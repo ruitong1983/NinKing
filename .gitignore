@@ -1,0 +1,37 @@
+# Godot 4+ specific
+.godot/
+*.uid
+
+# Imported files
+*.import
+
+# Temporary files
+*.tmp
+*.tmp.*
+*.bak
+*.bak2
+
+# Autoload
+addons/
+
+# Export
+export/
+dist/
+
+# Claude / AI assistant
+.claude/
+.ziva/
+
+# claude-mem synced data (runtime-only files excluded)
+.claude-mem-data/
+
+# Editor config
+.editorconfig
+bash.exe.stackdump
+__pycache__/
+
+# Android build artifacts
+android/
+
+# Temp image files
+temp_*.png

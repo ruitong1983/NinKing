@@ -1,0 +1,33 @@
+# 默认自动检测文本文件，统一 LF
+* text=auto eol=lf
+
+# GDScript 脚本
+*.gd text eol=lf
+
+# Godot 场景与资源
+*.tscn text eol=lf
+*.tres text eol=lf
+*.godot text eol=lf
+
+# 其他文本资源
+*.json text eol=lf
+*.md text eol=lf
+*.cfg text eol=lf
+*.ini text eol=lf
+*.import text eol=lf
+
+# 图片 - 二进制，不转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.svg binary
+
+# 音频 - 二进制，不转换
+*.ogg binary
+*.mp3 binary
+*.wav binary
+
+# 字体 - 二进制，不转换
+*.ttf binary
+*.otf binary
