@@ -70,6 +70,21 @@ const RANK_NAMES: Dictionary = {
 	Rank.TEN: "10", Rank.JACK: "J", Rank.QUEEN: "Q", Rank.KING: "K", Rank.ACE: "A",
 }
 
+## Single-char suit codes for SVG card filenames (e.g., "c" → clubs)
+const SUIT_FILE_CHARS: Dictionary = {
+	Suit.CLUBS: "c",
+	Suit.DIAMONDS: "d",
+	Suit.HEARTS: "h",
+	Suit.SPADES: "s",
+}
+
+## Single-char rank codes for SVG card filenames (e.g., "T" → ten)
+const RANK_FILE_CHARS: Dictionary = {
+	Rank.TWO: "2", Rank.THREE: "3", Rank.FOUR: "4", Rank.FIVE: "5",
+	Rank.SIX: "6", Rank.SEVEN: "7", Rank.EIGHT: "8", Rank.NINE: "9",
+	Rank.TEN: "T", Rank.JACK: "J", Rank.QUEEN: "Q", Rank.KING: "K", Rank.ACE: "A",
+}
+
 ## Chip value for each face card rank
 const RANK_CHIP_VALUES: Dictionary = {
 	Rank.TWO: 2, Rank.THREE: 3, Rank.FOUR: 4, Rank.FIVE: 5,
@@ -105,14 +120,15 @@ const HAND_TYPE3_BASE_VALUES: Dictionary = {
 	HandType3.THREE_OF_KIND_3: {"chips": 100, "mult": 8},
 }
 
-## 3-card hand type base values for COLUMNS (vertical) — ~2.5x horizontal values
+## 3-card hand type base values for COLUMNS (vertical) — ~1.8x horizontal values
+## Reduced from 2.5x (Plan C) so column optimization is rewarding but not mandatory
 const COLUMN_HAND_TYPE3_BASE_VALUES: Dictionary = {
 	HandType3.HIGH_CARD_3: {"chips": 0, "mult": 0},
-	HandType3.ONE_PAIR_3: {"chips": 20, "mult": 5},
-	HandType3.STRAIGHT_3: {"chips": 50, "mult": 10},
-	HandType3.FLUSH_3: {"chips": 80, "mult": 15},
-	HandType3.STRAIGHT_FLUSH_3: {"chips": 150, "mult": 30},
-	HandType3.THREE_OF_KIND_3: {"chips": 250, "mult": 50},
+	HandType3.ONE_PAIR_3: {"chips": 15, "mult": 4},
+	HandType3.STRAIGHT_3: {"chips": 35, "mult": 7},
+	HandType3.FLUSH_3: {"chips": 55, "mult": 11},
+	HandType3.STRAIGHT_FLUSH_3: {"chips": 100, "mult": 22},
+	HandType3.THREE_OF_KIND_3: {"chips": 180, "mult": 35},
 }
 
 ## Star chart level-up increments per use

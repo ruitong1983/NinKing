@@ -49,15 +49,6 @@ NinKingMain (Control) 1920×1080
 └── UIManager (Node)                       [%UIManager]
     脚本: ui_manager.gd
     │
-    ├── MainMenu (Control)                 [%MainMenu]    视图: 主菜单
-    │   ├── MenuBg (ColorRect)             #1A3A32
-    │   ├── MenuBgOverlay (ColorRect)      #000 30%
-    │   ├── TitleLabel                     "N I N K I N G"  64px 金色
-    │   ├── SubtitleLabel                  "扑克牌型计分闯关" 24px
-    │   ├── DeckLabel                      [%DeckLabel]   18px
-    │   ├── StartButton                    [%StartButton] "开始游戏"
-    │   └── VersionLabel                   "v0.1.0"
-    │
     ├── LevelIntro (Control)               [%LevelIntro]  视图: 关卡入场
     │   ├── IntroOverlay (ColorRect)       #000 80%
     │   ├── LevelLabel                     [%LevelLabel]  "第 X 关"
@@ -145,18 +136,7 @@ NinKingMain (Control) 1920×1080
 
 ## 3. 区域定义
 
-### 3.1 主菜单视图 `MainMenu`
-
-| 属性 | 值 |
-|------|-----|
-| 节点路径 | `UIManager/MainMenu` |
-| 访问名 | `%MainMenu` |
-| 默认状态 | 可见 |
-| 用途 | 游戏启动后的第一个界面 |
-
-**交互：** 点击 `StartButton` → `game_manager._on_start_pressed()` → `NinKingGameState.start_new_run()`
-
-### 3.2 关卡入场视图 `LevelIntro`
+### 3.1 关卡入场视图 `LevelIntro`
 
 | 属性 | 值 |
 |------|-----|
@@ -167,7 +147,7 @@ NinKingMain (Control) 1920×1080
 
 **数据源：** `LevelConfig.get_level(n)` → 关卡号 + 封印值
 
-### 3.3 游戏主视图 `GameLayout`
+### 3.2 游戏主视图 `GameLayout`
 
 | 属性 | 值 |
 |------|-----|
@@ -328,12 +308,10 @@ NinKingMain (Control) 1920×1080
 ## 4. 视图状态切换
 
 ```
-                    ┌──────────┐
-   game_manager     │ MainMenu │  ← 启动默认显示
-   _on_state_changed│ visible=T │
-        │           └────┬─────┘
-        │ 点击开始        │
-        ▼                ▼
+   game_manager     
+   _on_state_changed
+        │
+        ▼
    ┌──────────┐    ┌──────────┐
    │LevelIntro│    │ GameBg   │
    │ visible=T│    │ visible=T│
@@ -353,14 +331,13 @@ Overlay  (忍気达标)    (换牌用完)   →过关→商店)
 
 **`show_view()` 映射：**
 
-| view 参数 | MainMenu | GameBg | LevelIntro | GameLayout | Scoring | LevelComplete | GameOver |
-|-----------|----------|--------|------------|------------|---------|---------------|----------|
-| `"menu"` | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| `"intro"` | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| `"game"` | ❌ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
-| `"scoring"` | ❌ | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ |
-| `"complete"` | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| `"gameover"` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| view 参数 | GameBg | LevelIntro | GameLayout | Scoring | LevelComplete | GameOver |
+|-----------|--------|------------|------------|---------|---------------|----------|
+| `"intro"` | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| `"game"` | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| `"scoring"` | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| `"complete"` | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| `"gameover"` | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 
 ---
 

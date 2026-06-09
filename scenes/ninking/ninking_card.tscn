@@ -1,38 +1,34 @@
-[gd_scene load_steps=2 format=3 uid="uid://bk9w7t2cl4q0m"]
+[gd_scene format=3 uid="uid://blaw7t2cl4q0m"]
 
-[ext_resource type="Script" uid="uid://2wwuek0wudl4" path="res://scripts/ninking/ui/ninking_card.gd" id="1_pcard"]
+[ext_resource type="Script" uid="uid://cqfkax1a01hjd" path="res://scripts/ninking/ui/ninking_card.gd" id="1_pcard"]
 
-[node name="NinKingCard" type="Control"]
+[node name="NinKingCard" type="Control" unique_id=2066548491]
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_pcard")
-card_name = null
 card_size = Vector2(120, 160)
-show_front = true
-moving_speed = null
-can_be_interacted_with = true
 hover_distance = 30
 
-[node name="FrontFace" type="Control" parent="."]
+[node name="FrontFace" type="Control" parent="." unique_id=1534977069]
 layout_mode = 1
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 mouse_filter = 1
 
-[node name="TextureRect" type="TextureRect" parent="FrontFace"]
+[node name="TextureRect" type="TextureRect" parent="FrontFace" unique_id=430575953]
 layout_mode = 1
 offset_right = 120.0
 offset_bottom = 160.0
 
-[node name="BackFace" type="Control" parent="."]
+[node name="BackFace" type="Control" parent="." unique_id=1632720407]
 layout_mode = 1
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 mouse_filter = 1
 
-[node name="TextureRect" type="TextureRect" parent="BackFace"]
+[node name="TextureRect" type="TextureRect" parent="BackFace" unique_id=243903789]
 layout_mode = 1
 offset_right = 120.0
 offset_bottom = 160.0

@@ -8,7 +8,7 @@
 
 | 文件名 | 路径 | 规格 | 用途 | 引用位置 | 状态 |
 |---|---|---|---|---|---|
-| `launch_bg.png` | `assets/images/background/` | 1920×1080, PNG | 主菜单背景 | `ninking_main.tscn` → MainMenu/MenuBg | ✅ 占位 (FanKing) |
+| `launch_bg.png` | `assets/images/background/` | 1920×1080, PNG | 主菜单背景 | `ninking_launcher.tscn` → LaunchBg | ✅ 占位 (FanKing) |
 | `table_bg.png` | `assets/images/background/` | 1920×1080, PNG | 牌桌背景 | `ninking_main.tscn` → GameBg | ✅ 占位 (FanKing) |
 
 ---

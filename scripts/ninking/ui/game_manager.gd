@@ -18,7 +18,6 @@ var _transition_guard: bool = false
 
 
 func _ready() -> void:
-	ui.start_button.pressed.connect(_on_start_pressed)
 	ui.play_btn.pressed.connect(_on_play_pressed)
 	ui.redraw_btn.pressed.connect(_on_redraw_pressed)
 	ui.ai_rearrange_btn.pressed.connect(_on_ai_rearrange_pressed)
@@ -36,8 +35,7 @@ func _ready() -> void:
 	NinKingGameState.xi_triggered.connect(_on_xi_triggered)
 
 	_on_state_changed(NinKingGameState.current_state)
-	if NinKingGameState.current_state != NinKingGameState.State.MAIN_MENU:
-		ui.restore_ui_state()
+	ui.restore_ui_state()
 
 
 func _process(_delta: float) -> void:
@@ -50,8 +48,6 @@ func _process(_delta: float) -> void:
 
 func _on_state_changed(new_state: NinKingGameState.State) -> void:
 	match new_state:
-		NinKingGameState.State.MAIN_MENU:
-			ui.show_view("menu")
 		NinKingGameState.State.SEAL_INTRO:
 			ui.show_view("intro")
 		NinKingGameState.State.PLAYING:
@@ -138,10 +134,6 @@ func _on_xi_triggered(xis: Array[String]) -> void:
 
 
 # ═══ Button handlers ═══
-
-func _on_start_pressed() -> void:
-	NinKingGameState.start_new_run()
-
 
 func _on_play_pressed() -> void:
 	if ui.redraw_mode:

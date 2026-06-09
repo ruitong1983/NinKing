@@ -88,7 +88,7 @@
 | R3 | 散牌王说明更新 `13-blinds-and-bosses.md` — 注明列不受影响 | P2 | ✅ |
 | R4 | 交换行为变更同步 `06-complete-redesign.md` — 交换不再触发 AI 重排 | P2 | ✅ |
 | R5 | AI 重排按钮补充 `03-technical-design.md` 场景树 | P2 | ✅ |
-| C7 | 确认清理 `ninking_main.tscn` 中旧 MainMenu 视图节点（UIManager/MainMenu 含 LaunchBg/TitleLabel/SubtitleLabel/DeckLabel/StartButton/VersionLabel）。⏸ 暂不删除：被 game_manager.gd 引用，需先评估影响面 | `scenes/ninking/ninking_main.tscn` | P2 | 🔒 |
+| C7 | 确认清理 `ninking_main.tscn` 中旧 MainMenu 视图节点 | `scenes/ninking/ninking_main.tscn` | P2 | ✅ |
 
 ---
 
@@ -126,6 +126,7 @@ Phase A (当前) ──→ Phase B ──→ Phase C ──→ Phase D ──→
 
 | 日期 | 变更 |
 |------|------|
+| 2026-06-09 | 🧹 **C7 完成: 清理旧 MainMenu**: ninking_main.tscn 删 MainMenu 子树(76行)，game_manager 删 MAIN_MENU 分支+_on_start_pressed，ui_manager 删 3 个 @onready 引用 |
 | 2026-06-09 | 📋 **方案审阅: A9 列分机制**: Grill 14 轮 → review-plan 审阅 → R2-R5 共 4 项文档同步加入 TODO。Q1=breakdown 文字体现列分，Q2=列≥同花顺加 VFX 庆祝（shuriken + color_flash）|
 | 2026-06-09 | 📝 **A9 文档同步 + 代码审查完成**: R2-R5 四文档已更新（06 公式/交换 + 13 散牌王 + 03 场景树），A9 标记完成。代码审查通过，列分机制完整实现。 |
 | 2026-06-09 | 🔢 **牌型基础值重新调整**: 同花 20/3→30/4、同花顺 35/4→50/5、豹子 40/5→100/8。遵循传统扑克排序(同花>顺子)，高牌型拉开差距，星图升级值保持不放大（对标 Balatro 设计）。同步更新 06-complete-redesign / 12-consumable-cards 文档 |

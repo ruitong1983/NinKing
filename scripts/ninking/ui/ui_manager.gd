@@ -6,17 +6,12 @@ extends Control
 ## All display updates go through this class — game_manager.gd only handles flow.
 
 # ═══ Sub-views ═══
-@onready var main_menu: Control = %MainMenu
 @onready var level_intro: Control = %LevelIntro
 @onready var game_layout: Control = %GameLayout
 @onready var game_bg: ColorRect = %GameBg
 @onready var scoring_overlay: Control = %ScoringOverlay
 @onready var level_complete: Control = %LevelComplete
 @onready var game_over: Control = %GameOver
-
-# ═══ Menu ═══
-@onready var start_button: Button = %StartButton
-@onready var deck_label: Label = %DeckLabel
 
 # ═══ Level intro ═══
 @onready var intro_level_label: Label = %LevelLabel
@@ -144,7 +139,6 @@ func _ready() -> void:
 # ══════════════════════════════════════════
 
 func show_view(view: String) -> void:
-	main_menu.visible = (view == "menu")
 	game_bg.visible = (view in ["game", "intro", "scoring"])
 	level_intro.visible = (view == "intro")
 	game_layout.visible = (view in ["game", "scoring"])

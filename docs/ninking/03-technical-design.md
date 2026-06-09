@@ -57,11 +57,8 @@
 ## 状态机
 
 ```
-                    ┌─────────────┐
-                    │  MAIN_MENU  │
-                    └──────┬──────┘
-                           │ start_new_run() / continue_run()
-                    ┌──────▼──────┐
+   (启动器 main_menu.gd 调用 start_new_run() / continue_run() 后加载本场景)
+                    ┌──────┐
                     │ SEAL_INTRO  │ ← 显示封印目标 + 封印ノ主，2秒后自动跳转
                     └──────┬──────┘
                            │ auto-transition (2s)
@@ -92,14 +89,14 @@
               │        ▼
               │     VICTORY
               │
-              └────── 死亡后 → MAIN_MENU（存档已删除）
+              └────── 死亡后点"重新开始" → reload 场景 → SEAL_INTRO（_on_state_changed 驱动）
 ```
 
 ### 状态枚举
 
 ```gdscript
 enum State {
-    MAIN_MENU,
+    MAIN_MENU,       # ⛔ 已废弃 — 启动器替代，保留枚举值防引用断裂
     SEAL_INTRO,      # 封印入场（2秒倒计时）
     PLAYING,         # 手牌操作（出牌/换牌/交换）
     SCORING,         # 计分动画播放中（仅在 game_manager 动画流程中使用）
@@ -148,8 +145,6 @@ res://
 │   ├── ability_slot.tscn           ← 忍者牌槽位组件
 │   ├── shop_ability_card.tscn      ← 商店忍者牌卡片
 │   ├── shop_item_card.tscn         ← 商店道具卡片
-│   ├── ninking_main_base.tscn      ← 主场景基础（供 ninking_main 继承）
-│   └── ninking_main_original.tscn  ← 主场景原始备份
 ```
 
 ### ninking_launcher.tscn
@@ -167,11 +162,6 @@ NinKingMain (Control) [game_manager.gd]
 ├── CardManager (Control) [card_manager.gd] — 卡牌框架核心
 ├── GameBg (ColorRect) — 桌布背景 (1920×1080, 結界主题动态配色)
 └── UIManager (Node) [ui_manager.gd] — UI 总控
-    ├── MainMenu (Control) — 主菜单视图
-    │   ├── LaunchBg / MenuBgOverlay
-    │   ├── TitleLabel / SubtitleLabel
-    │   ├── DeckLabel / StartButton
-    │   └── VersionLabel
     ├── LevelIntro (Control) — 封印入场视图
     │   ├── IntroOverlay / LevelLabel / TargetLabel
     ├── GameLayout (HBoxContainer) — 游戏主视图
