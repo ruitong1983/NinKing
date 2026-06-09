@@ -30,12 +30,14 @@ class ScoreResult:
 ## @param star_chart_levels: Dictionary[HandType3, int] — level per hand type
 ## @param xi_result: XiDetector.XiResult — pre-detected xi patterns
 ## @param seal_lord_effects: Dictionary — Seal Lord overrides (e.g. "skip_head": true)
+## @param col_evals: Array[HandEvaluator3.EvalResult] — 3 column evaluations (or empty)
 ## @param gold: int — current gold, for economy-scaling ninjas (金剛力, 黄金律)
 static func calculate(
 	head_cards: Array, mid_cards: Array, tail_cards: Array,
 	head_eval: HandEvaluator3.EvalResult,
 	mid_eval: HandEvaluator3.EvalResult,
 	tail_eval: HandEvaluator3.EvalResult,
+	col_evals: Array = [],
 	ninjas: Array = [],
 	star_chart_levels: Dictionary = {},
 	xi_result: XiDetector.XiResult = null,
@@ -88,8 +90,22 @@ static func calculate(
 		hand_chips += CardData.get_hand_type3_leveled_chips(tail_type, star_chart_levels)
 		hand_mult += CardData.get_hand_type3_leveled_mult(tail_type, star_chart_levels)
 
+	# ── Column hand type chips/mult (flat sum model — card chips already counted horizontally) ──
+	var col_chips: int = 0
+	var col_mult: int = 0
+	if col_evals.size() == 3:
+		for i: int in range(3):
+			# scatter_king does NOT affect columns — use raw hand_type
+			var col_type: CardData.HandType3 = col_evals[i].hand_type
+			col_chips += CardData.get_hand_type3_column_leveled_chips(col_type, star_chart_levels)
+			col_mult += CardData.get_hand_type3_column_leveled_mult(col_type, star_chart_levels)
+	hand_chips += col_chips
+	hand_mult += col_mult
+
 	result.breakdown["hand_chips"] = hand_chips
 	result.breakdown["hand_mult"] = hand_mult
+	result.breakdown["col_chips"] = col_chips
+	result.breakdown["col_mult"] = col_mult
 
 	# ═══════════════ Step 3: Card enhancement/edition chips & mult ═══════════════
 	var card_ench_chips: int = 0

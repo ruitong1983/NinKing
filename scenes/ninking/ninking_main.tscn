@@ -8,6 +8,18 @@
 [ext_resource type="PackedScene" uid="uid://4jkp5mgq3d6t" path="res://scenes/ninking/ninking_card_factory.tscn" id="4_ensa0"]
 [ext_resource type="PackedScene" uid="uid://bkpjlq7ggckg6" path="res://addons/card-framework/hand.tscn" id="7_oseip"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_score_card"]
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+bg_color = Color(0.059, 0.157, 0.133, 0.6)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.831, 0.659, 0.263, 1)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uccuc"]
 bg_color = Color(0.227, 0.227, 0.227, 1)
 corner_radius_top_left = 6
@@ -182,18 +194,17 @@ offset_bottom = 1080.0
 color = Color(0.102, 0.227, 0.196, 1)
 
 [node name="UIManager" type="Control" parent="." unique_id=103814555]
-layout_mode = 3
+unique_name_in_owner = true
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-unique_name_in_owner = true
 script = ExtResource("2_ui_mgr")
 
 [node name="MainMenu" type="Control" parent="UIManager" unique_id=1015242182]
 unique_name_in_owner = true
-layout_mode = 3
 anchors_preset = 0
 offset_right = 1920.0
 offset_bottom = 1080.0
@@ -272,7 +283,6 @@ horizontal_alignment = 1
 [node name="LevelIntro" type="Control" parent="UIManager" unique_id=851291997]
 unique_name_in_owner = true
 visible = false
-layout_mode = 3
 anchors_preset = 0
 offset_right = 1920.0
 offset_bottom = 1080.0
@@ -310,7 +320,7 @@ horizontal_alignment = 1
 [node name="GameLayout" type="HBoxContainer" parent="UIManager" unique_id=631853525]
 unique_name_in_owner = true
 visible = false
-anchors_preset = 15
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -325,165 +335,210 @@ size_flags_horizontal = 0
 
 [node name="PanelBg" type="ColorRect" parent="UIManager/GameLayout/LeftPanel" unique_id=1495010632]
 unique_name_in_owner = true
-layout_mode = 0
-offset_right = 380.0
-offset_bottom = 1080.0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 color = Color(0.059, 0.157, 0.133, 0.92)
 
-[node name="ChipsMultContainer" type="HBoxContainer" parent="UIManager/GameLayout/LeftPanel" unique_id=1361345776]
-layout_mode = 0
-offset_left = 28.0
-offset_top = 88.0
-offset_right = 360.0
-offset_bottom = 165.0
+[node name="ContentVBox" type="VBoxContainer" parent="UIManager/GameLayout/LeftPanel" unique_id=2100000001]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+
+[node name="SpacerTop" type="Control" parent="UIManager/GameLayout/LeftPanel/ContentVBox" unique_id=2100000002]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ScoreCard" type="Panel" parent="UIManager/GameLayout/LeftPanel/ContentVBox" unique_id=2100000003]
+custom_minimum_size = Vector2(0, 220)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_score_card")
+
+[node name="ScoreCardVBox" type="VBoxContainer" parent="UIManager/GameLayout/LeftPanel/ContentVBox/ScoreCard" unique_id=2100000004]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="ChipsMultContainer" type="HBoxContainer" parent="UIManager/GameLayout/LeftPanel/ContentVBox/ScoreCard/ScoreCardVBox" unique_id=1361345776]
+layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="ChipsLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/ChipsMultContainer" unique_id=2114199838]
+[node name="ChipsLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/ContentVBox/ScoreCard/ScoreCardVBox/ChipsMultContainer" unique_id=2114199838]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
 theme_override_font_sizes/font_size = 48
 text = "0"
 
-[node name="MultSign" type="Label" parent="UIManager/GameLayout/LeftPanel/ChipsMultContainer" unique_id=951268244]
+[node name="MultSign" type="Label" parent="UIManager/GameLayout/LeftPanel/ContentVBox/ScoreCard/ScoreCardVBox/ChipsMultContainer" unique_id=951268244]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.478, 0.478, 0.416, 1)
 theme_override_font_sizes/font_size = 40
 text = "x"
 
-[node name="MultLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/ChipsMultContainer" unique_id=537157840]
+[node name="MultLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/ContentVBox/ScoreCard/ScoreCardVBox/ChipsMultContainer" unique_id=537157840]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.878, 0.251, 0.251, 1)
 theme_override_font_sizes/font_size = 48
 text = "0"
 
-[node name="HandTypeLabel" type="Label" parent="UIManager/GameLayout/LeftPanel" unique_id=1981147013]
+[node name="ScoreLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/ContentVBox/ScoreCard/ScoreCardVBox" unique_id=523126247]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 24.0
-offset_top = 189.0
-offset_right = 356.0
-offset_bottom = 215.0
+layout_mode = 2
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
-theme_override_font_sizes/font_size = 24
-text = "影: -  |  瞬: -  |  滅: -"
-
-[node name="ScoreLabel" type="Label" parent="UIManager/GameLayout/LeftPanel" unique_id=523126247]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 24.0
-offset_top = 232.0
-offset_right = 356.0
-offset_bottom = 259.0
-theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 48
 text = "忍気 0"
 
-[node name="TargetScoreLabel" type="Label" parent="UIManager/GameLayout/LeftPanel" unique_id=560253541]
+[node name="ProgressBar" type="ProgressBar" parent="UIManager/GameLayout/LeftPanel/ContentVBox/ScoreCard/ScoreCardVBox" unique_id=2091025954]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 24.0
-offset_top = 265.0
-offset_right = 356.0
-offset_bottom = 287.0
-theme_override_colors/font_color = Color(0.478, 0.478, 0.416, 1)
-theme_override_font_sizes/font_size = 24
-text = "封印 300"
-
-[node name="ProgressBar" type="ProgressBar" parent="UIManager/GameLayout/LeftPanel" unique_id=2091025954]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 12)
-layout_mode = 0
-offset_left = 24.0
-offset_top = 311.0
-offset_right = 356.0
-offset_bottom = 323.0
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_styles/background = SubResource("StyleBoxFlat_uccuc")
 theme_override_styles/fill = SubResource("StyleBoxFlat_pgq0x")
 max_value = 300.0
 show_percentage = false
 
-[node name="MatchPanel" type="Panel" parent="UIManager/GameLayout/LeftPanel" unique_id=466541583]
-layout_mode = 0
-offset_left = 28.0
-offset_top = 383.0
-offset_right = 352.0
-offset_bottom = 518.0
+[node name="TargetScoreLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/ContentVBox/ScoreCard/ScoreCardVBox" unique_id=560253541]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.478, 0.478, 0.416, 1)
+theme_override_font_sizes/font_size = 20
+text = "封印 300"
+
+[node name="Spacer2" type="Control" parent="UIManager/GameLayout/LeftPanel/ContentVBox" unique_id=2100000005]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HandTypeRow" type="HBoxContainer" parent="UIManager/GameLayout/LeftPanel/ContentVBox" unique_id=2100000006]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="ShadowType" type="Label" parent="UIManager/GameLayout/LeftPanel/ContentVBox/HandTypeRow" unique_id=2100000007]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.35, 0.55, 0.95, 1)
+theme_override_font_sizes/font_size = 22
+text = "影: -"
+horizontal_alignment = 1
+
+[node name="FlashType" type="Label" parent="UIManager/GameLayout/LeftPanel/ContentVBox/HandTypeRow" unique_id=2100000008]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.75, 0.75, 0.8, 1)
+theme_override_font_sizes/font_size = 22
+text = "瞬: -"
+horizontal_alignment = 1
+
+[node name="DestroyType" type="Label" parent="UIManager/GameLayout/LeftPanel/ContentVBox/HandTypeRow" unique_id=2100000009]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 22
+text = "滅: -"
+horizontal_alignment = 1
+
+[node name="Spacer3" type="Control" parent="UIManager/GameLayout/LeftPanel/ContentVBox" unique_id=2100000010]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MatchPanel" type="Panel" parent="UIManager/GameLayout/LeftPanel/ContentVBox" unique_id=466541583]
+custom_minimum_size = Vector2(0, 160)
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_5q2us")
 
-[node name="MatchTitle" type="Label" parent="UIManager/GameLayout/LeftPanel/MatchPanel" unique_id=1246038194]
-layout_mode = 0
-offset_left = 16.0
-offset_top = 16.0
-offset_right = 316.0
-offset_bottom = 31.0
+[node name="MatchVBox" type="VBoxContainer" parent="UIManager/GameLayout/LeftPanel/ContentVBox/MatchPanel" unique_id=2100000011]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="MatchTitle" type="Label" parent="UIManager/GameLayout/LeftPanel/ContentVBox/MatchPanel/MatchVBox" unique_id=1246038194]
+layout_mode = 2
 theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 18
 text = "比赛信息"
 
-[node name="HandsLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/MatchPanel" unique_id=1528298559]
+[node name="HandsLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/ContentVBox/MatchPanel/MatchVBox" unique_id=1528298559]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 16.0
-offset_top = 41.0
-offset_right = 308.0
-offset_bottom = 59.0
+layout_mode = 2
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
 theme_override_font_sizes/font_size = 24
 text = "出牌 0"
 
-[node name="RedrawsLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/MatchPanel" unique_id=564080101]
+[node name="RedrawsLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/ContentVBox/MatchPanel/MatchVBox" unique_id=564080101]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 16.0
-offset_top = 69.0
-offset_right = 308.0
-offset_bottom = 79.0
+layout_mode = 2
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
 theme_override_font_sizes/font_size = 24
 text = "手替え 0"
 
-[node name="GoldLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/MatchPanel" unique_id=552145411]
+[node name="GoldLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/ContentVBox/MatchPanel/MatchVBox" unique_id=552145411]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 16.0
-offset_top = 97.0
-offset_right = 308.0
-offset_bottom = 103.0
+layout_mode = 2
 theme_override_colors/font_color = Color(0.941, 0.816, 0.376, 1)
 theme_override_font_sizes/font_size = 24
 text = "$0"
 
-[node name="AntePanel" type="Panel" parent="UIManager/GameLayout/LeftPanel" unique_id=1099072276]
-layout_mode = 0
-offset_left = 28.0
-offset_top = 542.0
-offset_right = 352.0
-offset_bottom = 624.0
+[node name="Spacer4" type="Control" parent="UIManager/GameLayout/LeftPanel/ContentVBox" unique_id=2100000012]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="AntePanel" type="Panel" parent="UIManager/GameLayout/LeftPanel/ContentVBox" unique_id=1099072276]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_jnuj6")
 
-[node name="BarrierLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/AntePanel" unique_id=1412664362]
+[node name="AnteVBox" type="VBoxContainer" parent="UIManager/GameLayout/LeftPanel/ContentVBox/AntePanel" unique_id=2100000013]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="BarrierLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/ContentVBox/AntePanel/AnteVBox" unique_id=1412664362]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 16.0
-offset_top = 16.0
-offset_right = 308.0
-offset_bottom = 39.0
+layout_mode = 2
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
 theme_override_font_sizes/font_size = 24
 text = "結界 1/8"
 
-[node name="RoundLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/AntePanel" unique_id=1189083565]
+[node name="RoundLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/ContentVBox/AntePanel/AnteVBox" unique_id=1189083565]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 16.0
-offset_top = 44.0
-offset_right = 308.0
-offset_bottom = 63.0
+layout_mode = 2
 theme_override_colors/font_color = Color(0.478, 0.478, 0.416, 1)
 theme_override_font_sizes/font_size = 24
 text = "回合 1"
+
+[node name="SpacerBottom" type="Control" parent="UIManager/GameLayout/LeftPanel/ContentVBox" unique_id=2100000014]
+layout_mode = 2
+size_flags_vertical = 3
 
 [node name="CenterColumn" type="VBoxContainer" parent="UIManager/GameLayout" unique_id=233211831]
 custom_minimum_size = Vector2(1000, 0)
@@ -504,7 +559,7 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.251, 0.753, 0.251, 1)
 theme_override_font_sizes/font_size = 24
-text = "✅ 影 ≤ 瞬 ≤ 滅 — 可以出牌！"
+text = "影 <= 瞬 <= 滅 -- 可以出牌"
 horizontal_alignment = 1
 
 [node name="HandArea" type="HBoxContainer" parent="UIManager/GameLayout/CenterColumn" unique_id=859436346]
@@ -699,6 +754,16 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_m3hnw")
 text = "换
 牌"
 
+[node name="AiRearrangeBtn" type="Button" parent="UIManager/GameLayout/CenterColumn/HandArea" unique_id=472924208]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(84, 116)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 24
+disabled = true
+text = "AI
+重排"
+
 [node name="DeckBtn" type="Button" parent="UIManager/GameLayout/CenterColumn" unique_id=320529564]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 48)
@@ -711,12 +776,41 @@ theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = SubResource("StyleBoxFlat_v5l2m")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_b00f3")
 theme_override_styles/hover = SubResource("StyleBoxFlat_pqepw")
-text = "🎴 牌库: 52"
+text = "牌库: 52"
+
+[node name="ColumnLabelRow" type="HBoxContainer" parent="UIManager/GameLayout/CenterColumn" unique_id=1076051941]
+layout_mode = 2
+
+[node name="Col0Label" type="Label" parent="UIManager/GameLayout/CenterColumn/ColumnLabelRow" unique_id=1076051942]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+
+[node name="Col1Label" type="Label" parent="UIManager/GameLayout/CenterColumn/ColumnLabelRow" unique_id=1076051943]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+
+[node name="Col2Label" type="Label" parent="UIManager/GameLayout/CenterColumn/ColumnLabelRow" unique_id=1076051944]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
 
 [node name="ScoringOverlay" type="Control" parent="UIManager" unique_id=1136405108]
 unique_name_in_owner = true
 visible = false
-layout_mode = 3
 anchors_preset = 0
 offset_right = 1920.0
 offset_bottom = 1080.0
@@ -765,7 +859,6 @@ horizontal_alignment = 1
 [node name="LevelComplete" type="Control" parent="UIManager" unique_id=1812460388]
 unique_name_in_owner = true
 visible = false
-layout_mode = 3
 anchors_preset = 0
 offset_right = 1920.0
 offset_bottom = 1080.0
@@ -815,7 +908,6 @@ flat = true
 [node name="GameOver" type="Control" parent="UIManager" unique_id=713322261]
 unique_name_in_owner = true
 visible = false
-layout_mode = 3
 anchors_preset = 0
 offset_right = 1920.0
 offset_bottom = 1080.0
@@ -852,7 +944,7 @@ flat = true
 [node name="DeckViewer" type="Control" parent="UIManager" unique_id=220409291]
 unique_name_in_owner = true
 visible = false
-layout_mode = 3
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0

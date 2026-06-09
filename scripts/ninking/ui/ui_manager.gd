@@ -27,7 +27,9 @@ extends Control
 @onready var panel_bg: ColorRect = %PanelBg
 @onready var chips_label: Label = %ChipsLabel
 @onready var mult_label: Label = %MultLabel
-@onready var dun_type_row: Label = %HandTypeLabel
+@onready var shadow_type_label: Label = %ShadowType
+@onready var flash_type_label: Label = %FlashType
+@onready var destroy_type_label: Label = %DestroyType
 @onready var score_label: Label = %ScoreLabel
 @onready var target_score_label: Label = %TargetScoreLabel
 @onready var progress_bar: ProgressBar = %ProgressBar
@@ -59,6 +61,14 @@ extends Control
 @onready var play_btn: Button = %PlayBtn
 @onready var redraw_btn: Button = %RedrawBtn
 
+# ═══ Column labels ═══
+@onready var col0_label: Label = %Col0Label
+@onready var col1_label: Label = %Col1Label
+@onready var col2_label: Label = %Col2Label
+
+# ═══ AI rearrange ═══
+@onready var ai_rearrange_btn: Button = %AiRearrangeBtn
+
 # ═══ Scoring overlay ═══
 @onready var hand_name_label: Label = %HandNameLabel
 @onready var score_value_label: Label = %ScoreValueLabel
@@ -79,6 +89,19 @@ var deck_viewer_ctrl: DeckViewerController
 
 const ABILITY_SLOT_SCENE: PackedScene = preload("res://scenes/ninking/ability_slot.tscn")
 
+# ── Dun label highlight (V21) ──
+const HIGHLIGHT_FONT_COLOR := Color(1.0, 0.9, 0.5, 1.0)
+const HIGHLIGHT_OUTLINE_COLOR := Color(1.0, 0.85, 0.3, 0.8)
+const DEFAULT_FONT_COLOR := Color(0.831, 0.659, 0.263, 1.0)
+const DEFAULT_HEAD_OUTLINE := Color(0.0, 0.0, 0.0, 0.3)
+const DEFAULT_MID_OUTLINE := Color(0.0, 0.0, 0.0, 0.6)
+const DEFAULT_TAIL_OUTLINE := Color(0.0, 0.0, 0.0, 1.0)
+
+# Track previous highlight state to avoid redundant color_flash on every swap
+var _head_was_highlighted: bool = false
+var _mid_was_highlighted: bool = false
+var _tail_was_highlighted: bool = false
+
 
 func _ready() -> void:
 	# Set up hand display (rendering)
@@ -86,7 +109,8 @@ func _ready() -> void:
 	hand_display.setup(
 		head_cards, middle_cards, tail_cards,
 		head_type_label, middle_type_label, tail_type_label,
-		chips_label, mult_label, dun_type_row,
+		col0_label, col1_label, col2_label,
+		chips_label, mult_label, shadow_type_label, flash_type_label, destroy_type_label,
 		play_btn, redraw_btn, status_label
 	)
 
@@ -104,12 +128,15 @@ func _ready() -> void:
 
 	# ── Three-Dun title progressive outline (V20) ──
 	# 影 (head): subtle shadow → 瞬 (middle): standard → 滅 (tail): bold glow
-	head_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.3))
+	head_label.add_theme_color_override("font_outline_color", DEFAULT_HEAD_OUTLINE)
 	head_label.add_theme_constant_override("font_outline_size", 1)
-	middle_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.6))
+	middle_label.add_theme_color_override("font_outline_color", DEFAULT_MID_OUTLINE)
 	middle_label.add_theme_constant_override("font_outline_size", 2)
-	tail_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1.0))
+	tail_label.add_theme_color_override("font_outline_color", DEFAULT_TAIL_OUTLINE)
 	tail_label.add_theme_constant_override("font_outline_size", 3)
+
+	# ── Clear default constraint text; now driven by label highlights (V21) ──
+	status_label.text = ""
 
 
 # ══════════════════════════════════════════
@@ -175,6 +202,7 @@ func update_target(target: int) -> void:
 func refresh_hand(hand: Array[CardData.PlayingCard]) -> void:
 	hand_interaction.set_hand(hand)
 	hand_display.refresh(hand, hand_interaction.swap_source_idx, hand_interaction.redraw_targets, hand_interaction.redraw_mode, _on_ninking_card_clicked, _on_ninking_card_dragged)
+	_update_dun_label_highlights()
 
 
 func refresh_groups(head_cards_arr: Array[CardData.PlayingCard], mid_cards_arr: Array[CardData.PlayingCard], tail_cards_arr: Array[CardData.PlayingCard], _constraint_ok: bool) -> void:
@@ -184,6 +212,7 @@ func refresh_groups(head_cards_arr: Array[CardData.PlayingCard], mid_cards_arr: 
 	combined.append_array(tail_cards_arr)
 	hand_interaction.set_hand(combined)
 	hand_display.refresh(combined, hand_interaction.swap_source_idx, hand_interaction.redraw_targets, hand_interaction.redraw_mode, _on_ninking_card_clicked, _on_ninking_card_dragged)
+	_update_dun_label_highlights()
 
 
 # ══════════════════════════════════════════
@@ -362,3 +391,73 @@ func restore_ui_state() -> void:
 
 func update_deck_count(draw_count: int, discard_count: int) -> void:
 	deck_viewer_ctrl.update_deck_count(draw_count, discard_count)
+
+
+# ══════════════════════════════════════════
+# Dun label highlight (V21) — pair-wise constraint visualizer
+# ══════════════════════════════════════════
+
+## Update 影/瞬/滅 labels to reflect constraint satisfaction pair-by-pair.
+## Pair1 (影<=瞬) → lights 影+瞬; Pair2 (瞬<=滅) → lights 瞬+滅.
+## StatusLabel shows hint text only when constraint fails.
+func _update_dun_label_highlights() -> void:
+	# Don't interfere with redraw mode status text
+	if redraw_mode:
+		return
+
+	var arr: AutoArranger.Arrangement = NinKingGameState.current_arrangement
+	if arr == null:
+		_reset_dun_label_highlights()
+		return
+
+	var pair1_ok: bool = arr.head_eval.strength <= arr.mid_eval.strength
+	var pair2_ok: bool = arr.mid_eval.strength <= arr.tail_eval.strength
+
+	# 影 lights up when Pair1 satisfied, 瞬 when either pair satisfied, 滅 when Pair2 satisfied
+	_apply_label_highlight(head_label, pair1_ok, DEFAULT_HEAD_OUTLINE)
+	_apply_label_highlight(middle_label, pair1_ok or pair2_ok, DEFAULT_MID_OUTLINE)
+	_apply_label_highlight(tail_label, pair2_ok, DEFAULT_TAIL_OUTLINE)
+
+	# Flash labels that just transitioned from dim → bright
+	if pair1_ok and not _head_was_highlighted:
+		GlobalTweens.color_flash(head_label, Color.WHITE, 0.1)
+	if (pair1_ok or pair2_ok) and not _mid_was_highlighted:
+		GlobalTweens.color_flash(middle_label, Color.WHITE, 0.1)
+	if pair2_ok and not _tail_was_highlighted:
+		GlobalTweens.color_flash(tail_label, Color.WHITE, 0.1)
+
+	_head_was_highlighted = pair1_ok
+	_mid_was_highlighted = pair1_ok or pair2_ok
+	_tail_was_highlighted = pair2_ok
+
+	# StatusLabel — only show when constraint fails (red text for errors)
+	if pair1_ok and pair2_ok:
+		status_label.text = ""
+	else:
+		const ERROR_FONT_COLOR := Color(0.95, 0.3, 0.3, 1.0)  # red tint for constraint errors
+		status_label.add_theme_color_override("font_color", ERROR_FONT_COLOR)
+		if not pair1_ok and pair2_ok:
+			status_label.text = "影勢過強"
+		elif pair1_ok and not pair2_ok:
+			status_label.text = "滅力不足"
+		else:
+			status_label.text = "重排三道"
+
+
+func _apply_label_highlight(label: Label, highlight: bool, default_outline: Color) -> void:
+	if highlight:
+		label.add_theme_color_override("font_color", HIGHLIGHT_FONT_COLOR)
+		label.add_theme_color_override("font_outline_color", HIGHLIGHT_OUTLINE_COLOR)
+	else:
+		label.add_theme_color_override("font_color", DEFAULT_FONT_COLOR)
+		label.add_theme_color_override("font_outline_color", default_outline)
+
+
+func _reset_dun_label_highlights() -> void:
+	_apply_label_highlight(head_label, false, DEFAULT_HEAD_OUTLINE)
+	_apply_label_highlight(middle_label, false, DEFAULT_MID_OUTLINE)
+	_apply_label_highlight(tail_label, false, DEFAULT_TAIL_OUTLINE)
+	_head_was_highlighted = false
+	_mid_was_highlighted = false
+	_tail_was_highlighted = false
+	status_label.text = ""

@@ -105,6 +105,16 @@ const HAND_TYPE3_BASE_VALUES: Dictionary = {
 	HandType3.THREE_OF_KIND_3: {"chips": 100, "mult": 8},
 }
 
+## 3-card hand type base values for COLUMNS (vertical) — ~2.5x horizontal values
+const COLUMN_HAND_TYPE3_BASE_VALUES: Dictionary = {
+	HandType3.HIGH_CARD_3: {"chips": 0, "mult": 0},
+	HandType3.ONE_PAIR_3: {"chips": 20, "mult": 5},
+	HandType3.STRAIGHT_3: {"chips": 50, "mult": 10},
+	HandType3.FLUSH_3: {"chips": 80, "mult": 15},
+	HandType3.STRAIGHT_FLUSH_3: {"chips": 150, "mult": 30},
+	HandType3.THREE_OF_KIND_3: {"chips": 250, "mult": 50},
+}
+
 ## Star chart level-up increments per use
 const STAR_CHART_UPGRADES: Dictionary = {
 	HandType3.HIGH_CARD_3: {"chips": 5, "mult": 1},
@@ -249,6 +259,20 @@ static func get_hand_type3_leveled_chips(ht: HandType3, levels: Dictionary) -> i
 
 static func get_hand_type3_leveled_mult(ht: HandType3, levels: Dictionary) -> int:
 	var base: Dictionary = get_hand_type3_base(ht)
+	var upgrade: Dictionary = get_star_chart_upgrade(ht)
+	var lvl: int = levels.get(ht, 0)
+	return base["mult"] + upgrade["mult"] * lvl
+
+
+static func get_hand_type3_column_leveled_chips(ht: HandType3, levels: Dictionary) -> int:
+	var base: Dictionary = COLUMN_HAND_TYPE3_BASE_VALUES.get(ht, {"chips": 0, "mult": 0})
+	var upgrade: Dictionary = get_star_chart_upgrade(ht)
+	var lvl: int = levels.get(ht, 0)
+	return base["chips"] + upgrade["chips"] * lvl
+
+
+static func get_hand_type3_column_leveled_mult(ht: HandType3, levels: Dictionary) -> int:
+	var base: Dictionary = COLUMN_HAND_TYPE3_BASE_VALUES.get(ht, {"chips": 0, "mult": 0})
 	var upgrade: Dictionary = get_star_chart_upgrade(ht)
 	var lvl: int = levels.get(ht, 0)
 	return base["mult"] + upgrade["mult"] * lvl

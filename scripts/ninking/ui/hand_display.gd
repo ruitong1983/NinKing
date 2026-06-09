@@ -12,10 +12,15 @@ var _mid_type_label: Label
 var _tail_type_label: Label
 var _chips_label: Label
 var _mult_label: Label
-var _dun_type_row: Label
+var _shadow_type_label: Label
+var _flash_type_label: Label
+var _destroy_type_label: Label
 var _play_btn: Button
 var _redraw_btn: Button
 var _status_label: Label
+var _col0_label: Label
+var _col1_label: Label
+var _col2_label: Label
 
 var _current_hand: Array[CardData.PlayingCard] = []
 
@@ -23,7 +28,8 @@ var _current_hand: Array[CardData.PlayingCard] = []
 func setup(
 	head: Hand, mid: Hand, tail: Hand,
 	head_type: Label, mid_type: Label, tail_type: Label,
-	chips: Label, mult: Label, dun_row: Label,
+	col0: Label, col1: Label, col2: Label,
+	chips: Label, mult: Label, shadow_type: Label, flash_type: Label, destroy_type: Label,
 	play: Button, redraw: Button, status: Label
 ) -> void:
 	assert(head != null, "HandDisplay.setup: head must not be null")
@@ -34,7 +40,9 @@ func setup(
 	assert(tail_type != null, "HandDisplay.setup: tail_type must not be null")
 	assert(chips != null, "HandDisplay.setup: chips must not be null")
 	assert(mult != null, "HandDisplay.setup: mult must not be null")
-	assert(dun_row != null, "HandDisplay.setup: dun_row must not be null")
+	assert(shadow_type != null, "HandDisplay.setup: shadow_type must not be null")
+	assert(flash_type != null, "HandDisplay.setup: flash_type must not be null")
+	assert(destroy_type != null, "HandDisplay.setup: destroy_type must not be null")
 	assert(play != null, "HandDisplay.setup: play must not be null")
 	assert(redraw != null, "HandDisplay.setup: redraw must not be null")
 	assert(status != null, "HandDisplay.setup: status must not be null")
@@ -46,10 +54,15 @@ func setup(
 	_tail_type_label = tail_type
 	_chips_label = chips
 	_mult_label = mult
-	_dun_type_row = dun_row
+	_shadow_type_label = shadow_type
+	_flash_type_label = flash_type
+	_destroy_type_label = destroy_type
 	_play_btn = play
 	_redraw_btn = redraw
 	_status_label = status
+	_col0_label = col0
+	_col1_label = col1
+	_col2_label = col2
 
 
 func _clear_all() -> void:
@@ -72,6 +85,21 @@ func _reset_labels() -> void:
 		_chips_label.text = ""
 	if _mult_label != null:
 		_mult_label.text = ""
+	if _shadow_type_label != null:
+		_shadow_type_label.text = "影: -"
+	if _flash_type_label != null:
+		_flash_type_label.text = "瞬: -"
+	if _destroy_type_label != null:
+		_destroy_type_label.text = "滅: -"
+	if _col0_label != null:
+		_col0_label.text = ""
+		_col0_label.visible = false
+	if _col1_label != null:
+		_col1_label.text = ""
+		_col1_label.visible = false
+	if _col2_label != null:
+		_col2_label.text = ""
+		_col2_label.visible = false
 
 
 func _update_dun_type_labels() -> void:
@@ -80,9 +108,38 @@ func _update_dun_type_labels() -> void:
 	var head_eval: HandEvaluator3.EvalResult = HandEvaluator3.evaluate(_current_hand.slice(0, 3))
 	var mid_eval: HandEvaluator3.EvalResult = HandEvaluator3.evaluate(_current_hand.slice(3, 6))
 	var tail_eval: HandEvaluator3.EvalResult = HandEvaluator3.evaluate(_current_hand.slice(6, 9))
-	_head_type_label.text = CardData.get_hand_type3_name(head_eval.hand_type)
-	_mid_type_label.text = CardData.get_hand_type3_name(mid_eval.hand_type)
-	_tail_type_label.text = CardData.get_hand_type3_name(tail_eval.hand_type)
+	var head_name: String = CardData.get_hand_type3_name(head_eval.hand_type)
+	var mid_name: String = CardData.get_hand_type3_name(mid_eval.hand_type)
+	var tail_name: String = CardData.get_hand_type3_name(tail_eval.hand_type)
+	_head_type_label.text = head_name
+	_mid_type_label.text = mid_name
+	_tail_type_label.text = tail_name
+	if _shadow_type_label != null:
+		_shadow_type_label.text = "影: " + head_name
+	if _flash_type_label != null:
+		_flash_type_label.text = "瞬: " + mid_name
+	if _destroy_type_label != null:
+		_destroy_type_label.text = "滅: " + tail_name
+
+
+func _update_column_type_labels() -> void:
+	if _current_hand.size() < 9:
+		return
+	var col_labels: Array[Label] = [_col0_label, _col1_label, _col2_label]
+	for i: int in range(3):
+		var col_cards: Array[CardData.PlayingCard] = [
+			_current_hand[i],
+			_current_hand[i + 3],
+			_current_hand[i + 6]
+		]
+		var eval_result: HandEvaluator3.EvalResult = HandEvaluator3.evaluate(col_cards)
+		var lbl: Label = col_labels[i]
+		if int(eval_result.hand_type) >= int(CardData.HandType3.ONE_PAIR_3):
+			lbl.text = CardData.get_hand_type3_name(eval_result.hand_type)
+			lbl.visible = true
+		else:
+			lbl.text = ""
+			lbl.visible = false
 
 
 func _update_action_buttons(p_redraw_mode: bool) -> void:
@@ -108,6 +165,7 @@ func _update_score_preview() -> void:
 	var result: ScoreCalculator.ScoreResult = ScoreCalculator.calculate(
 		head_cards, mid_cards, tail_cards,
 		head_eval, mid_eval, tail_eval,
+		[],
 		NinKingGameState.owned_ninjas, NinKingGameState.star_chart_levels,
 		null, {},
 		NinKingGameState.gold
@@ -175,6 +233,7 @@ func refresh(hand: Array[CardData.PlayingCard], swap_idx: int, redraw_idxs: Arra
 	for i: int in range(6, 9):
 		_add_card(_tail_hand, hand[i], i, swap_idx, redraw_idxs, on_card_clicked, on_card_dragged)
 	_update_dun_type_labels()
+	_update_column_type_labels()
 	_update_action_buttons(redraw_mode)
 	_update_score_preview()
 

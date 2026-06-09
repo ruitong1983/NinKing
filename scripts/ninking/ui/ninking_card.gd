@@ -4,7 +4,7 @@ extends Card
 ## NinKing-specific Card extending card-framework's Card.
 ## Renders a realistic playing card face: white background, rounded corners,
 ## corner rank+suit labels (top-left upright, bottom-right 180° rotated),
-## and a large centered suit symbol.
+## and a large centered suit symbol drawn programmatically (no font dependency).
 
 signal ninking_card_clicked(index: int)
 signal ninking_card_dragged(index: int, drop_position: Vector2)
@@ -29,7 +29,7 @@ const BORDER_CLR: Color = Color(0.2, 0.2, 0.2, 1.0)        # #333333 dark border
 const RED_CLR: Color = Color(0.8, 0.1, 0.1, 1.0)           # Red for ♥♦
 const BLACK_CLR: Color = Color(0.1, 0.1, 0.1, 1.0)         # Black for ♠♣
 const CORNER_FONT_SZ: int = 24
-const CENTER_FONT_SZ: int = 56
+const CENTER_SUIT_SZ: int = 56
 const CORNER_LABEL_W: int = 36
 const CORNER_LABEL_H: int = 48
 
@@ -44,10 +44,40 @@ var card_index: int = -1
 var _press_global_position: Vector2 = Vector2.ZERO
 var _visual_state: int = VisualState.NORMAL
 
-# Card face child labels
+# Card face child nodes
 var _corner_top_label: Label
 var _corner_bottom_label: Label
 var _center_suit_label: Label
+var _center_suit_draw: _SuitDrawer  # only used for ♣ clubs
+
+
+# ══════════════════════════════════════════
+# _SuitDrawer — programmatic filled suit symbol (V22)
+# ══════════════════════════════════════════
+
+## Draws a filled ♣ clubs symbol. Only used for clubs — other three suits
+## render well via font at CENTER_FONT_SZ and keep the original Label approach.
+class _SuitDrawer extends Control:
+	var _color: Color = Color.BLACK
+
+	func set_color(color: Color) -> void:
+		_color = color
+		queue_redraw()
+
+	func _draw() -> void:
+		var c := size / 2.0
+		const R: float = 10.0
+		const STEM_W: float = 5.0
+		const STEM_H: float = 10.0
+		# Three filled circles (trefoil)
+		draw_circle(c + Vector2(0, -11), R, _color)
+		draw_circle(c + Vector2(-10, 7), R, _color)
+		draw_circle(c + Vector2(10, 7), R, _color)
+		# Stem
+		draw_rect(Rect2(c.x - STEM_W / 2.0, c.y + 12, STEM_W, STEM_H), _color)
+
+	func _get_minimum_size() -> Vector2:
+		return Vector2(CENTER_SUIT_SZ, CENTER_SUIT_SZ)
 
 
 func _ready() -> void:
@@ -166,8 +196,8 @@ func _is_mask_border(x: int, y: int, w: int, h: int, mask: PackedByteArray) -> b
 # ═══ Label creation ═══
 
 ## Create label nodes for card face text.
-## Labels get an empty Theme to break pixel-font inheritance from pixel_theme.tres,
-## falling back to Godot's built-in default font for clean rank/suit rendering.
+## Corner labels use an empty Theme to break pixel-font inheritance.
+## Center suit: Label for ♠♥♦ (font renders fine), _SuitDrawer for ♣ (V22).
 func _create_labels() -> void:
 	# Empty theme — breaks the pixel_theme chain so labels use Godot's built-in
 	# default font. This keeps card text (A♠, 10♥, etc.) clean and readable
@@ -185,7 +215,7 @@ func _create_labels() -> void:
 	_corner_top_label.size = Vector2(CORNER_LABEL_W, CORNER_LABEL_H)
 	add_child(_corner_top_label)
 
-	# Center suit symbol (large)
+	# Center suit symbol — Label for ♠♥♦ (font renders fine), _SuitDrawer for ♣ (V22)
 	_center_suit_label = Label.new()
 	_center_suit_label.name = "CenterSuit"
 	_center_suit_label.theme = _card_label_theme
@@ -194,6 +224,12 @@ func _create_labels() -> void:
 	_center_suit_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_center_suit_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	add_child(_center_suit_label)
+
+	_center_suit_draw = _SuitDrawer.new()
+	_center_suit_draw.name = "CenterSuitDraw"
+	_center_suit_draw.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_center_suit_draw.visible = false  # only shown for clubs
+	add_child(_center_suit_draw)
 
 	# Bottom-right corner — 180° rotated copy of top-left
 	_corner_bottom_label = Label.new()
@@ -220,6 +256,7 @@ func _update_display_label() -> void:
 	if playing_card_data == null:
 		_corner_top_label.text = "?"
 		_center_suit_label.text = "?"
+		_center_suit_draw.visible = false
 		_corner_bottom_label.text = "?"
 		return
 
@@ -233,11 +270,20 @@ func _update_display_label() -> void:
 	_corner_top_label.add_theme_color_override("font_color", suit_color)
 	_corner_top_label.position = Vector2(MARGIN_XY, MARGIN_TOP)
 
-	# Center suit — fills entire card for true centering
-	_center_suit_label.text = suit_str
-	_center_suit_label.add_theme_color_override("font_color", suit_color)
-	_center_suit_label.size = card_size
-	_center_suit_label.position = Vector2.ZERO
+	# Center suit — Label for ♠♥♦, _SuitDrawer only for ♣ (V22)
+	if playing_card_data.suit == CardData.Suit.CLUBS:
+		_center_suit_label.visible = false
+		_center_suit_draw.visible = true
+		_center_suit_draw.size = card_size
+		_center_suit_draw.position = Vector2.ZERO
+		_center_suit_draw.set_color(suit_color)
+	else:
+		_center_suit_draw.visible = false
+		_center_suit_label.visible = true
+		_center_suit_label.text = suit_str
+		_center_suit_label.add_theme_color_override("font_color", suit_color)
+		_center_suit_label.size = card_size
+		_center_suit_label.position = Vector2.ZERO
 
 	# Bottom-right corner — same content as top-left, rotated 180° by _create_labels()
 	# Position: symmetric to top-left (right=8px, bottom=6px)

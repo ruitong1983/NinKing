@@ -79,7 +79,7 @@ offset_left = 1435.0
 offset_top = 19.0
 offset_right = 1525.0
 offset_bottom = 71.0
-text = "🔄"
+text = "刷新"
 
 [node name="RerollLabel" type="Label" parent="ShopPanel/RerollBtn" unique_id=144345993]
 unique_name_in_owner = true

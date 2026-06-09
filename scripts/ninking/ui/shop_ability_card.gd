@@ -67,7 +67,7 @@ func setup(data: Dictionary) -> void:
 
 	price_label.text = str(data.get("cost", 0))
 
-	# Set art emoji based on card theme
+	# Set art icon based on card theme (text symbols, no emoji)
 	var icon: String = _get_theme_icon(data.get("name", ""), data.get("effect_desc", ""))
 	art_icon.text = icon
 
@@ -76,21 +76,21 @@ func setup(data: Dictionary) -> void:
 
 
 func _get_theme_icon(name: String, effect: String) -> String:
-	if "倍" in effect and effect.begins_with("×"):
-		return "👑"
+	if "倍" in effect and effect.begins_with("x"):
+		return "[极]"
 	if "筹码" in effect and "倍率" in effect:
-		return "🃏"
+		return "[术]"
 	if "顺子" in name:
-		return "🔄"
+		return "[顺]"
 	if "同花" in name:
-		return "🌸"
+		return "[花]"
 	if "四条" in name or "葫芦" in name:
-		return "💪"
+		return "[强]"
 	if "皇家" in name:
-		return "👑"
+		return "[极]"
 	if "幸运" in name or "新手" in name:
-		return "🍀"
-	return "🃏"
+		return "[运]"
+	return "[术]"
 
 
 func set_purchased() -> void:

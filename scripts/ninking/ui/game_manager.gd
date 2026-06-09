@@ -21,6 +21,7 @@ func _ready() -> void:
 	ui.start_button.pressed.connect(_on_start_pressed)
 	ui.play_btn.pressed.connect(_on_play_pressed)
 	ui.redraw_btn.pressed.connect(_on_redraw_pressed)
+	ui.ai_rearrange_btn.pressed.connect(_on_ai_rearrange_pressed)
 	ui.to_shop_button.pressed.connect(_on_go_shop_pressed)
 	ui.retry_button.pressed.connect(_on_retry_pressed)
 
@@ -57,6 +58,7 @@ func _on_state_changed(new_state: NinKingGameState.State) -> void:
 			ui.show_view("game")
 			ui.refresh_hand(NinKingGameState.hand)
 			ui.refresh_ninjas(NinKingGameState.owned_ninjas, NinKingGameState.max_ninja_slots)
+			ui.ai_rearrange_btn.disabled = false
 			_update_deck_display()
 		NinKingGameState.State.SCORING:
 			ui.show_view("scoring")
@@ -174,6 +176,13 @@ func _on_go_shop_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/ninking/shop.tscn")
 
 
+func _on_ai_rearrange_pressed() -> void:
+	if NinKingGameState.current_state != NinKingGameState.State.PLAYING:
+		return
+	NinKingGameState.auto_arrange()
+	ui.refresh_hand(NinKingGameState.hand)
+
+
 func _on_retry_pressed() -> void:
 	get_tree().reload_current_scene()
 
@@ -215,7 +224,21 @@ func _run_scoring_animation() -> void:
 	var breakdown_text: String = "筹码 %d  ×  倍率 %d" % [int(score_result.chips_sum), int(score_result.mult_sum)]
 	if score_result.x_mult_product > 1.0:
 		breakdown_text += "  ×%.1f" % score_result.x_mult_product
+	var col_chips: int = score_result.breakdown.get("col_chips", 0)
+	var col_mult: int = score_result.breakdown.get("col_mult", 0)
+	if col_chips > 0 or col_mult > 0:
+		breakdown_text += "\n列: +%d筹码 +%d倍率" % [col_chips, col_mult]
 	ui.score_breakdown.text = breakdown_text
+
+	# Column VFX celebration (col ≥ 同花顺 → shuriken burst + color flash)
+	var col_evals: Array = play_data.get("col_evals", [])
+	if col_evals.size() == 3:
+		for i: int in range(3):
+			var ct: CardData.HandType3 = col_evals[i].hand_type
+			if int(ct) >= int(CardData.HandType3.STRAIGHT_FLUSH_3):
+				var col_labels: Array[Label] = [ui.col0_label, ui.col1_label, ui.col2_label]
+				GlobalTweens.burst_particles(col_labels[i].global_position + col_labels[i].size * 0.5, "shuriken")
+				GlobalTweens.color_flash(col_labels[i], Color(0.831, 0.659, 0.263, 1.0), 0.15)
 	await get_tree().create_timer(0.65).timeout
 
 	# ── Phase 3: Xi effects ──

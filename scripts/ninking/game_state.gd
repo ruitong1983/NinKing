@@ -56,6 +56,7 @@ var gold: int = 8
 # Hand & deck
 var hand: Array[CardData.PlayingCard] = []             # 9 cards, arranged
 var current_arrangement: AutoArranger.Arrangement = null
+var current_col_evals: Array = []  # Array[HandEvaluator3.EvalResult], 3 elements or empty
 var deck_manager: DeckManager = null
 var current_deck_name: String = "standard"
 
@@ -135,8 +136,43 @@ func _start_seal() -> void:
 ## Called externally by SealController and ShopManager.
 func auto_arrange() -> void:
 	ArrangeController.auto_arrange(self)
+	_recompute_col_evals()
 	arrangement_changed.emit(current_arrangement)
 	hand_updated.emit(hand)
+
+
+## Re-evaluate the current manual arrangement without AI re-sorting.
+## Preserves player's card positions, re-computes hand types and constraint.
+func re_evaluate_arrangement() -> void:
+	if hand.size() < 9:
+		return
+	var head_cards: Array[CardData.PlayingCard] = []
+	var mid_cards: Array[CardData.PlayingCard] = []
+	var tail_cards: Array[CardData.PlayingCard] = []
+	for i: int in range(3):
+		head_cards.append(hand[i])
+		mid_cards.append(hand[i + 3])
+		tail_cards.append(hand[i + 6])
+	var he: HandEvaluator3.EvalResult = HandEvaluator3.evaluate(head_cards)
+	var me: HandEvaluator3.EvalResult = HandEvaluator3.evaluate(mid_cards)
+	var te: HandEvaluator3.EvalResult = HandEvaluator3.evaluate(tail_cards)
+	current_arrangement = AutoArranger.Arrangement.new(head_cards, mid_cards, tail_cards, he, me, te)
+	_recompute_col_evals()
+	arrangement_changed.emit(current_arrangement)
+	hand_updated.emit(hand)
+
+
+## Recompute column evaluations from current arrangement.
+func _recompute_col_evals() -> void:
+	current_col_evals.clear()
+	if not current_arrangement:
+		return
+	var head: Array = current_arrangement.head
+	var mid: Array = current_arrangement.mid
+	var tail: Array = current_arrangement.tail
+	for i: int in range(3):
+		var col_cards: Array[CardData.PlayingCard] = [head[i], mid[i], tail[i]]
+		current_col_evals.append(HandEvaluator3.evaluate(col_cards))
 
 
 func get_scoring_rules() -> Dictionary:

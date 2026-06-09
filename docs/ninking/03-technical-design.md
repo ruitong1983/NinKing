@@ -190,7 +190,12 @@ NinKingMain (Control) [game_manager.gd]
     │       │   │   ├── DunHead (Panel) — 影（1px 边框）
     │       │   │   ├── DunMiddle (Panel) — 瞬（2px 边框）
     │       │   │   └── DunTail (Panel) — 滅（3px 边框）
+    │       │   ├── AiRearrangeBtn "AI\n重排" — AI 重排按钮（初始禁用，PLAYING 时启用）
     │       │   └── RedrawBtn "换牌"
+    │       ├── ColumnLabelRow (HBoxContainer) — 列牌型标签行
+    │       │   ├── Col0Label — 列0 牌型（≥对子时金色显示）
+    │       │   ├── Col1Label — 列1 牌型
+    │       │   └── Col2Label — 列2 牌型
     │       └── DeckBtn "🎴 牌库"
     ├── ScoringOverlay (Control) — 计分弹窗
     │   └── HandNameLabel / ScoreValueLabel / ScoreBreakdown
@@ -244,7 +249,7 @@ Shop (Control) [shop_ui.gd]
 | `redraws_changed` | `remaining: int` | 手替え次数变化 |
 | `gold_changed` | `amount: int` | 金币变化 |
 | `hand_updated` | `hand: Array` | 手牌变化 (9张, 已排序) |
-| `arrangement_changed` | `arrangement: Arrangement` | AI 重排后（影/瞬/滅 分组变化） |
+| `arrangement_changed` | `arrangement: Arrangement` | AI 重排/原地重评估后（影/瞬/滅 分组变化） |
 | `seal_started` | `barrier: int, seal_idx: int, target: int, seal_lord_name: String` | 封印开始 |
 | `xi_triggered` | `xis: Array[String]` | 喜触发（全黑/全红等） |
 
@@ -261,6 +266,7 @@ SealController.execute_play(gs)
     ├── prepare_play(gs) → 验证 + 计分（不修改状态）
     │   ├── AutoArranger (排列评估)
     │   ├── XiDetector.detect() → XiResult
+    │   ├── Column evaluation (列_j = 影[j]+瞬[j]+滅[j]) → col_evals
     │   └── ScoreCalculator.calculate() → ScoreResult
     └── finalize_play(gs, play_data) → 应用状态变更
         ├── gs.plays_remaining -= 1
@@ -427,11 +433,12 @@ NinKingCard (extends Card) — 牌面渲染
 NinKingCardFactory (extends CardFactory) — 框架合约占位 (create_card() 返回 null, 实际创建由 HandDisplay 负责)
 
 HandDisplay (extends RefCounted) — 手牌渲染器
-├── setup(head,mid,tail, labels×6, buttons×2, status) — 注入节点引用
+├── setup(head,mid,tail, labels×6+col_labels×3, buttons×2, status) — 注入节点引用
 ├── refresh(hand, swap_idx, redraw_idxs, redraw_mode, on_clicked) — 主渲染入口
 ├── _clear_all() — 调用 Hand.clear_cards() 清理三墩 (框架官方API)
 ├── _add_card(hand, card_data, idx, ...) — 创建 NinKingCard 并加入 Hand
 ├── _update_dun_type_labels() — HandEvaluator3 评估并显示三墩牌型
+├── _update_column_type_labels() — 评估 3 列并显示列牌型（≥对子时金色）
 ├── _update_score_preview() — ScoreCalculator.calculate() 实时 chips×mult
 └── _update_action_buttons(redraw_mode) — 切换出牌/换牌按钮文本和禁用状态
 
@@ -443,7 +450,8 @@ HandInteraction (extends RefCounted) — 交互状态机
 CardData (RefCounted)
 ├── enum Suit, Rank, HandType3, Enhancement, Seal, Edition
 ├── class PlayingCard (suit, rank, enhancement, seal, edition)
-├── const: HAND_TYPE3_BASE_VALUES, STAR_CHART_UPGRADES, RANK_CHIP_VALUES
+├── const: HAND_TYPE3_BASE_VALUES, COLUMN_HAND_TYPE3_BASE_VALUES, STAR_CHART_UPGRADES, RANK_CHIP_VALUES
+├── static: get_hand_type3_column_leveled_chips/mult(ht, levels)
 └── static: create_standard_deck()
 
 HandEvaluator3 (RefCounted)
@@ -455,7 +463,7 @@ AutoArranger (RefCounted)
 
 ScoreCalculator (RefCounted)
 ├── class ScoreResult (total_score, chips_sum, mult_sum, x_mult_product, breakdown)
-└── static: calculate(head, mid, tail, evals, ninjas, star_charts, xi_result, seal_effects, gold) → ScoreResult
+└── static: calculate(head, mid, tail, evals, col_evals, ninjas, star_charts, xi_result, seal_effects, gold) → ScoreResult
 
 XiDetector (RefCounted)
 ├── class XiResult (triggered, chips_add, mult_x_stack)
@@ -469,8 +477,9 @@ DeckManager (RefCounted)
 
 NinKingGameState (Node, Autoload)
 ├── current_state, barrier_num, seal_idx, gold, hand, owned_ninjas, star_chart_levels
+├── current_arrangement, current_col_evals
 ├── start_new_run() / continue_run() / has_saved_run()
-├── auto_arrange() / get_scoring_rules()
+├── auto_arrange() / re_evaluate_arrangement() / get_scoring_rules()
 ├── swap_cards() / execute_play() / execute_redraw()
 ├── go_to_shop() / continue_from_shop() / skip_seal()
 └── Signals: state_changed, score_updated, plays_changed, redraws_changed, gold_changed,
@@ -478,8 +487,8 @@ NinKingGameState (Node, Autoload)
 
 SealController (RefCounted, 静态方法)
 ├── execute_play(gs) / prepare_play(gs) / finalize_play(gs, data) — 出牌流程
-├── swap_cards(gs, idx1, idx2) — 交换手牌
-├── execute_redraw(gs, indices) — 手替え
+├── swap_cards(gs, idx1, idx2) — 交换（原地重评估，不触发 AI 重排）
+├── execute_redraw(gs, indices) — 手替え（触发 auto_arrange）
 ├── go_to_shop(gs) / continue_from_shop(gs) / skip_seal(gs, tag_reward)
 ├── _complete_seal(gs) — 过关奖励 + 利息
 ├── _collect_play_gold(gs, cards, xi) — 经济效果统一结算

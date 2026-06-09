@@ -28,6 +28,7 @@
 | A6 | 交换 UI | 点击交换（已有）+ 拖拽交换（新增 NinKingCard 拖拽信号 + HandDisplay 落点检测 + HandInteraction 跨容器交换）| **P1** | ✅ |
 | A7 | 出牌/计分动画流程 | 组揭示 → 计分跳动 → 喜触发粒子 → 过关/失败判定。SealController 拆为 prepare/finalize，CountUp 直接调用，零手写 Tween | **P1** | ✅ |
 | A8 | 永久死亡存档 | 失败/胜利自动记录战绩+删 run 存档，checkpoint 在封印开始时保存，新增 continue_run/has_saved_run | **P1** | ✅ |
+| **A9** | **列分机制** | 3×3 网格纵向列计分（列_i = 影[i]+瞬[i]+滅[i]），列专属基础值 2.5× 横向，AI 只优化横向，交换不自动重排，新增 AI 重排按钮 + 列标签 | **P0** | ✅ |
 
 ---
 
@@ -83,6 +84,10 @@
 | C4 | `ui_manager.gd` class_name 与全局脚本类冲突（Godot 编辑器已知现象，不影响运行） | `scripts/ninking/ui/ui_manager.gd` | P2 | ⚠️ |
 | C5 | `blind_controller.gd` class_name 与全局脚本类冲突（同上） | `scripts/ninking/blind_controller.gd` | P2 | ⚠️ |
 | C6 | `03-technical-design.md` 全文档同步至实现 — 场景树列表(5→11)、shop.tscn 重写、节点命名(BarrierLabel/RedrawBtn)、目录结构(10+7→19+13)、类图(新增 ArrangeController/NinjaPool/NinjaScaling/BarrierTheme、修正 NinjaData/ShopManager/BarrierConfig) | `docs/ninking/03-technical-design.md` | P1 | ✅ |
+| R2 | 计分公式更新 `06-complete-redesign.md` — 加列 chips/mult | P2 | ✅ |
+| R3 | 散牌王说明更新 `13-blinds-and-bosses.md` — 注明列不受影响 | P2 | ✅ |
+| R4 | 交换行为变更同步 `06-complete-redesign.md` — 交换不再触发 AI 重排 | P2 | ✅ |
+| R5 | AI 重排按钮补充 `03-technical-design.md` 场景树 | P2 | ✅ |
 | C7 | 确认清理 `ninking_main.tscn` 中旧 MainMenu 视图节点（UIManager/MainMenu 含 LaunchBg/TitleLabel/SubtitleLabel/DeckLabel/StartButton/VersionLabel）。⏸ 暂不删除：被 game_manager.gd 引用，需先评估影响面 | `scenes/ninking/ninking_main.tscn` | P2 | 🔒 |
 
 ---
@@ -121,6 +126,8 @@ Phase A (当前) ──→ Phase B ──→ Phase C ──→ Phase D ──→
 
 | 日期 | 变更 |
 |------|------|
+| 2026-06-09 | 📋 **方案审阅: A9 列分机制**: Grill 14 轮 → review-plan 审阅 → R2-R5 共 4 项文档同步加入 TODO。Q1=breakdown 文字体现列分，Q2=列≥同花顺加 VFX 庆祝（shuriken + color_flash）|
+| 2026-06-09 | 📝 **A9 文档同步 + 代码审查完成**: R2-R5 四文档已更新（06 公式/交换 + 13 散牌王 + 03 场景树），A9 标记完成。代码审查通过，列分机制完整实现。 |
 | 2026-06-09 | 🔢 **牌型基础值重新调整**: 同花 20/3→30/4、同花顺 35/4→50/5、豹子 40/5→100/8。遵循传统扑克排序(同花>顺子)，高牌型拉开差距，星图升级值保持不放大（对标 Balatro 设计）。同步更新 06-complete-redesign / 12-consumable-cards 文档 |
 | 2026-06-09 | 🎴 **V1 卡牌背面**: CardBackGenerator 程序绘制 140×196 像素手里剑卡背（深蓝底+交叉纹+金色硬边框+十字手里剑+中心环+角钻+装饰线），已接入 ninking_card.gd set_faces()；同步 V2/V3/V7 标记为已并入完成 |pixel_theme.tres 重写(0圆角/2px硬边/三态按钮/三墩边框递进) + barrier_theme.gd(8結界冷暖交替配色表) + CRT shader time_offset 扩展(扫描线微下移) + game_manager 結界主题应用(配色自动切换/按钮色调跟随) + ui_manager 三墩标题区分(outline递进)。场景仅加 5 个 unique_name_in_owner flag |
 | 2026-06-09 | 💰 **金币×忍者牌联动**: 补实现福神/金尾/俭约/镀金/金封印 5 效果（`_collect_play_gold` 统一结算）；新增 金剛力（$5→+1倍率）/ 黄金律（$15→×2）2 张 economy ninja；ScoreCalculator 加 `gold` 参数 |

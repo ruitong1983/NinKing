@@ -35,7 +35,7 @@ func setup(
 
 
 func update_deck_count(draw_count: int, _discard_count: int) -> void:
-	deck_btn.text = "🎴 牌库: %d" % draw_count
+	deck_btn.text = "牌库: %d" % draw_count
 
 
 func _on_deck_btn_pressed() -> void:

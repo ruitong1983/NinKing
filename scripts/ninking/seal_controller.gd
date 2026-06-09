@@ -58,6 +58,12 @@ static func prepare_play(gs) -> Dictionary:
 			"mid":  seal_lord_effects["skip_mid"] = true
 			"tail": seal_lord_effects["skip_tail"] = true
 
+	# Column evaluation (3 vertical columns — from arrangement, not auto-arranger)
+	var col_evals: Array[HandEvaluator3.EvalResult] = []
+	for i: int in range(3):
+		var col_cards: Array[CardData.PlayingCard] = [head_cards[i], mid_cards[i], tail_cards[i]]
+		col_evals.append(HandEvaluator3.evaluate(col_cards))
+
 	# Xi detection (no signal emit — deferred to finalize_play)
 	var xi_result: XiDetector.XiResult = null
 	if not seal_lord_effects.get("no_xi", false):
@@ -68,6 +74,7 @@ static func prepare_play(gs) -> Dictionary:
 	var score_result: ScoreCalculator.ScoreResult = ScoreCalculator.calculate(
 		head_cards, mid_cards, tail_cards,
 		head_eval, mid_eval, tail_eval,
+		col_evals,
 		gs.owned_ninjas,
 		gs.star_chart_levels,
 		xi_result,
@@ -79,6 +86,7 @@ static func prepare_play(gs) -> Dictionary:
 		"score_result": score_result,
 		"xi_result": xi_result,
 		"seal_effects": seal_lord_effects,
+		"col_evals": col_evals,
 	}
 
 
@@ -169,7 +177,7 @@ static func swap_cards(gs: NinKingGameState, idx1: int, idx2: int) -> void:
 	var temp: CardData.PlayingCard = gs.hand[idx1]
 	gs.hand[idx1] = gs.hand[idx2]
 	gs.hand[idx2] = temp
-	gs.auto_arrange()
+	gs.re_evaluate_arrangement()
 
 
 # ══════════════════════════════════════════

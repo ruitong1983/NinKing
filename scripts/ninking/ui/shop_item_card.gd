@@ -1,28 +1,22 @@
-extends Panel
-## Balatro-style item (consumable) card displayed in the shop.
+class_name ShopItemCard
+extends PanelContainer
 
 @onready var art_icon: Label = %ArtIcon
 @onready var name_label: Label = %NameLabel
 @onready var effect_label: Label = %EffectLabel
-@onready var desc_label: Label = %DescLabel
 @onready var price_label: Label = %PriceLabel
 @onready var buy_button: Button = %BuyButton
-@onready var buy_label: Label = %BuyButton
 
-var item_data: Dictionary = {}
 var is_purchased: bool = false
+var _data: Dictionary = {}
 
-signal purchase_requested(item: Dictionary)
-signal card_pressed(card: Panel)
-
-const COLOR_ITEM_BORDER: Color = Color("4080D0")  # Blue
-const COLOR_PRICE: Color = Color("F0D060")
-const COLOR_CARD_BG: Color = Color("1A2F2A")
-const COLOR_PURCHASED: Color = Color("3A3A3A")
+const COLOR_CARD_BG: Color = Color(0.1, 0.1, 0.18, 0.92)
+const COLOR_ITEM_BORDER: Color = Color(0.25, 0.6, 0.9, 0.7)
 
 
 func setup(data: Dictionary) -> void:
-	item_data = data
+	_data = data
+	is_purchased = false
 
 	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = COLOR_CARD_BG
@@ -38,49 +32,32 @@ func setup(data: Dictionary) -> void:
 
 	name_label.text = data.get("name", "???")
 	effect_label.text = data.get("effect_desc", "")
-	desc_label.text = data.get("desc", "")
-	price_label.text = str(data.get("cost", 0))
+
+	var cost: int = data.get("cost", 1)
+	price_label.text = "$%d" % cost
 
 	var icon: String = _get_item_icon(data.get("name", ""))
 	art_icon.text = icon
 
-	buy_button.pressed.connect(_on_buy_pressed)
-	gui_input.connect(_on_gui_input)
-
 
 func _get_item_icon(name: String) -> String:
 	if "暴击" in name or "骰子" in name:
-		return "🎲"
+		return "[赛]"
 	if "药水" in name or "倍率" in name:
-		return "🧪"
+		return "[药]"
 	if "幸运" in name:
-		return "⭐"
+		return "[运]"
 	if "满堂" in name:
-		return "🎯"
+		return "[满]"
 	if "王牌" in name:
-		return "♠"
+		return "[王]"
 	if "Ace" in name:
-		return "🅰"
-	return "💊"
+		return "[A]"
+	return "[物]"
 
 
 func set_purchased() -> void:
 	is_purchased = true
 	buy_button.disabled = true
-	buy_label.text = "已购买"
-	modulate = Color(0.5, 0.5, 0.5, 1.0)
-
-
-func set_unavailable(reason: String) -> void:
-	buy_button.disabled = true
-	buy_label.text = reason
-
-
-func _on_buy_pressed() -> void:
-	if not is_purchased:
-		purchase_requested.emit(item_data)
-
-
-func _on_gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		card_pressed.emit(self)
+	buy_button.text = "已购买"
+	modulate.a = 0.5
