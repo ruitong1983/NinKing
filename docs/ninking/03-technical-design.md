@@ -34,7 +34,9 @@
 **`assets/themes/pixel_theme.tres`** — 挂载在 `ninking_main.tscn` 根节点 `NinKingMain`
 
 - `default_font` = Press Start 2P (font_size=16)
-- 合并了原 `button_theme.tres` 的 Button/Panel/PanelContainer 样式
+- StyleBox 全部 0 圆角、2px 硬边、金色边框（像素忍者风）
+- 按钮三态：normal/hover/pressed（瞬时切换 + 按下时 content_margin 下移）
+- 三墩边框递进：DunHead(1px) → DunMiddle(2px) → DunTail(3px)
 - 原 `button_theme.tres` 已废弃删除
 
 ### UI 字号速查 (ninking_main.tscn)
@@ -46,7 +48,7 @@
 | 中文大号 | LevelLabel, CompleteLabel, GameOverLabel, HandNameLabel | 48 | 交集 ✓ |
 | 分数 | ChipsLabel, MultLabel | 48 | 交集 ✓ |
 | 分数弹出 | ScoreValueLabel | 72 | 交集 ✓ |
-| 按钮 | StartButton, PlayBtn, DiscardBtn 等 | 24 | 交集 ✓ |
+| 按钮 | StartButton, PlayBtn, RedrawBtn 等 | 24 | 交集 ✓ |
 | 牌面 | CORNER_FONT_SZ / CENTER_FONT_SZ | 24 / 56 | PS2P ✓ |
 | 特殊 | MultSign ("×"), VersionLabel, TitleBar | 40 / 16 / 24 | PS2P ✓ |
 
@@ -100,13 +102,16 @@ enum State {
     MAIN_MENU,
     SEAL_INTRO,      # 封印入场（2秒倒计时）
     PLAYING,         # 手牌操作（出牌/换牌/交换）
-    SCORING,         # 计分动画播放中
+    SCORING,         # 计分动画播放中（仅在 game_manager 动画流程中使用）
     SEAL_COMPLETE,   # 封印达成 → 萬屋
     SHOP,            # 商店（独立场景）
     GAME_OVER,       # 永久死亡 → 记录战绩 + 删档
     VICTORY,         # 通关 → 记录战绩 + 删档
 }
 ```
+
+> **注意:** `SCORING` 状态仅在 `game_manager.gd` 的计分动画流程中短暂使用，防止动画期间重复操作。
+> SealController 使用 prepare/finalize 模式直接在 PLAYING 状态下计算分数，不经过 SCORING 状态转换。
 
 ---
 
@@ -136,24 +141,23 @@ res://
 ├── scenes/ninking/
 │   ├── ninking_launcher.tscn       ← 入口场景 (主菜单)
 │   ├── ninking_main.tscn           ← 主游戏场景
-│   ├── shop.tscn                  ← 商店场景
-│   ├── card_button.tscn           ← 手牌按钮组件
-│   └── joker_slot.tscn            ← 小丑牌槽位组件
+│   ├── shop.tscn                   ← 商店（萬屋）场景
+│   ├── card_button.tscn            ← 手牌按钮组件
+│   ├── ninking_card.tscn           ← 卡牌组件 (NinKingCard)
+│   ├── ninking_card_factory.tscn   ← 卡牌工厂 (Card-Framework)
+│   ├── ability_slot.tscn           ← 忍者牌槽位组件
+│   ├── shop_ability_card.tscn      ← 商店忍者牌卡片
+│   ├── shop_item_card.tscn         ← 商店道具卡片
+│   ├── ninking_main_base.tscn      ← 主场景基础（供 ninking_main 继承）
+│   └── ninking_main_original.tscn  ← 主场景原始备份
 ```
 
 ### ninking_launcher.tscn
 
 ```
-Launcher (Control) [main_menu.gd]
-├── Background (ColorRect)
-└── CenterContainer
-    └── VBoxContainer
-        ├── Title (Label) "NINKING"
-        ├── Subtitle (Label) "扑克牌型计分闯关"
-        ├── Spacer (Control)
-        ├── DeckLabel (Label) "牌组: 经典牌组"
-        ├── Spacer (Control)
-        └── StartButton (Button) "开始游戏"
+Launcher (Node) [main_menu.gd]
+└── LaunchBg (TextureRect) — launch_bg.png 背景
+    (UI 全部由 main_menu.gd 程序化构建: CanvasLayer + 按钮 + 牌组面板 + 继续面板)
 ```
 
 ### ninking_main.tscn
@@ -161,39 +165,32 @@ Launcher (Control) [main_menu.gd]
 ```
 NinKingMain (Control) [game_manager.gd]
 ├── CardManager (Control) [card_manager.gd] — 卡牌框架核心
-├── GameBg (ColorRect) — 桌布背景 (1920×1080, #1A3A32)
+├── GameBg (ColorRect) — 桌布背景 (1920×1080, 結界主题动态配色)
 └── UIManager (Node) [ui_manager.gd] — UI 总控
     ├── MainMenu (Control) — 主菜单视图
     │   ├── LaunchBg / MenuBgOverlay
     │   ├── TitleLabel / SubtitleLabel
     │   ├── DeckLabel / StartButton
     │   └── VersionLabel
-    ├── LevelIntro (Control) — 关卡入场视图
+    ├── LevelIntro (Control) — 封印入场视图
     │   ├── IntroOverlay / LevelLabel / TargetLabel
     ├── GameLayout (HBoxContainer) — 游戏主视图
     │   ├── LeftPanel (Control) — 左侧信息面板
     │   │   ├── PanelBg (ColorRect)
     │   │   ├── ChipsMultContainer — ChipsLabel / MultSign / MultLabel
     │   │   ├── HandTypeLabel / ScoreLabel / TargetScoreLabel / ProgressBar
-    │   │   ├── MatchPanel — HandsLabel / DiscardsLabel / GoldLabel
-    │   │   └── AntePanel — AnteLabel / RoundLabel
+    │   │   ├── MatchPanel — HandsLabel / RedrawsLabel / GoldLabel
+    │   │   └── AntePanel — BarrierLabel / RoundLabel
     │   └── CenterColumn (VBoxContainer) — 中央区域
-    │       ├── AbilityBar (HBoxContainer) — 能力牌栏 (5槽位, 无背景条)
-    │       ├── StatusLabel — 状态提示 (✅/⚠ 约束状态)
-    │       ├── HandArea (HBoxContainer, 1138×728) — 操作+三组区
-    │       │   ├── PlayBtn "出
-牌" (84×116)
-    │       │   ├── DunArea (Panel, 620×728, StyleBoxFlat 12px margin)
-    │       │   │   ├── DunHead (Panel, 620×224) — 影
-    │       │   │   │   ├── HeadLabel "影" (12,96) 40×28 20px金色
-    │       │   │   │   ├── HeadTypeLabel "散牌" (510,100) 14px金色
-    │       │   │   │   └── HeadCards (Hand, max_hand_spread=600, swap_only=true)
-    │       │   │   ├── DunMiddle (Panel, 620×224) — 瞬 (8px gap)
-    │       │   │   │   ├── MiddleLabel / MiddleTypeLabel / MiddleCards
-    │       │   │   └── DunTail (Panel, 620×224) — 滅 (8px gap)
-    │       │   │       ├── TailLabel / TailTypeLabel / TailCards
-    │       │   └── DiscardBtn "换
-牌" (84×116)
+    │       ├── AbilityBar (HBoxContainer) — 忍者牌栏 (5槽位)
+    │       ├── StatusLabel — 状态提示
+    │       ├── HandArea (HBoxContainer) — 操作+三组区
+    │       │   ├── PlayBtn "出牌"
+    │       │   ├── DunArea (Panel) — 三墩容器
+    │       │   │   ├── DunHead (Panel) — 影（1px 边框）
+    │       │   │   ├── DunMiddle (Panel) — 瞬（2px 边框）
+    │       │   │   └── DunTail (Panel) — 滅（3px 边框）
+    │       │   └── RedrawBtn "换牌"
     │       └── DeckBtn "🎴 牌库"
     ├── ScoringOverlay (Control) — 计分弹窗
     │   └── HandNameLabel / ScoreValueLabel / ScoreBreakdown
@@ -202,39 +199,35 @@ NinKingMain (Control) [game_manager.gd]
     ├── GameOver (Control) — 失败弹窗
     │   └── GameOverLabel / RetryButton
     └── DeckViewer (Control) — 牌库查看器
-        ├── ViewerBg / CardPanel
-        └── CardGrid (剩余牌面网格)
+        └── ViewerBg / CardPanel / TitleBar / CountRow / CardScroll / CardGrid
 ```
 
-### 墩面板布局 (Figma 对齐)
-
-每个墩面板 620×224，内部元素位置：
-
-| 元素 | 位置 | 尺寸 | 字体 |
-|------|------|------|------|
-| 墩名 Label | (12, 96) | 40×28 | 20px 金色 |
-| 牌型 Label | (510, 100) | 86×21 | 14px 金色 |
-| Hand (3张牌) | (282, 12) | spread=600 | — |
-
-牌间距 10px (card_spacing=150, max_hand_spread=600):
-```
-Card0 @x=62  Card1 @x=212  Card2 @x=362
-```
+> **注意:** 三墩内部的手牌节点（HeadCards/MiddleCards/TailCards）和牌型标签（HeadTypeLabel 等）
+> 由 `HandDisplay` 在运行时动态创建和管理，不在静态场景树中。
 
 ### shop.tscn
 
 ```
 Shop (Control) [shop_ui.gd]
-├── Background (ColorRect)
-├── Title (Label) "商店"
-├── ShopGoldLabel "金币: 0"
-├── ScrollContainer
-│   └── VBoxContainer
-│       ├── JokerSection "--- 小丑牌 ---"
-│       ├── JokerShopContainer
-│       ├── ItemSection "--- 道具卡 ---"
-│       └── ItemShopContainer
-└── ContinueButton "继续闯关"
+├── Overlay (ColorRect) — 全屏半透明遮罩
+└── ShopPanel (Panel) — 商店主面板
+    ├── TitleBar (ColorRect) — 标题栏背景
+    ├── ShopTitle (Label) "萬屋"
+    ├── GoldPill (Panel) — 金币显示
+    │   ├── CoinIcon (Label) "🪙"
+    │   └── GoldLabel (Label)
+    ├── RerollBtn (Button) / RerollLabel — 刷新按钮
+    ├── AbilityLabel (Label) "--- 忍者牌 ---"
+    ├── DecoLineL1 / DecoLineR1 (ColorRect) — 装饰线
+    ├── AbilityRow (HBoxContainer) — 忍者牌商品行
+    ├── ItemLabel (Label) "--- 道具 ---"
+    ├── DecoLineL2 / DecoLineR2 (ColorRect) — 装饰线
+    ├── ItemRow (HBoxContainer) — 道具商品行
+    ├── BottomBar (ColorRect) — 底部栏背景
+    ├── Separator (ColorRect) — 分隔线
+    ├── ContinueBtn (Button) "继续闯关"
+    ├── NextLevelHint (Label) — 下一封印提示
+    └── NinjaSlotLabel (Label) — 忍者槽位指示器
 ```
 
 ---
@@ -251,35 +244,31 @@ Shop (Control) [shop_ui.gd]
 | `redraws_changed` | `remaining: int` | 手替え次数变化 |
 | `gold_changed` | `amount: int` | 金币变化 |
 | `hand_updated` | `hand: Array` | 手牌变化 (9张, 已排序) |
-| `arrangement_changed` | `arrangement: Arrangement` | AI 重排后（头/中/尾 分组变化）|
+| `arrangement_changed` | `arrangement: Arrangement` | AI 重排后（影/瞬/滅 分组变化） |
 | `seal_started` | `barrier: int, seal_idx: int, target: int, seal_lord_name: String` | 封印开始 |
-| `xi_triggered` | `xis: Array[String]` | 喜触发（全黑/全红等）|
+| `xi_triggered` | `xis: Array[String]` | 喜触发（全黑/全红等） |
 
-### 数据流
+### 数据流（出牌）
 
 ```
-玩家点击手牌 → GameManager → NinKingGameState.execute_swap()
-                                    │
-                    ┌───────────────┼───────────────┐
-                    ▼               ▼               ▼
-              DeckManager      HandEvaluator   ScoreCalculator
-              .discard()       .evaluate()     .calculate()
-              .draw()              │               │
-                    │              ▼               ▼
-                    │         EvalResult      ScoreResult
-                    │              │               │
-                    └──────────────┴───────────────┘
-                                    │
-                                    ▼
-                          NinKingGameState
-                          .score_updated.emit()
-                          .hand_updated.emit()
-                          .swap_used.emit()
-                                    │
-                                    ▼
-                              GameManager
-                              ._refresh_hand()
-                              ._refresh_jokers()
+玩家点击出牌 → GameManager._on_play_pressed()
+    │
+    ▼
+NinKingGameState.execute_play()
+    │ 委托
+    ▼
+SealController.execute_play(gs)
+    ├── prepare_play(gs) → 验证 + 计分（不修改状态）
+    │   ├── AutoArranger (排列评估)
+    │   ├── XiDetector.detect() → XiResult
+    │   └── ScoreCalculator.calculate() → ScoreResult
+    └── finalize_play(gs, play_data) → 应用状态变更
+        ├── gs.plays_remaining -= 1
+        ├── gs.current_score += score
+        ├── _collect_play_gold() → 经济结算
+        ├── DeckManager.discard() + draw(9)
+        ├── ArrangeController.auto_arrange(gs)
+        └── 判定: 过关/失败/继续
 ```
 
 ---
@@ -304,6 +293,7 @@ Shop (Control) [shop_ui.gd]
     "plays_remaining": 2,
     "redraws_remaining": 1,
     "gold": 15,
+    "current_deck_name": "standard",
     "owned_ninjas": [
         {
             "id": "n_x01",
@@ -312,14 +302,7 @@ Shop (Control) [shop_ui.gd]
             "cost": 4
         }
     ],
-    "owned_items": [
-        {
-            "id": "enc_009",
-            "name": "淬火牌",
-            "effect": { "enhancement": 2 },
-            "cost": 3
-        }
-    ],
+    "owned_items": [],
     "star_chart_levels": { "0": 1, "1": 0, "2": 0, "3": 0, "4": 0, "5": 0 },
     "current_seal_lord_name": "无头骑士",
     "current_seal_lord_effects": { "skip_head": true }
@@ -349,6 +332,7 @@ Shop (Control) [shop_ui.gd]
 | `load_progress()` → Dictionary | 读取永久进度 |
 | `save_progress(data)` | 写入永久进度 |
 | `record_run_result(deck, barrier, won)` | 记录一局结果（总局数+1，胜场+1，更新最高結界） |
+| `unlock_deck(deck_name)` | 解锁新牌组 |
 
 ### 永久死亡流程
 
@@ -373,33 +357,53 @@ Shop (Control) [shop_ui.gd]
 
 ```
 res://
-├── scenes/ninking/          # 场景文件
+├── scenes/ninking/          # 场景文件 (11 tscn)
 ├── scripts/
-│   ├── ninking/             # NinKing 核心逻辑 (10 脚本)
-│   │   ├── ui/             # NinKing UI (7 脚本: ninking_card.gd, ninking_card_factory.gd, game_manager.gd, ui_manager.gd, deck_viewer_controller.gd, hand_display.gd, hand_interaction.gd)
-│   │   ├── card_data.gd
-│   │   ├── deck_manager.gd
-│   │   ├── hand_evaluator.gd
-│   │   ├── score_calculator.gd
-│   │   ├── game_state.gd
-│   │   ├── ninja_data.gd
-│   │   ├── consumable_data.gd
-│   │   ├── barrier_config.gd
-│   │   ├── seal_controller.gd
-│   │   ├── shop_manager.gd
-│   │   ├── xi_detector.gd           ← 新增: 喜检测器
-│   │   └── save_manager.gd
-│   ├── system/             # 系统工具 (4 脚本, 源自 FanKing)
-│   ├── tween/              # 动效框架 (8 脚本, 源自 FanKing)
-│   ├── config/             # 配置 (2 脚本, 源自 FanKing)
-│   └── ui/                 # 通用 UI (1 脚本, 源自 FanKing)
+│   ├── ninking/             # NinKing 核心逻辑 (19 脚本)
+│   │   ├── ui/              # NinKing UI (13 脚本)
+│   │   │   ├── ninking_card.gd           ← 卡牌渲染 (NinKingCard)
+│   │   │   ├── ninking_card_factory.gd   ← 卡牌工厂 (NinKingCardFactory)
+│   │   │   ├── game_manager.gd           ← 主场景控制器
+│   │   │   ├── ui_manager.gd             ← UI 总控
+│   │   │   ├── main_menu.gd              ← 主菜单
+│   │   │   ├── shop_ui.gd                ← 商店 UI
+│   │   │   ├── hand_display.gd           ← 手牌渲染器
+│   │   │   ├── hand_interaction.gd       ← 交互状态机
+│   │   │   ├── deck_viewer_controller.gd ← 牌库查看器
+│   │   │   ├── card_button.gd            ← 手牌按钮
+│   │   │   ├── ability_slot.gd           ← 忍者牌槽位
+│   │   │   ├── shop_ability_card.gd      ← 商店忍者牌卡片
+│   │   │   └── shop_item_card.gd         ← 商店道具卡片
+│   │   ├── card_data.gd                  ← 扑克牌数据 (CardData)
+│   │   ├── deck_manager.gd               ← 牌库管理 (DeckManager)
+│   │   ├── hand_evaluator.gd             ← 牌型评估 (HandEvaluator3)
+│   │   ├── auto_arranger.gd              ← 排列求解器 (AutoArranger)
+│   │   ├── score_calculator.gd           ← 计分引擎 (ScoreCalculator)
+│   │   ├── xi_detector.gd                ← 喜检测器 (XiDetector)
+│   │   ├── game_state.gd                 ← 游戏状态机 (NinKingGameState, Autoload)
+│   │   ├── seal_controller.gd            ← 出牌/封印逻辑 (SealController)
+│   │   ├── arrange_controller.gd         ← 排列/规则收集 (ArrangeController)
+│   │   ├── ninja_data.gd                 ← 忍者牌数据 (NinjaData)
+│   │   ├── ninja_pool.gd                 ← 忍者牌随机抽取 (NinjaPool)
+│   │   ├── ninja_scaling.gd              ← 修炼成长引擎 (NinjaScaling)
+│   │   ├── consumable_data.gd            ← 道具卡数据 (ConsumableData)
+│   │   ├── item_data.gd                  ← 物品数据 (ItemData)
+│   │   ├── barrier_config.gd             ← 封印/結界配置 (BarrierConfig)
+│   │   ├── barrier_theme.gd              ← 結界主题配色 (BarrierTheme)
+│   │   ├── card_back_generator.gd        ← 卡牌背面程序绘制
+│   │   ├── shop_manager.gd               ← 商店逻辑 (ShopManager)
+│   │   └── save_manager.gd               ← 存档管理 (SaveManager)
+│   ├── system/             # 系统工具 (源自 FanKing)
+│   ├── tween/              # 动效框架 (源自 FanKing)
+│   ├── config/             # 配置 (源自 FanKing)
+│   └── ui/                 # 通用 UI (源自 FanKing)
 ├── assets/
 │   ├── images/ui/          # UI 素材
 │   ├── audio/              # 音频素材
-│   └── themes/             # 主题
-├── shaders/                # 着色器
-├── docs/ninking/            # 设计文档
-├── memory/                 # 需求池
+│   └── themes/             # 主题 (pixel_theme.tres)
+├── shaders/                # 着色器 (crt_filter.gdshader)
+├── docs/ninking/           # 设计文档
+├── memory/                 # AI 记忆
 └── tests/                  # 测试
 ```
 
@@ -408,30 +412,28 @@ res://
 ## 核心类图
 
 ```
-NinKingCard (extends Card) — 牌面渲染 (276 行)
+NinKingCard (extends Card) — 牌面渲染
 ├── _create_face_structure() — FrontFace/BackFace/TextureRect 节点树
 ├── _generate_card_texture() — 程序绘制圆角牌面 (140×196, 8px圆角, #FAF8F2底+1px #333边框+底部阴影)
 ├── _create_labels() — 角标+中央花色Label (24px角标, 56px中央, 36×48角标框)
 ├── _update_display_label() — 刷新牌面文字 (安全调用: _ready()前自动跳过)
 ├── set_visual_state(VisualState) — SWAP_SOURCE(蓝) / REDRAW_TARGET(红) / NORMAL
-├── 左上角标: 点数
-花色 (8,6), 48px高, 24px字号
+├── 左上角标: 点数花色 (8,6), 48px高, 24px字号
 ├── 中央花色: 56px 居中, Press Start 2P@56px
 ├── 右下角标: 180° 旋转镜像 (pivot_offset居中, rotation=PI, 位置96,142)
-├── signal ninking_card_clicked(index) — 点击 (super释放后发射)
+├── signal ninking_card_clicked(index) — 点击
 └── signal ninking_card_dragged(index, drop_position) — 拖拽
 
 NinKingCardFactory (extends CardFactory) — 框架合约占位 (create_card() 返回 null, 实际创建由 HandDisplay 负责)
 
-HandDisplay (extends RefCounted) — 手牌渲染器 (159 行)
-├── setup(head,mid,tail, labels×6, buttons×2, status) — 注入节点引用 (12 asserts)
+HandDisplay (extends RefCounted) — 手牌渲染器
+├── setup(head,mid,tail, labels×6, buttons×2, status) — 注入节点引用
 ├── refresh(hand, swap_idx, redraw_idxs, redraw_mode, on_clicked) — 主渲染入口
 ├── _clear_all() — 调用 Hand.clear_cards() 清理三墩 (框架官方API)
 ├── _add_card(hand, card_data, idx, ...) — 创建 NinKingCard 并加入 Hand
 ├── _update_dun_type_labels() — HandEvaluator3 评估并显示三墩牌型
 ├── _update_score_preview() — ScoreCalculator.calculate() 实时 chips×mult
-├── _update_action_buttons(redraw_mode) — 切换出牌/换牌按钮文本和禁用状态
-└── _reset_labels() — 清空所有标签 (手牌<9时调用)
+└── _update_action_buttons(redraw_mode) — 切换出牌/换牌按钮文本和禁用状态
 
 HandInteraction (extends RefCounted) — 交互状态机
 ├── 管理 swap 选中源 / redraw 选中目标
@@ -448,9 +450,16 @@ HandEvaluator3 (RefCounted)
 ├── class EvalResult (hand_type, base_chips, base_mult, strength)
 └── static: evaluate(cards: Array[PlayingCard]) → EvalResult
 
+AutoArranger (RefCounted)
+└── static: find_best(hand, ninja_chips, ninja_mult, ninja_x_stack, star_chart_levels, rules) → Arrangement
+
 ScoreCalculator (RefCounted)
 ├── class ScoreResult (total_score, chips_sum, mult_sum, x_mult_product, breakdown)
 └── static: calculate(head, mid, tail, evals, ninjas, star_charts, xi_result, seal_effects, gold) → ScoreResult
+
+XiDetector (RefCounted)
+├── class XiResult (triggered, chips_add, mult_x_stack)
+└── static: detect(head, mid, tail, head_eval, mid_eval, tail_eval) → XiResult
 
 DeckManager (RefCounted)
 ├── draw_pile, discard_pile
@@ -461,32 +470,57 @@ DeckManager (RefCounted)
 NinKingGameState (Node, Autoload)
 ├── current_state, barrier_num, seal_idx, gold, hand, owned_ninjas, star_chart_levels
 ├── start_new_run() / continue_run() / has_saved_run()
-├── buy_ninja() / sell_ninja() / buy_item()
+├── auto_arrange() / get_scoring_rules()
 ├── swap_cards() / execute_play() / execute_redraw()
-└── Signals: state_changed, score_updated, plays_changed, seal_started, xi_triggered 等
+├── go_to_shop() / continue_from_shop() / skip_seal()
+└── Signals: state_changed, score_updated, plays_changed, redraws_changed, gold_changed,
+    hand_updated, arrangement_changed, seal_started, xi_triggered
 
 SealController (RefCounted, 静态方法)
-├── prepare_play() / finalize_play() — 计分 prepare/finalize 模式
-├── execute_redraw() / swap_cards()
-├── _complete_seal() — 过关奖励 + 利息
-└── _collect_play_gold() — 经济效果统一结算（福神/金尾/镀金/金封印）
+├── execute_play(gs) / prepare_play(gs) / finalize_play(gs, data) — 出牌流程
+├── swap_cards(gs, idx1, idx2) — 交换手牌
+├── execute_redraw(gs, indices) — 手替え
+├── go_to_shop(gs) / continue_from_shop(gs) / skip_seal(gs, tag_reward)
+├── _complete_seal(gs) — 过关奖励 + 利息
+├── _collect_play_gold(gs, cards, xi) — 经济效果统一结算
+└── _advance_seal(gs) → bool — 封印/結界推进
+
+ArrangeController (RefCounted, 静态方法)
+├── auto_arrange(gs) — 排列计算（不 emit 信号）
+├── get_scoring_rules(gs) → Dictionary — 收集封印ノ主+忍者规则
+├── sum_ninja_effect(gs, key, default) → int
+└── collect_ninja_effect(gs, key, threshold) → Array
 
 NinjaData (RefCounted)
 ├── ALL_NINJAS: Array[Dictionary] — 47 张定义（45 active + 2 deferred）
-├── get_random_ninjas(count) / get_ninja_by_id(id)
-└── process_scaling() — 成长修炼引擎
+├── STARTER_IDS: Array[String] — 初始 10 张
+├── get_by_id(id) → Dictionary
+└── get_starter_ninjas() → Array[Dictionary]
+
+NinjaPool (RefCounted)
+├── get_random_ninjas(count, exclude_ids, rarity_filter) → Array[Dictionary]
+└── get_random_legendary() → Dictionary
+
+NinjaScaling (RefCounted)
+└── process_scaling(ninjas, trigger_type, context) — 修炼忍者成长引擎（待接入）
 
 ConsumableData (RefCounted)
 ├── FUJUTSU_CARDS / STAR_CHART_CARDS / KINJUTSU_CARDS
 └── get_random_fujutsu(count) / get_random_star_charts(count) / get_random_kinjutsu(count)
 
-LevelConfig (RefCounted)
-├── LEVELS: Array[Dictionary]
-└── get_level(n) → Dictionary
+BarrierConfig (RefCounted)
+├── 封印/結界配置表（目标分数、金币奖励、封印ノ主）
+└── get_seal(barrier, seal_idx) / get_seals_per_barrier() / get_total_barriers() / assign_seal_lord()
+
+BarrierTheme (RefCounted)
+└── BARRIER_COLORS: 8 結界冷暖交替配色（紫/青/蓝/翠 冷 → 红/橙/金/粉 暖）
 
 ShopManager (RefCounted)
-├── available_jokers, available_items
-└── generate_stock()
+├── available_ninjas, available_fujutsu, available_star_charts, available_kinjutsu
+├── generate_stock(yasha_shop, exclude_ninja_ids)
+├── get_ninjas_for_display() / get_fujutsu_for_display() / get_star_charts_for_display() / get_kinjutsu_for_display()
+├── buy_ninja(gs, ninja) / sell_ninja(gs, idx) / buy_item(gs, item) / apply_star_chart(gs, hand_type)
+└── is_yasha_shop: bool
 
 SaveManager (RefCounted)
 ├── save_run() / load_run() / delete_run() / has_run_save() / build_run_data()

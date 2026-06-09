@@ -1,12 +1,23 @@
-[gd_scene load_steps=2 format=3 uid="uid://abslpoking001"]
+[gd_scene load_steps=3 format=3 uid="uid://abslpoking001"]
 
 [ext_resource type="Script" path="res://scripts/ninking/ui/ability_slot.gd" id="1_ab"]
+[ext_resource type="Texture2D" uid="uid://b87tpe1i30ctq" path="res://assets/images/cards/slot_bg.png" id="2_bg"]
 
 [node name="AbilitySlot" type="Panel"]
 custom_minimum_size = Vector2(130, 170)
 size_flags_horizontal = 0
 size_flags_vertical = 0
 script = ExtResource("1_ab")
+
+[node name="SlotBg" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
 
 [node name="Label" type="Label" parent="."]
 layout_mode = 1

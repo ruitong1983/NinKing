@@ -13,6 +13,9 @@ var _current_play_data: Dictionary = {}
 # CRT scanline drift (V18-V19)
 var _crt_offset: float = 0.0
 
+# Double-click guard for scene transitions (V13)
+var _transition_guard: bool = false
+
 
 func _ready() -> void:
 	ui.start_button.pressed.connect(_on_start_pressed)
@@ -163,6 +166,9 @@ func _on_redraw_pressed() -> void:
 
 
 func _on_go_shop_pressed() -> void:
+	if _transition_guard:
+		return
+	_transition_guard = true
 	SealController.go_to_shop(NinKingGameState)
 	await GlobalTweens.fade_out(ui, 0.3).finished
 	get_tree().change_scene_to_file("res://scenes/ninking/shop.tscn")
@@ -214,7 +220,7 @@ func _run_scoring_animation() -> void:
 
 	# ── Phase 3: Xi effects ──
 	if xi_result and xi_result.has_any():
-		GlobalTweens.burst_particles(Vector2(960, 540), "shuriken")
+		GlobalTweens.burst_particles(get_viewport_rect().size * 0.5, "shuriken")
 		GlobalTweens.do_hit_stop(0.06, 0.05)
 		GlobalTweens.screen_shake(0.12, 0.08)
 		var xi_names: Array[String] = []
@@ -225,7 +231,7 @@ func _run_scoring_animation() -> void:
 
 	# ── Phase 4: Outcome + finalize ──
 	if is_pass:
-		GlobalTweens.burst_particles(Vector2(960, 540), "sakura")
+		GlobalTweens.burst_particles(get_viewport_rect().size * 0.5, "sakura")
 		GlobalTweens.do_hit_stop(0.08, 0.05)
 		GlobalTweens.punch_in(ui.score_value_label, 0.4, 1.5)
 		await get_tree().create_timer(0.6).timeout

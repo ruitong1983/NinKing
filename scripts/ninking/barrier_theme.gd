@@ -64,11 +64,11 @@ const BARRIER_COLORS: Dictionary = {
 
 
 ## Get full color set for a barrier number (1-8).
-## Returns Dictionary with bg/panel/accent/name, or the default (結界6 金剛) for invalid numbers.
+## Returns Dictionary with bg/panel/accent/name, or the default (結界1 紫苑) for invalid numbers.
 static func get_colors(barrier_num: int) -> Dictionary:
 	if BARRIER_COLORS.has(barrier_num):
 		return BARRIER_COLORS[barrier_num]
-	return BARRIER_COLORS[6]  # fallback: gold
+	return BARRIER_COLORS[1]  # fallback: purple (紫苑)
 
 
 static func get_accent(barrier_num: int) -> Color:

@@ -105,11 +105,11 @@ func _ready() -> void:
 	# ── Three-Dun title progressive outline (V20) ──
 	# 影 (head): subtle shadow → 瞬 (middle): standard → 滅 (tail): bold glow
 	head_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.3))
-	head_label.add_theme_font_size_override("font_outline_size", 1)
+	head_label.add_theme_constant_override("font_outline_size", 1)
 	middle_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.6))
-	middle_label.add_theme_font_size_override("font_outline_size", 2)
+	middle_label.add_theme_constant_override("font_outline_size", 2)
 	tail_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1.0))
-	tail_label.add_theme_font_size_override("font_outline_size", 3)
+	tail_label.add_theme_constant_override("font_outline_size", 3)
 
 
 # ══════════════════════════════════════════

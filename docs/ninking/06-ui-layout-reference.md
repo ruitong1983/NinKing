@@ -188,13 +188,14 @@ NinKingMain (Control) 1920×1080
 
 **刷新方法：** `ui_manager.refresh_abilities(owned_abilities, max_slots)`
 
-#### 3.3.2 状态面板 `StatusPanel`
+#### 3.3.2 状态面板 `LeftPanel`
 
 | 属性 | 值 |
 |------|-----|
-| 节点路径 | `UIManager/GameLayout/MainArea/StatusPanel` |
+| 节点路径 | `UIManager/GameLayout/LeftPanel` |
+| 访问名 | `%LeftPanel` (V19 新增) |
 | 宽度 | 380px |
-| 背景色 | `#0F2822` 92% 不透明 |
+| 背景色 | 动态結界配色 `BarrierTheme.get_colors(n).panel` |
 | 用途 | 显示全部计分与状态数据 |
 
 **子区域：**
@@ -415,21 +416,36 @@ NinKingGameState (autoload)
 
 ## 6. 配色速查
 
-| 名称 | 色值 | 用途 |
-|------|------|------|
-| `COLOR_TABLE` | `#1A3A32` | 桌布底色 |
-| `COLOR_DARK_BG` | `#0F2822` (92%) | 左侧面板底色 |
-| `COLOR_GOLD` | `#D4A843` | 金色文字/筹码/进度填充 |
-| `COLOR_GOLD_LIGHT` | `#F0D060` | 金币文字 |
-| `COLOR_RED` | `#E04040` | 倍率数字/出牌按钮 |
-| `COLOR_BLUE` | `#4080D0` | 换牌按钮 |
-| `COLOR_WHITE` | `#F0EDE4` | 通用白色文字 |
-| `COLOR_DIM` | `#7A7A6A` | 次要文字 |
-| `COLOR_PANEL_RED` | `#4A2020` | 比赛信息面板 |
-| `COLOR_PANEL_BROWN` | `#3D2B1A` | 关卡信息面板 |
-| `COLOR_CARD` | `#F8F4E8` | 卡牌白底 |
-| `COLOR_CARD_BORDER` | `#3A3A3A` | 卡牌边框 |
-| `COLOR_OVERLAY` | `#000000` (70%/80%) | 弹窗遮罩 |
+### 动态配色体系 (V16-V19)
+
+> **NinKing 采用 8 結界冷暖交替动态配色。** 配色由 `BarrierTheme` (`scripts/ninking/barrier_theme.gd`) 集中管理，
+> `game_manager._on_seal_started()` 自动切换 GameBg / PanelBg / ProgressBar / 按钮字体色。
+> **不推荐硬编码色值**——请通过 `BarrierTheme.get_colors(barrier_num)` 获取当前結界对应配色。
+
+### 8 結界配色表
+
+| 結界 | 色调 | 名称 | bg | accent |
+|------|------|------|-----|--------|
+| 壱 | 冷·紫 | 紫苑 | `(0.08,0.04,0.16)` | `(0.75,0.45,0.95)` |
+| 弐 | 暖·红 | 紅蓮 | `(0.16,0.04,0.04)` | `(0.95,0.35,0.35)` |
+| 参 | 冷·青 | 青龍 | `(0.04,0.12,0.16)` | `(0.30,0.85,0.90)` |
+| 肆 | 暖·橙 | 橙火 | `(0.16,0.08,0.04)` | `(0.95,0.55,0.20)` |
+| 伍 | 冷·蓝 | 藍鋼 | `(0.04,0.06,0.18)` | `(0.35,0.55,0.95)` |
+| 陸 | 暖·金 | 金剛 | `(0.14,0.10,0.04)` | `(0.95,0.75,0.25)` |
+| 漆 | 冷·翠 | 翠嵐 | `(0.04,0.15,0.12)` | `(0.25,0.88,0.70)` |
+| 捌 | 暖·粉 | 桜吹雪 | `(0.16,0.06,0.12)` | `(0.95,0.45,0.65)` |
+
+### 像素风设计原则 (V16)
+
+| 原则 | 规范 |
+|------|------|
+| 圆角 | 全部 `0px` — 像素硬角 |
+| 边框 | 全局 `2px` 硬边，金色强调 |
+| 按钮 | 三态瞬时切换：normal(暗底+金边) → hover(亮底+金边) → pressed(深底+内容下移2px) |
+| 面板 | 2px 外边框 + 1px 内边框 (双层硬边) |
+| 三墩区分 | 影(1px outline/alpha 0.3) → 瞬(2px/alpha 0.6) → 滅(3px/alpha 1.0) 边框递进 |
+| CRT | 扫描线 + `time_offset` 微下移动效 (约35秒一循环) |
+| 字体 | Press Start 2P (EN) + 凤凰点阵体 12px/16px (CJK) |
 
 ---
 
@@ -440,14 +456,16 @@ NinKingGameState (autoload)
 | `scenes/ninking/ninking_launcher.tscn` | 启动场景（自动跳转） |
 | `scenes/ninking/ninking_main.tscn` | 主UI场景（本文档所述） |
 | `scripts/ninking/ui/main_menu.gd` | 启动器脚本 |
+| `scripts/ninking/card_back_generator.gd` | 卡牌背面/槽位背景程序绘制 |
+| `scripts/ninking/ui/ninking_card.gd` | 忍者卡牌显示 (Card Framework 扩展) |
 | `scripts/ninking/ui/game_manager.gd` | 游戏流程控制 |
 | `scripts/ninking/ui/ui_manager.gd` | UI显示管理 |
 | `scripts/ninking/game_state.gd` | 游戏状态 autoload |
 | `scripts/ninking/card_data.gd` | 卡牌数据定义 |
 | `scripts/ninking/hand_evaluator.gd` | 牌型评估 |
 | `scripts/ninking/score_calculator.gd` | 计分计算 |
-| `scripts/ninking/joker_data.gd` | 能力牌配置（待重命名） |
-| `scripts/ninking/level_config.gd` | 关卡配置 |
+| `scripts/ninking/barrier_config.gd` | 关卡/結界配置 |
+| `scripts/ninking/barrier_theme.gd` | 8 結界冷暖交替配色表 |
 | `scripts/ninking/shop_manager.gd` | 商店管理 |
 | `docs/ninking/01-game-design.md` | 游戏设计文档 |
 | `docs/ninking/03-technical-design.md` | 技术设计文档 |

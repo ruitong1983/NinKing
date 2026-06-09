@@ -202,3 +202,97 @@ static func _draw_deco_line(img: Image, w: int, h: int, color: Color) -> void:
 				img.set_pixel(dl_x + d, dl_y, color)
 			d += 1
 		dl_x += 4
+
+
+# ═══ Slot background generator (V6) ═══
+
+## Generate NinKing ability slot background — 100×140 pixel art ninja frame.
+static func generate_slot_bg(save_path: String = "res://assets/images/cards/slot_bg.png") -> int:
+	const W: int = 100
+	const H: int = 140
+	var img: Image = Image.create(W, H, false, Image.FORMAT_RGBA8)
+
+	# ── Colors ──
+	const BG: Color = Color(0.09, 0.09, 0.16, 1.0)
+	const GOLD_BORDER: Color = Color(0.753, 0.627, 0.188, 1.0)
+	const BRONZE: Color = Color(0.545, 0.451, 0.333, 1.0)
+	const RECESS: Color = Color(0.06, 0.06, 0.12, 1.0)
+	const HATCH: Color = Color(0.12, 0.12, 0.20, 1.0)
+	const DIM_GOLD: Color = Color(0.50, 0.42, 0.22, 1.0)
+
+	img.fill(BG)
+
+	# ── Diagonal crosshatch (more sparse than card back — every 10px) ──
+	var y: int = 10
+	while y < H - 10:
+		var x: int = 10
+		while x < W - 10:
+			var d: int = 0
+			while d < 2:
+				var x1: int = x + d
+				var y1: int = y + d
+				if x1 < W - 10 and y1 < H - 10:
+					img.set_pixel(x1, y1, HATCH)
+				var x2: int = x + 9 - d
+				var y2: int = y + d
+				if x2 >= 10 and y2 < H - 10:
+					img.set_pixel(x2, y2, HATCH)
+				d += 1
+			x += 10
+		y += 10
+
+	# ── 2px outer border ──
+	_draw_outer_border(img, W, H, GOLD_BORDER)
+
+	# ── Inner recessed border (1px, inset 4px) ──
+	_draw_inner_border(img, W, H, 4, BRONZE)
+
+	# ── Recessed center area (slightly darker, inset 6px) ──
+	var inset: int = 6
+	var ry: int = inset + 1
+	while ry < H - inset - 1:
+		var rx: int = inset + 1
+		while rx < W - inset - 1:
+			img.set_pixel(rx, ry, RECESS)
+			rx += 1
+		ry += 1
+
+	# ── 4 corner diamonds (smaller than card back) ──
+	const DOFF: int = 10
+	_draw_diamond(img, DOFF, DOFF, 3, BRONZE)
+	_draw_diamond(img, W - 1 - DOFF, DOFF, 3, BRONZE)
+	_draw_diamond(img, DOFF, H - 1 - DOFF, 3, BRONZE)
+	_draw_diamond(img, W - 1 - DOFF, H - 1 - DOFF, 3, BRONZE)
+
+	# ── Center ninja star (small 4-point, subtle) ──
+	const CX: int = 50
+	const CY: int = 70
+	const SR: int = 16
+	const AW: int = 2
+	_draw_shuriken(img, W, H, CX, CY, SR, AW, DIM_GOLD, RECESS, DIM_GOLD)
+
+	# ── Top accent line ──
+	var ty: int = inset + 3
+	var tx: int = inset + 6
+	while tx < W - inset - 6:
+		var dl: int = 0
+		while dl < 2:
+			if tx + dl < W - inset - 6:
+				img.set_pixel(tx + dl, ty, BRONZE)
+			dl += 1
+		tx += 6
+
+	# ── Bottom accent line ──
+	var by: int = H - inset - 4
+	var bx: int = inset + 6
+	while bx < W - inset - 6:
+		var dl2: int = 0
+		while dl2 < 2:
+			if bx + dl2 < W - inset - 6:
+				img.set_pixel(bx + dl2, by, BRONZE)
+			dl2 += 1
+		bx += 6
+
+	# ── Save ──
+	var err: int = img.save_png(save_path)
+	return err

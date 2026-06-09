@@ -51,10 +51,10 @@
 |---|------|------|--------|------|
 | V1 | 卡牌背面 (Card Back) | 140×196 像素风 PNG，程序绘制：`card_back_generator.gd` → `card_back.png`（手里剑十字星+交叉纹底+金色硬边框+内边框+角钻），已集成到 `ninking_card.gd` | **P0** | ✅ |
 | V2 | 像素中文字体 | Press Start 2P (EN) + 凤凰点阵体 12px/16px (CJK) 三套已导入并配置回退链 | **P0** | ✅ |
-| V3 | pixel_theme.tres | 全局 Theme 资源（字体/颜色/按钮样式） → **已细化至 V16** | **P0** | ⬜ |
+| V3 | pixel_theme.tres | 全局 Theme 资源（字体/颜色/按钮样式） → **已由 V16 完成** | **P0** | ✅ |
 | V4 | 按钮素材（普通/按下） | 可拉伸像素风边框 PNG | P1 | ⬜ |
 | V5 | 商店面板/顶部信息栏背景 | 半透明深色背景 | P1 | ⬜ |
-| V6 | 忍者牌槽位背景 | 100×140 像素风边框 | **P0** | ⬜ |
+| V6 | 忍者牌槽位背景 | 100×140 像素风边框，`CardBackGenerator.generate_slot_bg()` 程序绘制：深蓝底+交叉纹+金边框+内凹区域+中央小手里剑+角钻+上下装饰线，已接入 `ability_slot.tscn` TextureRect | **P0** | ✅ |
 | V7 | CRT 扫描线效果接入 | crt_filter.gd 已复用 → **已细化至 V18**（shader time_offset 扩展 + 微下移动效） | P1 | ⬜ |
 | V8 | VFX 接入（卡牌翻转/粒子/闪烁/震动） | Tween/FX 框架已有，接入各流程 | P2 | ⬜ |
 | V9 | **ParticlePool 扩展** — shuriken + sakura 粒子预设 | 程序绘制 8×8 纹理，shuriken=铁灰十字星(4尖)，sakura=淡粉圆点+径向渐变，写入 `scripts/tween/particle_pool.gd`，后续全局复用 | **P0** | ✅ |
@@ -63,7 +63,7 @@
 | V18 | **CRT shader time_offset 扩展** | `crt_filter.gdshader` 新增 `uniform float time_offset`，sin() 中加 offset 实现扫描线微下移；`CRTFilter` 新增 `set_offset()`；`GlobalTweens` 新增委托；`game_manager._process` 每帧 +0.003 驱动。替代 V7 的静态 CRT 接入 | P1 | ✅ |
 | V19 | **game_manager.gd 結界主题应用** | `_on_seal_started()` → `BarrierTheme.get_colors(barrier_num)` 切换 GameBg/PanelBg/ProgressBar 配色；`_process` 驱动 CRT time_offset；Boss 揭示改 visible 硬切；PlayBtn/RedrawBtn/DeckBtn 字体色跟随結界强调色。场景加 LeftPanel+PanelBg unique_name + ui_manager 加 left_panel/panel_bg/deck_btn 引用 | P1 | ✅ |
 | V20 | **ui_manager.gd 三墩标题区分** | 影/瞬/滅 Label 用 `theme_override_colors/font_outline_color` + `font_outline_size` 递进：影(alpha 0.3→1px暗)、瞬(alpha 0.6→2px标准)、滅(alpha 1.0→3px亮+glow)。场景加 HeadLabel/MiddleLabel/TailLabel unique_name，纯 Theme override | P1 | ✅ |
-| V21 | **06-ui-layout-reference.md 配色表更新** | §6 旧单套配色（`#1A3A32` 等）→ 动态 8 結界配色引用 `BarrierTheme.BARRIER_COLORS`；场景结构名与实际一致（StatusPanel→LeftPanel, PlayArea→CenterColumn）；新增像素风设计原则条目 | P2 | ⬜ |
+| V21 | **06-ui-layout-reference.md 配色表更新** | §6 旧单套配色（`#1A3A32` 等）→ 动态 8 結界配色引用 `BarrierTheme.BARRIER_COLORS`；场景结构名与实际一致（StatusPanel→LeftPanel, PlayArea→CenterColumn）；新增像素风设计原则条目 | P2 | ✅ |
 | V10 | **发牌动画** — 卷轴展开 | `TweenFX.stagger_spread()` + `GlobalTweens.stagger_spread()` 委托。`particle_pool.gd` → `tween_fx.gd` → `global_tweens.gd` | P1 | ✅ |
 | V11 | **换牌动画** — 烟遁消失+瞬身出现 | `ui_manager.gd` `_run_redraw_with_vfx()`: 弃牌 `fade_out` + `burst_particles("dust")` → await 0.18s → 新牌 pop_in | P1 | ✅ |
 | V12 | **计分动画主题化** — 粒子替换 | `game_manager.gd` `_run_scoring_animation()`: sparkle→shuriken、confetti→sakura | P2 | ✅ |
@@ -82,7 +82,7 @@
 | C3 | `game_state.gd` BlindController 静态方法类型检查冲突 | `scripts/ninking/game_state.gd` | P2 | ✅ |
 | C4 | `ui_manager.gd` class_name 与全局脚本类冲突（Godot 编辑器已知现象，不影响运行） | `scripts/ninking/ui/ui_manager.gd` | P2 | ⚠️ |
 | C5 | `blind_controller.gd` class_name 与全局脚本类冲突（同上） | `scripts/ninking/blind_controller.gd` | P2 | ⚠️ |
-| C6 | `03-technical-design.md` launcher 场景树描述与实现不一致（文档:Control+VBoxContainer居中 → 方案:Node+CanvasLayer左下竖排） | `docs/ninking/03-technical-design.md` | P1 | ⬜ |
+| C6 | `03-technical-design.md` 全文档同步至实现 — 场景树列表(5→11)、shop.tscn 重写、节点命名(BarrierLabel/RedrawBtn)、目录结构(10+7→19+13)、类图(新增 ArrangeController/NinjaPool/NinjaScaling/BarrierTheme、修正 NinjaData/ShopManager/BarrierConfig) | `docs/ninking/03-technical-design.md` | P1 | ✅ |
 | C7 | 确认清理 `ninking_main.tscn` 中旧 MainMenu 视图节点（UIManager/MainMenu 含 LaunchBg/TitleLabel/SubtitleLabel/DeckLabel/StartButton/VersionLabel）。⏸ 暂不删除：被 game_manager.gd 引用，需先评估影响面 | `scenes/ninking/ninking_main.tscn` | P2 | 🔒 |
 
 ---
