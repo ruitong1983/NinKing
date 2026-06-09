@@ -10,8 +10,8 @@ config_version=5
 
 [application]
 
-config/name="Poking"
-run/main_scene="res://scenes/poking/poking_main.tscn"
+config/name="NinKing"
+run/main_scene="res://scenes/ninking/ninking_launcher.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://assets/images/ui/icon.png"
 
@@ -28,7 +28,7 @@ GlobalTweens="*res://scripts/tween/global_tweens.gd"
 MCPGameInspector="*res://addons/godot_mcp/mcp_game_inspector_service.gd"
 TweenFX="*res://scripts/tween/tween_fx.gd"
 RangeHighlighter="*res://scripts/system/range_highlighter.gd"
-PokingGameState="*res://scripts/poking/game_state.gd"
+NinKingGameState="*res://scripts/ninking/game_state.gd"
 
 [display]
 

@@ -296,6 +296,46 @@ static func stagger_slide_in(nodes: Array, stagger: float = 0.12, dur: float = 0
 		tw.tween_property(node, "position:x", node.position.x + slide_offset, dur)
 
 
+## 卡牌从中心向弧位散开：卷轴展开效果。
+## 单张居中，多张沿圆弧均匀分布（Y 轴压缩模拟透视）。
+## 每张牌从中心 stagger 延迟后并行 scale+alpha 弹入归位。
+## 注意：此函数不参与 auto_kill（操作数组，按项索引独立创建补间）
+static func stagger_spread(nodes: Array, center_pos: Vector2, radius: float = 400.0, spread_angle_deg: float = 40.0, stagger: float = 0.06, dur: float = 0.3) -> void:
+	var n := nodes.size()
+	if n == 0:
+		return
+
+	# 计算各牌的目标弧位
+	var target_positions: Array[Vector2] = []
+	if n == 1:
+		target_positions.append(center_pos)
+	else:
+		var angle_span := deg_to_rad(spread_angle_deg)
+		var rad_half := radius * 0.5
+		for i in range(n):
+			var t := float(i) / float(n - 1)  # 0..1
+			var angle := -angle_span * 0.5 + angle_span * t
+			var x := center_pos.x + sin(angle) * radius
+			var y := center_pos.y + cos(angle) * rad_half  # Y 压缩模拟透视
+			target_positions.append(Vector2(x, y))
+
+	# 全部归位到中心 → stagger 弹出到目标位
+	for i in range(n):
+		var node: CanvasItem = nodes[i]
+		if not is_instance_valid(node):
+			continue
+		var target := target_positions[i]
+		node.modulate.a = 0.0
+		node.scale = Vector2(0.5, 0.5)
+		node.position = center_pos
+		var tw := node.create_tween()
+		tw.tween_interval(i * stagger)
+		tw.set_parallel(true)
+		tw.tween_property(node, "position", target, dur).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+		tw.tween_property(node, "scale", Vector2.ONE, dur).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+		tw.tween_property(node, "modulate:a", 1.0, dur * 0.6).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SINE)
+
+
 # ─── 闪色 ───
 
 static func color_flash(node: CanvasItem, color: Color = Color.WHITE, duration: float = 0.1, auto_kill: bool = true) -> Tween:

@@ -12,6 +12,7 @@ uniform float aberration_amount : hint_range(0.0, 3.0) = 0.5;
 uniform float vignette_amount : hint_range(0.0, 1.0) = 0.3;
 uniform float warp_amount : hint_range(0.0, 0.1) = 0.02;
 uniform float brightness : hint_range(0.5, 2.0) = 1.1;
+uniform float time_offset : hint_range(0.0, 100.0) = 0.0;
 
 void fragment() {
 	vec2 uv = SCREEN_UV;
@@ -22,7 +23,7 @@ void fragment() {
 
 	// ── 扫描线 ──
 	vec2 pixel_size = 1.0 / vec2(textureSize(SCREEN_TEXTURE, 0));
-	float scanline = sin(uv.y / pixel_size.y * 3.14159) * 0.5 + 0.5;
+	float scanline = sin((uv.y / pixel_size.y + time_offset) * 3.14159) * 0.5 + 0.5;
 	scanline = mix(1.0, scanline, scanline_intensity);
 
 	// ── 色差（RGB 偏移）──

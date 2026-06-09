@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://cbtnpoking001"]
+
+[ext_resource type="Script" path="res://scripts/ninking/ui/card_button.gd" id="1_cardbtn"]
+
+[node name="CardButton" type="Button"]
+custom_minimum_size = Vector2(120, 160)
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 14
+script = ExtResource("1_cardbtn")

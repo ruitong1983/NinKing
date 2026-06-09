@@ -3,8 +3,22 @@
     "godot-mcp-pro": {
       "command": "node",
       "args": [
-        "E:/Code/Godot_v4.6.2-stable_win64/PVZ_AutoRunChess/server/build/index.js",
+        "C:/Users/candy/Downloads/125037_godotmcpprov1.14.1/server/build/index.js",
         "--minimal"
+      ]
+    },
+    "figma": {
+      "command": "npx",
+      "args": [
+        "figma-developer-mcp",
+        "--figma-api-key",
+        "figd_P24gfIo8vLAGfQ66x7k5jgfQcuaLbWLYtM5LM_fp"
+      ]
+    },
+    "figma-pilot": {
+      "command": "npx",
+      "args": [
+        "@youware-labs/figma-pilot-mcp"
       ]
     }
   }

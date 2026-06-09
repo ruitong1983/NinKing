@@ -1,0 +1,15 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://c1ty4fx8ctelk" path="res://scripts/ninking/ui/main_menu.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://b2ju5xh7q1y1v" path="res://assets/images/background/launch_bg.png" id="2_bg"]
+
+[node name="Launcher" type="Node"]
+script = ExtResource("1_script")
+
+[node name="LaunchBg" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 5

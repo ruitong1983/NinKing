@@ -1,0 +1,96 @@
+[gd_scene load_steps=2 format=3 uid="uid://dshopitemcard01"]
+
+[ext_resource type="Script" path="res://scripts/ninking/ui/shop_item_card.gd" id="1_card"]
+
+[node name="ItemCard" type="Panel" node_paths=PackedStringArray("art_icon", "name_label", "effect_label", "desc_label", "price_label", "buy_button")]
+custom_minimum_size = Vector2(260, 340)
+offset_right = 260.0
+offset_bottom = 340.0
+mouse_filter = 2
+script = ExtResource("1_card")
+
+[node name="ArtArea" type="ColorRect" parent="."]
+custom_minimum_size = Vector2(260, 160)
+offset_right = 260.0
+offset_bottom = 160.0
+color = Color(0.106, 0.137, 0.18, 1)
+
+[node name="ArtFrame" type="ColorRect" parent="ArtArea"]
+offset_left = 14.0
+offset_top = 14.0
+offset_right = 246.0
+offset_bottom = 146.0
+color = Color(0.129, 0.169, 0.22, 1)
+
+[node name="ArtIcon" type="Label" parent="."]
+offset_left = 85.0
+offset_top = 45.0
+offset_right = 175.0
+offset_bottom = 115.0
+text = "?"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NamePlate" type="ColorRect" parent="."]
+offset_top = 160.0
+offset_right = 260.0
+offset_bottom = 196.0
+color = Color(0.071, 0.102, 0.09, 1)
+
+[node name="NameLabel" type="Label" parent="."]
+offset_left = 16.0
+offset_top = 166.0
+offset_right = 244.0
+offset_bottom = 190.0
+text = "道具名称"
+horizontal_alignment = 0
+vertical_alignment = 1
+
+[node name="EffectLabel" type="Label" parent="."]
+offset_left = 16.0
+offset_top = 206.0
+offset_right = 244.0
+offset_bottom = 224.0
+text = "效果"
+horizontal_alignment = 0
+vertical_alignment = 1
+
+[node name="DescLabel" type="Label" parent="."]
+offset_left = 16.0
+offset_top = 226.0
+offset_right = 244.0
+offset_bottom = 242.0
+text = "描述"
+horizontal_alignment = 0
+vertical_alignment = 1
+
+[node name="PriceBadge" type="Panel" parent="."]
+offset_left = 166.0
+offset_top = 290.0
+offset_right = 246.0
+offset_bottom = 324.0
+
+[node name="CoinIcon" type="Label" parent="PriceBadge"]
+offset_left = 8.0
+offset_top = 2.0
+offset_right = 24.0
+offset_bottom = 32.0
+text = "💰"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PriceLabel" type="Label" parent="PriceBadge"]
+offset_left = 26.0
+offset_top = 2.0
+offset_right = 72.0
+offset_bottom = 32.0
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BuyButton" type="Button" parent="."]
+offset_left = 90.0
+offset_top = 290.0
+offset_right = 170.0
+offset_bottom = 322.0
+text = "购买"

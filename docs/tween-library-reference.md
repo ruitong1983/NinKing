@@ -1,6 +1,6 @@
 # Tween & VFX 库参考手册
 
-> 最后更新：2026-06-06 | 源码：`scripts/tween/` + `scripts/system/crt_filter.gd`
+> 最后更新：2026-06-09 | 源码：`scripts/tween/` + `scripts/system/crt_filter.gd`
 >
 > **铁律：实现任何 Tween/VFX 前，必须先查本文档。确认已有 API 是否覆盖需求，避免手写 `create_tween()`。**
 >
@@ -58,6 +58,7 @@ GlobalTweens (autoload, 胶水层)
 | 卡牌倾斜追踪鼠标 | `GlobalTweens.enable_card_tilt(node)` | 每帧跟随鼠标旋转 |
 | 取消卡牌倾斜 | `GlobalTweens.disable_card_tilt(node)` | Tween 回正 |
 | 手牌扇形摊开 | `GlobalTweens.set_hand_spread(cards, center)` | 弧形布局+微倾斜 |
+| 卡牌中心散开（卷轴展开） | `GlobalTweens.stagger_spread(nodes, center, 400, 40, 0.06, 0.3)` | 弧位计算→归位中心→stagger 弹入。忍者主题发牌 |
 | 数字滚动（计数） | `GlobalTweens.count_up(label, to_val, 0.5)` | 线性递增 |
 | 数字滚动（金币） | `GlobalTweens.count_up_gold(label, amount, 0.6)` | 缓出+金色闪烁 |
 
@@ -113,6 +114,9 @@ GlobalTweens.card_unhover(node: CanvasItem, original_scale: Vector2 = Vector2.ON
 GlobalTweens.enable_card_tilt(node: CanvasItem) -> void     # 开启 per-frame 鼠标追踪
 GlobalTweens.disable_card_tilt(node: CanvasItem) -> void    # Tween 回正 + 停止追踪
 GlobalTweens.set_hand_spread(cards: Array, center_pos: Vector2 = Vector2.ZERO) -> void  # 扇形摊开
+
+# 中心散开 — 卷轴展开（委托给 TweenFX）
+GlobalTweens.stagger_spread(nodes: Array, center_pos: Vector2, radius: float = 400.0, spread_angle_deg: float = 40.0, stagger: float = 0.06, dur: float = 0.3) -> void  # 弧位计算→归位中心→stagger 弹入
 ```
 
 **CardTilt 可调参数**（在 `card_tilt.gd` 中修改）：
@@ -170,6 +174,8 @@ GlobalTweens.burst_particles(position: Vector2, preset: String = "sparkle") -> v
 | `"sparkle"` | 10 | 0.4s | 金色 (1, 0.843, 0) | 90° | 40–100 |
 | `"dust"` | 6 | 0.3s | 灰色 (0.7, 0.7, 0.7) | 30° | 20–60 |
 | `"confetti"` | 18 | 0.8s | 金色 GOLD | 120° | 60–150 |
+| `"shuriken"` | 8 | 0.35s | 铁灰 (0.35,0.35,0.4) | 360° | 60–130 |
+| `"sakura"` | 12 | 0.7s | 淡粉 (0.95,0.65,0.75) | 150° | 30–90 |
 
 **自定义粒子**（直接使用 ParticlePool）：
 ```gdscript
@@ -284,6 +290,16 @@ TweenFX.slide_out(node: Control, to_dir: SlideDir = SlideDir.DOWN, duration: flo
 `TweenFX.stagger_slide_in(nodes: Array, stagger: float = 0.12, dur: float = 0.3, slide_offset: float = 30.0) -> void`
 
 列表逐项错峰入场。每项设 alpha=0、左移 `slide_offset` px，然后间隔 `i * stagger` 秒后并行淡入+右滑归位。fire-and-forget，不返回 Tween。
+
+`TweenFX.stagger_spread(nodes: Array, center_pos: Vector2, radius: float = 400.0, spread_angle_deg: float = 40.0, stagger: float = 0.06, dur: float = 0.3) -> void`
+
+卡牌从中心向弧位散开（卷轴展开效果）。单张居中，多张沿圆弧均匀分布（Y 轴压缩模拟透视）。全部归位到中心 → stagger 延迟后 BACK EASE_OUT 弹入目标弧位（position + scale + alpha 并行）。fire-and-forget，不返回 Tween。不参与 auto_kill。
+
+**可调参数：**
+- `radius` — 弧位半径，默认 400
+- `spread_angle_deg` — 总展开角（度），默认 40°
+- `stagger` — 每张间隔延迟，默认 0.06s
+- `dur` — 位移动画时长，默认 0.3s
 
 ### 2.6 闪色
 

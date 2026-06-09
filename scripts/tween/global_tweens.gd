@@ -82,6 +82,9 @@ func toast(node: CanvasItem, hold_duration: float = 1.5, fade_in_dur: float = 0.
 func stagger_slide_in(nodes: Array, stagger: float = 0.12, dur: float = 0.3, slide_offset: float = 30.0) -> void:
 	FX.stagger_slide_in(nodes, stagger, dur, slide_offset)
 
+func stagger_spread(nodes: Array, center_pos: Vector2, radius: float = 400.0, spread_angle_deg: float = 40.0, stagger: float = 0.06, dur: float = 0.3) -> void:
+	FX.stagger_spread(nodes, center_pos, radius, spread_angle_deg, stagger, dur)
+
 func shake_node(node: Control, intensity: float = 4.0, duration: float = 0.25, auto_kill: bool = true) -> Tween:
 	return FX.shake_node(node, intensity, duration, auto_kill)
 

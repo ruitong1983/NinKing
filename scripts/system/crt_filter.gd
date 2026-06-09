@@ -87,3 +87,6 @@ func set_warp(v: float) -> void:
 
 func set_brightness(v: float) -> void:
 	_material.set_shader_parameter("brightness", v)
+
+func set_offset(v: float) -> void:
+	_material.set_shader_parameter("time_offset", v)
