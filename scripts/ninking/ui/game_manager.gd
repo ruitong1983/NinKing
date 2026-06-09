@@ -37,6 +37,14 @@ func _ready() -> void:
 	_on_state_changed(NinKingGameState.current_state)
 	ui.restore_ui_state()
 
+	# Replay lost seal_started signal — emitted in launcher before this scene loaded
+	_on_seal_started(
+		NinKingGameState.barrier_num,
+		NinKingGameState.seal_idx,
+		float(NinKingGameState.target_score),
+		NinKingGameState.current_seal_lord_name
+	)
+
 
 func _process(_delta: float) -> void:
 	# CRT scanline slow downward drift (one full cycle ≈ 35 sec @ 60 fps)
