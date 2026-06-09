@@ -35,3 +35,15 @@ android/
 
 # Temp image files
 temp_*.png
+
+# Debug screenshots & temp files
+debug_game.png
+deck_panel_test.png
+menu_screenshot.png
+menu_screenshot2.png
+screenshot_debug.png
+slot_bg.png
+slot_test.png
+*.lock.json
+skills-lock.json
+.agents/
