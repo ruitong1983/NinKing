@@ -126,6 +126,7 @@ static func calculate(
 		if effect.get("mult_per_gold", 0) > 0:
 			var step: int = effect.get("mult_gold_step", 5)
 			var cap: int = effect.get("mult_gold_cap", 10)
+			@warning_ignore("integer_division")
 			var bonus: int = mini(gold / step, cap) * effect["mult_per_gold"]
 			if bonus > 0:
 				ninja_mult += bonus
@@ -135,6 +136,7 @@ static func calculate(
 		if effect.get("x_per_gold", 1) > 1:
 			var step_x: int = effect.get("x_gold_step", 15)
 			var cap_x: int = effect.get("x_gold_cap", 3)
+			@warning_ignore("integer_division")
 			var count_x: int = mini(gold / step_x, cap_x)
 			for _i: int in range(count_x):
 				ninja_x_stack.append(effect["x_per_gold"])

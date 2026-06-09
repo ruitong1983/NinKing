@@ -23,6 +23,7 @@ func _init() -> void:
 	_color_rect = ColorRect.new()
 	_color_rect.name = "CRTColorRect"
 	_color_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_color_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	_material = ShaderMaterial.new()
 	_material.shader = preload("res://resources/shaders/crt_filter.gdshader")
@@ -90,3 +91,6 @@ func set_brightness(v: float) -> void:
 
 func set_offset(v: float) -> void:
 	_material.set_shader_parameter("time_offset", v)
+
+func set_breath(v: float) -> void:
+	_material.set_shader_parameter("breath", v)

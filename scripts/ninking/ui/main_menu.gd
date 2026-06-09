@@ -1,5 +1,6 @@
-extends Node
+extends Control
 ## NinKing 主菜单 — 闪屏 → 按钮 → 牌组选择 / 继续确认面板
+## Buttons defined in scene file; panels built programmatically.
 
 const DECK_NAMES: Dictionary = {
 	"standard": "标准牌组",
@@ -7,7 +8,6 @@ const DECK_NAMES: Dictionary = {
 	"sun": "赤阳牌组",
 }
 
-## 当前仅标准牌组可玩；night/sun 在牌组系统实现前置灰
 const PLAYABLE_DECKS: Array[String] = ["standard"]
 
 const SPLASH_DURATION: float = 0.8
@@ -15,30 +15,27 @@ const BUTTON_STAGGER: float = 0.08
 const BUTTON_SLIDE_DUR: float = 0.4
 const BUTTON_SLIDE_OFFSET: float = 80.0
 
-# Menu button layout (32px Chinese font)
-const BTN_WIDTH: int = 300
-const BTN_HEIGHT: int = 72
-const BTN_SPACING: int = 24
-const BTN_START_Y: float = 680.0
-const BTN_X: float = 80.0
-
-const FONT_TITLE: int = 32
 const FONT_LABEL: int = 24
 const FONT_INFO: int = 20
 
-var _btn_start: Button
-var _btn_continue: Button
-var _btn_settings: Button
-var _btn_quit: Button
+@onready var _btn_start: Button = %StartBtn
+@onready var _btn_continue: Button = %ContinueBtn
+@onready var _btn_settings: Button = %SettingsBtn
+@onready var _btn_quit: Button = %QuitBtn
 var _buttons: Array[Button] = []
 
-var _menu_container: Control
 var _overlay: ColorRect
 var _deck_panel: Control
 var _deck_cards: Array[Control] = []
 var _selected_deck: String = "standard"
 var _continue_panel: Control
 var _panel_open: bool = false
+
+# Ambient effects
+var _bg_breath_tween: Tween
+var _ambient_timer: Timer
+var _particle_layer: CanvasLayer
+var _sakura_tex: ImageTexture
 
 # Assets
 var _cn_font: FontFile
@@ -47,19 +44,16 @@ var _sfx_click: AudioStream
 var _sfx_hover: AudioStream
 
 
-# ══════════════════════════════════════════
-# Lifecycle
-# ══════════════════════════════════════════
-
 func _ready() -> void:
 	_load_assets()
-	GlobalTweens.set_crt_enabled(true)
 	MusicManager.play_menu_bgm()
 	_build_ui()
-	# 闪屏阶段 — 隐藏按钮，延迟后滑入
-	_menu_container.modulate.a = 0.0
+	# Splash: hide buttons, then slide in
+	for btn: Button in _buttons:
+		btn.modulate.a = 0.0
 	await get_tree().create_timer(SPLASH_DURATION).timeout
 	_show_menu_buttons()
+	_start_ambient_effects()
 
 
 func _load_assets() -> void:
@@ -69,17 +63,23 @@ func _load_assets() -> void:
 	_sfx_hover = load("res://assets/audio/sound/game/hover.ogg")
 
 
-# ══════════════════════════════════════════
-# UI Construction
-# ══════════════════════════════════════════
-
 func _build_ui() -> void:
-	var canvas := CanvasLayer.new()
-	canvas.name = "MenuCanvas"
-	canvas.layer = 1
-	add_child(canvas)
+	_buttons = [_btn_start, _btn_continue, _btn_settings, _btn_quit]
 
-	# Full-screen overlay (hidden until a panel opens)
+	# Connect signals
+	_btn_start.pressed.connect(_on_start_pressed)
+	_btn_continue.pressed.connect(_on_continue_pressed)
+	_btn_settings.pressed.connect(_on_settings_pressed)
+	_btn_quit.pressed.connect(_on_quit_pressed)
+
+	for btn: Button in _buttons:
+		btn.mouse_entered.connect(_on_button_hovered.bind(btn))
+		btn.mouse_exited.connect(_on_button_unhovered.bind(btn))
+		btn.pressed.connect(_play_click_sfx)
+
+	_update_continue_button()
+
+	# Full-screen overlay (hidden, behind panels)
 	_overlay = ColorRect.new()
 	_overlay.name = "Overlay"
 	_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -88,56 +88,28 @@ func _build_ui() -> void:
 	_overlay.modulate.a = 0.0
 	_overlay.hide()
 	_overlay.gui_input.connect(_on_overlay_gui_input)
-	canvas.add_child(_overlay)
-
-	# Buttons container
-	_menu_container = Control.new()
-	_menu_container.name = "MenuButtons"
-	_menu_container.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_menu_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	canvas.add_child(_menu_container)
-
-	# Build each button
-	_btn_start = _make_button("开始游戏", BTN_X, BTN_START_Y)
-	_btn_continue = _make_button("继续游戏", BTN_X, BTN_START_Y + BTN_HEIGHT + BTN_SPACING)
-	_btn_settings = _make_button("设置", BTN_X, BTN_START_Y + (BTN_HEIGHT + BTN_SPACING) * 2)
-	_btn_quit = _make_button("退出游戏", BTN_X, BTN_START_Y + (BTN_HEIGHT + BTN_SPACING) * 3)
-
-	_btn_start.pressed.connect(_on_start_pressed)
-	_btn_continue.pressed.connect(_on_continue_pressed)
-	_btn_settings.pressed.connect(_on_settings_pressed)
-	_btn_quit.pressed.connect(_on_quit_pressed)
-
-	_buttons = [_btn_start, _btn_continue, _btn_settings, _btn_quit]
-
-	# Settings button: disabled placeholder
-	_btn_settings.disabled = true
-
-	# Continue: visible only if save exists
-	_update_continue_button()
+	add_child(_overlay)
 
 	# Build panels (hidden)
-	_build_deck_panel(canvas)
-	_build_continue_panel(canvas)
-
-
-func _make_button(text: String, x: float, y: float) -> Button:
-	var btn := Button.new()
-	btn.text = text
-	btn.position = Vector2(x, y)
-	btn.size = Vector2(BTN_WIDTH, BTN_HEIGHT)
-	btn.theme = _theme
-	btn.add_theme_font_override("font", _cn_font)
-	btn.add_theme_font_size_override("font_size", FONT_TITLE)
-	btn.mouse_entered.connect(_on_button_hovered.bind(btn))
-	btn.mouse_exited.connect(_on_button_unhovered.bind(btn))
-	btn.pressed.connect(_play_click_sfx)
-	_menu_container.add_child(btn)
-	return btn
+	_build_deck_panel(self)
+	_build_continue_panel(self)
 
 
 func _update_continue_button() -> void:
 	_btn_continue.disabled = not NinKingGameState.has_saved_run()
+
+
+## Set a Control's anchors to center and place it at the screen center.
+func _center_control(ctrl: Control) -> void:
+	var half: Vector2 = ctrl.size * 0.5
+	ctrl.anchor_left = 0.5
+	ctrl.anchor_top = 0.5
+	ctrl.anchor_right = 0.5
+	ctrl.anchor_bottom = 0.5
+	ctrl.offset_left = -half.x
+	ctrl.offset_top = -half.y
+	ctrl.offset_right = half.x
+	ctrl.offset_bottom = half.y
 
 
 # ══════════════════════════════════════════
@@ -145,12 +117,88 @@ func _update_continue_button() -> void:
 # ══════════════════════════════════════════
 
 func _show_menu_buttons() -> void:
-	# Container must be visible BEFORE stagger_slide_in sets per-button alpha=0
-	_menu_container.modulate.a = 1.0
 	var nodes: Array[CanvasItem] = []
 	for btn: Button in _buttons:
 		nodes.append(btn)
 	GlobalTweens.stagger_slide_in(nodes, BUTTON_STAGGER, BUTTON_SLIDE_DUR, BUTTON_SLIDE_OFFSET)
+
+
+# ══════════════════════════════════════════
+# Ambient effects
+# ══════════════════════════════════════════
+
+func _start_ambient_effects() -> void:
+	# ── Background slow breathing: scale 1.0↔1.04, 14s cycle ──
+	var bg: TextureRect = $LaunchBg
+	bg.pivot_offset = bg.size * 0.5
+	_bg_breath_tween = create_tween()
+	_bg_breath_tween.set_loops()
+	_bg_breath_tween.tween_property(bg, "scale", Vector2(1.04, 1.04), 7.0) \
+		.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	_bg_breath_tween.tween_property(bg, "scale", Vector2(1.0, 1.0), 7.0) \
+		.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+
+	# ── Particle CanvasLayer (layer 128 — above everything) ──
+	_particle_layer = CanvasLayer.new()
+	_particle_layer.name = "ParticleLayer"
+	_particle_layer.layer = 128
+	add_child(_particle_layer)
+
+	# ── Cache sakura texture once ──
+	_sakura_tex = _make_sakura_tex()
+
+	# ── Ambient sakura petals: local burst, Timer-driven ──
+	_ambient_timer = Timer.new()
+	_ambient_timer.name = "AmbientTimer"
+	_ambient_timer.wait_time = randf_range(1.0, 2.0)
+	_ambient_timer.timeout.connect(_on_ambient_tick)
+	_particle_layer.add_child(_ambient_timer)
+	_ambient_timer.start()
+
+
+func _on_ambient_tick() -> void:
+	var vp: Rect2 = get_viewport().get_visible_rect()
+	var pos := Vector2(randf_range(0.0, vp.size.x), randf_range(0.0, vp.size.y * 0.4))
+	_spawn_sakura_burst(pos)
+	_ambient_timer.wait_time = randf_range(1.0, 2.0)
+
+
+## Spawn a one-shot sakura particle burst at the given position.
+func _spawn_sakura_burst(at: Vector2) -> void:
+	const SAKURA_LIFETIME: float = 3.0
+	const SAKURA_AMOUNT: int = 40
+	const SAKURA_SPREAD: float = 120.0
+	const SAKURA_COLOR := Color(1.0, 0.7, 0.8, 1.0)
+
+	var p := CPUParticles2D.new()
+	p.texture = _sakura_tex
+	p.one_shot = true
+	p.explosiveness = 1.0
+	p.amount = SAKURA_AMOUNT
+	p.lifetime = SAKURA_LIFETIME
+	p.spread = SAKURA_SPREAD
+	p.direction = Vector2(0, -1)
+	p.initial_velocity_min = 30.0
+	p.initial_velocity_max = 90.0
+	p.damping_min = 2.0
+	p.damping_max = 4.0
+	p.scale_amount_min = 1.5
+	p.scale_amount_max = 4.0
+	p.modulate = SAKURA_COLOR
+	p.position = at
+	p.finished.connect(p.queue_free)
+	_particle_layer.add_child(p)
+	p.emitting = true
+
+
+func _make_sakura_tex() -> ImageTexture:
+	var img := Image.create(8, 8, false, Image.FORMAT_RGBA8)
+	for y in range(8):
+		for x in range(8):
+			var d := Vector2(float(x) - 3.5, float(y) - 3.5).length() / 3.5
+			var a := clampf(1.0 - d, 0.0, 1.0)
+			img.set_pixel(x, y, Color(1.0, 1.0, 1.0, a))
+	return ImageTexture.create_from_image(img)
 
 
 # ══════════════════════════════════════════
@@ -170,7 +218,7 @@ func _on_continue_pressed() -> void:
 
 
 func _on_settings_pressed() -> void:
-	pass  # disabled; no-op
+	pass
 
 
 func _on_quit_pressed() -> void:
@@ -215,10 +263,9 @@ func _build_deck_panel(parent: Node) -> void:
 	var panel_bg := PanelContainer.new()
 	panel_bg.name = "DeckPanelBg"
 	panel_bg.theme = _theme
-	panel_bg.set_anchors_preset(Control.PRESET_CENTER)
-	panel_bg.custom_minimum_size = Vector2(960, 600)
-	panel_bg.position = Vector2(-480, -300)
+	panel_bg.size = Vector2(960, 600)
 	_deck_panel.add_child(panel_bg)
+	_center_control(panel_bg)
 
 	var vbox := VBoxContainer.new()
 	vbox.name = "DeckVBox"
@@ -226,17 +273,15 @@ func _build_deck_panel(parent: Node) -> void:
 	vbox.add_theme_constant_override("separation", 32)
 	panel_bg.add_child(vbox)
 
-	# Title
 	var title := Label.new()
 	title.name = "DeckTitle"
 	title.text = "选择牌组"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_override("font", _cn_font)
-	title.add_theme_font_size_override("font_size", FONT_TITLE)
+	title.add_theme_font_size_override("font_size", 32)
 	title.add_theme_color_override("font_color", Color(0.91, 0.77, 0.27))
 	vbox.add_child(title)
 
-	# Deck cards row
 	var cards_row := HBoxContainer.new()
 	cards_row.name = "DeckCards"
 	cards_row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -251,10 +296,8 @@ func _build_deck_panel(parent: Node) -> void:
 		cards_row.add_child(card)
 		_deck_cards.append(card)
 
-	# Default: select standard
 	_update_deck_selection(0)
 
-	# Buttons row
 	var btn_row := HBoxContainer.new()
 	btn_row.name = "DeckBtnRow"
 	btn_row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -316,7 +359,6 @@ func _make_deck_card(deck_key: String, deck_name: String, best_barrier: int) -> 
 	best_label.add_theme_font_size_override("font_size", FONT_INFO)
 	vbox.add_child(best_label)
 
-	# Grey out non-playable decks
 	if not PLAYABLE_DECKS.has(deck_key):
 		card.modulate = Color(0.4, 0.4, 0.4, 0.6)
 	else:
@@ -401,10 +443,9 @@ func _build_continue_panel(parent: Node) -> void:
 	var panel_bg := PanelContainer.new()
 	panel_bg.name = "ContinuePanelBg"
 	panel_bg.theme = _theme
-	panel_bg.set_anchors_preset(Control.PRESET_CENTER)
-	panel_bg.custom_minimum_size = Vector2(560, 400)
-	panel_bg.position = Vector2(-280, -200)
+	panel_bg.size = Vector2(560, 400)
 	_continue_panel.add_child(panel_bg)
+	_center_control(panel_bg)
 
 	var vbox := VBoxContainer.new()
 	vbox.name = "ContinueVBox"
@@ -412,17 +453,15 @@ func _build_continue_panel(parent: Node) -> void:
 	vbox.add_theme_constant_override("separation", 24)
 	panel_bg.add_child(vbox)
 
-	# Title
 	var title := Label.new()
 	title.name = "ContinueTitle"
 	title.text = "继续冒险"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_override("font", _cn_font)
-	title.add_theme_font_size_override("font_size", FONT_TITLE)
+	title.add_theme_font_size_override("font_size", 32)
 	title.add_theme_color_override("font_color", Color(0.91, 0.77, 0.27))
 	vbox.add_child(title)
 
-	# Save info label (populated on show)
 	var info := Label.new()
 	info.name = "ContinueInfo"
 	info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -431,7 +470,6 @@ func _build_continue_panel(parent: Node) -> void:
 	info.add_theme_color_override("font_color", Color(0.78, 0.78, 0.82))
 	vbox.add_child(info)
 
-	# Button row
 	var btn_row := HBoxContainer.new()
 	btn_row.name = "ContinueBtnRow"
 	btn_row.alignment = BoxContainer.ALIGNMENT_CENTER

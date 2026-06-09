@@ -100,9 +100,9 @@ const HAND_TYPE3_BASE_VALUES: Dictionary = {
 	HandType3.HIGH_CARD_3: {"chips": 5, "mult": 1},
 	HandType3.ONE_PAIR_3: {"chips": 10, "mult": 2},
 	HandType3.STRAIGHT_3: {"chips": 20, "mult": 3},
-	HandType3.FLUSH_3: {"chips": 20, "mult": 3},
-	HandType3.STRAIGHT_FLUSH_3: {"chips": 35, "mult": 4},
-	HandType3.THREE_OF_KIND_3: {"chips": 40, "mult": 5},
+	HandType3.FLUSH_3: {"chips": 30, "mult": 4},
+	HandType3.STRAIGHT_FLUSH_3: {"chips": 50, "mult": 5},
+	HandType3.THREE_OF_KIND_3: {"chips": 100, "mult": 8},
 }
 
 ## Star chart level-up increments per use

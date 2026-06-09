@@ -13,6 +13,7 @@ uniform float vignette_amount : hint_range(0.0, 1.0) = 0.3;
 uniform float warp_amount : hint_range(0.0, 0.1) = 0.02;
 uniform float brightness : hint_range(0.5, 2.0) = 1.1;
 uniform float time_offset : hint_range(0.0, 100.0) = 0.0;
+uniform float breath : hint_range(0.0, 1.0) = 0.0;
 
 void fragment() {
 	vec2 uv = SCREEN_UV;
@@ -39,7 +40,7 @@ void fragment() {
 	float vig = vig_uv.x * vig_uv.y * 15.0;
 	vig = mix(1.0, vig, vignette_amount);
 
-	color *= vig * brightness;
+	color *= vig * brightness * (1.0 + breath * 0.08);
 
 	COLOR = vec4(color, 1.0);
 }

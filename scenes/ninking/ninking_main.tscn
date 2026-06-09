@@ -181,7 +181,13 @@ offset_right = 1920.0
 offset_bottom = 1080.0
 color = Color(0.102, 0.227, 0.196, 1)
 
-[node name="UIManager" type="Node" parent="." unique_id=103814555]
+[node name="UIManager" type="Control" parent="." unique_id=103814555]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 unique_name_in_owner = true
 script = ExtResource("2_ui_mgr")
 

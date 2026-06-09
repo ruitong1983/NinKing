@@ -52,6 +52,12 @@ func _on_first_scene_loaded(_node: Node) -> void:
 func set_crt_enabled(enabled: bool) -> void:
 	crt.set_enabled(enabled)
 
+func set_crt_aberration(v: float) -> void:
+	crt.set_aberration(v)
+
+func set_crt_breath(v: float) -> void:
+	crt.set_breath(v)
+
 
 # ── 基础补间 & 卡牌动效（委托 TweenFX，透传 auto_kill）──
 

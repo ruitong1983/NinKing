@@ -166,10 +166,18 @@ func _is_mask_border(x: int, y: int, w: int, h: int, mask: PackedByteArray) -> b
 # ═══ Label creation ═══
 
 ## Create label nodes for card face text.
+## Labels get an empty Theme to break pixel-font inheritance from pixel_theme.tres,
+## falling back to Godot's built-in default font for clean rank/suit rendering.
 func _create_labels() -> void:
+	# Empty theme — breaks the pixel_theme chain so labels use Godot's built-in
+	# default font. This keeps card text (A♠, 10♥, etc.) clean and readable
+	# regardless of the project-wide pixel theme.
+	var _card_label_theme := Theme.new()
+
 	# Top-left corner (rank + suit, stacked vertically)
 	_corner_top_label = Label.new()
 	_corner_top_label.name = "CornerTop"
+	_corner_top_label.theme = _card_label_theme
 	_corner_top_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_corner_top_label.add_theme_font_size_override("font_size", CORNER_FONT_SZ)
 	_corner_top_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -180,6 +188,7 @@ func _create_labels() -> void:
 	# Center suit symbol (large)
 	_center_suit_label = Label.new()
 	_center_suit_label.name = "CenterSuit"
+	_center_suit_label.theme = _card_label_theme
 	_center_suit_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_center_suit_label.add_theme_font_size_override("font_size", CENTER_FONT_SZ)
 	_center_suit_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -189,6 +198,7 @@ func _create_labels() -> void:
 	# Bottom-right corner — 180° rotated copy of top-left
 	_corner_bottom_label = Label.new()
 	_corner_bottom_label.name = "CornerBottom"
+	_corner_bottom_label.theme = _card_label_theme
 	_corner_bottom_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_corner_bottom_label.add_theme_font_size_override("font_size", CORNER_FONT_SZ)
 	_corner_bottom_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

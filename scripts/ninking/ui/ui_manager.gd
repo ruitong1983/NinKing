@@ -1,5 +1,5 @@
 class_name UIManager
-extends Node
+extends Control
 
 ## Centralized UI management for NinKing (忍者牌 × 比鸡).
 ## Delegates hand rendering to HandDisplay and interaction to HandInteraction.

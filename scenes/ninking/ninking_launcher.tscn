@@ -1,15 +1,74 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://me6pr1t82qb3"]
 
 [ext_resource type="Script" uid="uid://c1ty4fx8ctelk" path="res://scripts/ninking/ui/main_menu.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://b2ju5xh7q1y1v" path="res://assets/images/background/launch_bg.png" id="2_bg"]
+[ext_resource type="Theme" uid="uid://ddvno1bm21p8c" path="res://assets/themes/pixel_theme.tres" id="3_theme"]
+[ext_resource type="FontFile" uid="uid://3qo0ylcohy02" path="res://assets/fonts/vonwaon_bitmap_16px.ttf" id="4_font"]
 
-[node name="Launcher" type="Node"]
+[node name="Launcher" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_script")
 
 [node name="LaunchBg" type="TextureRect" parent="."]
-layout_mode = 0
-offset_right = 1920.0
-offset_bottom = 1080.0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 texture = ExtResource("2_bg")
 expand_mode = 1
-stretch_mode = 5
+stretch_mode = 0
+mouse_filter = 2
+
+[node name="StartBtn" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 80.0
+offset_top = 680.0
+offset_right = 380.0
+offset_bottom = 752.0
+theme = ExtResource("3_theme")
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 32
+text = "开始游戏"
+
+[node name="ContinueBtn" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 80.0
+offset_top = 776.0
+offset_right = 380.0
+offset_bottom = 848.0
+theme = ExtResource("3_theme")
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 32
+text = "继续游戏"
+
+[node name="SettingsBtn" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 80.0
+offset_top = 872.0
+offset_right = 380.0
+offset_bottom = 944.0
+theme = ExtResource("3_theme")
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 32
+text = "设置"
+disabled = true
+
+[node name="QuitBtn" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 80.0
+offset_top = 968.0
+offset_right = 380.0
+offset_bottom = 1040.0
+theme = ExtResource("3_theme")
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 32
+text = "退出游戏"

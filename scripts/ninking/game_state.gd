@@ -28,6 +28,7 @@ signal redraws_changed(remaining: int)
 
 func emit_redraws_changed() -> void:
 	redraws_changed.emit(redraws_remaining)
+@warning_ignore("unused_signal")
 signal gold_changed(amount: int)
 signal hand_updated(hand: Array)           # 9 cards, arranged: [0-2]=head, [3-5]=mid, [6-8]=tail
 signal arrangement_changed(arrangement: AutoArranger.Arrangement)
