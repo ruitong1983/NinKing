@@ -275,6 +275,45 @@ func create_card(_card_name, _target) -> Card:
 
 ---
 
+## ⚠️ 已知陷阱 — Z-Index 穿透 Overlay
+
+### 症状
+
+全屏半透明遮罩（ScoringOverlay / DeckViewer 等）出现后，手牌卡牌仍然浮在遮罩上方，只遮暗了第一张。
+
+### 根因
+
+`Hand._update_target_z_index()` 会给每张牌设 `z_index = 0, 1, 2, ...`（保证右侧牌叠在左侧上方）。
+
+Godot 4 中 `z_as_relative = true`（默认），有效渲染层 = **根节点到当前节点的 z_index 累加值**。整个场景树按此值排序渲染：
+
+```
+Card[0]: 有效 z = 0  →  与 overlay 同层  →  树顺序靠前  →  遮暗 ✓
+Card[1]: 有效 z = 1  →  > overlay(z=0)   →  渲染在 overlay 上方  →  未遮暗 ✗
+Card[2]: 有效 z = 2  →  > overlay(z=0)   →  渲染在 overlay 上方  →  未遮暗 ✗
+```
+
+即使 overlay 是 `GameLayout` 的后续兄弟节点（正常应在上面），只要卡牌的累加 z_index 大于 overlay，就会穿透。
+
+### 修复
+
+所有与 `GameLayout` 同级、需要在手牌上方的 overlay 节点，必须显式设 `z_index` 大于手牌最大 z_index：
+
+```gdscript
+# 手牌 z_index 范围: 0 ~ (max_hand_size - 1)，本项目 max_hand_size=3 → max=2
+# overlay z_index 至少设为 10（留余量）
+ScoringOverlay.z_index = 10
+DeckViewer.z_index = 10
+```
+
+> **原则：任何覆盖游戏画面的 overlay/panel，只要和 Hand 容器处于同一场景树且需要叠在手牌上方，就必须设 z_index > max_hand_size。**
+
+### 为什么不用负值
+
+给卡牌设负 z_index（如 `stored_z_index = i - hand_size`）也能解决，但会让卡牌渲染到 Dun 面板背景下方，得不偿失。给 overlay 加 z_index 是副作用最小的方案。
+
+---
+
 ## 使用规则
 
 1. **手牌卡牌** → 必须继承 `NinKingCard`，场景用 `Hand` 容器
@@ -284,6 +323,7 @@ func create_card(_card_name, _target) -> Card:
 5. **商店卡牌/能力卡**（无拖拽需求）→ 用 `Panel`/`Button`，不继承 `Card`
 6. **新增容器** → 继承 `CardContainer`，覆写三个虚方法
 7. **场景结构** → `CardManager` 必须在容器层之上
+8. **Overlay z_index** → 全屏遮罩必须设 `z_index > max_hand_size`，防止卡牌 z_index 穿透
 
 ---
 

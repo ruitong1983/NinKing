@@ -1,7 +1,7 @@
 # NinKing 字体设计方案
 
 > **建立日期:** 2026-06-10 | **状态:** 方案待确认
-> **关联:** [`16-art-direction-principles.md`](16-art-direction-principles.md) §10 附录 B · [`TODO.md`](TODO.md) C10 · [`04-asset-gap-list.md`](04-asset-gap-list.md) §3
+> **关联:** [`16-art-direction-principles.md`](16-art-direction-principles.md) §10 附录 B · [`TODO.md`](TODO.md) C10
 >
 > **用途:** 指导漫画风字体选型、获取、命名、导入、配置的完整计划。
 
@@ -255,7 +255,7 @@ source_han_sans_sc_heavy.otf   (默认粗体)
 | 1.5 | 场景节点引用新的 `manga_theme.tres` | 10min |
 | 1.6 | 游戏内测试：检查中文/日文/英文/数字显示效果 | 15min |
 | 1.7 | 旧字体移入 `legacy/`，不删除 | 5min |
-| 1.8 | 更新 `04-asset-gap-list.md` §3 字体状态 | 5min |
+| 1.8 | ~~更新 `04-asset-gap-list.md` §3~~ 文档已删除，状态见 TODO.md | — |
 
 ### Phase 2 — 细调 (P1)
 

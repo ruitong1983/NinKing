@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/ninking/ui/shop_item_card.gd" id="1_card"]
 
-[node name="ItemCard" type="Panel" node_paths=PackedStringArray("art_icon", "name_label", "effect_label", "desc_label", "price_label", "buy_button")]
+[node name="ItemCard" type="Panel"]
 custom_minimum_size = Vector2(260, 340)
 offset_right = 260.0
 offset_bottom = 340.0
@@ -93,4 +93,4 @@ offset_left = 90.0
 offset_top = 290.0
 offset_right = 170.0
 offset_bottom = 322.0
-text = "购买"
+text = "入手"

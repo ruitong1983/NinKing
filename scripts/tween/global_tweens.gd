@@ -1,7 +1,7 @@
 # scripts/tween/global_tweens.gd
 # ============================================================
 # GlobalTweens — 全局动效调度（Autoload: GlobalTweens）
-# 依赖: 本项目 8 个 VFX 子系统
+# 依赖: 本项目 7 个 VFX 子系统（CRT 已移除 — 漫画风不需要扫描线）
 # ============================================================
 # 调用规范：外部代码只调 GlobalTweens，不直接调 TweenFX 或子系统。
 # TweenFX 是纯函数库，GlobalTweens 是唯一对外入口。
@@ -13,7 +13,6 @@ const CU = preload("res://scripts/tween/count_up.gd")
 
 # ─── 子系统实例 ───
 
-var crt: CRTFilter
 var shake: ScreenShake
 var tilt: CardTilt
 var particles: ParticlePool
@@ -22,13 +21,9 @@ var hit_stop: HitStop
 
 func _ready() -> void:
 	_init_subsystems()
-	# CRT 需要在场景加载后挂载
-	if get_tree():
-		get_tree().root.child_entered_tree.connect(_on_first_scene_loaded, CONNECT_ONE_SHOT)
 
 
 func _init_subsystems() -> void:
-	crt = CRTFilter.new()
 	shake = ScreenShake.new()
 	shake.name = "ScreenShake"
 	add_child(shake)
@@ -41,22 +36,6 @@ func _init_subsystems() -> void:
 	hit_stop = HitStop.new()
 	hit_stop.name = "HitStop"
 	add_child(hit_stop)
-
-
-func _on_first_scene_loaded(_node: Node) -> void:
-	crt.attach_to_root()
-
-
-# ── CRT ──
-
-func set_crt_enabled(enabled: bool) -> void:
-	crt.set_enabled(enabled)
-
-func set_crt_aberration(v: float) -> void:
-	crt.set_aberration(v)
-
-func set_crt_breath(v: float) -> void:
-	crt.set_breath(v)
 
 
 # ── 基础补间 & 卡牌动效（委托 TweenFX，透传 auto_kill）──

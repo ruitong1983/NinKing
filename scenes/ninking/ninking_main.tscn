@@ -1,10 +1,9 @@
 [gd_scene format=3 uid="uid://2t05pvhi3bt0"]
 
 [ext_resource type="Script" uid="uid://cghcglami0ang" path="res://scripts/ninking/ui/game_manager.gd" id="1_game_mgr"]
-[ext_resource type="Theme" uid="uid://ddvno1bm21p8c" path="res://assets/themes/pixel_theme.tres" id="1_pgq0x"]
+[ext_resource type="Theme" uid="uid://bqb2i07k0v8jt" path="res://assets/themes/manga_theme.tres" id="1_pgq0x"]
 [ext_resource type="PackedScene" uid="uid://c7u8hryloq7hy" path="res://addons/card-framework/card_manager.tscn" id="2_ff38i"]
 [ext_resource type="Script" uid="uid://bme3lgpqg56tv" path="res://scripts/ninking/ui/ui_manager.gd" id="2_ui_mgr"]
-[ext_resource type="Texture2D" uid="uid://b2ju5xh7q1y1v" path="res://assets/images/background/launch_bg.png" id="3_b00f3"]
 [ext_resource type="PackedScene" uid="uid://4jkp5mgq3d6t" path="res://scenes/ninking/ninking_card_factory.tscn" id="4_ensa0"]
 [ext_resource type="PackedScene" uid="uid://bkpjlq7ggckg6" path="res://addons/card-framework/hand.tscn" id="7_oseip"]
 
@@ -664,6 +663,40 @@ hand_rotation_curve = SubResource("Curve_ff38i")
 hand_vertical_curve = SubResource("Curve_llo3g")
 swap_only_on_reorder = true
 
+[node name="ColumnLabelRow" type="HBoxContainer" parent="UIManager/GameLayout/CenterColumn/HandArea/DunArea" unique_id=1076051941]
+layout_mode = 0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -28.0
+
+[node name="Col0Label" type="Label" parent="UIManager/GameLayout/CenterColumn/HandArea/DunArea/ColumnLabelRow" unique_id=1076051942]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+
+[node name="Col1Label" type="Label" parent="UIManager/GameLayout/CenterColumn/HandArea/DunArea/ColumnLabelRow" unique_id=1076051943]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+
+[node name="Col2Label" type="Label" parent="UIManager/GameLayout/CenterColumn/HandArea/DunArea/ColumnLabelRow" unique_id=1076051944]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+
 [node name="RedrawBtn" type="Button" parent="UIManager/GameLayout/CenterColumn/HandArea" unique_id=480470585]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(84, 116)
@@ -701,42 +734,13 @@ theme_override_styles/pressed = SubResource("StyleBoxFlat_b00f3")
 theme_override_styles/hover = SubResource("StyleBoxFlat_pqepw")
 text = "牌库: 52"
 
-[node name="ColumnLabelRow" type="HBoxContainer" parent="UIManager/GameLayout/CenterColumn" unique_id=1076051941]
-layout_mode = 2
-
-[node name="Col0Label" type="Label" parent="UIManager/GameLayout/CenterColumn/ColumnLabelRow" unique_id=1076051942]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
-theme_override_font_sizes/font_size = 24
-horizontal_alignment = 1
-
-[node name="Col1Label" type="Label" parent="UIManager/GameLayout/CenterColumn/ColumnLabelRow" unique_id=1076051943]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
-theme_override_font_sizes/font_size = 24
-horizontal_alignment = 1
-
-[node name="Col2Label" type="Label" parent="UIManager/GameLayout/CenterColumn/ColumnLabelRow" unique_id=1076051944]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
-theme_override_font_sizes/font_size = 24
-horizontal_alignment = 1
-
 [node name="ScoringOverlay" type="Control" parent="UIManager" unique_id=1136405108]
 unique_name_in_owner = true
 visible = false
 anchors_preset = 0
 offset_right = 1920.0
 offset_bottom = 1080.0
+z_index = 10
 
 [node name="OverlayBg" type="ColorRect" parent="UIManager/ScoringOverlay" unique_id=623976441]
 layout_mode = 0
@@ -842,6 +846,7 @@ offset_bottom = 1080.0
 color = Color(0, 0, 0, 0.8)
 
 [node name="GameOverLabel" type="Label" parent="UIManager/GameOver" unique_id=1835767358]
+unique_name_in_owner = true
 layout_mode = 0
 offset_left = 640.0
 offset_top = 380.0
@@ -864,6 +869,15 @@ theme_override_font_sizes/font_size = 24
 text = "重新开始"
 flat = true
 
+[node name="BackToMenuButton" type="Button" parent="UIManager/GameOver" unique_id=703436984]
+unique_name_in_owner = true
+layout_mode = 0
+text = "返回主菜单"
+
+[node name="ScoreSummary" type="Label" parent="UIManager/GameOver" unique_id=1143129712]
+unique_name_in_owner = true
+layout_mode = 0
+
 [node name="DeckViewer" type="Control" parent="UIManager" unique_id=220409291]
 unique_name_in_owner = true
 visible = false
@@ -873,6 +887,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+z_index = 10
 
 [node name="ViewerBg" type="ColorRect" parent="UIManager/DeckViewer" unique_id=1521626267]
 unique_name_in_owner = true
@@ -942,3 +957,23 @@ layout_mode = 2
 theme_override_constants/h_separation = 2
 theme_override_constants/v_separation = 2
 columns = 13
+
+[node name="VictoryOverlay" type="Control" parent="UIManager" unique_id=1596771866]
+visible = false
+anchors_preset = 0
+metadata/_editor_unique_name_ = true
+
+[node name="OverlayBg" type="ColorRect" parent="UIManager/VictoryOverlay" unique_id=642608461]
+layout_mode = 0
+color = Color(0, 0, 0, 0.7)
+
+[node name="VictoryLabel" type="Label" parent="UIManager/VictoryOverlay" unique_id=474829960]
+layout_mode = 0
+text = "忍道制霸!"
+
+[node name="StatsSummary" type="Label" parent="UIManager/VictoryOverlay" unique_id=453149600]
+layout_mode = 0
+
+[node name="MenuButton" type="Button" parent="UIManager/VictoryOverlay" unique_id=1631855430]
+layout_mode = 0
+text = "返回主菜单"

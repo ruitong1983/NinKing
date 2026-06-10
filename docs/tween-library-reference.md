@@ -1,6 +1,6 @@
 # Tween & VFX 库参考手册
 
-> 最后更新：2026-06-09 | 源码：`scripts/tween/` + `scripts/system/crt_filter.gd`
+> 最后更新：2026-06-10 | 源码：`scripts/tween/` + `scripts/system/crt_filter.gd`
 >
 > **铁律：实现任何 Tween/VFX 前，必须先查本文档。确认已有 API 是否覆盖需求，避免手写 `create_tween()`。**
 >
@@ -18,8 +18,8 @@ GlobalTweens (autoload, 胶水层)
 ├── HitStop ─── 顿帧/冻结帧
 ├── AudioCoupler ─── 动效-音效耦合
 ├── CardTilt ─── 卡牌倾斜/手牌摊开
-├── CountUp ─── 数字滚动
-└── CRTFilter ─── 全屏 CRT 后处理
+├── CountUp ─── 数字滚动（线性/缓出，BounceScore 内部依赖）
+└── BounceScore ─── 计分弹性着陆（蓄力→过冲→弹跳→ProgressBar→闪色）
 ```
 
 | 组件 | 文件 | 类型 | 定位 |
@@ -31,8 +31,8 @@ GlobalTweens (autoload, 胶水层)
 | **HitStop** | `scripts/tween/hit_stop.gd` | class_name | 顿帧：冻结 time_scale 后平滑恢复 |
 | **AudioCoupler** | `scripts/tween/audio_coupler.gd` | class_name | Tween 内联音效 + 一次性音效 |
 | **CardTilt** | `scripts/tween/card_tilt.gd` | class_name | 卡牌随鼠标倾斜 + 手牌扇形摊开 |
-| **CountUp** | `scripts/tween/count_up.gd` | class_name | Label 数字递增滚动 |
-| **CRTFilter** | `scripts/system/crt_filter.gd` | class_name | CRT 扫描线/色差/暗角/扭曲 |
+| **CountUp** | `scripts/tween/count_up.gd` | class_name | Label 数字递增滚动（BounceScore 内部依赖） |
+| **BounceScore** | `scripts/tween/bounce_score.gd` | RefCounted (preload) | 计分弹性着陆：蓄力→过冲暴涨→缩放弹跳→ProgressBar延迟→Chips/Mult闪→PanelBg发光 |
 
 ---
 
@@ -423,7 +423,32 @@ CountUp.play_gold(label, amount, duration, prefix, suffix) -> Tween
 
 所有方法 `set_ignore_time_scale(true)`。
 
-### 3.7 CRTFilter — CRT 后处理
+### 3.7 BounceScore — 计分弹性着陆
+
+**文件：** `scripts/tween/bounce_score.gd` | 用法：`const BounceScore = preload(...)` → `BounceScore.play(...)`
+
+```gdscript
+# 计分时一次性调用，打包全部动效：
+BounceScore.play(
+    score_label,     # Label — 主分数 Label
+    progress_bar,    # ProgressBar — 进度条
+    chips_label,     # Label — 筹码数字
+    mult_label,      # Label — 倍率数字
+    panel_bg,        # ColorRect — 左侧面板背景（发光）
+    old_score,       # int — 旧分数
+    new_score,       # int — 新分数
+    barrier_color,   # Color — 结界强调色（面板发光）
+    bounce_sfx       # AudioStream = null — 峰值音效（可选）
+)
+```
+
+**时序：** 蓄力白闪(0.08s) → 数字过冲+scale暴涨(0.58s, 1.6×, 30%过冲) → 过冲回落(0.08s) → 弹簧恢复(0.12s, TRANS_BACK) → 延迟(0.10s) → ProgressBar滑动+Chips/Mult金色闪+PanelBg结界色闪(0.25s)。总时长 ~1.2s。
+
+**内部依赖：** `TweenFX.color_flash`（闪色）。数字滚动由自身 `tween_method` 实现，不依赖 CountUp。
+
+**不触发时：** `old_score == new_score` → 直接 set text 返回。`new_score < old_score` → 简单线性 count 无弹跳。
+
+### 3.8 CRTFilter — CRT 后处理 ⛔ 已移除
 
 **文件：** `scripts/system/crt_filter.gd` | class_name: `CRTFilter`
 

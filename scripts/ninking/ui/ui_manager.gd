@@ -2,7 +2,8 @@ class_name UIManager
 extends Control
 
 ## Centralized UI management for NinKing (忍者牌 × 比鸡).
-## Delegates hand rendering to HandDisplay and interaction to HandInteraction.
+## Delegates to HandDisplay, HandInteraction, DeckViewerController,
+## DunHighlighter, RedrawVFXHandler, ResultScreenDisplay, NinjaBarDisplay.
 ## All display updates go through this class — game_manager.gd only handles flow.
 
 # ═══ Sub-views ═══
@@ -74,32 +75,30 @@ extends Control
 @onready var reward_label: Label = %RewardLabel
 @onready var to_shop_button: Button = %ToShopButton
 
-# ═══ Game over / Victory ═══
+# ═══ Game over ═══
+@onready var game_over_label: Label = %GameOverLabel
+@onready var score_summary: Label = %ScoreSummary
 @onready var retry_button: Button = %RetryButton
+@onready var back_to_menu_button: Button = %BackToMenuButton
+
+# ═══ Victory overlay ═══
+@onready var victory_overlay: Control = $VictoryOverlay
+@onready var victory_label: Label = $VictoryOverlay/VictoryLabel
+@onready var victory_stats_summary: Label = $VictoryOverlay/StatsSummary
+@onready var victory_menu_button: Button = $VictoryOverlay/MenuButton
 
 # ═══ Delegates ═══
 var hand_display: RefCounted  # HandDisplay
 var hand_interaction: RefCounted  # HandInteraction
 var deck_viewer_ctrl: DeckViewerController
-
-const ABILITY_SLOT_SCENE: PackedScene = preload("res://scenes/ninking/ability_slot.tscn")
-
-# ── Dun label highlight (V21) ──
-const HIGHLIGHT_FONT_COLOR := Color(1.0, 0.9, 0.5, 1.0)
-const HIGHLIGHT_OUTLINE_COLOR := Color(1.0, 0.85, 0.3, 0.8)
-const DEFAULT_FONT_COLOR := Color(0.831, 0.659, 0.263, 1.0)
-const DEFAULT_HEAD_OUTLINE := Color(0.0, 0.0, 0.0, 0.3)
-const DEFAULT_MID_OUTLINE := Color(0.0, 0.0, 0.0, 0.6)
-const DEFAULT_TAIL_OUTLINE := Color(0.0, 0.0, 0.0, 1.0)
-
-# Track previous highlight state to avoid redundant color_flash on every swap
-var _head_was_highlighted: bool = false
-var _mid_was_highlighted: bool = false
-var _tail_was_highlighted: bool = false
+var dun_highlighter: DunHighlighter
+var redraw_vfx_handler: RedrawVFXHandler
+var result_screen: ResultScreenDisplay
+var ninja_bar: NinjaBarDisplay
 
 
 func _ready() -> void:
-	# Set up hand display (rendering)
+	# Hand display (rendering)
 	hand_display = HandDisplay.new()
 	hand_display.setup(
 		head_cards, middle_cards, tail_cards,
@@ -109,7 +108,7 @@ func _ready() -> void:
 		play_btn, redraw_btn, status_label
 	)
 
-	# Set up hand interaction (swap/redraw state machine)
+	# Hand interaction (swap/redraw state machine)
 	hand_interaction = HandInteraction.new()
 	hand_interaction.setup(hand_display)
 
@@ -121,16 +120,42 @@ func _ready() -> void:
 		%CardGrid, %ViewerBg
 	)
 
+	# Dun highlighter (constraint visualization + card flash)
+	dun_highlighter = DunHighlighter.new()
+	dun_highlighter.setup(
+		head_label, middle_label, tail_label, status_label,
+		head_cards, middle_cards, tail_cards
+	)
+
+	# Redraw VFX handler (手替え animation sequence)
+	redraw_vfx_handler = RedrawVFXHandler.new()
+	redraw_vfx_handler.setup(
+		hand_interaction,
+		head_cards, middle_cards, tail_cards,
+		play_btn, redraw_btn, status_label
+	)
+
+	# Result screen display (scoring / complete / victory / gameover / xi)
+	result_screen = ResultScreenDisplay.new()
+	result_screen.setup(
+		reward_label, complete_label,
+		victory_label, victory_stats_summary,
+		game_over_label, score_summary,
+		hand_name_label, score_value_label, score_breakdown
+	)
+
+	# Ninja bar display
+	ninja_bar = NinjaBarDisplay.new()
+	ninja_bar.setup(ability_bar)
+
 	# ── Three-Dun title progressive outline (V20) ──
-	# 影 (head): subtle shadow → 瞬 (middle): standard → 滅 (tail): bold glow
-	head_label.add_theme_color_override("font_outline_color", DEFAULT_HEAD_OUTLINE)
+	head_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.3))
 	head_label.add_theme_constant_override("font_outline_size", 1)
-	middle_label.add_theme_color_override("font_outline_color", DEFAULT_MID_OUTLINE)
+	middle_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.6))
 	middle_label.add_theme_constant_override("font_outline_size", 2)
-	tail_label.add_theme_color_override("font_outline_color", DEFAULT_TAIL_OUTLINE)
+	tail_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 1.0))
 	tail_label.add_theme_constant_override("font_outline_size", 3)
 
-	# ── Clear default constraint text; now driven by label highlights (V21) ──
 	status_label.text = ""
 
 
@@ -142,9 +167,10 @@ func show_view(view: String) -> void:
 	game_bg.visible = (view in ["game", "intro", "scoring"])
 	level_intro.visible = (view == "intro")
 	game_layout.visible = (view in ["game", "scoring"])
-	scoring_overlay.visible = (view == "scoring")
+	# Balatro-style: no overlay dimming during scoring — inline HUD animation
 	level_complete.visible = (view == "complete")
-	game_over.visible = (view in ["gameover", "victory"])
+	game_over.visible = (view == "gameover")
+	victory_overlay.visible = (view == "victory")
 
 
 # ══════════════════════════════════════════
@@ -193,10 +219,14 @@ func update_target(target: int) -> void:
 # Hand display — thin wrappers to HandDisplay + HandInteraction
 # ══════════════════════════════════════════
 
-func refresh_hand(hand: Array[CardData.PlayingCard]) -> void:
+func _refresh_internal(hand: Array[CardData.PlayingCard]) -> void:
 	hand_interaction.set_hand(hand)
 	hand_display.refresh(hand, hand_interaction.swap_source_idx, hand_interaction.redraw_targets, hand_interaction.redraw_mode, _on_ninking_card_clicked, _on_ninking_card_dragged)
-	_update_dun_label_highlights()
+	dun_highlighter.update(NinKingGameState.current_arrangement, redraw_mode)
+
+
+func refresh_hand(hand: Array[CardData.PlayingCard]) -> void:
+	_refresh_internal(hand)
 
 
 func refresh_groups(head_cards_arr: Array[CardData.PlayingCard], mid_cards_arr: Array[CardData.PlayingCard], tail_cards_arr: Array[CardData.PlayingCard], _constraint_ok: bool) -> void:
@@ -204,16 +234,13 @@ func refresh_groups(head_cards_arr: Array[CardData.PlayingCard], mid_cards_arr: 
 	combined.append_array(head_cards_arr)
 	combined.append_array(mid_cards_arr)
 	combined.append_array(tail_cards_arr)
-	hand_interaction.set_hand(combined)
-	hand_display.refresh(combined, hand_interaction.swap_source_idx, hand_interaction.redraw_targets, hand_interaction.redraw_mode, _on_ninking_card_clicked, _on_ninking_card_dragged)
-	_update_dun_label_highlights()
+	_refresh_internal(combined)
 
 
 # ══════════════════════════════════════════
 # Card interaction — delegated to HandInteraction
 # ══════════════════════════════════════════
 
-## Expose redraw_mode for game_manager.gd to check before play/redraw toggle.
 var redraw_mode: bool:
 	get:
 		return hand_interaction.redraw_mode if hand_interaction else false
@@ -232,7 +259,7 @@ func enable_redraw_mode() -> void:
 		return
 	hand_interaction.enable_redraw_mode()
 	play_btn.disabled = true
-	status_label.text = "点击1~3张要手替え的牌，再点确认"
+	status_label.text = "选择要替换的卡牌 (最多 3 张)"
 	hand_interaction.set_cards_interactable(head_cards, middle_cards, tail_cards, false)
 	_update_redraw_button_text()
 
@@ -240,48 +267,9 @@ func enable_redraw_mode() -> void:
 func confirm_redraw() -> void:
 	if hand_interaction.redraw_targets.is_empty():
 		return
-	if _redraw_vfx_guard:
+	if redraw_vfx_handler.is_running():
 		return
-	_redraw_vfx_guard = true
-	_run_redraw_with_vfx()
-
-var _redraw_vfx_guard: bool = false
-
-## Animate discarded cards out (fade_out + smoke dust) → redraw → new cards pop in.
-func _run_redraw_with_vfx() -> void:
-	var targets: Array[int] = hand_interaction.redraw_targets.duplicate()
-
-	for idx: int in targets:
-		var card_node: Node = _get_card_node_at_index(idx)
-		if card_node:
-			GlobalTweens.fade_out(card_node, 0.15)
-			GlobalTweens.burst_particles(card_node.global_position + card_node.size * 0.5, "dust")
-
-	await get_tree().create_timer(0.18).timeout
-
-	hand_interaction.confirm_redraw()
-	play_btn.disabled = false
-	redraw_btn.text = "手\n替"
-	status_label.text = ""
-	hand_interaction.set_cards_interactable(head_cards, middle_cards, tail_cards, true)
-	_redraw_vfx_guard = false
-
-func _get_card_node_at_index(idx: int) -> Node:
-	var hand: Hand
-	var local_idx: int
-	if idx < 3:
-		hand = head_cards
-		local_idx = idx
-	elif idx < 6:
-		hand = middle_cards
-		local_idx = idx - 3
-	else:
-		hand = tail_cards
-		local_idx = idx - 6
-	var cards_node: Node = hand.get_node_or_null("Cards")
-	if cards_node and local_idx < cards_node.get_child_count():
-		return cards_node.get_child(local_idx)
-	return null
+	redraw_vfx_handler.execute()
 
 
 func _update_redraw_button_text() -> void:
@@ -290,76 +278,47 @@ func _update_redraw_button_text() -> void:
 
 
 # ══════════════════════════════════════════
-# Ninja bar
+# Ninja bar — delegated to NinjaBarDisplay
 # ══════════════════════════════════════════
 
 func refresh_ninjas(owned_ninjas: Array, max_slots: int) -> void:
-	for child: Node in ability_bar.get_children():
-		child.queue_free()
-	for ninja: Dictionary in owned_ninjas:
-		var slot: Panel = ABILITY_SLOT_SCENE.instantiate()
-		var label: Label = slot.get_node_or_null("Label")
-		if label != null:
-			label.text = ninja["name"]
-		ability_bar.add_child(slot)
-	var empty: int = max_slots - owned_ninjas.size()
-	for _i: int in range(empty):
-		var slot: Panel = ABILITY_SLOT_SCENE.instantiate()
-		var label: Label = slot.get_node_or_null("Label")
-		if label != null:
-			label.text = "空"
-		ability_bar.add_child(slot)
+	ninja_bar.refresh(owned_ninjas, max_slots)
 
 
 # ══════════════════════════════════════════
-# Seal complete
+# Result screens — delegated to ResultScreenDisplay
 # ══════════════════════════════════════════
 
 func set_level_complete(gold_reward: int) -> void:
-	reward_label.text = "+%d 金币" % gold_reward
+	result_screen.set_level_complete(gold_reward)
 
 
-# ══════════════════════════════════════════
-# Xi popup
-# ══════════════════════════════════════════
+func set_victory(barrier: int, score: int) -> void:
+	result_screen.set_victory(barrier, score)
+
+
+func show_game_over(reason: String, barrier: int, score: int) -> void:
+	result_screen.show_game_over(reason, barrier, score)
+
 
 func show_xi_popup(xis: Array[String]) -> void:
-	var text: String = "喜触发: " + ", ".join(xis)
-	score_breakdown.text = text
+	result_screen.show_xi_popup(xis)
+
+
+func show_scoring_result(head_eval: HandEvaluator3.EvalResult, mid_eval: HandEvaluator3.EvalResult, tail_eval: HandEvaluator3.EvalResult, total_score: int) -> void:
+	result_screen.show_scoring_result(head_eval, mid_eval, tail_eval, total_score)
 
 
 # ══════════════════════════════════════════
-# Card flash — A7 group reveal
+# Card flash — delegated to DunHighlighter
 # ══════════════════════════════════════════
 
 func flash_all_hand_cards() -> void:
-	_flash_hand(head_cards)
-	_flash_hand(middle_cards)
-	_flash_hand(tail_cards)
+	dun_highlighter.flash_all_hands()
 
 
-func _flash_hand(hand: Hand) -> void:
-	var cards_node: Node = hand.get_node_or_null("Cards")
-	if cards_node == null:
-		return
-	for card_node: Node in cards_node.get_children():
-		if card_node is CanvasItem:
-			GlobalTweens.color_flash(card_node, Color(1.0, 0.843, 0.0, 1.0), 0.1)
-
-
-# ══════════════════════════════════════════
-# Scoring result
-# ══════════════════════════════════════════
-
-func show_scoring_result(head_eval: HandEvaluator3.EvalResult, mid_eval: HandEvaluator3.EvalResult, tail_eval: HandEvaluator3.EvalResult, total_score: int) -> void:
-	var text: String = "影: %s | 瞬: %s | 滅: %s" % [
-		CardData.get_hand_type3_name(head_eval.hand_type),
-		CardData.get_hand_type3_name(mid_eval.hand_type),
-		CardData.get_hand_type3_name(tail_eval.hand_type)
-	]
-	hand_name_label.text = text
-	score_value_label.text = "+ %d" % total_score
-	score_breakdown.text = ""
+func flash_hand(hand: Hand) -> void:
+	dun_highlighter.flash_hand(hand)
 
 
 # ══════════════════════════════════════════
@@ -367,7 +326,7 @@ func show_scoring_result(head_eval: HandEvaluator3.EvalResult, mid_eval: HandEva
 # ══════════════════════════════════════════
 
 func restore_ui_state() -> void:
-	var gs = NinKingGameState
+	var gs: NinKingGameState = NinKingGameState
 	on_seal_start(gs.barrier_num, gs.seal_idx, int(gs.target_score), gs.current_seal_lord_name)
 	update_score(int(gs.current_score), int(gs.target_score))
 	update_match_info(gs.plays_remaining, gs.redraws_remaining)
@@ -380,78 +339,8 @@ func restore_ui_state() -> void:
 
 
 # ══════════════════════════════════════════
-# Deck display (delegated to DeckViewerController)
+# Deck display — delegated to DeckViewerController
 # ══════════════════════════════════════════
 
 func update_deck_count(draw_count: int, discard_count: int) -> void:
 	deck_viewer_ctrl.update_deck_count(draw_count, discard_count)
-
-
-# ══════════════════════════════════════════
-# Dun label highlight (V21) — pair-wise constraint visualizer
-# ══════════════════════════════════════════
-
-## Update 影/瞬/滅 labels to reflect constraint satisfaction pair-by-pair.
-## Pair1 (影<=瞬) → lights 影+瞬; Pair2 (瞬<=滅) → lights 瞬+滅.
-## StatusLabel shows hint text only when constraint fails.
-func _update_dun_label_highlights() -> void:
-	# Don't interfere with redraw mode status text
-	if redraw_mode:
-		return
-
-	var arr: AutoArranger.Arrangement = NinKingGameState.current_arrangement
-	if arr == null:
-		_reset_dun_label_highlights()
-		return
-
-	var pair1_ok: bool = arr.head_eval.strength <= arr.mid_eval.strength
-	var pair2_ok: bool = arr.mid_eval.strength <= arr.tail_eval.strength
-
-	# 影 lights up when Pair1 satisfied, 瞬 when either pair satisfied, 滅 when Pair2 satisfied
-	_apply_label_highlight(head_label, pair1_ok, DEFAULT_HEAD_OUTLINE)
-	_apply_label_highlight(middle_label, pair1_ok or pair2_ok, DEFAULT_MID_OUTLINE)
-	_apply_label_highlight(tail_label, pair2_ok, DEFAULT_TAIL_OUTLINE)
-
-	# Flash labels that just transitioned from dim → bright
-	if pair1_ok and not _head_was_highlighted:
-		GlobalTweens.color_flash(head_label, Color.WHITE, 0.1)
-	if (pair1_ok or pair2_ok) and not _mid_was_highlighted:
-		GlobalTweens.color_flash(middle_label, Color.WHITE, 0.1)
-	if pair2_ok and not _tail_was_highlighted:
-		GlobalTweens.color_flash(tail_label, Color.WHITE, 0.1)
-
-	_head_was_highlighted = pair1_ok
-	_mid_was_highlighted = pair1_ok or pair2_ok
-	_tail_was_highlighted = pair2_ok
-
-	# StatusLabel — only show when constraint fails (red text for errors)
-	if pair1_ok and pair2_ok:
-		status_label.text = ""
-	else:
-		const ERROR_FONT_COLOR := Color(0.95, 0.3, 0.3, 1.0)  # red tint for constraint errors
-		status_label.add_theme_color_override("font_color", ERROR_FONT_COLOR)
-		if not pair1_ok and pair2_ok:
-			status_label.text = "影勢過強"
-		elif pair1_ok and not pair2_ok:
-			status_label.text = "滅力不足"
-		else:
-			status_label.text = "重排三道"
-
-
-func _apply_label_highlight(label: Label, highlight: bool, default_outline: Color) -> void:
-	if highlight:
-		label.add_theme_color_override("font_color", HIGHLIGHT_FONT_COLOR)
-		label.add_theme_color_override("font_outline_color", HIGHLIGHT_OUTLINE_COLOR)
-	else:
-		label.add_theme_color_override("font_color", DEFAULT_FONT_COLOR)
-		label.add_theme_color_override("font_outline_color", default_outline)
-
-
-func _reset_dun_label_highlights() -> void:
-	_apply_label_highlight(head_label, false, DEFAULT_HEAD_OUTLINE)
-	_apply_label_highlight(middle_label, false, DEFAULT_MID_OUTLINE)
-	_apply_label_highlight(tail_label, false, DEFAULT_TAIL_OUTLINE)
-	_head_was_highlighted = false
-	_mid_was_highlighted = false
-	_tail_was_highlighted = false
-	status_label.text = ""

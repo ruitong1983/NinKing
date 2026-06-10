@@ -1,7 +1,10 @@
 # NinKing 音效设计计划
 
-> **建立日期:** 2026-06-10 | **关联:** [`TODO.md`](TODO.md) · [`04-asset-gap-list.md`](04-asset-gap-list.md) · [`sound_bank.gd`](../../scripts/config/sound_bank.gd)
+> **建立日期:** 2026-06-10 | **最后更新:** 2026-06-10 (V23 匹配完成)
+> **关联:** [`TODO.md`](TODO.md) · [`sound_bank.gd`](../../scripts/config/sound_bank.gd) · [`18-audio-asset-matching-guide.md`](18-audio-asset-matching-guide.md)
 > **用途:** 指导音效素材寻找、替换、新增、代码接线的完整工作计划。
+>
+> **✅ V23 素材替换状态:** 20/20 音效已从 Epic Stock Media「Anime Game」包自动匹配并转换为 OGG。详见 §10 执行记录。
 
 ---
 
@@ -61,9 +64,9 @@
 | 类别 | 现状 | 目标 |
 |------|------|------|
 | BGM | 2 首 FanKing 占位 (WAV) | 4 首忍者主题 OGG（菜单 + 游戏 3 段变奏 + 商店） |
-| 游戏 SFX | 17 个 FanKing 占位 (OGG) | 全替换为动画 SFX（日常操作 chiptune + 情绪节点动画戏剧音） |
-| UI SFX | 3 个 FanKing 占位 (OGG) | 保留 3 个 + 新增 3 个 |
-| **总计 SFX** | **19** | **25-30**（替换 19 + 新增 6-11） |
+| 游戏 SFX | ✅ **已替换** — 17 个动画 SFX (OGG) 来自 Anime Game Pack | 全替换为动画 SFX（日常操作 chiptune + 情绪节点动画戏剧音） |
+| UI SFX | ✅ **已替换** — 3 个动画 SFX (OGG) 来自 Anime Game Pack | 保留 3 个 + 新增 3 个 |
+| **总计 SFX** | **20/20 ✅**（P0 11 + P1 9） | **25-30**（替换 20 + 待新增 5-10 P2/P3） |
 
 ### SoundBank 常量重命名（忍者主题）
 
@@ -358,21 +361,23 @@
 ### Phase 1 — 核心体验 (P0) 🎯 目标：玩家第一耳就能感受到动画漫画风格
 
 ```
-素材寻找: S1-S10 (10 个音效) + BGM1 + BGM2a + BGM2b
-代码接线: game_manager.gd + seal_controller.gd 接入
-预计工时: 素材 2-3 天 + 接线 0.5 天
+✅ 素材替换: S1-S10 + S11-S18 (20 个音效) — 已完成 (2026-06-10)
+⬜ 代码接线: game_manager.gd + seal_controller.gd + shop_ui.gd + hand_interaction.gd
+⬜ BGM 素材: BGM1 + BGM2a + BGM2b 待寻找
+⬜ SoundBank 更新: C8 常量重命名 + L2 preload 更新
 ```
 
-| 步骤 | 内容 |
-|------|------|
-| 1.1 | BOOTH 采购 1 个アニメ/和風効果音集 + itch.io 采购 1 个 Anime SFX Pack |
-| 1.2 | 筛选符合 S1-S10 的素材，统一命名放入 `assets/audio/sound/game/` |
-| 1.3 | 効果音ラボ / Dova-Syndrome 筛选动画风 BGM1 + BGM2a/b |
-| 1.4 | 替换 sound_bank.gd 中 19 个旧 preload 路径 → 新文件 |
-| 1.5 | 接线：`game_manager._run_scoring_animation()` / `_on_xi_triggered()` / `_intro_timer()` |
-| 1.6 | 接线：`seal_controller.finalize_play()` / `_complete_seal()` / `execute_redraw()` |
-| 1.7 | 接线：`hand_interaction.gd` 交换完成 |
-| 1.8 | 测试：完整一局听全部 P0 音效 |
+| 步骤 | 内容 | 状态 |
+|------|------|------|
+| 1.1 | ~~BOOTH 采购~~ → 实际使用 Epic Stock Media「Anime Game」Pack (itch.io, $69, 1,433 WAV) | ✅ |
+| 1.2 | 自动匹配 S1-S18 + UIE 共 20 需求 → 全部匹配成功 (详见 §10) | ✅ |
+| 1.3 | ffmpeg WAV→OGG 转换 (`libvorbis -q:a 6` ~192kbps) → 复制到 `assets/audio/sound/` | ✅ |
+| 1.4 | BGM 素材寻找 (効果音ラボ / Dova-Syndrome) | ⬜ |
+| 1.5 | 替换 sound_bank.gd 中 17 个旧 preload + 新增 10 个常量 (C8) | ⬜ |
+| 1.6 | 接线：`game_manager._run_scoring_animation()` / `_on_xi_triggered()` / `_intro_timer()` | ⬜ |
+| 1.7 | 接线：`seal_controller.finalize_play()` / `_complete_seal()` / `execute_redraw()` | ⬜ |
+| 1.8 | 接线：`hand_interaction.gd` 交换完成 + `shop_ui.gd` 商店全流程 | ⬜ |
+| 1.9 | 测试：完整一局听全部音效 | ⬜ |
 
 ### Phase 2 — 关卡节点 (P1)
 
@@ -485,7 +490,71 @@ assets/audio/
 
 ---
 
-## §9 附录：已删除/合并的 FanKing 遗留
+## §10 执行记录 — V23 音效匹配 (2026-06-10)
+
+### 匹配概要
+
+| 指标 | 数值 |
+|------|------|
+| 素材包 | Epic Stock Media「Anime Game - Universal Sound Sets Library」 |
+| 源文件数 | 1,433 WAV (24-bit) |
+| 匹配需求 | 20 (P0 11 + P1 9) |
+| 匹配成功 | 20/20 ✅ |
+| 转换格式 | OGG (`libvorbis -q:a 6`, ~192kbps) |
+| 自动化工具 | awk 打分引擎 + ffprobe + ffmpeg |
+| 匹配规范 | `18-audio-asset-matching-guide.md` v2 |
+
+### P0 核心体验 (11 文件)
+
+| id | target | 时长 | 源文件 | 置信度 | 备注 |
+|----|--------|------|--------|--------|------|
+| S1 | `deal.ogg` | 0.59s | WHSH_Movement Blink Quick Swish 01 | 🟡 中 | 包内无 <0.2s whoosh。swish+light 关键词命中 |
+| S2 | `group_reveal.ogg` | 0.64s | IMPT_Combat Cute Punch Pow Impact 01 | 🟢 高 | 短impact+打击感，combat 目录优先匹配 |
+| S3 | `count_tick.ogg` | 0.25s | UI_Scifi Blip Short 01 | 🟡 中 | 包内最短UI音。scifi blip 音色近似 tick |
+| S4a | `xi_trigger.ogg` | 1.32s | MGB_Magic Buff Shimmer 01 | 🟡 中 | 魔法 shimmer 有铃铛质感，比设计时长偏长 |
+| S4b | `xi_fanfare.ogg` | 0.91s | PUP_Power Up Success 01 | 🟢 高 | power-up + success 精确命中，上行华丽 |
+| S5 | `seal_clear.ogg` | 1.51s | PUP_Bright Success Shimmer 01 | 🟡 中 | bright+success+shimmer。偏短但音色明亮 |
+| S6 | `seal_fail.ogg` | 0.75s | IMPT_Heavy Muffled Impact 01 | 🟡 中 | heavy+muffled=低沉下行感，combar→impact 目录 |
+| S7 | `swap.ogg` | 0.58s | WHSH_Movement Blink Swish 02 | 🟡 中 | 与 S1 同系列不同变体(01 vs 02) |
+| S8a | `discard.ogg` | 1.24s | MGB_Magic Pop Shimmer 03 | 🟡 中 | magic pop≈poof 烟遁感，偏长 |
+| S8b | `redraw_pop.ogg` | 0.80s | WHSH_Effect Blink Dash Flicker 01 | 🟡 中 | dash+flicker≈瞬身出现，whoosh 感 |
+| S9 | `ninja_activate.ogg` | 1.11s | MGE_Magic Electric Spark Flicker 01 | 🟡 中 | electric+spark=能量激活，metal ting 替代 |
+| S10 | `ui_click.ogg` | 0.29s | UI_Scifi Blip 03 | 🟡 中 | 包内次短UI音，与 S3 不同变体 |
+
+### P1 关卡节点 + UI (9 文件)
+
+| id | target | 时长 | 源文件 | 置信度 | 备注 |
+|----|--------|------|--------|--------|------|
+| S11 | `boss_reveal.ogg` | 2.15s | EXP_Dark Ominous Reveal 01 | 🟢 高 | **完美匹配**: dark+ominous+reveal 全关键词命中 |
+| S12 | `boss_final_layer.ogg` | 3.01s | MGG_Magic General Ominous Debuff Shimmer 01 | 🟡 中 | ominous+dark 氛围，低频嗡鸣感 |
+| S13 | `shop_enter.ogg` | 1.08s | ITM_Collect Acquire Bright 01 | 🟡 中 | collect+acquire≈获得物品，bright=温暖 |
+| S14 | `ui_coin.ogg` | 1.11s | UI_Clean Glass Tap 01 | 🟡 中 | glass tap 清脆感≈金币，偏长但音色对 |
+| S15 | `item_purchase.ogg` | 1.05s | ITM_Loot Chest Equip Gain 01 | 🟢 高 | **完美匹配**: loot+gain=获得消耗品 |
+| S16 | `shop_reroll.ogg` | 1.04s | WHSH_Movement Smooth Slide Swish 01 | 🟡 中 | slide+swish≈洗牌翻飞 |
+| S17 | `shop_exit.ogg` | 1.05s | WHSH_Movement Quick Slide Tight Filter 04 | 🟡 中 | 与 S16 不同变体(04 vs 01)，close/exit 语义 |
+| UIE | `ui_error.ogg` | 0.97s | MGE_Magic Electric Buzzing Malfunction 01 | 🟡 中 | buzzing+malfunction≈错误否定，偏长但拒绝感对 |
+
+### 已知限制
+
+| # | 限制 | 影响 | 缓解 |
+|---|------|------|------|
+| L1 | 包内无 <0.2s 超短音效 | S3 count_tick (0.25s) / S10 ui_click (0.29s) 偏长 | 选取包内最短可用，高频操作容忍度内 |
+| L2 | 无纯和风乐器音（太鼓/铃/尺八/筝） | S2/S5 缺乏和风特色 | 采用通用动画打击/胜利音替代，和风点缀待 BOOTH 补充 |
+| L3 | 包内 whoosh ~0.5-1.2s 为主 | S1/S7 偏长（spec 目标 0.05-0.25s） | 选取最短可用变体，实际听感可接受 |
+| L4 | 无 anime 人声/喊叫 | 无法做角色语音 | 非当前需求范围，P2+ 考虑 |
+
+### 旧文件归档
+
+17 个 FanKing 占位文件已备份至 `assets/audio/sound/legacy_placeholders/`，待 C8 SoundBank 更新 + L3 接线完成后清理。
+
+### 后续待办
+
+| 步骤 | 内容 | 关联 |
+|------|------|------|
+| C8 | `sound_bank.gd` 常量重命名（§3 映射表） | TODO.md C8 |
+| L2 | `sound_bank.gd` 新增 P0+P1 preload 常量 | §8 |
+| L3 | 全量接线 (§7 速查表 17 处) | §7 |
+| B11 | MusicManager BGM 3 段变奏 | TODO.md B11 |
 
 以下 FanKing 占位音效在替换后不再存在对应文件：
 

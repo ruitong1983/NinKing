@@ -1,7 +1,7 @@
 # NinKing 图像素材 AI 生成 + Godot 拼装工作计划
 
 > **最后更新:** 2026-06-10 | **状态:** 方案已确认，待执行（漫画风重写版）
-> **关联文档:** [`04-asset-gap-list.md`](04-asset-gap-list.md) · [`06-ui-layout-reference.md`](06-ui-layout-reference.md) · [`16-art-direction-principles.md`](16-art-direction-principles.md) · [`README.md`](README.md)
+> **关联文档:** [`06-ui-layout-reference.md`](06-ui-layout-reference.md) · [`16-art-direction-principles.md`](16-art-direction-principles.md) · [`README.md`](README.md)
 >
 > **AI 工具首选:** 豆包（Doubao / 即梦）Seedream 4.0
 > **后备工具:** 通义万相、Midjourney（英文提示词兼容）

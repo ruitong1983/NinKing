@@ -2,6 +2,7 @@
 
 > **维护索引：** 本文档定义全部 UI 区域命名、层级结构、节点访问路径和更新接口。
 > 代码中所有 `%` 引用、`@onready` 变量、信号绑定均以此文档为准。
+> **风格权威：**[`16-art-direction-principles.md`](16-art-direction-principles.md) — UI 配色/组件/特效以 16 号文档为准，本文档 §6 为速查摘要。
 
 ---
 
@@ -129,7 +130,15 @@ NinKingMain (Control) 1920×1080
     └── OVL_GameOver (Control)             [%GameOver]  视图: 失败
         ├── OverlayBg                      #000 80%
         ├── GameOverLabel                  "失败" 56px 红色
-        └── RetryButton                    [%RetryButton] "重新开始"
+        ├── ScoreSummary (Label)           "战绩: 结界 N · 忍気 N" 24px
+        ├── RetryButton                    [%RetryButton] "重新开始"
+        └── BackToMenuButton               "返回主菜单"
+    │
+    ├── VictoryOverlay (Control)            [VictoryOverlay]  视图: 通关 (新增)
+    │   ├── OverlayBg                      #000 70%
+    │   ├── VictoryLabel                   "忍道制霸!" 56px 金
+    │   ├── StatsSummary (Label)          通关统计
+    │   └── MenuButton                     "返回主菜单"
 ```
 
 ---
@@ -175,7 +184,7 @@ NinKingMain (Control) 1920×1080
 | 节点路径 | `UIManager/GameLayout/LeftPanel` |
 | 访问名 | `%LeftPanel` (V19 新增) |
 | 宽度 | 380px |
-| 背景色 | 动态結界配色 `BarrierTheme.get_colors(n).panel` |
+| 背景色 | 动态属性配色 `BarrierTheme.get_colors(n).panel` |
 | 用途 | 显示全部计分与状态数据 |
 
 **子区域：**
@@ -247,8 +256,8 @@ NinKingMain (Control) 1920×1080
 | 单牌尺寸 | 90×130 |
 | 交互 | 点击两张牌互换（蓝高亮=交换源）；换牌模式（红高亮=标记丢弃） |
 | 约束 | 影牌力 ≤ 瞬牌力 ≤ 滅牌力 |
-| 约束满足 | 三道标签（影/瞬/滅）亮白色高亮 + 金色辉光描边，StatusLabel 留空 |
-| 约束违规 | 违规段标签变暗金；StatusLabel 显示原因（影勢過強 / 滅力不足 / 重排三道） |
+| 约束满足 | 三道标签同时点亮为属性 accent 色 + 集中线从标签向卡牌汇聚，StatusLabel 留空 |
+| 约束违规 | 违规段标签变灰 + 小「×」叠印（漫画错误标记）；StatusLabel 显示原因（影勢過強 / 滅力不足 / 重排三道） |
 | 高亮算法 | 逐对匹配：Pair1(影≤瞬) 点亮影+瞬，Pair2(瞬≤滅) 点亮瞬+滅。全满足=全亮可討伐 |
 
 ### 3.4 计分弹窗 `OVL_Scoring`
@@ -296,9 +305,9 @@ NinKingMain (Control) 1920×1080
 **更新时机：** 每次牌库变化（抽牌/手替え/换牌后）→ `game_manager._update_deck_display()` → `ui_manager.update_deck_count()`
 
 **`DeckBtn` 样式：**
-- 金色文字 `🎴 牌库: XX`，18px
-- 背景 `#0F2822` + 1px 金色描边 `#D4A843` + 圆角 8px + 阴影
-- hover 时文字变亮金色 `#F0D060`
+- 文字 `🎴 牌库: XX`，18px
+- 背景当前属性 `panel` 色 + 2px 粗黑描边 + 圆角 6px + 阴影
+- hover 时文字变亮 + 描边加粗至 3px
 - 尺寸 200×48，居中位于 HandArea 下方
 
 **CardPanel 尺寸：** 900×640，居中于 1920×1080 遮罩内
@@ -323,21 +332,22 @@ NinKingMain (Control) 1920×1080
    │ visible=T│
    └────┬─────┘
         │
-   ┌────┴─────┬──────────┬──────────┐
-   ▼          ▼          ▼          ▼
-Scoring  LevelComplete  GameOver  (出牌→计分
-Overlay  (忍気达标)    (换牌用完)   →过关→商店)
+   ┌────┴─────┬──────────┬──────────┬──────────┐
+   ▼          ▼          ▼          ▼          ▼
+Scoring  LevelComplete  GameOver  VictoryOverlay
+Overlay  (封印达成)    (忍気不足)  (全结界制霸)
 ```
 
 **`show_view()` 映射：**
 
-| view 参数 | GameBg | LevelIntro | GameLayout | Scoring | LevelComplete | GameOver |
-|-----------|--------|------------|------------|---------|---------------|----------|
-| `"intro"` | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| `"game"` | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
-| `"scoring"` | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ |
-| `"complete"` | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| `"gameover"` | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| view 参数 | GameBg | LevelIntro | GameLayout | Scoring | LevelComplete | GameOver | VictoryOverlay |
+|-----------|--------|------------|------------|---------|---------------|----------|----------------|
+| `"intro"` | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `"game"` | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| `"scoring"` | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| `"complete"` | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| `"gameover"` | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| `"victory"` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 
 ---
 
@@ -392,38 +402,62 @@ NinKingGameState (autoload)
 
 ---
 
-## 6. 配色速查
+## 6. 配色与风格速查
+
+> **权威来源：**[`16-art-direction-principles.md`](16-art-direction-principles.md) — 本文档 §6 为 UI 布局视角的速查摘要，以 16 号文档为准。
 
 ### 动态配色体系 (V16-V19)
 
-> **NinKing 采用 8 結界冷暖交替动态配色。** 配色由 `BarrierTheme` (`scripts/ninking/barrier_theme.gd`) 集中管理，
+> **NinKing 采用 8 属性动态配色。** 配色由 `BarrierTheme` (`scripts/ninking/barrier_theme.gd`) 集中管理，
 > `game_manager._on_seal_started()` 自动切换 GameBg / PanelBg / ProgressBar / 按钮字体色。
-> **不推荐硬编码色值**——请通过 `BarrierTheme.get_colors(barrier_num)` 获取当前結界对应配色。
+> **不推荐硬编码色值**——请通过 `BarrierTheme.get_colors(barrier_num)` 获取当前属性对应配色。
 
-### 8 結界配色表
+### 8 属性配色表
 
-| 結界 | 色调 | 名称 | bg | accent |
-|------|------|------|-----|--------|
-| 壱 | 冷·紫 | 紫苑 | `(0.08,0.04,0.16)` | `(0.75,0.45,0.95)` |
-| 弐 | 暖·红 | 紅蓮 | `(0.16,0.04,0.04)` | `(0.95,0.35,0.35)` |
-| 参 | 冷·青 | 青龍 | `(0.04,0.12,0.16)` | `(0.30,0.85,0.90)` |
-| 肆 | 暖·橙 | 橙火 | `(0.16,0.08,0.04)` | `(0.95,0.55,0.20)` |
-| 伍 | 冷·蓝 | 藍鋼 | `(0.04,0.06,0.18)` | `(0.35,0.55,0.95)` |
-| 陸 | 暖·金 | 金剛 | `(0.14,0.10,0.04)` | `(0.95,0.75,0.25)` |
-| 漆 | 冷·翠 | 翠嵐 | `(0.04,0.15,0.12)` | `(0.25,0.88,0.70)` |
-| 捌 | 暖·粉 | 桜吹雪 | `(0.16,0.06,0.12)` | `(0.95,0.45,0.65)` |
+> 亮色英雄向 — 明亮中色调 bg（非纯白，护眼）+ 高饱和漫画 accent。
 
-### 像素风设计原则 (V16)
+| Ante | 属性 | 称谓 | bg | panel | accent | particle_color |
+|------|------|------|-----|-------|--------|-----------------|
+| 1 | **火** | 壱·火 | `(0.92,0.82,0.78)` 暖米 | `(0.96,0.90,0.86)` | `(0.90,0.18,0.10)` 烈焰红 | 红橙 |
+| 2 | **水** | 弐·水 | `(0.78,0.86,0.92)` 淡蓝 | `(0.86,0.93,0.96)` | `(0.12,0.45,0.88)` 流水蓝 | 青蓝 |
+| 3 | **風** | 参·風 | `(0.80,0.90,0.82)` 淡绿 | `(0.88,0.95,0.90)` | `(0.15,0.72,0.38)` 疾风绿 | 翠绿 |
+| 4 | **雷** | 肆·雷 | `(0.94,0.90,0.78)` 暖金 | `(0.97,0.95,0.86)` | `(0.95,0.72,0.08)` 雷光金 | 金黄 |
+| 5 | **土** | 伍·土 | `(0.88,0.82,0.75)` 暖棕 | `(0.94,0.90,0.85)` | `(0.75,0.40,0.15)` 大地琥珀 | 橙棕 |
+| 6 | **光** | 陸·光 | `(0.92,0.92,0.86)` 象牙 | `(0.97,0.97,0.92)` | `(0.90,0.78,0.15)` 光辉金 | 亮金 |
+| 7 | **暗** | 漆·暗 | `(0.72,0.68,0.80)` 暗紫 | `(0.80,0.76,0.86)` | `(0.55,0.22,0.78)` 暗夜紫 | 深紫 |
+| 8 | **无** | 捌·无 | `(0.82,0.82,0.84)` 银灰 | `(0.90,0.90,0.92)` | `(0.55,0.55,0.58)` 虚无灰 | 灰白 |
+
+### 漫画风设计原则 (V20+)
+
+> **风格定位：少年漫/热血漫 × 忍者扑克 Roguelike — 干净底子 + 漫画特效层。**
+> 详细规范见 [`16-art-direction-principles.md`](16-art-direction-principles.md) §3-§4。
 
 | 原则 | 规范 |
 |------|------|
-| 圆角 | 全部 `0px` — 像素硬角 |
-| 边框 | 全局 `2px` 硬边，金色强调 |
-| 按钮 | 三态瞬时切换：normal(暗底+金边) → hover(亮底+金边) → pressed(深底+内容下移2px) |
-| 面板 | 2px 外边框 + 1px 内边框 (双层硬边) |
-| 三墩区分 | 影(1px outline/alpha 0.3) → 瞬(2px/alpha 0.6) → 滅(3px/alpha 1.0) 边框递进 |
-| CRT | 扫描线 + `time_offset` 微下移动效 (约35秒一循环) |
-| 字体 | Press Start 2P (EN) + 凤凰点阵体 12px/16px (CJK) |
+| 圆角 | 6-8px（漫画不是像素，不要硬角） |
+| 描边 | 2-3px 仿手绘描边（G-pen 感），全局统一 `#1A1A1A` 墨色 |
+| 按钮 | 三态漫画风：normal(accent底+2px黑描边) → hover(调亮10%+描边3px+scale 1.03) → pressed(调暗15%+内容下移2px) |
+| 面板 | 属性 `panel` 色底 + 可选 5-8% 半调网点叠加 + 4px 柔和投影 |
+| 三墩区分 | 影(1px虚线) / 瞬(2px实线+微弱属性色glow) / 滅(3px粗描边+速度线底纹) |
+| 约束满足 | 三道标签同时点亮为属性 accent 色 + 集中线从标签向卡牌汇聚 |
+| 约束违规 | 违规段标签变灰 + 小「×」叠印 |
+| 漫画特效层 | 集中线(Boss揭晓/封印达成) + 速度线(发牌/换牌) + 拟声词弹出(P2) |
+| 字体 | ⏸️ 暂用 Press Start 2P (EN) + 凤凰点阵体 (CJK)，漫画ゴシック体替换方案见 `17-font-design-plan.md` |
+
+### 旧→新对照
+
+| 维度 | 旧（像素风·暗夜忍者） | 新（少年漫·亮色英雄） |
+|------|----------------------|----------------------|
+| **美术风格** | 16-bit 像素风 | 少年漫画风，cel-shading |
+| **色调** | 深色基底 + 金色点缀 | 亮色基底 + 高饱和 accent |
+| **配色体系** | 8 結界冷暖交替 | 8 属性（火水風雷土光暗无） |
+| **結界称谓** | 壱 / 弐 / 参 … 捌 | 壱·火 / 弐·水 … 捌·无 |
+| **圓角** | 0px（硬角） | 6-8px |
+| **描边** | 2px 等宽硬边 | 1-3px 仿手绘描边 |
+| **按钮** | 像素三态（暗底+金边） | 粗描边三态 + scale_pop |
+| **三墩区分** | 1px/2px/3px 边框递进 | 虚线/实线/粗描边+速度线 |
+| **特效层** | CRT 扫描线 + 微下移 | 集中线 + 速度线 + 拟声词 |
+| **粒子** | 像素手里剑/樱花 | 漫画集中线/墨迹/速度线 |
 
 ---
 
@@ -443,8 +477,12 @@ NinKingGameState (autoload)
 | `scripts/ninking/hand_evaluator.gd` | 牌型评估 |
 | `scripts/ninking/score_calculator.gd` | 计分计算 |
 | `scripts/ninking/barrier_config.gd` | 关卡/結界配置 |
-| `scripts/ninking/barrier_theme.gd` | 8 結界冷暖交替配色表 |
+| `scripts/ninking/barrier_theme.gd` | 8 属性亮色色板（待实施，详见 `16-art-direction-principles.md` §9 C1） |
 | `scripts/ninking/shop_manager.gd` | 商店管理 |
+| `scripts/ninking/ui/shop_ui.gd` | 商店 UI 控制 (萬屋) |
+| `scripts/ninking/ui/shop_ability_card.gd` | 商店能力牌卡片组件 |
+| `scripts/ninking/ui/shop_item_card.gd` | 商店道具卡片组件 |
+| `scripts/ninking/ui/nin_king_tween.gd` | 项目级动画序列层 (商店入场等) |
 | `docs/ninking/01-game-design.md` | 游戏设计文档 |
 | `docs/ninking/03-technical-design.md` | 技术设计文档 |
 | `docs/ninking/05-image-asset-generation-plan.md` | 素材生成方案 |

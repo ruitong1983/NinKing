@@ -1,9 +1,11 @@
 extends Control
 ## 萬屋 UI — buy ninjas and items between seals.
+## Manga hot-blooded style with impact-frame title bars and focus lines.
 
 const ABILITY_CARD_SCENE: String = "res://scenes/ninking/shop_ability_card.tscn"
 const ITEM_CARD_SCENE: String = "res://scenes/ninking/shop_item_card.tscn"
 const REROLL_COST: int = 5
+const COLOR_INK: Color = Color(0.102, 0.102, 0.102)  # #1A1A1A 漫画墨色
 
 @onready var gold_label: Label = %GoldLabel
 @onready var reroll_button: Button = %RerollBtn
@@ -14,12 +16,19 @@ const REROLL_COST: int = 5
 @onready var next_level_hint: Label = %NextLevelHint
 @onready var ninja_slot_label: Label = %NinjaSlotLabel
 @onready var panel: Panel = %ShopPanel
+@onready var title_focus_lines: TextureRect = %TitleFocusLines
+@onready var shop_subtitle: Label = %ShopSubtitle
+@onready var ability_focus_lines: TextureRect = %AbilityFocusLines
+@onready var item_focus_lines: TextureRect = %ItemFocusLines
+@onready var bottom_focus_lines: TextureRect = %BottomFocusLines
 
 var shop: ShopManager = null
 var ability_card_scene: PackedScene = null
 var item_card_scene: PackedScene = null
 var ability_cards: Array = []
 var item_cards: Array = []
+var barrier_colors: Dictionary = {}
+var _entrance_active: bool = false
 
 
 func _ready() -> void:
@@ -27,6 +36,8 @@ func _ready() -> void:
 	item_card_scene = load(ITEM_CARD_SCENE)
 
 	shop = ShopManager.new()
+	barrier_colors = BarrierTheme.get_colors(NinKingGameState.barrier_num)
+	_apply_barrier_theme()
 	_refresh_shop()
 
 	_update_gold_display()
@@ -34,6 +45,108 @@ func _ready() -> void:
 	reroll_button.pressed.connect(_on_reroll_pressed)
 
 	_play_entrance()
+
+
+func _apply_barrier_theme() -> void:
+	## Apply barrier-specific manga colors to the shop chrome.
+	var c: Dictionary = barrier_colors
+	var darker: Color = Color(c.bg).darkened(0.08)
+
+	# Panel frame
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = c.panel
+	panel_style.border_color = COLOR_INK
+	panel_style.border_width_left = 3
+	panel_style.border_width_top = 3
+	panel_style.border_width_right = 3
+	panel_style.border_width_bottom = 3
+	panel_style.corner_radius_top_left = 8
+	panel_style.corner_radius_top_right = 8
+	panel_style.corner_radius_bottom_left = 8
+	panel_style.corner_radius_bottom_right = 8
+	panel_style.content_margin_left = 12
+	panel_style.content_margin_top = 12
+	panel_style.content_margin_right = 12
+	panel_style.content_margin_bottom = 12
+	panel_style.shadow_size = 6
+	panel_style.shadow_color = Color(0, 0, 0, 0.15)
+	panel.add_theme_stylebox_override("panel", panel_style)
+
+	# Title bar / bottom bar
+	$ShopPanel/TitleBar.color = darker
+	$ShopPanel/BottomBar.color = darker
+
+	# Title text
+	$ShopPanel/ShopTitle.add_theme_color_override("font_color", c.accent)
+
+	# Subtitle stamp
+	shop_subtitle.add_theme_color_override("font_color", c.accent)
+	shop_subtitle.add_theme_color_override("font_outline_color", COLOR_INK)
+	shop_subtitle.add_theme_constant_override("outline_size", 2)
+
+	# Focus lines (white PNG → modulate to accent)
+	title_focus_lines.modulate = Color(c.accent, 0.6)
+	ability_focus_lines.modulate = Color(c.accent, 0.4)
+	item_focus_lines.modulate = Color(c.accent, 0.4)
+	bottom_focus_lines.modulate = Color(c.accent, 0.6)
+
+	# Separator
+	$ShopPanel/Separator.color = Color(c.accent, 0.25)
+
+	# Impact buttons — override bg_color to current accent
+	_apply_impact_button_style(continue_button, c.accent)
+	_apply_impact_button_style(reroll_button, c.accent)
+
+	# Ninja slot label
+	ninja_slot_label.add_theme_color_override("font_color", c.accent)
+
+	# Section labels
+	$ShopPanel/AbilityLabel.add_theme_color_override("font_color", c.accent)
+	$ShopPanel/ItemLabel.add_theme_color_override("font_color", c.accent)
+
+
+func _apply_impact_button_style(btn: Button, accent: Color) -> void:
+	## Create impact-button styleboxes for a button with the given accent color.
+	var s_normal := StyleBoxFlat.new()
+	s_normal.bg_color = accent
+	s_normal.border_color = COLOR_INK
+	s_normal.border_width_left = 3
+	s_normal.border_width_right = 3
+	s_normal.border_width_top = 3
+	s_normal.border_width_bottom = 3
+	s_normal.corner_radius_top_left = 8
+	s_normal.corner_radius_top_right = 8
+	s_normal.corner_radius_bottom_left = 8
+	s_normal.corner_radius_bottom_right = 8
+	s_normal.content_margin_left = 20
+	s_normal.content_margin_top = 10
+	s_normal.content_margin_right = 20
+	s_normal.content_margin_bottom = 10
+	btn.add_theme_stylebox_override("normal", s_normal)
+	btn.add_theme_color_override("font_color", Color.WHITE)
+
+	var s_hover := s_normal.duplicate() as StyleBoxFlat
+	s_hover.bg_color = Color(accent).lightened(0.1)
+	s_hover.border_width_left = 4
+	s_hover.border_width_right = 4
+	s_hover.border_width_top = 4
+	s_hover.border_width_bottom = 4
+	btn.add_theme_stylebox_override("hover", s_hover)
+
+	var s_pressed := s_normal.duplicate() as StyleBoxFlat
+	s_pressed.bg_color = Color(accent).darkened(0.15)
+	s_pressed.content_margin_top = 12
+	s_pressed.content_margin_bottom = 8
+	btn.add_theme_stylebox_override("pressed", s_pressed)
+
+	var s_disabled := s_normal.duplicate() as StyleBoxFlat
+	s_disabled.bg_color = Color(0.8, 0.8, 0.8, 1)
+	s_disabled.border_color = Color(0.6, 0.6, 0.6, 1)
+	s_disabled.border_width_left = 2
+	s_disabled.border_width_right = 2
+	s_disabled.border_width_top = 2
+	s_disabled.border_width_bottom = 2
+	btn.add_theme_stylebox_override("disabled", s_disabled)
 
 
 func _refresh_shop() -> void:
@@ -47,9 +160,10 @@ func _render_abilities() -> void:
 	_clear_ability_row()
 	for data: Dictionary in shop.get_ninjas_for_display():
 		var card := ability_card_scene.instantiate()
+		ability_row.add_child(card)  # must add to tree first — @onready fires on enter_tree
 		card.setup(data)
+		card.apply_barrier_theme(barrier_colors)
 		card.purchase_requested.connect(_on_ability_purchase)
-		ability_row.add_child(card)
 		ability_cards.append(card)
 
 
@@ -61,9 +175,10 @@ func _render_items() -> void:
 	all_items.append_array(shop.get_kinjutsu_for_display())
 	for data: Dictionary in all_items:
 		var card := item_card_scene.instantiate()
+		item_row.add_child(card)  # must add to tree first — @onready fires on enter_tree
 		card.setup(data)
+		card.apply_barrier_theme(barrier_colors)
 		card.purchase_requested.connect(_on_item_purchase)
-		item_row.add_child(card)
 		item_cards.append(card)
 
 
@@ -118,6 +233,9 @@ func _on_ability_purchase(ability: Dictionary) -> void:
 		_update_reroll_state()
 		for card in ability_cards:
 			if card.ability_data == ability:
+				# Purchase micro-impact
+				GlobalTweens.scale_pop(card.buy_button, 1.05, 0.15)
+				GlobalTweens.shake_node(card, 3.0, 0.06)
 				card.set_purchased()
 				break
 		ToastManager.show("获得: %s!" % ability.get("name", "???"), 1.5)
@@ -131,6 +249,8 @@ func _on_item_purchase(item: Dictionary) -> void:
 		_update_reroll_state()
 		for card in item_cards:
 			if card.item_data == item:
+				GlobalTweens.scale_pop(card.buy_button, 1.05, 0.15)
+				GlobalTweens.shake_node(card, 3.0, 0.06)
 				card.set_purchased()
 				break
 		ToastManager.show("获得: %s!" % item.get("name", "???"), 1.5)
@@ -157,18 +277,29 @@ func _on_continue_pressed() -> void:
 
 
 func _play_entrance() -> void:
-	panel.position.y += 200
-	var tween: Tween = create_tween()
-	tween.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
-	tween.tween_property(panel, "position:y", panel.position.y - 200, 0.5)
+	## Play manga-style shop entrance sequence. Fire-and-forget.
+	if _entrance_active:
+		return
+	_entrance_active = true
 
-	for i: int in range(ability_cards.size() + item_cards.size()):
-		var card: Control
-		if i < ability_cards.size():
-			card = ability_cards[i]
-		else:
-			card = item_cards[i - ability_cards.size()]
-		card.scale = Vector2.ZERO
-		var ct: Tween = create_tween()
-		ct.tween_interval(0.4 + i * 0.07)
-		ct.tween_property(card, "scale", Vector2.ONE, 0.3).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	var all_cards: Array[Control] = []
+	all_cards.append_array(ability_cards)
+	all_cards.append_array(item_cards)
+
+	# Sound: load directly until SoundBank C16 is done
+	var whoosh_sfx: AudioStream = load("res://assets/audio/sound/game/shop_enter.ogg")
+	var impact_sfx: AudioStream = load("res://assets/audio/sound/game/boss_reveal.ogg")
+
+	await NinKingTween.play_shop_entrance({
+		overlay = $Overlay,
+		panel = panel,
+		all_cards = all_cards,
+		focus_title = title_focus_lines,
+		focus_ability = ability_focus_lines,
+		focus_item = item_focus_lines,
+		focus_bottom = bottom_focus_lines,
+		whoosh_sfx = whoosh_sfx,
+		impact_sfx = impact_sfx,
+	})
+
+	_entrance_active = false

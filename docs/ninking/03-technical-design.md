@@ -187,18 +187,22 @@ NinKingMain (Control) [game_manager.gd]
     │       │   ├── Col1Label — 列1 牌型
     │       │   └── Col2Label — 列2 牌型
     │       └── DeckBtn "🎴 牌库"
-    ├── ScoringOverlay (Control) — 计分弹窗
-    │   └── HandNameLabel / ScoreValueLabel / ScoreBreakdown
+    ├── ScoringOverlay (Control) — ⛔ 计分时不再显示 (Balatro 风内联动画) [z_index=10]
+    │   └── HandNameLabel / ScoreValueLabel / ScoreBreakdown (保留节点，未被计分流程使用)
     ├── LevelComplete (Control) — 过关弹窗
     │   └── CompleteLabel / RewardLabel / ToShopButton
     ├── GameOver (Control) — 失败弹窗
-    │   └── GameOverLabel / RetryButton
-    └── DeckViewer (Control) — 牌库查看器
+    │   └── OverlayBg / GameOverLabel / ScoreSummary / RetryButton / BackToMenuButton
+    ├── VictoryOverlay (Control) — 通关弹窗 (独立于 GameOver)
+    │   └── OverlayBg / VictoryLabel / StatsSummary / MenuButton
+    └── DeckViewer (Control) — 牌库查看器 [z_index=10]
         └── ViewerBg / CardPanel / TitleBar / CountRow / CardScroll / CardGrid
 ```
 
 > **注意:** 三墩内部的手牌节点（HeadCards/MiddleCards/TailCards）和牌型标签（HeadTypeLabel 等）
 > 由 `HandDisplay` 在运行时动态创建和管理，不在静态场景树中。
+>
+> **⚠️ z_index 陷阱:** `Hand._update_target_z_index()` 会给卡牌设 z_index=0/1/2，在 Godot 4 的累加 z_index 模型下会穿透同层 overlay。DeckViewer 已设 `z_index=10` 应对。ScoringOverlay 计分时不显示（Balatro 风内联动画），不再需要 z_index 防护。详见 `docs/card-framework-usage-guide.md` § 已知陷阱。
 
 ### shop.tscn
 
