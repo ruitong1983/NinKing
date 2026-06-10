@@ -14,6 +14,14 @@
 
 > 每次会话开始先读取。完成任务后更新状态。
 
+# 🧪 Godot MCP Pro 测试 → 先读 `docs/ninking/testing-guide.md`
+
+> **调用 `mcp__godot-mcp-pro__play_scene` / `execute_game_script` / `find_ui_elements` / `simulate_mouse_click` / `get_game_screenshot` 做游戏测试前，必须先读此指南。**
+>
+> **触发：** 任何涉及运行时 MCP 工具的游戏测试操作。
+> **为什么：** 场景切换会销毁旧树上的 await timer（SEAL_INTRO 卡死等已知陷阱），按钮文本/场景结构/状态机必须对得上。
+> **不读的后果：** 卡在 Launcher 进不去主界面、find_ui_elements 返回空、按钮点不动 — 浪费 3-5 回合。
+
 # ⚠️ 任务分派 — 动手前先查 Skill
 
 > 非纯代码任务必须先检查 `.claude/skills/`。Skill 匹配后走完其完整流程。

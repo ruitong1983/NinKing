@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://cpbjm8wnrn5ae"]
 
 [ext_resource type="Script" uid="uid://cgmftbp56ll6h" path="res://scripts/ninking/ui/shop_ui.gd" id="1_shop"]
+[ext_resource type="Theme" uid="uid://ddvno1bm21p8c" path="res://assets/themes/pixel_theme.tres" id="2_theme"]
 
 [node name="Shop" type="Control" unique_id=1001952410]
 layout_mode = 3
@@ -9,6 +10,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("2_theme")
 script = ExtResource("1_shop")
 
 [node name="Overlay" type="ColorRect" parent="." unique_id=1991946275]

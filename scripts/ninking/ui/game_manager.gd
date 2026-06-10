@@ -45,6 +45,11 @@ func _ready() -> void:
 		NinKingGameState.current_seal_lord_name
 	)
 
+	# Transition SEAL_INTRO → PLAYING after intro display.
+	# Moved from game_state._begin_seal_phase() because change_scene_to_file
+	# destroys the old scene tree along with any pending await timers.
+	await _intro_timer()
+
 
 func _process(_delta: float) -> void:
 	# CRT scanline slow downward drift (one full cycle ≈ 35 sec @ 60 fps)
@@ -191,6 +196,19 @@ func _update_deck_display() -> void:
 	var dm: DeckManager = NinKingGameState.deck_manager
 	if dm != null:
 		ui.update_deck_count(dm.draw_pile.size(), dm.discard_pile.size())
+
+
+# ══════════════════════════════════════════
+# Intro timer — SEAL_INTRO → PLAYING
+# ══════════════════════════════════════════
+
+## Wait 2 seconds then transition from SEAL_INTRO to PLAYING.
+## Extracted from game_state._begin_seal_phase() because
+## change_scene_to_file destroys the old scene tree (and its timers).
+func _intro_timer() -> void:
+	await get_tree().create_timer(2.0).timeout
+	if NinKingGameState.current_state == NinKingGameState.State.SEAL_INTRO:
+		NinKingGameState._transition_to(NinKingGameState.State.PLAYING)
 
 
 # ══════════════════════════════════════════

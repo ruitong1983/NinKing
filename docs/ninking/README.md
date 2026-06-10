@@ -14,9 +14,13 @@
 | [`03-technical-design.md`](03-technical-design.md) | 状态机、场景树、信号架构（技术参考） |
 | [`04-asset-gap-list.md`](04-asset-gap-list.md) | 美术/音效/UI/字体 素材缺口与补齐计划 |
 | [`05-image-asset-generation-plan.md`](05-image-asset-generation-plan.md) | 图像素材 AI 生成方案 |
+| [`15-sound-design-plan.md`](15-sound-design-plan.md) | 音效设计计划 |
+| [`16-art-direction-principles.md`](16-art-direction-principles.md) | **美术方向设计原则** — UI/音效/图像/卡牌/VFX 全局风格规范 |
+| [`17-font-design-plan.md`](17-font-design-plan.md) | **字体设计方案** — 漫画ゴシック体选型/获取/命名/导入/配置 |
 | [`07-shop-ui-design.md`](07-shop-ui-design.md) | 商店 UI 设计 |
 | [`08-figma-naming-convention.md`](08-figma-naming-convention.md) | Figma 命名规范 |
 | [`TODO.md`](TODO.md) | **工作清单:** Bug / 待实现 / 优化 / 素材缺口 |
+| [`testing-guide.md`](testing-guide.md) | **测试指南:** Godot MCP Pro 测试流程/常见陷阱/命令速查 |
 
 ## 技术参考（docs/ 根目录）
 

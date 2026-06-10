@@ -309,9 +309,8 @@ func _begin_seal_phase() -> void:
 	_transition_to(State.SEAL_INTRO)
 	seal_started.emit(barrier_num, seal_idx, target_score, current_seal_lord_name)
 
-	await get_tree().create_timer(2.0).timeout
-	if current_state == State.SEAL_INTRO:
-		_transition_to(State.PLAYING)
+	# NOTE: SEAL_INTRO → PLAYING timer moved to game_manager._ready()
+	# because change_scene_to_file destroys timers on the old scene tree.
 
 
 func _transition_to(new_state: State) -> void:

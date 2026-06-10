@@ -308,7 +308,7 @@ text = "0"
 [node name="MultSign" type="Label" parent="UIManager/GameLayout/LeftPanel/ContentVBox/ScoreCard/ScoreCardVBox/ChipsMultContainer" unique_id=951268244]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.478, 0.478, 0.416, 1)
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 48
 text = "x"
 
 [node name="MultLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/ContentVBox/ScoreCard/ScoreCardVBox/ChipsMultContainer" unique_id=537157840]
@@ -339,7 +339,7 @@ show_percentage = false
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.478, 0.478, 0.416, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 24
 text = "封印 300"
 
 [node name="Spacer2" type="Control" parent="UIManager/GameLayout/LeftPanel/ContentVBox" unique_id=2100000005]
@@ -358,7 +358,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.35, 0.55, 0.95, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 24
 text = "影: -"
 horizontal_alignment = 1
 
@@ -367,7 +367,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.75, 0.75, 0.8, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 24
 text = "瞬: -"
 horizontal_alignment = 1
 
@@ -376,7 +376,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.95, 0.3, 0.3, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 24
 text = "滅: -"
 horizontal_alignment = 1
 
@@ -402,7 +402,7 @@ theme_override_constants/separation = 10
 [node name="MatchTitle" type="Label" parent="UIManager/GameLayout/LeftPanel/ContentVBox/MatchPanel/MatchVBox" unique_id=1246038194]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 16
 text = "比赛信息"
 
 [node name="HandsLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/ContentVBox/MatchPanel/MatchVBox" unique_id=1528298559]
@@ -410,7 +410,7 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
 theme_override_font_sizes/font_size = 24
-text = "出牌 0"
+text = "討伐 0"
 
 [node name="RedrawsLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/ContentVBox/MatchPanel/MatchVBox" unique_id=564080101]
 unique_name_in_owner = true
@@ -504,8 +504,8 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_7exmg")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_hwrj5")
 theme_override_styles/hover = SubResource("StyleBoxFlat_sbvwy")
 disabled = true
-text = "出
-牌"
+text = "討
+伐"
 
 [node name="DunArea" type="Panel" parent="UIManager/GameLayout/CenterColumn/HandArea" unique_id=248658335]
 custom_minimum_size = Vector2(620, 728)
@@ -684,8 +684,8 @@ layout_mode = 2
 size_flags_vertical = 4
 theme_override_font_sizes/font_size = 24
 disabled = true
-text = "AI
-重排"
+text = "陣
+形"
 
 [node name="DeckBtn" type="Button" parent="UIManager/GameLayout/CenterColumn" unique_id=320529564]
 unique_name_in_owner = true
@@ -710,7 +710,7 @@ visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 24
 horizontal_alignment = 1
 
 [node name="Col1Label" type="Label" parent="UIManager/GameLayout/CenterColumn/ColumnLabelRow" unique_id=1076051943]
@@ -719,7 +719,7 @@ visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 24
 horizontal_alignment = 1
 
 [node name="Col2Label" type="Label" parent="UIManager/GameLayout/CenterColumn/ColumnLabelRow" unique_id=1076051944]
@@ -728,7 +728,7 @@ visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 24
 horizontal_alignment = 1
 
 [node name="ScoringOverlay" type="Control" parent="UIManager" unique_id=1136405108]

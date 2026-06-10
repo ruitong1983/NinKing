@@ -237,6 +237,48 @@ func refresh(hand: Array[CardData.PlayingCard], swap_idx: int, redraw_idxs: Arra
 	_update_action_buttons(redraw_mode)
 	_update_score_preview()
 
+	# Card Framework move-tween race fix: rapid sequential add_card cycles
+	# (kill→move→kill→deferred reapply) leave cards at intermediate positions.
+	# We fix this in two stages:
+	#   1. Timer fires → update_card_ui() (fixes child order, z-index, states)
+	#      → force card positions (overrides stale tween targets)
+	#   2. force positions once more after a short delay to catch any straggler
+	#      tweens that may have been queued after our first pass.
+	if _head_hand and _head_hand.is_inside_tree():
+		var timer := _head_hand.get_tree().create_timer(0.3)
+		timer.timeout.connect(_fixup_layout.bind(_head_hand, _mid_hand, _tail_hand), CONNECT_ONE_SHOT)
+
+
+func _fixup_layout(head: Hand, mid: Hand, tail: Hand) -> void:
+	for hand: Hand in [head, mid, tail]:
+		if not is_instance_valid(hand):
+			continue
+		# update_card_ui() fixes child order (_reorder_card_nodes),
+		# z-index, and states. Then we force exact positions so that
+		# any later move() calls see cards already at their targets
+		# and skip creating new tweens.
+		hand.update_card_ui()
+		_force_card_positions(hand)
+
+
+func _force_card_positions(hand: Hand) -> void:
+	# Iterate by _held_cards order (matching _compute_pose indices),
+	# NOT by Cards child order — the two may differ before _reorder.
+	var held_cards: Array = hand.get("_held_cards")
+	if held_cards == null or held_cards.is_empty():
+		return
+	var card_count: int = held_cards.size()
+	var _w: float = 140.0  # NinKing card width
+	var spacing: float = hand.max_hand_spread / (card_count + 1)
+	var anchor: float = (hand.max_hand_spread + _w) / 2.0
+	for i: int in range(card_count):
+		var card: Card = held_cards[i]
+		var target: Vector2 = hand.global_position
+		target.x += (i + 1) * spacing - anchor
+		# Flat curves → no rotation, no vertical offset.
+		card.global_position = target
+		card.rotation = 0.0
+
 
 func add_card_to_hand(target: Hand, card_data: CardData.PlayingCard, idx: int,
 		swap_idx: int = -1, redraw_idxs: Array[int] = []) -> void:

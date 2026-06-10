@@ -76,7 +76,7 @@ NinKingMain (Control) 1920×1080
     │       │   │
     │       │   ├── PNL_MatchInfo (Panel)          比赛信息面板
     │       │   │   ├── LBL_MatchTitle             "比赛信息" 16px 金色
-    │       │   │   ├── HandsLabel        [%HandsLabel] "出牌 X"
+    │       │   │   ├── HandsLabel        [%HandsLabel] "討伐 X"
     │       │   │   ├── DiscardsLabel     [%DiscardsLabel] "手替え X"
     │       │   │   └── GoldLabel         [%GoldLabel] "$X"
     │       │   │
@@ -89,10 +89,10 @@ NinKingMain (Control) 1920×1080
     │           │
     │           ├── ActionBar (HBoxContainer)  [%ActionBar]
     │           │   ├── DiscardBtn         [%DiscardBtn] "换牌(剩X次)" 180×50
-    │           │   └── PlayBtn            [%PlayBtn]    "确认出牌" 180×50
+    │           │   └── PlayBtn            [%PlayBtn]    "討伐" 180×50
     │           │
     │           └── HandArea (HBoxContainer)  [%HandArea]  三组手牌区
-    │               ├── PlayBtn            [%PlayBtn]    "出牌" 84×f
+    │               ├── PlayBtn            [%PlayBtn]    "討伐" 84×f
     │               ├── DunArea (VBoxContainer)
     │               │   ├── DunHead [%DunHead] (影: hand[0-2])
     │               │   ├── DunMiddle [%DunMiddle] (瞬: hand[3-5])
@@ -211,7 +211,7 @@ NinKingMain (Control) 1920×1080
 | 字段 | 节点 | 格式 |
 |------|------|------|
 | 标题 | `LBL_MatchTitle` | "比赛信息" |
-| 已出牌数 | `HandsLabel` | "出牌 X" |
+| 已出牌数 | `HandsLabel` | "討伐 X" |
 | 手替え | `DiscardsLabel` | "手替え X" |
 | 金币 | `GoldLabel` | "$X" |
 
@@ -249,7 +249,7 @@ NinKingMain (Control) 1920×1080
 | 约束 | 影牌力 ≤ 瞬牌力 ≤ 滅牌力 |
 | 约束满足 | 三道标签（影/瞬/滅）亮白色高亮 + 金色辉光描边，StatusLabel 留空 |
 | 约束违规 | 违规段标签变暗金；StatusLabel 显示原因（影勢過強 / 滅力不足 / 重排三道） |
-| 高亮算法 | 逐对匹配：Pair1(影≤瞬) 点亮影+瞬，Pair2(瞬≤滅) 点亮瞬+滅。全满足=全亮可出牌 |
+| 高亮算法 | 逐对匹配：Pair1(影≤瞬) 点亮影+瞬，Pair2(瞬≤滅) 点亮瞬+滅。全满足=全亮可討伐 |
 
 ### 3.4 计分弹窗 `OVL_Scoring`
 

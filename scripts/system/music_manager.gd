@@ -94,5 +94,12 @@ func _create_player() -> AudioStreamPlayer:
 	var p := AudioStreamPlayer.new()
 	p.bus = "BGM"
 	p.volume_db = DEFAULT_VOLUME_DB
+	p.finished.connect(_on_player_finished.bind(p))
 	add_child(p)
 	return p
+
+
+func _on_player_finished(player: AudioStreamPlayer) -> void:
+	# 兜底循环：若导入设置 loop_mode 失效，代码层重新播放
+	if player == _active_player and player.stream != null:
+		player.play()

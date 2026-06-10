@@ -181,7 +181,7 @@ func update_gold(amount: int) -> void:
 
 
 func update_match_info(plays_left: int, redraws_left: int) -> void:
-	hands_label.text = "出牌 %d" % plays_left
+	hands_label.text = "討伐 %d" % plays_left
 	redraws_label.text = "手替え %d" % redraws_left
 
 

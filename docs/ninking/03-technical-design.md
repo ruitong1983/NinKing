@@ -180,7 +180,7 @@ NinKingMain (Control) [game_manager.gd]
     │       │   │   ├── DunHead (Panel) — 影（1px 边框）
     │       │   │   ├── DunMiddle (Panel) — 瞬（2px 边框）
     │       │   │   └── DunTail (Panel) — 滅（3px 边框）
-    │       │   ├── AiRearrangeBtn "AI\n重排" — AI 重排按钮（初始禁用，PLAYING 时启用）
+    │       │   ├── AiRearrangeBtn "陣\n形" — 陣形按钮（初始禁用，PLAYING 时启用）
     │       │   └── RedrawBtn "换牌"
     │       ├── ColumnLabelRow (HBoxContainer) — 列牌型标签行
     │       │   ├── Col0Label — 列0 牌型（≥对子时金色显示）
@@ -408,25 +408,29 @@ res://
 ## 核心类图
 
 ```
-NinKingCard (extends Card) — 牌面渲染
-├── _create_face_structure() — FrontFace/BackFace/TextureRect 节点树
-├── _generate_card_texture() — 程序绘制圆角牌面 (140×196, 8px圆角, #FAF8F2底+1px #333边框+底部阴影)
-├── _create_labels() — 角标+中央花色Label (24px角标, 56px中央, 36×48角标框)
-├── _update_display_label() — 刷新牌面文字 (安全调用: _ready()前自动跳过)
+NinKingCard (extends Card) — SVG 牌面渲染
+├── _ensure_face_nodes() — 创建 FrontFace/BackFace/TextureRect 节点（new() 兜底）
+├── _load_card_texture() — 加载 SVG 纹理 (res://assets/images/cards/4color_deck_by_heratexx/{rank}{suit}.svg)
+│   └── expand_mode=IGNORE_SIZE + stretch_mode=KEEP_ASPECT_COVERED + size=card_size
+│       (IGNORE_SIZE 防止 Godot 4 每帧覆盖 size 为 SVG viewBox 240×334)
+├── _get_card_svg_path() — suit/rank → SVG 文件路径
+├── update_display() — 重载 SVG 纹理（换牌/数据变更时）
 ├── set_visual_state(VisualState) — SWAP_SOURCE(蓝) / REDRAW_TARGET(红) / NORMAL
-├── 左上角标: 点数花色 (8,6), 48px高, 24px字号
-├── 中央花色: 56px 居中, Press Start 2P@56px
-├── 右下角标: 180° 旋转镜像 (pivot_offset居中, rotation=PI, 位置96,142)
-├── signal ninking_card_clicked(index) — 点击
-└── signal ninking_card_dragged(index, drop_position) — 拖拽
+├── _handle_mouse_released/pressed() — 点击 vs 拖拽判定（CLICK_THRESHOLD=10px）
+├── signal ninking_card_clicked(index) — 点击交换/选牌
+└── signal ninking_card_dragged(index, drop_position) — 拖拽跨组交换
 
 NinKingCardFactory (extends CardFactory) — 框架合约占位 (create_card() 返回 null, 实际创建由 HandDisplay 负责)
 
 HandDisplay (extends RefCounted) — 手牌渲染器
 ├── setup(head,mid,tail, labels×6+col_labels×3, buttons×2, status) — 注入节点引用
 ├── refresh(hand, swap_idx, redraw_idxs, redraw_mode, on_clicked) — 主渲染入口
+│   └── 末尾 0.3s Timer → _fixup_layout() 修正 Card Framework move-tween 竞态
 ├── _clear_all() — 调用 Hand.clear_cards() 清理三墩 (框架官方API)
 ├── _add_card(hand, card_data, idx, ...) — 创建 NinKingCard 并加入 Hand
+├── _fixup_layout(head, mid, tail) — update_card_ui() 修正子序/z-index/状态
+├── _force_card_positions(hand) — 按 _held_cards 序直接设 global_position+rotation
+│   └── 绕过 move() tween: 先 force 再 update_card_ui(), move() 见已在目标即跳过
 ├── _update_dun_type_labels() — HandEvaluator3 评估并显示三墩牌型
 ├── _update_column_type_labels() — 评估 3 列并显示列牌型（≥对子时金色）
 ├── _update_score_preview() — ScoreCalculator.calculate() 实时 chips×mult

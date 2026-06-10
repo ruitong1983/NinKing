@@ -81,9 +81,10 @@ func _get_card_svg_path() -> String:
 
 
 ## Load the SVG and apply to the card face.
-## SVG imports at its native viewBox size (240×334). Card base sets
-## EXPAND_IGNORE_SIZE which would blow up the TextureRect → override
-## with KEEP_SIZE + stretch-to-fit so the texture scales into card_size.
+## SVG imports at its native viewBox size (240x334).
+## Use EXPAND_IGNORE_SIZE so Godot won't override size with the texture's
+## native dimensions every frame — a Godot 4 quirk with KEEP_SIZE + non-SCALE stretch.
+## KEEP_ASPECT_COVERED scales proportionally to fill card_size without distortion.
 func _load_card_texture() -> void:
 	var path: String = _get_card_svg_path()
 	if path.is_empty():
@@ -95,14 +96,12 @@ func _load_card_texture() -> void:
 
 	set_faces(svg_tex, _get_card_back_tex())
 
-	# Constrain TextureRect to card_size — Card base sets EXPAND_IGNORE_SIZE
-	# which ignores size and expands to the texture's native resolution.
 	if front_face_texture:
-		front_face_texture.expand_mode = TextureRect.EXPAND_KEEP_SIZE
+		front_face_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		front_face_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		front_face_texture.size = card_size
 	if back_face_texture:
-		back_face_texture.expand_mode = TextureRect.EXPAND_KEEP_SIZE
+		back_face_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		back_face_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		back_face_texture.size = card_size
 

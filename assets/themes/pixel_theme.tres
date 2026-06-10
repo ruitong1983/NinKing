@@ -1,5 +1,7 @@
 [gd_resource type="Theme" format=3 uid="uid://ddvno1bm21p8c"]
 
+[ext_resource type="FontFile" uid="uid://3qo0ylcohy02" path="res://assets/fonts/vonwaon_bitmap_16px.ttf" id="1_qss3m"]
+
 [sub_resource type="StyleBoxFlat" id="slot_frame"]
 content_margin_left = 6.0
 content_margin_top = 4.0
@@ -61,6 +63,7 @@ border_width_bottom = 2
 border_color = Color(0.94, 0.75, 0.25, 0.45)
 
 [resource]
+default_font = ExtResource("1_qss3m")
 default_font_size = 16
 BaoPaiSlot/styles/normal = SubResource("slot_frame")
 Button/colors/font_color = Color(0.85, 0.85, 0.9, 1)

@@ -13,6 +13,8 @@
 | B1 | Boss "封印师" 仍用旧逻辑 `random_group_zero` — 已改为 `lowest_group_zero`（分数最低组×0） | `blind_controller.gd:33` | **P0** | ✅ |
 | B2 | Boss 效果字典 key 已对齐 10 Boss 定义 | `blind_controller.gd` + `score_calculator.gd` | **P0** | ✅ |
 | B3 | XiDetector: 全顺/三顺清/顺清打头/全三条/通锅 5 个喜模式未实现 — 全部 9 喜已实现（通锅=全顺） | `xi_detector.gd:76` | **P1** | ✅ |
+| B4 | SEAL_INTRO → PLAYING timer 被 change_scene_to_file 销毁，导致新游戏/继续/商店返回时卡在结界标题 | `game_state.gd:312` + `game_manager.gd:48-52` | **P0** | ✅ |
+| B5 | SVG 卡牌尺寸错误 — Godot 4 TextureRect KEEP_SIZE + non-SCALE stretch 每帧覆盖 size 为纹理原始尺寸(240×334)，卡牌显示过大 | `ninking_card.gd:87-107` | **P0** | ✅ |
 
 ---
 
@@ -43,6 +45,7 @@
 | B8 | 忍者牌条件效果 | 部分忍者牌带条件触发（如"影为同花时+x mult"），需实现条件检测 | P2 | ⬜ |
 | B9 | **主菜单系统** — 闪屏→按钮→牌组选择→继续确认 | 详见审阅报告。要点：① 按钮 hover/click SFX ② `_ready` 触发菜单 BGM ③ `stagger_slide_in(slide_offset=80)` ④ 牌组中文名映射 `DECK_NAMES` ⑤ 未实现牌组(night/sun)置灰不可点击 ⑥ CRT 滤镜开启 ⑦ `_panel_open` 双击守卫 | **P0** | ✅ |
 | B10 | **接入修炼忍者成长系统** — `NinjaScaling.process_scaling()` 接入 `finalize_play` (on_play) 和 `execute_redraw` (on_redraw)，构建 context (head/mid/tail_type + triggered_xis) | `NinjaScaling` 已提取，6 张修炼忍者数据已有，需在出牌/重抽后调用 `process_scaling` | P2 | ⬜ |
+| B11 | **MusicManager 扩展 BGM 3 段变奏** — 新增 `set_game_variation(barrier)`，根据結界 1-3(轻)/4-6(中)/7-8(重) 自动切换变奏，`_crossfade_to()` 已有 | 3 首 game_bgm 变奏素材 + MusicManager ~15 行扩展 + `_on_seal_started()` 触发 | P1 | ⬜ |
 
 ---
 
@@ -56,7 +59,7 @@
 | V4 | 按钮素材（普通/按下） | 可拉伸像素风边框 PNG | P1 | ⬜ |
 | V5 | 商店面板/顶部信息栏背景 | 半透明深色背景 | P1 | ⬜ |
 | V6 | 忍者牌槽位背景 | 100×140 像素风边框，`CardBackGenerator.generate_slot_bg()` 程序绘制：深蓝底+交叉纹+金边框+内凹区域+中央小手里剑+角钻+上下装饰线，已接入 `ability_slot.tscn` TextureRect | **P0** | ✅ |
-| V7 | CRT 扫描线效果接入 | crt_filter.gd 已复用 → **已细化至 V18**（shader time_offset 扩展 + 微下移动效） | P1 | ⬜ |
+| V7 | ~~CRT 扫描线效果接入~~ | ⛔ 已废弃 — 漫画风移除 CRT。见 V24 | P1 | ⛔ |
 | V8 | VFX 接入（卡牌翻转/粒子/闪烁/震动） | Tween/FX 框架已有，接入各流程 | P2 | ⬜ |
 | V9 | **ParticlePool 扩展** — shuriken + sakura 粒子预设 | 程序绘制 8×8 纹理，shuriken=铁灰十字星(4尖)，sakura=淡粉圆点+径向渐变，写入 `scripts/tween/particle_pool.gd`，后续全局复用 | **P0** | ✅ |
 | V16 | **pixel_theme.tres 像素忍者风重写** | StyleBox 全部 corner_radius→0、border→2px 硬边；按钮三态（normal/hover/pressed 瞬间切换 + content_margin 下移）；面板双层硬边框（外层 2px 暗色 + 内层 1px 强调色）；三墩 DunHead(1px)/DunMiddle(2px)/DunTail(3px) 边框递进区分。覆盖 V3 原占位 Theme | P1 | ✅ |
@@ -71,6 +74,13 @@
 | V13 | **过关过渡** — 屏风转场 | `game_manager.gd` `_on_go_shop_pressed()`: `fade_out(ui, 0.3)` → change_scene | P1 | ✅ |
 | V14 | **Boss 封印揭晓** — 墨字浮现 | `game_manager.gd` `_on_seal_started()`: CRT vignette+aberration → Boss 名 scale_pop → 1s 恢复 | P2 | ✅ |
 | V15 | **屏风转场增强** — logo 遮罩版 | 过关时在 fade 中间叠 NinKing logo/忍字 ColorRect，需评估 autoload vs 场景内实现方案 | P3 | ⬜ |
+| V22 | **商店 BGM** — 轻松明亮短循环 | 和风 chioptune 商店主题，`assets/audio/music/shop_bgm.ogg`，MusicManager 新增 `play_shop_bgm()` | P1 | ⬜ |
+| V23 | **音效素材替换+新增** — P0 音效(~10个)：计分/喜/过关/失败/发牌/交换/换牌；P1 音效(~8个)：Boss揭晓/商店交易/进入离开；P2 音效(~8个)：附魔/星图/秘仪/修炼 | 替换全部 19 个 FanKing 占位 + 新增缺失音效；详见 `15-sound-design-plan.md`（风格已改为动画 SFX） | P0 | ⬜ |
+| V24 | **CRT 滤镜移除** — 删除 `crt_filter.gd` + `crt_filter.gdshader` + `GlobalTweens` CRT 引用 + `game_manager.gd` 6 处 CRT 调用 | 漫画风不需要扫描线。覆盖 V7/V18。详见 `16-art-direction-principles.md` §9 | **P0** | ⬜ |
+| V25 | **barrier_theme.gd 八属性亮色重写** — 8 結界冷暖交替暗色系 → 8 属性（火水風雷土光暗无）亮色版；新增 `particle_color` 字段；name 改为「壱·火」格式 | 覆盖 V17。详见 `16-art-direction-principles.md` §2 | **P0** | ⬜ |
+| V26 | **漫画粒子预设** — `ParticlePool` 新增 `manga_burst`(集中线) + `manga_ink`(墨迹) + `TweenFX.speed_line_trail()`(速度线) | 覆盖 V9 的像素粒子(shuriken/sakura)。详见 `16-art-direction-principles.md` §8 | P1 | ⬜ |
+| V27 | **卡背漫画风重绘** — 豆包 AI 生成：漫画网点+粗黑描边+中心「忍」字 | 覆盖 V1 的像素卡背。详见 `16-art-direction-principles.md` §7.2 | P1 | ⬜ |
+| V28 | **UI 组件漫画风更新** — `06-ui-layout-reference.md` §6 重写（配色表→8属性亮色版、像素风原则→漫画风原则）；按钮/面板/三墩区分按新规范更新 | 覆盖 V16/V19/V20/V21。详见 `16-art-direction-principles.md` §3/§9 | **P0** | ⬜ |
 
 ---
 
@@ -89,6 +99,8 @@
 | R4 | 交换行为变更同步 `06-complete-redesign.md` — 交换不再触发 AI 重排 | P2 | ✅ |
 | R5 | AI 重排按钮补充 `03-technical-design.md` 场景树 | P2 | ✅ |
 | C7 | 确认清理 `ninking_main.tscn` 中旧 MainMenu 视图节点 | `scenes/ninking/ninking_main.tscn` | P2 | ✅ |
+| C8 | **SoundBank 忍者主题重命名** — 废弃 FanKing 遗留名（`HU`→`GROUP_REVEAL` / `YAKU_REVEAL`→`XI_TRIGGER` / `BAO_ACTIVATE`→`NINJA_ACTIVATE` 等），旧常量保留 alias 到全部接线完毕 | `scripts/config/sound_bank.gd` | P1 | ⬜ |
+| C10 | **漫画风字体替换方案** — 见 `17-font-design-plan.md`：F1 思源黑体 JP Heavy（粗体）+ F2 Regular（正文）+ F3 霞鹜文楷（手写/P2）。Phase 1 下载+导入+Theme 替换，估时 1h。 | `pixel_theme.tres` → `manga_theme.tres` / `17-font-design-plan.md` | P1 | ⬜ |
 
 ---
 
@@ -101,9 +113,9 @@
 | D3 | Tag 系统 | 投资/星图/忍者/优惠/稀有 Tag | 🔒 |
 | D4 | 卡包系统 | 附魔包/星图包/封印包/秘仪包 | 🔒 |
 | D5 | n_x04 黑龙 / n_x05 赤凤 | 需牌组系统支持 | 🔒 |
-| D6 | 商店 BGM | `assets/audio/music/shop_bgm` 缺失 | 🔒 |
+| D6 | 商店 BGM | → 已提升至 V22 (P1) | ✅ |
 | D7 | 数值平衡调优 | 完整验证难度曲线 + 价格平衡 | 🔒 |
-| D8 | 音频替换为扑克风格 | 当前全部为 FanKing 占位 | 🔒 |
+| D8 | 音频替换为扑克风格 | → 已拆分为 V23(素材) + B11(BGM变奏) + C8(重命名)，详见 `15-sound-design-plan.md` | ✅ |
 
 ---
 
@@ -126,6 +138,13 @@ Phase A (当前) ──→ Phase B ──→ Phase C ──→ Phase D ──→
 
 | 日期 | 变更 |
 |------|------|
+| 2026-06-10 | 📋 **美术方向设计原则确立**: 11 轮 grill + review-plan 审阅 → `16-art-direction-principles.md`。像素风+暗夜忍者→少年漫+亮色英雄。8結界冷暖交替→8属性(火水風雷土光暗无)。CRT移除。Chiptune+和风→动画SFX。V24-V28 共 5 项 + C10 共 1 项加入 TODO。V7/V18 废弃。`05-image-asset-generation-plan.md` 全部提示词待重写。 |
+| 2026-06-10 | 📋 **15-sound-design-plan.md 审阅+修复**: 风格更新为动画 SFX（§1/§2/§4/§5/BGM）。审阅发现 3 处遗漏修复（§3 目标列/§8 目录注释/S12 术语）。 |
+| 2026-06-10 | 🔤 **17-font-design-plan.md 字体方案 + 审阅修复**: 漫画ゴシック体选型 — F1 思源黑体 SC Heavy + F2 SC Regular + F3 Yusei Magic(P2)。3 字体全 OFL 免费可商用。Phase 1 下载+导入+Theme 替换估时 1h。审阅 6 项修复：JP→SC、§7.2 改名→新建、fallback 链去循环、F3 楷体→手書き、优先级统一 P1、.import 自动生成说明。 |
+| 2026-06-10 | 🏗️ **手牌布局精确对齐**: Card Framework move-tween 竞态导致 3-5px Y 偏差。`_fixup_layout` 改为先 `update_card_ui()` 再 `_force_card_positions()`（按 `_held_cards` 序直接赋值 `global_position`，绕开 move() tween）。Timer 0.1→0.3s。实测 9 张卡牌 X/Y 偏差降至 0.000px。
+| 2026-06-10 | 📝 **03-technical-design.md 同步**: NinKingCard 类图更新（程序绘制→SVG 纹理渲染），HandDisplay 类图新增 `_fixup_layout()`. |🔴 Boss 名称全部修正为实际名单（断尾/无头/独柱/铁链/反目/封印师/饿鬼/散牌王/喜之克星/终焉），🟡 卷轴 800×500、商店面板→9-patch、图标 15→10 精简。`05-image-asset-generation-plan.md` 重写完成，~41 张 AI + ~80 张拼装，P0/P1/P2 三阶段可执行。现有 V4/V5/V7/V15 素材项被新方案覆盖。 |
+| 2026-06-10 | 🐛 **B4 修复: SEAL_INTRO 卡死**: `_begin_seal_phase()` await timer 被 change_scene_to_file 销毁 → 移至 `game_manager._intro_timer()`。影响新游戏/继续/商店返回三个路径 |
+| 2026-06-10 | 📋 **测试指南**: `testing-guide.md` — 场景流转图、状态机、MCP 命令速查、常见陷阱与解决方案、快速调试命令集 |
 | 2026-06-09 | 🧹 **C7 完成: 清理旧 MainMenu**: ninking_main.tscn 删 MainMenu 子树(76行)，game_manager 删 MAIN_MENU 分支+_on_start_pressed，ui_manager 删 3 个 @onready 引用 |
 | 2026-06-09 | 📋 **方案审阅: A9 列分机制**: Grill 14 轮 → review-plan 审阅 → R2-R5 共 4 项文档同步加入 TODO。Q1=breakdown 文字体现列分，Q2=列≥同花顺加 VFX 庆祝（shuriken + color_flash）|
 | 2026-06-09 | 📝 **A9 文档同步 + 代码审查完成**: R2-R5 四文档已更新（06 公式/交换 + 13 散牌王 + 03 场景树），A9 标记完成。代码审查通过，列分机制完整实现。 |
