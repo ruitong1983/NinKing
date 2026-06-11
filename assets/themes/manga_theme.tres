@@ -1,6 +1,6 @@
 [gd_resource type="Theme" format=3 uid="uid://bqb2i07k0v8jt"]
 
-[ext_resource type="FontFile" uid="uid://bltjg4x1xnkf3" path="res://assets/fonts/SourceHanSansSC-Heavy.otf" id="1_f1heavy"]
+[ext_resource type="FontFile" uid="uid://l5d7mx0hlykx" path="res://assets/fonts/SourceHanSansSC-Heavy.otf" id="1_f1heavy"]
 
 [sub_resource type="StyleBoxFlat" id="slot_frame"]
 content_margin_left = 6.0

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cnp27jvv4jr5i"]
 
-[ext_resource type="Script" uid="uid://0hkxn1lfljbf" path="res://scripts/ninking/ui/shop_ability_card.gd" id="1_card"]
+[ext_resource type="Script" uid="uid://5y8t0roodvt" path="res://scripts/ninking/ui/shop_ability_card.gd" id="1_card"]
 
 [node name="AbilityCard" type="Panel" unique_id=1546640846]
 custom_minimum_size = Vector2(280, 400)
@@ -9,38 +9,59 @@ offset_bottom = 400.0
 mouse_filter = 2
 script = ExtResource("1_card")
 
+[node name="CardArt" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
 [node name="ArtArea" type="ColorRect" parent="." unique_id=1785667049]
-custom_minimum_size = Vector2(280, 230)
-layout_mode = 0
-offset_right = 280.0
-offset_bottom = 230.0
-color = Color(0.114, 0.106, 0.18, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.114, 0.106, 0.18, 0.4)
+mouse_filter = 2
 
-[node name="ArtFrame" type="ColorRect" parent="ArtArea" unique_id=413691671]
-layout_mode = 0
-offset_left = 12.0
-offset_top = 12.0
-offset_right = 268.0
-offset_bottom = 218.0
-color = Color(0.145, 0.133, 0.212, 1)
+[node name="FrameTexture" type="TextureRect" parent="ArtArea"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
 
-[node name="ArtIcon" type="ColorRect" parent="ArtArea" unique_id=216589822]
+[node name="ArtIcon" type="TextureRect" parent="ArtArea" unique_id=216589822]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -172.0
-offset_top = -147.0
-offset_right = -108.0
-offset_bottom = -83.0
+offset_left = -32.0
+offset_top = -32.0
+offset_right = 32.0
+offset_bottom = 32.0
 grow_horizontal = 2
 grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
 mouse_filter = 2
-color = Color(0, 0, 0, 0)
 
 [node name="ArtNameLabel" type="Label" parent="ArtArea" unique_id=382911185]
+visible = false
 custom_minimum_size = Vector2(240, 160)
 layout_mode = 0
 anchor_right = 1.0
@@ -77,44 +98,45 @@ vertical_alignment = 1
 
 [node name="NamePlate" type="ColorRect" parent="." unique_id=2089582880]
 layout_mode = 0
-offset_top = 230.0
-offset_right = 280.0
-offset_bottom = 268.0
-color = Color(0.071, 0.102, 0.09, 1)
+offset_left = 8.0
+offset_top = 12.0
+offset_right = 272.0
+offset_bottom = 48.0
+color = Color(0.071, 0.102, 0.09, 0.72)
 
 [node name="NameLabel" type="Label" parent="." unique_id=328700963]
 layout_mode = 0
 offset_left = 16.0
-offset_top = 236.0
+offset_top = 16.0
 offset_right = 264.0
-offset_bottom = 262.0
+offset_bottom = 44.0
 text = "卡片名称"
 vertical_alignment = 1
 
 [node name="EffectLabel" type="Label" parent="." unique_id=738927624]
 layout_mode = 0
 offset_left = 16.0
-offset_top = 276.0
+offset_top = 168.0
 offset_right = 264.0
-offset_bottom = 299.0
+offset_bottom = 195.0
 text = "效果描述"
 vertical_alignment = 1
 
 [node name="ConditionLabel" type="Label" parent="." unique_id=796096302]
 layout_mode = 0
 offset_left = 16.0
-offset_top = 300.0
+offset_top = 196.0
 offset_right = 264.0
-offset_bottom = 323.0
+offset_bottom = 223.0
 text = "触发条件"
 vertical_alignment = 1
 
 [node name="PriceBadge" type="Panel" parent="." unique_id=32460820]
 layout_mode = 0
 offset_left = 176.0
-offset_top = 344.0
+offset_top = 350.0
 offset_right = 264.0
-offset_bottom = 382.0
+offset_bottom = 388.0
 
 [node name="CoinIcon" type="Label" parent="PriceBadge" unique_id=1081039912]
 layout_mode = 0
@@ -139,7 +161,7 @@ vertical_alignment = 1
 [node name="BuyButton" type="Button" parent="." unique_id=574311426]
 layout_mode = 0
 offset_left = 92.0
-offset_top = 350.0
+offset_top = 354.0
 offset_right = 180.0
-offset_bottom = 386.0
+offset_bottom = 390.0
 text = "入手"

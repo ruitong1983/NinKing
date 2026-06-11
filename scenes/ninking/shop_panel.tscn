@@ -2,14 +2,14 @@
 
 [ext_resource type="Script" uid="uid://py2jsudkqhq" path="res://scripts/ninking/ui/shop_ui.gd" id="1_v2fv5"]
 
-[node name="ShopPanel" type="Control" unique_id=382268857]
+[node name="ShopPanel" type="Control"]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 1520.0
 offset_bottom = 960.0
 script = ExtResource("1_v2fv5")
 
-[node name="Overlay" type="ColorRect" parent="." unique_id=319527502]
+[node name="Overlay" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -17,186 +17,99 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0, 0, 0, 0.65)
+color = Color(0, 0, 0, 0.45)
 
-[node name="TitleBar" type="ColorRect" parent="." unique_id=1755531328]
+[node name="TitleBar" type="ColorRect" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
 offset_right = 1520.0
-offset_bottom = 90.0
+offset_bottom = 60.0
 color = Color(0.12, 0.12, 0.2, 1)
-metadata/_edit_group_as_ = true
 
-[node name="ShopSubtitle" type="Label" parent="." unique_id=1771758874]
+[node name="ShopSubtitle" type="Label" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 560.0
-offset_top = 14.0
-offset_right = 960.0
+offset_left = 24.0
+offset_top = 0.0
+offset_right = 200.0
 offset_bottom = 60.0
-rotation = 0.0872665
 text = "萬屋！"
-horizontal_alignment = 1
+horizontal_alignment = 0
 vertical_alignment = 1
 
-[node name="TitleFocusLines" type="ColorRect" parent="." unique_id=1064409708]
-unique_name_in_owner = true
+[node name="GoldPill" type="Panel" parent="."]
 layout_mode = 0
-offset_right = 1520.0
-offset_bottom = 120.0
-mouse_filter = 2
-
-[node name="GoldPill" type="Panel" parent="." unique_id=2018693602]
-layout_mode = 0
-offset_left = 1120.0
-offset_top = 19.0
+offset_left = 1130.0
+offset_top = 5.0
 offset_right = 1320.0
-offset_bottom = 71.0
+offset_bottom = 55.0
 
-[node name="GoldLabel" type="Label" parent="GoldPill" unique_id=1921859035]
+[node name="GoldLabel" type="Label" parent="GoldPill"]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 20.0
-offset_top = 12.0
-offset_right = 180.0
-offset_bottom = 44.0
+offset_top = 8.0
+offset_right = 170.0
+offset_bottom = 47.0
 text = "0"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="RerollBtn" type="Button" parent="." unique_id=1906108576]
+[node name="RerollBtn" type="Button" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 1350.0
-offset_top = 19.0
-offset_right = 1500.0
-offset_bottom = 71.0
+offset_left = 1340.0
+offset_top = 5.0
+offset_right = 1496.0
+offset_bottom = 55.0
 theme_type_variation = &"ImpactButton"
 text = "入替"
 
-[node name="RerollLabel" type="Label" parent="." unique_id=1712088981]
+[node name="AbilityGrid" type="GridContainer" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 1350.0
-offset_top = 76.0
-offset_right = 1500.0
-offset_bottom = 96.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 16
-text = "$5"
-horizontal_alignment = 1
+offset_left = 156.0
+offset_top = 80.0
+offset_right = 756.0
+offset_bottom = 880.0
+columns = 2
+theme_override_constants/h_separation = 40
+theme_override_constants/v_separation = 0
 
-[node name="AbilityFocusLines" type="ColorRect" parent="." unique_id=1961538443]
+[node name="ItemColumn" type="VBoxContainer" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 510.0
-offset_top = 96.0
-offset_right = 1010.0
-offset_bottom = 166.0
-mouse_filter = 2
-
-[node name="AbilityLabel" type="Label" parent="." unique_id=8274934]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 560.0
-offset_top = 110.0
-offset_right = 960.0
-offset_bottom = 146.0
-text = "忍 者 牌"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="AbilityRow" type="HBoxContainer" parent="." unique_id=1909637372]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 210.0
-offset_top = 150.0
-offset_right = 1310.0
-offset_bottom = 620.0
-theme_override_constants/separation = 40
-alignment = 1
-
-[node name="ItemFocusLines" type="ColorRect" parent="." unique_id=513881839]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 510.0
-offset_top = 631.0
-offset_right = 1010.0
-offset_bottom = 701.0
-mouse_filter = 2
-
-[node name="ItemLabel" type="Label" parent="." unique_id=652302698]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 560.0
-offset_top = 645.0
-offset_right = 960.0
-offset_bottom = 681.0
-text = "道 具 卡"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="ItemRow" type="HBoxContainer" parent="." unique_id=1907466024]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 226.0
-offset_top = 685.0
-offset_right = 1294.0
-offset_bottom = 1025.0
+offset_left = 1086.0
+offset_top = 122.0
+offset_right = 1346.0
+offset_bottom = 838.0
 theme_override_constants/separation = 36
 alignment = 1
 
-[node name="BottomBar" type="ColorRect" parent="." unique_id=796951015]
+[node name="BottomBar" type="ColorRect" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
-offset_top = 880.0
+offset_top = 900.0
 offset_right = 1520.0
 offset_bottom = 960.0
 color = Color(0.12, 0.12, 0.2, 1)
 
-[node name="Separator" type="ColorRect" parent="." unique_id=1946149863]
-layout_mode = 0
-offset_left = 30.0
-offset_top = 880.0
-offset_right = 1490.0
-offset_bottom = 881.0
-color = Color(0.831, 0.659, 0.263, 0.25)
-
-[node name="BottomFocusLines" type="ColorRect" parent="." unique_id=1174482081]
-unique_name_in_owner = true
-layout_mode = 0
-offset_top = 860.0
-offset_right = 1520.0
-offset_bottom = 980.0
-mouse_filter = 2
-
-[node name="ContinueBtn" type="Button" parent="." unique_id=2051853450]
+[node name="ContinueBtn" type="Button" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 590.0
-offset_top = 895.0
+offset_top = 902.0
 offset_right = 930.0
-offset_bottom = 951.0
+offset_bottom = 958.0
 theme_type_variation = &"ImpactButton"
-text = "討伐へ  ▶"
+text = "討伐へ ▶"
 
-[node name="NextLevelHint" type="Label" parent="." unique_id=970070042]
+[node name="NextLevelHint" type="Label" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 560.0
-offset_top = 954.0
+offset_top = 956.0
 offset_right = 960.0
-offset_bottom = 958.0
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="NinjaSlotLabel" type="Label" parent="." unique_id=1552436701]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 970.0
-offset_top = 24.0
-offset_right = 1110.0
-offset_bottom = 72.0
-text = "忍者 0/5"
+offset_bottom = 960.0
 horizontal_alignment = 1
 vertical_alignment = 1

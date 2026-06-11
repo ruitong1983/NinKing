@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bslpoking001"]
 
-[ext_resource type="Script" path="res://scripts/ninking/ui/ninja_slot.gd" id="1_ab"]
+[ext_resource type="Script" uid="uid://dj8k00mt21cm8" path="res://scripts/ninking/ui/ninja_slot.gd" id="1_ab"]
 [ext_resource type="Texture2D" uid="uid://b87tpe1i30ctq" path="res://assets/images/cards/slot_bg.png" id="2_bg"]
 
 [node name="NinjaSlot" type="Panel" unique_id=1700455314]
@@ -18,6 +18,17 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("2_bg")
+
+[node name="CardArt" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Icon" type="TextureRect" parent="."]
 offset_left = 41.0

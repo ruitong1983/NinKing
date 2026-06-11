@@ -76,8 +76,7 @@ func _ready() -> void:
 		NinKingGameState.current_seal_lord_name
 	)
 
-	# Transition SEAL_INTRO → PLAYING after intro watermark (Phase C: 0.5s)
-	await _intro_timer()
+	# SEAL_INTRO → PLAYING timer now fires from _on_state_changed on every seal entry
 
 
 # ═══ State callbacks ═══
@@ -86,6 +85,7 @@ func _on_state_changed(new_state: NinKingGameState.State) -> void:
 	match new_state:
 		NinKingGameState.State.SEAL_INTRO:
 			ui.show_view("intro")
+			_intro_timer()
 		NinKingGameState.State.PLAYING:
 			ui.show_view("game")
 			# Reset table after shop (Phase C)

@@ -87,6 +87,7 @@
 | B8 | **忍者牌条件效果** | 已实现：score_calculator.gd _ninja_condition_met() 完整支持 group/hand_type/xi 条件检测 | P2 | ✅ |
 | B9 | **主菜单系统** — 闪屏→按钮→牌组选择→继续确认 | 详见审阅报告。要点：① 按钮 hover/click SFX ② `_ready` 触发菜单 BGM ③ `stagger_slide_in(slide_offset=80)` ④ 牌组中文名映射 `DECK_NAMES` ⑤ 未实现牌组(night/sun)置灰不可点击 ⑥ CRT 滤镜开启 ⑦ `_panel_open` 双击守卫 | **P0** | ✅ |
 | B10 | **接入修炼忍者成长系统** ✅ — `NinjaScaling.process_scaling()` 接入 `finalize_play` (on_play)，构建 context (head/mid/tail_type + triggered_xis)。n_s04 忍法帖 已删除（trigger: on_redraw 对应手替え已废弃）| `seal_controller.gd` `finalize_play` xi_triggered 后、win/lose 前调用。剩余 5 张修炼忍者全部正常工作 | P2 | ✅ |
+| B12 | **右键卡牌详情弹窗** — 右键点击忍者牌/物品牌弹出放大版详情浮层（大图+完整效果描述+触发条件+稀有度），再次右键或点击外部关闭。`shop_ability_card.gd` / `shop_item_card.gd` 加 `_on_gui_input` 右键分支 → 信号上报 → `ui_manager.gd` 统一管理弹窗 | P2 | ⬜ |
 | B11 | **BGM 3 段变奏完成** ✅ — DOVA-SYNDROME 3 首战忍BGM下载 → `game_bgm_light/medium/heavy.mp3` → `MusicManager.set_game_variation(barrier)` 根据结界 1-3(轻)/4-6(中)/7-8(重) 自动 crossfade → `_on_seal_started()` + 商店退出统一触发 | MusicManager + game_manager + sound_bank | P1 | ✅ |
 
 ---
@@ -217,6 +218,7 @@ Phase A (当前) ──→ Phase B ──→ Phase C ──→ Phase D ──→
 
 | 日期 | 变更 |
 |------|------|
+| 2026-06-12 | 🏪 **Phase D 商店布局重设 — 左右分栏极简化**: Grill 12 轮确认 → 左 6:4 右 / 2x2 忍者 Grid + 2 道具 VBox / 固定 4+2 / 顶底栏 60px 对称 / 去所有装饰 / 遮罩 45% / 弱化主题。shop_panel.tscn 重写 / shop_ui.gd 重写 / shop_manager.gd 固定库存+assert / ui_manager.gd 去死参。07-shop-ui-design.md 场景树+布局同步。 |
 | 2026-06-11 | 🐛 **C24 商店忍者槽位数修正**: `shop_ui.gd._update_ninja_slot_label()` 从读库存数改为接收参数 `_owned_ninja_count` + `_max_ninja_slots`。`init()` 和 `update_gold()` 由 `ui_manager.gd` 传入 `NinKingGameState.owned_ninjas.size()`。运行时验证: 购买前"忍者 0/5"→购买后"忍者 1/5" ✅ |
 | 2026-06-11 | 🗂️ **V48 AssetRegistry 统一素材注册表**: 新建 `asset_registry.gd`，合并 `ninja_data.gd`(CATEGORY_ICONS+get_icon_path) 和 `consumable_data.gd`(ITEM_CATEGORY_MAP+get_item_xx_path)。3 调用文件改为直接引用 `AssetRegistry`。旧文件保留 delegation stub ✅ |
 | 2026-06-11 | 🗑️ **V49 死资产清理: icon_upgrade.png 删除** — 无任何物品类别需要升级图标（3 类为 transform/constellation/ritual），PNG + `.import` 一并删除 |

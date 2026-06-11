@@ -204,7 +204,7 @@ func show_shop(shop_mgr: ShopManager, gold: int, colors: Dictionary) -> void:
 	shop_overlay.add_child(panel)
 
 	_current_shop_panel = panel
-	panel.init(shop_mgr, gold, colors, NinKingGameState.owned_ninjas.size(), NinKingGameState.max_ninja_slots)
+	panel.init(shop_mgr, gold, colors)
 
 	# Wire signals to game_manager (emitted via UIManager for relay)
 	panel.purchase_requested.connect(_on_shop_purchase_requested)
@@ -248,7 +248,7 @@ func is_shop_open() -> bool:
 func shop_panel_update_gold(gold: int) -> void:
 	## Update gold on the active shop panel (called by game_manager after purchase/reroll).
 	if _current_shop_panel != null and is_instance_valid(_current_shop_panel):
-		_current_shop_panel.update_gold(gold, NinKingGameState.owned_ninjas.size())
+		_current_shop_panel.update_gold(gold)
 
 
 func shop_panel_update_reroll_cost(cost: int) -> void:

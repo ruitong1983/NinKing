@@ -1,8 +1,10 @@
 extends Panel
 ## Balatro-style ability (joker) card displayed in the shop.
 
+@onready var card_art: TextureRect = $CardArt
 @onready var art_rect: ColorRect = $ArtArea
-@onready var art_icon: ColorRect = $ArtArea/ArtIcon
+@onready var frame_texture: TextureRect = $ArtArea/FrameTexture
+@onready var art_icon: TextureRect = $ArtArea/ArtIcon
 @onready var art_name_label: Label = $ArtArea/ArtNameLabel
 @onready var rarity_badge: Panel = $RarityBadge
 @onready var name_label: Label = $NameLabel
@@ -63,7 +65,9 @@ const RARITY_CONFIG: Dictionary = {
 func _cache_nodes() -> void:
 	## Ensure @onready vars are initialized — setup() may be called before enter_tree.
 	if not name_label:
+		card_art = $CardArt
 		art_rect = $ArtArea
+		frame_texture = $ArtArea/FrameTexture
 		art_icon = $ArtArea/ArtIcon
 		art_name_label = $ArtArea/ArtNameLabel
 		rarity_badge = $RarityBadge
@@ -102,10 +106,20 @@ func setup(data: Dictionary) -> void:
 
 	_setup_rarity_badge(r)
 
+	# ── Load full ninja card illustration ──
+	var ninja_id: String = data.get("id", "")
+	var card_path: String = AssetRegistry.get_ninja_card_path(ninja_id)
+	if ResourceLoader.exists(card_path):
+		card_art.texture = load(card_path)
+
+	# Hide old compositing nodes
+	frame_texture.visible = false
+	art_icon.visible = false
+	art_name_label.visible = false
+
 	add_theme_stylebox_override("panel", _card_style)
 
 	name_label.text = data.get("name", "???")
-	art_name_label.text = data.get("name", "???")
 	effect_label.text = data.get("effect_desc", "")
 
 	var cond: String = data.get("condition_desc", "")
@@ -138,11 +152,8 @@ func apply_barrier_theme(colors: Dictionary) -> void:
 		_:
 			_card_style.border_color = COLOR_INK
 
-	# Art area = panel darkened 15%
-	art_rect.color = Color(colors.panel).darkened(0.15)
-	# Art name label = accent color at low opacity
-	art_name_label.add_theme_color_override("font_color", Color(colors.accent, 0.35))
-	art_name_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.3))
+	# Art area = transparent — card art shows through
+	art_rect.color = Color(colors.panel, 0.0)
 	# Name plate = panel darkened 5%
 	$NamePlate.color = Color(colors.panel).darkened(0.05)
 	# Price badge = panel color + ink border

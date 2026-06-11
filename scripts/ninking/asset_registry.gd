@@ -6,6 +6,22 @@ extends RefCounted
 ## 新代码应直接引用 AssetRegistry，不再分别引用 NinjaData / ConsumableData 的图标方法。
 
 
+# ═══ Ninja frame path ── rarity → frame file name ═══
+const NINJA_FRAME_PATH: String = "res://assets/images/ninjas/frames/"
+
+## Get the card frame texture path for a given rarity tier.
+static func get_frame_path(rarity: String) -> String:
+	return NINJA_FRAME_PATH + "ninja_frame_" + rarity + ".png"
+
+
+# ═══ Ninja card path ── full card illustration ═══
+const NINJA_CARD_PATH: String = "res://assets/images/cards/ninjas/"
+
+## Get the full card illustration PNG path for a ninja by its ID.
+static func get_ninja_card_path(ninja_id: String) -> String:
+	return NINJA_CARD_PATH + ninja_id + ".png"
+
+
 # ═══ Ninja icon path ── id prefix → icon file name ═══
 # ⚠️ Order matters: more specific prefixes FIRST, catch-all "n_" LAST.
 const NINJA_ICON_PATH: String = "res://assets/images/ninjas/icons/"
