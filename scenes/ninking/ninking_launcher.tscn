@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://me6pr1t82qb3"]
 
-[ext_resource type="Script" uid="uid://c1ty4fx8ctelk" path="res://scripts/ninking/ui/main_menu.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://b2ju5xh7q1y1v" path="res://assets/images/background/launch_bg.png" id="2_bg"]
-[ext_resource type="Theme" uid="uid://bqb2i07k0v8jt" path="res://assets/themes/manga_theme.tres" id="3_theme"]
-[ext_resource type="FontFile" uid="uid://l5d7mx0hlykx" path="res://assets/fonts/SourceHanSansSC-Heavy.otf" id="4_font"]
+[ext_resource type="Script" path="res://scripts/ninking/ui/main_menu.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/images/background/launch_bg.png" id="2_bg"]
+[ext_resource type="Theme" path="res://assets/themes/manga_theme.tres" id="3_theme"]
+[ext_resource type="FontFile" path="res://assets/fonts/SourceHanSansSC-Heavy.otf" id="4_font"]
 
 [node name="Launcher" type="Control"]
 layout_mode = 3

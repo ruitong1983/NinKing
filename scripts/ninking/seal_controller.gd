@@ -120,6 +120,15 @@ static func finalize_play(gs, play_data: Dictionary) -> void:
 	if xi_result and xi_result.has_any():
 		gs.emit_xi_triggered(xi_result.triggered)
 
+	# B10: Apply scaling ninja growth after each play
+	var arr = gs.current_arrangement
+	NinjaScaling.process_scaling(gs.owned_ninjas, "on_play", {
+		"head_type": arr.head_eval.hand_type,
+		"mid_type": arr.mid_eval.hand_type,
+		"tail_type": arr.tail_eval.hand_type,
+		"triggered_xis": xi_result.triggered if xi_result and xi_result.has_any() else [],
+	})
+
 	# Check win/lose
 	if gs.current_score >= gs.target_score:
 		_complete_seal(gs)
@@ -178,50 +187,6 @@ static func swap_cards(gs: NinKingGameState, idx1: int, idx2: int) -> void:
 	gs.hand[idx1] = gs.hand[idx2]
 	gs.hand[idx2] = temp
 	gs.re_evaluate_arrangement()
-
-
-# ══════════════════════════════════════════
-# Redraw (手替え — 弃掉选中牌并抽新牌)
-# ══════════════════════════════════════════
-
-static func execute_redraw(gs: NinKingGameState, indices: Array[int]) -> void:
-	if gs.current_state != NinKingGameState.State.PLAYING:
-		return
-	if gs.redraws_remaining <= 0:
-		return
-	if indices.is_empty() or indices.size() > 5:
-		return
-
-	gs.redraws_remaining -= 1
-	gs.emit_redraws_changed()
-
-	# Collect discarded cards
-	var discarded: Array[CardData.PlayingCard] = []
-	for idx: int in indices:
-		if idx >= 0 and idx < gs.hand.size():
-			discarded.append(gs.hand[idx])
-
-	gs.deck_manager.discard(discarded)
-
-	# Remove from hand (reverse order to avoid index shift)
-	indices.sort()
-	for i: int in range(indices.size() - 1, -1, -1):
-		gs.hand.remove_at(indices[i])
-
-	# Draw replacements
-	var new_cards: Array[CardData.PlayingCard] = gs.deck_manager.draw(discarded.size())
-	gs.hand.append_array(new_cards)
-
-	# Re-arrange
-	gs.auto_arrange()
-
-	# E3: 俭约 — gold if redraw ≤ 2 cards
-	for ninja: Dictionary in gs.owned_ninjas:
-		var eff: Dictionary = ninja.get("effect", {})
-		if eff.get("gold_per_small_redraw", 0) > 0 and indices.size() <= 2:
-			gs.gold += eff["gold_per_small_redraw"]
-			gs.gold_changed.emit(gs.gold)
-			break
 
 
 # ══════════════════════════════════════════

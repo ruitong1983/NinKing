@@ -58,50 +58,53 @@
 
 ```
    (启动器 main_menu.gd 调用 start_new_run() / continue_run() 后加载本场景)
-                    ┌──────┐
-                    │ SEAL_INTRO  │ ← 显示封印目标 + 封印ノ主，2秒后自动跳转
-                    └──────┬──────┘
-                           │ auto-transition (2s)
-                    ┌──────▼──────┐
-              ┌─────│   PLAYING   │◄──────────────────┐
-              │     └──┬──┬──┬───┘                   │
-              │        │  │  │                       │
-              │  swap  │  │  execute_play()          │
-              │  cards │  │  (出牌3次)              │
-              │        │  │  execute_redraw()         │
-              │        │  │  (手替え2次)             │
-              │        │  └──────────┐               │
-              │        │             ▼               │
-              │        │         SCORING             │
-              │        │     (动画 → 判定)          │
-              │        │             │               │
-              │        │    ┌────────┴──────┐        │
-              │        │    ▼               ▼        │
-              │        │ SEAL_           GAME_        │
-              │        │ COMPLETE        OVER         │
-              │        │    │                         │
-              │        │    ▼                         │
-              │        │   SHOP                       │
-              │        │    │                         │
-              │        │    ▼                         │
-              │        │ continue_from_shop() ────────┘
-              │        │
-              │        ▼
-              │     VICTORY
+                    ┌──────────┐
+                    │ SEAL_INTRO │ ← 0.5s 结界浮水印（Phase C 极简化）
+                    └─────┬──────┘
+                          │ auto-transition (0.5s)
+                   ┌──────▼──────┐
+              ┌────│   PLAYING   │◄──────────────────────┐
+              │    └──┬──┬──┬───┘                       │
+              │       │  │  │                           │
+              │  swap │  │  execute_play()              │
+              │  cards│  │  (讨伐 3次)                 │
+              │       │  │  execute_redraw()            │
+              │       │  │  (手替え 2次)                │
+              │       │  └──────────┐                    │
+              │       │             ▼                    │
+              │       │         SCORING                  │
+              │       │     (动画 → 判定)               │
+              │       │          │                       │
+              │       │   ┌──────┴──────┐                │
+              │       │   ▼              ▼               │
+              │       │SEAL_          GAME_              │
+              │       │COMPLETE        OVER              │
+              │       │   │                              │
+              │       │   ▼                              │
+              │       │  SHOP (同场景 Overlay) ←─ Phase C │
+              │       │   │   无 scene 切换               │
+              │       │   ▼                              │
+              │       │ continue_from_shop() ────────────┘
+              │       │
+              │       ▼
+              │    VICTORY
               │
-              └────── 死亡后点"重新开始" → reload 场景 → SEAL_INTRO（_on_state_changed 驱动）
+              └────── 死亡后点"重新开始" → reload 场景 → SEAL_INTRO
 ```
+
+> **Phase C 变更 (2026-06-11):** SHOP 改为同场景 Overlay，不再涉及 `change_scene_to_file`。
+> SEAL_INTRO 从 2s 缩短为 0.5s 结界浮水印。Boss 封印的揭示动画移至 PLAYING 中（战中出现）。
 
 ### 状态枚举
 
 ```gdscript
 enum State {
     MAIN_MENU,       # ⛔ 已废弃 — 启动器替代，保留枚举值防引用断裂
-    SEAL_INTRO,      # 封印入场（2秒倒计时）
+    SEAL_INTRO,      # 封印入场（0.5s 结界浮水印 — Phase C 极简化）
     PLAYING,         # 手牌操作（出牌/换牌/交换）
     SCORING,         # 计分动画播放中（仅在 game_manager 动画流程中使用）
     SEAL_COMPLETE,   # 封印达成 → 萬屋
-    SHOP,            # 商店（独立场景）
+    SHOP,            # 🏪 商店（同场景 UIManager/ShopOverlay）— 无 scene 切换
     GAME_OVER,       # 永久死亡 → 记录战绩 + 删档
     VICTORY,         # 通关 → 记录战绩 + 删档
 }
@@ -137,12 +140,12 @@ enum State {
 res://
 ├── scenes/ninking/
 │   ├── ninking_launcher.tscn       ← 入口场景 (主菜单)
-│   ├── ninking_main.tscn           ← 主游戏场景
-│   ├── shop.tscn                   ← 商店（萬屋）场景
+│   ├── ninking_main.tscn           ← 主游戏场景（含 ShopOverlay Phase C）
+│   ├── shop_panel.tscn             ← 🆕 商店面板场景片段 (替代旧 shop.tscn)
 │   ├── card_button.tscn            ← 手牌按钮组件
 │   ├── ninking_card.tscn           ← 卡牌组件 (NinKingCard)
 │   ├── ninking_card_factory.tscn   ← 卡牌工厂 (Card-Framework)
-│   ├── ability_slot.tscn           ← 忍者牌槽位组件
+│   ├── ability_slot.tscn           ← 忍者牌槽位组件 (已重命名)
 │   ├── shop_ability_card.tscn      ← 商店忍者牌卡片
 │   ├── shop_item_card.tscn         ← 商店道具卡片
 ```
@@ -160,40 +163,46 @@ Launcher (Node) [main_menu.gd]
 ```
 NinKingMain (Control) [game_manager.gd]
 ├── CardManager (Control) [card_manager.gd] — 卡牌框架核心
-├── GameBg (ColorRect) — 桌布背景 (1920×1080, 結界主题动态配色)
+├── GameBg (TextureRect) — 桌布背景 (1920×1080, 結界主题动态配色)
 └── UIManager (Node) [ui_manager.gd] — UI 总控
     ├── LevelIntro (Control) — 封印入场视图
-    │   ├── IntroOverlay / LevelLabel / TargetLabel
+    │   ├── IntroOverlay / LevelLabel / TargetLabel / BossPortrait
     ├── GameLayout (HBoxContainer) — 游戏主视图
     │   ├── LeftPanel (Control) — 左侧信息面板
-    │   │   ├── PanelBg (ColorRect)
-    │   │   ├── ChipsMultContainer — ChipsLabel / MultSign / MultLabel
-    │   │   ├── HandTypeLabel / ScoreLabel / TargetScoreLabel / ProgressBar
-    │   │   ├── MatchPanel — HandsLabel / RedrawsLabel / GoldLabel
-    │   │   └── AntePanel — BarrierLabel / RoundLabel
+    │   │   ├── PanelBg (ColorRect)          — 全透明 (保留节点供代码引用)
+    │   │   │
+    │   │   ├── ScoreCard (Panel)             — anchors: top=0, bottom=0.5 (上半 1/2)
+    │   │   │   └── ScoreCardVBox             — layout_mode=1, anchors_preset=15 (full rect)
+    │   │   │       ├── ColXiLabel           — 列x累乘 + 喜预览
+    │   │   │       ├── HandTypeRow          — 三墩牌型+分数
+    │   │   │       ├── ScoreLabel / ProgressBar / TargetScoreLabel
+    │   │   │
+    │   │   ├── MatchPanel (Panel)            — anchors: top=0.5, bottom=0.75 (中间 1/4, 无圆角/无边框/挂 fade)
+    │   │   │   └── MatchVBox → MatchTitle / HandsLabel / GoldLabel
+    │   │   │
+    │   │   └── AntePanel (Panel)             — anchors: top=0.75, bottom=1.0 (底部 1/4, 无圆角/无边框/挂 fade)
+    │   │       └── AnteVBox → BarrierLabel / RoundLabel
     │   └── CenterColumn (VBoxContainer) — 中央区域
-    │       ├── AbilityBar (HBoxContainer) — 忍者牌栏 (5槽位)
+    │       ├── NinjaBar (HBoxContainer) — 忍者牌栏 (5槽位)
     │       ├── StatusLabel — 状态提示
     │       ├── HandArea (HBoxContainer) — 操作+三组区
-    │       │   ├── PlayBtn "出牌"
+    │       │   ├── PlayBtn "討伐"
     │       │   ├── DunArea (Panel) — 三墩容器
-    │       │   │   ├── DunHead (Panel) — 影（1px 边框）
-    │       │   │   ├── DunMiddle (Panel) — 瞬（2px 边框）
-    │       │   │   └── DunTail (Panel) — 滅（3px 边框）
-    │       │   ├── AiRearrangeBtn "陣\n形" — 陣形按钮（初始禁用，PLAYING 时启用）
+    │       │   │   ├── DunHead — 影（1px 边框）
+    │       │   │   ├── DunMiddle — 瞬（2px 边框）
+    │       │   │   └── DunTail — 滅（3px 边框）
+    │       │   ├── AiRearrangeBtn "陣\n形"
     │       │   └── RedrawBtn "换牌"
-    │       ├── ColumnLabelRow (HBoxContainer) — 列牌型标签行
-    │       │   ├── Col0Label — 列0 牌型（≥对子时金色显示）
-    │       │   ├── Col1Label — 列1 牌型
-    │       │   └── Col2Label — 列2 牌型
+    │       ├── ColumnLabelRow — 列牌型标签
     │       └── DeckBtn "🎴 牌库"
-    ├── ScoringOverlay (Control) — ⛔ 计分时不再显示 (Balatro 风内联动画) [z_index=10]
-    │   └── HandNameLabel / ScoreValueLabel / ScoreBreakdown (保留节点，未被计分流程使用)
+    ├── ScoringOverlay (Control) — ⛔ 未使用 (Balatro 风内联动画)
     ├── LevelComplete (Control) — 过关弹窗
     │   └── CompleteLabel / RewardLabel / ToShopButton
+    ├── ShopOverlay (Control) — ← **Phase C 新增** 商店覆盖层
+    │   └── 运行时: add_child(load("res://scenes/ninking/shop_panel.tscn").instantiate())
     ├── GameOver (Control) — 失败弹窗
     │   └── OverlayBg / GameOverLabel / ScoreSummary / RetryButton / BackToMenuButton
-    ├── VictoryOverlay (Control) — 通关弹窗 (独立于 GameOver)
+    ├── VictoryOverlay (Control) — 通关弹窗
     │   └── OverlayBg / VictoryLabel / StatsSummary / MenuButton
     └── DeckViewer (Control) — 牌库查看器 [z_index=10]
         └── ViewerBg / CardPanel / TitleBar / CountRow / CardScroll / CardGrid
@@ -204,30 +213,32 @@ NinKingMain (Control) [game_manager.gd]
 >
 > **⚠️ z_index 陷阱:** `Hand._update_target_z_index()` 会给卡牌设 z_index=0/1/2，在 Godot 4 的累加 z_index 模型下会穿透同层 overlay。DeckViewer 已设 `z_index=10` 应对。ScoringOverlay 计分时不显示（Balatro 风内联动画），不再需要 z_index 防护。详见 `docs/card-framework-usage-guide.md` § 已知陷阱。
 
-### shop.tscn
+### shop.tscn → shop_panel.tscn
+
+> **⛔ 已删除 (Phase C, 2026-06-11).** 商店 UI 移至 `ninking_main.tscn` 的 `UIManager/ShopOverlay` 下。
+> 原 `Shop (Control) [shop_ui.gd]` 根节点内容改为 `shop_panel.tscn` 场景片段。
+>
+> 旧节点结构归档如下：
 
 ```
-Shop (Control) [shop_ui.gd]
-├── Overlay (ColorRect) — 全屏半透明遮罩
+Shop (Control) [shop_ui.gd]       ← 改为 shop_panel.tscn (场景片段)
+├── Overlay (ColorRect) — 遮罩
 └── ShopPanel (Panel) — 商店主面板
-    ├── TitleBar (ColorRect) — 标题栏背景
+    ├── TitleBar (ColorRect)
     ├── ShopTitle (Label) "萬屋"
     ├── GoldPill (Panel) — 金币显示
-    │   ├── CoinIcon (Label) "🪙"
-    │   └── GoldLabel (Label)
-    ├── RerollBtn (Button) / RerollLabel — 刷新按钮
-    ├── AbilityLabel (Label) "--- 忍者牌 ---"
-    ├── DecoLineL1 / DecoLineR1 (ColorRect) — 装饰线
-    ├── AbilityRow (HBoxContainer) — 忍者牌商品行
-    ├── ItemLabel (Label) "--- 道具 ---"
-    ├── DecoLineL2 / DecoLineR2 (ColorRect) — 装饰线
-    ├── ItemRow (HBoxContainer) — 道具商品行
-    ├── BottomBar (ColorRect) — 底部栏背景
-    ├── Separator (ColorRect) — 分隔线
-    ├── ContinueBtn (Button) "继续闯关"
-    ├── NextLevelHint (Label) — 下一封印提示
-    └── NinjaSlotLabel (Label) — 忍者槽位指示器
+    ├── RerollBtn / RerollLabel
+    ├── AbilityLabel "忍者牌"
+    ├── AbilityRow — 忍者牌商品行
+    ├── ItemLabel "道具"
+    ├── ItemRow — 道具商品行
+    ├── BottomBar (ColorRect)
+    ├── ContinueBtn "討伐へ ▶"
+    └── NinjaSlotLabel "忍者 X/5"
 ```
+
+> **文件操作：** `shop.tscn` 整文件删除。`shop_ui.gd` 重写为 panel 模式（init + signal）。
+> 旧节点中 `NextLevelHint` 已在 Phase C 决策中去除。
 
 ---
 
@@ -445,11 +456,31 @@ HandInteraction (extends RefCounted) — 交互状态机
 ├── set_cards_interactable(bool) — 批量开关卡牌交互
 └── 对接 ui_manager.gd 的状态流转控制
 
+ShopHandler (extends RefCounted) — 商店委托（C21 拆分）
+├── setup(ui: UIManager) — 注入 UI 引用
+├── go_shop_pressed() — fade 牌桌→缓存商品→触发 SHOP 状态
+├── on_enter_shop() — 重置 reroll 计次→ui.show_shop()→通知 UI 刷新价格
+├── on_purchase_requested(ability) — 购买忍者牌
+├── on_item_purchase_requested(item) — 购买道具（B6: 星图 → _purchase_star_chart）
+├── _purchase_star_chart(item) — 星图购买即用：扣钱→apply_star_chart→Toast→VFX（B6）
+├── on_reroll_requested() — 递进式刷新 $3+$1/次（B4）
+├── on_continue_requested() — 退出商店→下一封印
+├── _reroll_count / _get_reroll_cost() — 内部状态
+└── game_manager 将 5 个按钮/信号 connect 到 shop_handler
+
+AnimationHandler (extends RefCounted) — 计分动画委托（C21 拆分）
+├── setup(ui, mark_auto_shop_cb) — 注入 UI + auto-shop 回调
+├── current_play_data: Dictionary — game_manager 在出牌前写入
+├── run_scoring() — Phase 1-4 完整计分动画序列
+├── _float_score_gain(anchor, gain, color) — "+N" 上浮飘出
+├── _show_breakdown_toast(text, color) — 筹码×倍率内幕 toast
+└── game_manager 设 current_play_data → SCORING 触发 run_scoring()
+
 CardData (RefCounted)
 ├── enum Suit, Rank, HandType3, Enhancement, Seal, Edition
 ├── class PlayingCard (suit, rank, enhancement, seal, edition)
-├── const: HAND_TYPE3_BASE_VALUES, COLUMN_HAND_TYPE3_BASE_VALUES, STAR_CHART_UPGRADES, RANK_CHIP_VALUES
-├── static: get_hand_type3_column_leveled_chips/mult(ht, levels)
+├── const: HAND_TYPE3_BASE_VALUES, STAR_CHART_UPGRADES, RANK_CHIP_VALUES
+├── static: get_hand_type3_leveled_chips/mult(ht, levels)  # 仅横排，列×mult 固定值无关
 └── static: create_standard_deck()
 
 HandEvaluator3 (RefCounted)
@@ -457,14 +488,21 @@ HandEvaluator3 (RefCounted)
 └── static: evaluate(cards: Array[PlayingCard]) → EvalResult
 
 AutoArranger (RefCounted)
-└── static: find_best(hand, ninja_chips, ninja_mult, ninja_x_stack, star_chart_levels, rules) → Arrangement
+└── static: find_best(hand, head_ninja, mid_ninja, tail_ninja, star_chart_levels, rules) → Arrangement
+    └── _fast_score() v4.0: per-group评分 + 列近似奖励 + 同点数量散惩罚
 
 ScoreCalculator (RefCounted)
-├── class ScoreResult (total_score, chips_sum, mult_sum, x_mult_product, breakdown)
-└── static: calculate(head, mid, tail, evals, col_evals, ninjas, star_charts, xi_result, seal_effects, gold) → ScoreResult
+├── class ScoreResult (total_score, head_score, mid_score, tail_score,
+│                      col_x_stack, global_xi_x_stack, chips_sum, mult_sum, breakdown)
+├── static: calculate(head, mid, tail, evals, col_evals, ninjas, star_charts,
+│                    xi_result, seal_effects, gold) → ScoreResult
+├── static: collect_ninja_per_group() — 忍效果→三组分账
+├── static: ninja_affected_groups() — 条件→命中组
+└── static: _col_type_to_x_mult() — 列牌型→×mult(2/4/8/16/32)
 
 XiDetector (RefCounted)
 ├── class XiResult (triggered, chips_add, mult_x_stack)
+│   # v4.0: 四张 chips→×5, chips_add 不再使用(全部×mult)
 └── static: detect(head, mid, tail, head_eval, mid_eval, tail_eval) → XiResult
 
 DeckManager (RefCounted)
@@ -509,7 +547,7 @@ NinjaPool (RefCounted)
 └── get_random_legendary() → Dictionary
 
 NinjaScaling (RefCounted)
-└── process_scaling(ninjas, trigger_type, context) — 修炼忍者成长引擎（待接入）
+└── process_scaling(ninjas, trigger_type, context) — 修炼忍者成长引擎（已接入 finalize_play）
 
 ConsumableData (RefCounted)
 ├── FUJUTSU_CARDS / STAR_CHART_CARDS / KINJUTSU_CARDS

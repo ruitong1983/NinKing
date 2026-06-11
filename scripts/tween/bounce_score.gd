@@ -13,20 +13,19 @@ const PREFIX: String = "忍気 "
 const OVERSCALE: float = 1.6
 const UNDERSHOOT: float = 0.82
 const OVERSHOOT_RATIO: float = 0.30
-const PHASE_WINDUP: float = 0.08
-const PHASE_UP: float = 0.58
-const PHASE_SETTLE: float = 0.08
-const PHASE_RESTORE: float = 0.12
-const PROGRESS_DELAY: float = 0.10
-const PROGRESS_DUR: float = 0.25
-const GLOW_DUR: float = 0.30
+const PHASE_WINDUP: float = 0.12
+const PHASE_UP: float = 1.00
+const PHASE_SETTLE: float = 0.15
+const PHASE_RESTORE: float = 0.20
+const PROGRESS_DELAY: float = 0.15
+const PROGRESS_DUR: float = 0.40
+const GLOW_DUR: float = 0.45
 
 
 static func play(
 	score_label: Label,
 	progress_bar: ProgressBar,
-	chips_label: Label,
-	mult_label: Label,
+	col_xi_label: Label,
 	panel_bg: ColorRect,
 	old_score: int,
 	new_score: int,
@@ -101,8 +100,7 @@ static func play(
 	if is_instance_valid(progress_bar):
 		_tween_progress_on(tw, progress_bar, float(new_score), PROGRESS_DUR)\
 			.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
-	tw.tween_callback(_make_flash_callback(chips_label, Color.GOLD, 0.15))
-	tw.tween_callback(_make_flash_callback(mult_label, Color.GOLD, 0.15))
+	tw.tween_callback(_make_flash_callback(col_xi_label, Color.GOLD, 0.15))
 	tw.tween_callback(_make_flash_callback(panel_bg, barrier_color, GLOW_DUR))
 	tw.tween_callback(_make_flash_callback(progress_bar, barrier_color.lightened(0.3), GLOW_DUR))
 

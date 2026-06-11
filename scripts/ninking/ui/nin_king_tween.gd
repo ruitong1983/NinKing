@@ -29,10 +29,10 @@ static func play_shop_entrance(config: Dictionary) -> void:
 	var overlay: ColorRect = config.get("overlay") as ColorRect
 	var panel: Control = config.get("panel") as Control
 	var all_cards: Array = config.get("all_cards", [])
-	var focus_title: TextureRect = config.get("focus_title") as TextureRect
-	var focus_ability: TextureRect = config.get("focus_ability") as TextureRect
-	var focus_item: TextureRect = config.get("focus_item") as TextureRect
-	var focus_bottom: TextureRect = config.get("focus_bottom") as TextureRect
+	var focus_title: ColorRect = config.get("focus_title") as ColorRect
+	var focus_ability: ColorRect = config.get("focus_ability") as ColorRect
+	var focus_item: ColorRect = config.get("focus_item") as ColorRect
+	var focus_bottom: ColorRect = config.get("focus_bottom") as ColorRect
 	var whoosh_sfx: AudioStream = config.get("whoosh_sfx") as AudioStream
 	var impact_sfx: AudioStream = config.get("impact_sfx") as AudioStream
 
@@ -50,7 +50,7 @@ static func play_shop_entrance(config: Dictionary) -> void:
 	if panel:
 		if whoosh_sfx:
 			GlobalTweens.play_sfx(whoosh_sfx)
-		var tw := TweenFX.slide_in(panel, TweenFX.SlideDir.DOWN, 0.5)
+		var tw := GlobalTweens.slide_in(panel, TweenFX.SlideDir.DOWN, 0.5)
 		if tw:
 			await tw.finished
 	if not is_instance_valid(panel):
@@ -97,3 +97,92 @@ static func play_shop_entrance(config: Dictionary) -> void:
 	# ── Phase 4: Cards stagger pop in ──
 	if not all_cards.is_empty():
 		GlobalTweens.stagger_slide_in(all_cards, 0.1, 0.3, 30.0)
+
+
+static func play_shop_exit(config: Dictionary) -> void:
+	## Play the shop exit sequence (Phase C): cards gather → panel slide out → overlay fade out.
+	## Each await guarded with is_instance_valid(panel).
+	##
+	## config keys:
+	##   overlay: ColorRect          — dark overlay (fade out)
+	##   panel: Control              — shop panel (validity anchor + slide out)
+	##   all_cards: Array[Control]   — ability + item cards (gather to center then fade)
+	##   center_pos: Vector2         — gather target position (default: panel center)
+
+	var overlay: ColorRect = config.get("overlay") as ColorRect
+	var panel: Control = config.get("panel") as Control
+	var all_cards: Array = config.get("all_cards", [])
+	var center_pos: Vector2 = config.get("center_pos",
+		panel.get_viewport_rect().size * 0.5 if panel else Vector2(960, 540))
+
+	# ── Phase 1: Cards gather to center (0.3s) ──
+	for card in all_cards:
+		if is_instance_valid(card):
+			var tw: Tween = card.create_tween()
+			tw.set_parallel()
+			tw.tween_property(card, "scale", Vector2(0.1, 0.1), 0.3).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_BACK)
+			tw.tween_property(card, "global_position", center_pos, 0.3).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_BACK)
+			tw.tween_property(card, "modulate:a", 0.0, 0.25)
+
+	if not is_instance_valid(panel):
+		return
+	await panel.get_tree().create_timer(0.3).timeout
+	if not is_instance_valid(panel):
+		return
+
+	# ── Phase 2: Panel slide out downward (0.3s) ──
+	if panel:
+		GlobalTweens.play_sfx(preload("res://scripts/config/sound_bank.gd").SHOP_EXIT)
+		var tw: Tween = panel.create_tween()
+		tw.tween_property(panel, "position:y", panel.get_viewport_rect().size.y + 100, 0.3).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_BACK)
+		tw.parallel().tween_property(panel, "modulate:a", 0.0, 0.25)
+		await tw.finished
+
+	if not is_instance_valid(panel):
+		return
+
+	# ── Phase 3: Overlay fade out (0.2s) ──
+	if overlay and is_instance_valid(overlay):
+		GlobalTweens.fade_out(overlay, 0.2)
+
+
+static func play_reroll_vfx(old_cards: Array, new_cards_callback: Callable) -> void:
+	## Play reroll VFX: old cards blow away → callback generates new cards → new cards slide in.
+	## new_cards_callback: Callable() that returns the new Array[Control] after stock refresh.
+	##
+	## Usage:
+	##   await NinKingTween.play_reroll_vfx(ability_cards + item_cards, func(): ... )
+
+	# ── Phase 1: Old cards blow away (0.3s) ──
+	var rng := RandomNumberGenerator.new()
+	for card in old_cards:
+		if not is_instance_valid(card):
+			continue
+		var tw: Tween = card.create_tween()
+		tw.set_parallel()
+		var angle: float = rng.randf_range(-60.0, 60.0)
+		var dist: float = rng.randf_range(300.0, 600.0)
+		var fly_to: Vector2 = card.global_position + Vector2(
+			cos(deg_to_rad(angle)) * dist,
+			sin(deg_to_rad(angle)) * dist - 200.0  # bias upward
+		)
+		tw.tween_property(card, "global_position", fly_to, 0.3).set_ease(Tween.EASE_IN)
+		tw.tween_property(card, "modulate:a", 0.0, 0.25)
+		tw.tween_property(card, "rotation", deg_to_rad(rng.randf_range(-30.0, 30.0)), 0.3)
+
+	await Engine.get_main_loop().create_timer(0.35).timeout
+
+	# ── Phase 2: Generate new cards via callback ──
+	var new_cards: Array = new_cards_callback.call()
+
+	# ── Phase 3: New cards slide in from above (0.3s stagger) ──
+	if not new_cards.is_empty():
+		GlobalTweens.stagger_slide_in(new_cards, 0.08, 0.3, -60.0)
+
+
+static func play_ninja_pop_in(slot_node: CanvasItem) -> void:
+	## New ninja slot pop-in: scale_pop + gold flash. Fire-and-forget.
+	if not is_instance_valid(slot_node):
+		return
+	GlobalTweens.scale_pop(slot_node, 1.3, 0.3)
+	GlobalTweens.color_flash(slot_node, Color.GOLD, 0.2)

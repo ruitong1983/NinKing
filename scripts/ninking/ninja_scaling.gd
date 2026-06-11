@@ -3,8 +3,10 @@ extends RefCounted
 
 ## Scaling ninja engine — processes growth effects on ninja cards.
 ## Extracted from NinjaData. Modifies ninja `effect` values in-place.
+## Called from SealController.finalize_play() (B10).
 ##
-## TODO: Wire into finalize_play() and execute_redraw() — see TODO.md.
+## 5 scaling ninjas: n_s01(修行者), n_s02(三清道人), n_s03(龙脉),
+##   n_s05(头悬梁), n_s06(尾刺骨). n_s04(忍法帖) deleted (on_redraw removed).
 
 
 ## Process scaling ninja effects after each play or redraw.

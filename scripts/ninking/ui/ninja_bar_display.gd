@@ -1,31 +1,35 @@
 class_name NinjaBarDisplay
 extends RefCounted
 
-## Manages the ninja ability bar — clear, populate, empty slots.
+## Manages the ninja bar — clear, populate, empty slots.
 ## Extracted from UIManager.
 
-var _ability_bar: HBoxContainer
+var _ninja_bar: HBoxContainer
 
-const ABILITY_SLOT_SCENE: PackedScene = preload("res://scenes/ninking/ability_slot.tscn")
+const NINJA_SLOT_SCENE: PackedScene = preload("res://scenes/ninking/ninja_slot.tscn")
 
 
-func setup(ability_bar: HBoxContainer) -> void:
-	_ability_bar = ability_bar
+func setup(ninja_bar: HBoxContainer) -> void:
+	_ninja_bar = ninja_bar
 
 
 func refresh(owned_ninjas: Array, max_slots: int) -> void:
-	for child: Node in _ability_bar.get_children():
+	for child: Node in _ninja_bar.get_children():
 		child.queue_free()
 	for ninja: Dictionary in owned_ninjas:
-		_make_slot(ninja["name"])
+		var icon_path: String = AssetRegistry.get_icon_path(ninja["id"], ninja.get("effect", {}))
+		_make_slot(ninja["name"], icon_path)
 	var empty: int = max_slots - owned_ninjas.size()
 	for _i: int in range(empty):
 		_make_slot("空")
 
 
-func _make_slot(text: String) -> void:
-	var slot: Panel = ABILITY_SLOT_SCENE.instantiate()
-	var label: Label = slot.get_node_or_null("Label")
-	if label != null:
-		label.text = text
-	_ability_bar.add_child(slot)
+func _make_slot(text: String, icon_path: String = "") -> void:
+	var slot: Panel = NINJA_SLOT_SCENE.instantiate()
+	_ninja_bar.add_child(slot)
+	if slot.has_method("setup"):
+		slot.setup(text, icon_path)
+	else:
+		var label: Label = slot.get_node_or_null("Label")
+		if label != null:
+			label.text = text

@@ -1,6 +1,6 @@
 # NinKing 工作清单
 
-> **最后更新:** 2026-06-10 | **当前 Phase:** A（核心引擎）
+> **最后更新:** 2026-06-11 | **当前 Phase:** A（核心引擎）
 > **使用方式:** AI 每次会话开始时读取此文件。完成任务后更新状态。
 > **状态图例:** ⬜ 待做 | 🔵 进行中 | ✅ 已完成 | 🔒 暂缓 | ⛔ 已废弃
 
@@ -20,6 +20,27 @@
 
 ---
 
+## 🏗️ Phase C — 同场景沉浸化通关流程
+
+> **Grill 19 轮 + review-plan 审阅通过, 2026-06-11**
+> **核心改动：** 消除 SEAL_COMPLETE→SHOP→下一封印 间的场景切换，全流程在 ninking_main.tscn 内完成。
+> 决策树详见记忆 `flow-immersion-decisions-2026-06-11.md`
+
+| # | 任务 | 说明 | 优先级 | 状态 |
+|---|------|------|--------|------|
+| S1 | **shop_panel.tscn 场景片段提取** | 从当前 `shop.tscn` 提取根节点 Content 为 `res://scenes/ninking/shop_panel.tscn`（CanvasLayer 或 Control），保留所有 unique_name 引用。shop_ability_card / shop_item_card 子场景保持独立 | **P0** | ✅ |
+| S2 | **shop_ui.gd 重写为 panel 模式** | 接受 init data（stock, gold, barrier_colors），通过信号上报操作（`purchase_requested` 已有、新增 `reroll_requested` / `continue_requested`）。删除对 `NinKingGameState` 的直接引用。`_on_continue_pressed` 删 `change_scene_to_file` 改为 emit 信号 | **P0** | ✅ |
+| S3 | **NinKingTween 扩展** | 新增：① `play_shop_exit(config)` — 卡片 gather 回中心 + panel slide_out + overlay fade_out，~50 行 ② `play_reroll_vfx(old_cards, new_cards)` — 飘出飘入，~30 行 ③ `play_ninja_pop_in(slot_node)` — 新忍者入槽 pop_in + color_flash，~15 行 | **P0** | ✅ |
+| S4 | **ui_manager.gd 加 ShopOverlay 引用** | `@onready var shop_overlay: Control = %ShopOverlay` + `show_view("shop")` 映射。新增 `show_shop()` / `hide_shop()` 方法 | **P0** | ✅ |
+| S5 | **ninking_main.tscn 加 ShopOverlay 子树** | UIManager 下新增 ShopOverlay (Control) 节点，包含 Overlay (ColorRect) + ShopPanel 实例化入口。运行时动态 `add_child(shop_panel.instance())` | **P0** | ✅ |
+| S6 | **game_manager.gd 重写 go_shop + SHOP 状态 + intro_timer** | `_on_state_changed` 加 SHOP 分支逻辑；`_on_go_shop_pressed()` 从 scene 切换改为：清理牌桌 → LevelComplete fade_out → 触发 ShopOverlay 入场；`_intro_timer` 2s→0.5s | **P0** | ✅ |
+| S7 | **Boss 揭示移到 PLAYING 中** | 非 Boss 封印：0.5s 浮水印 → PLAYING。Boss 封印：0.5s 浮水印 → PLAYING 站稳(0.3s 延迟) → Boss 立绘 punch_in + 浮水 1.5s | **P0** | ✅ |
+| S8 | **牌桌清理序列** | ShopOverlay 入场同时，GameLayout 进行 fade_out。ShopOverlay 关闭时，GameLayout 重新 visible+modulate 还原 | **P1** | ✅ |
+| S9 | **文档同步** | ① `07-shop-ui-design.md` 节点结构从 Shop→shop_panel；② `03-technical-design.md` 场景树补 ShopOverlay、状态图更新、删除 shop.tscn 行；③ `06-ui-layout-reference.md` 补 ShopOverlay 视图 + show_view 表 + 更新接口 | **P1** | ✅ |
+| S10 | **删除旧 shop.tscn** | 确认所有引用清理后删除 `scenes/ninking/shop.tscn` | **P1** | ✅ |
+
+---
+
 ## 🏗️ Phase A — 核心引擎完善
 
 | # | 任务 | 说明 | 优先级 | 状态 |
@@ -28,11 +49,30 @@
 | A2 | Boss AI 适配 | 6 种 Boss 评分策略已实现：deprioritize/skip_weak/scatter_king/hungry_ghost/balance/constraint_reverse | **P0** | ✅ |
 | A3 | 商店 MVP 完善 | 修复场景切换 bug + 方法名更新 + 忍者槽位指示器 + GoldPill 布局调整 | **P0** | ✅ |
 | A4 | 喜系统补全 | 全部 9 种喜已实现：全黑/全红/全顺/全同花/四张/三清/三顺清/顺清打头/全三条 | **P1** | ✅ |
-| A5 | 换牌 UI 交互 | 选卡 → 确认丢弃 → 重抽 → AI 重排流程完整（已修复 redraw_mode 属性缺失） | **P1** | ✅ |
+| A5 | ~~换牌 UI 交互~~ | 9张牌策略下不适合，已移除（2026-06-11） | **P1** | 🗑️ |
 | A6 | 交换 UI | 点击交换（已有）+ 拖拽交换（新增 NinKingCard 拖拽信号 + HandDisplay 落点检测 + HandInteraction 跨容器交换）| **P1** | ✅ |
 | A7 | 出牌/计分动画流程 | 组揭示 → 计分跳动 → 喜触发粒子 → 过关/失败判定。SealController 拆为 prepare/finalize，CountUp 直接调用，零手写 Tween | **P1** | ✅ |
 | A8 | 永久死亡存档 | 失败/胜利自动记录战绩+删 run 存档，checkpoint 在封印开始时保存，新增 continue_run/has_saved_run | **P1** | ✅ |
 | **A9** | **列分机制** | 3×3 网格纵向列计分（列_i = 影[i]+瞬[i]+滅[i]），列专属基础值 2.5× 横向，AI 只优化横向，交换不自动重排，新增 AI 重排按钮 + 列标签 | **P0** | ✅ |
+| **A10** | **score_calculator.gd 完全重写** ✅ | 扁平池→三行独立计分+列×mult(2/4/8/16/32)累乘+全局喜×mult。新 ScoreResult。忍者/卡片×mult 跟组走 | `scripts/ninking/score_calculator.gd` | **P0** | ✅ |
+| **A11** | **auto_arranger._fast_score() 同步新公式** ✅ | AI 排列评分改用 per-group + 列近似奖励 + 同点离散惩罚。接口改为 per-group ninja dicts | `scripts/ninking/auto_arranger.gd` | **P0** | ✅ |
+| **A12** | **arrange_controller 忍者跟组走** ✅ | `_compute_per_group_ninja_effects()` 预计算分组忍者效果，调用 `ScoreCalculator.collect_ninja_per_group()` | `scripts/ninking/arrange_controller.gd` | **P0** | ✅ |
+| **A13** | **card_data.gd 清理列基础值函数** ✅ | 删 COLUMN_HAND_TYPE3_BASE_VALUES 及 4 个列函数 | `scripts/ninking/card_data.gd` | P1 | ✅ |
+| A14 | **xi_detector.gd 四张 ×5** ✅ | 四张 chips:50→0, x_mult:1→5 | `scripts/ninking/xi_detector.gd` | P1 | ✅ |
+| A15 | **item_data.gd 道具整化** ✅ | 暴击骰子 x_mult:1.5→2，其余保持整型 | `scripts/ninking/item_data.gd` | P1 | ✅ |
+| A16 | **animation_handler.gd breakdown 格式更新** ✅ | "影: N 瞬: N 滅: N\n列: ×N×N×N\n喜: ×N×N"。删旧 col_chips/col_mult | `scripts/ninking/ui/animation_handler.gd` | P1 | ✅ |
+| A17 | **hand_type_labeler.gd 预览更新** ✅ | 无需修改 — 签名兼容 | `scripts/ninking/ui/hand_type_labeler.gd` | P1 | ✅ |
+| A18 | **seal_controller.gd 调用点适配** ✅ | 无需修改 — calculate() 签名相同 | `scripts/ninking/seal_controller.gd` | P1 | ✅ |
+| A19 | **列 VFX 庆祝阈值调低** ✅ | 同花(×8)以上列触发粒子庆祝 | `scripts/ninking/ui/animation_handler.gd` | 🟢 | ✅ |
+| A20 | **场景节点替换：CMC → ColXiLabel** ✅ | 删 `ChipsMultContainer`，新建 `ColXiLabel` 32px 金+accent | `ninking_main.tscn` | **P0** | ✅ |
+| A21 | **ui_manager 引用更新** ✅ | 删 chips/mult，增 col_xi_label | `scripts/ninking/ui/ui_manager.gd` | **P0** | ✅ |
+| A22 | **HandTypeLabeler 列喜预览** ✅ | `_update_col_xi_preview()` 列 eval + xi detect | `scripts/ninking/ui/hand_type_labeler.gd` | **P0** | ✅ |
+| A23 | **HandDisplay 适配** ✅ | setup 签名更新 | `scripts/ninking/ui/hand_display.gd` | **P0** | ✅ |
+| A24 | **BounceScore 删参** ✅ | 删 chips/mult，改闪 col_xi_label | `scripts/tween/bounce_score.gd` | P1 | ✅ |
+| A25 | **animation_handler Phase 1 分数动效** ✅ | 每墩揭示后 ShadowScore flash + 完整 chips×mult | `scripts/ninking/ui/animation_handler.gd` | **P0** | ✅ |
+| A26 | **card_data 列 ×mult 字典** ✅ | `COL_X_MULT_VALUES` 公开常量 | `scripts/ninking/card_data.gd` | P1 | ✅ |
+| A27 | **文档同步：06-ui-layout-reference** ✅ | §3.3a + 场景树更新 | `docs/ninking/06-ui-layout-reference.md` | P2 | ✅ |
+| A28 | **文档同步：10-main-ui-design** ✅ | §3.2 更新 | `docs/ninking/10-main-ui-design.md` | P2 | ✅ |
 
 ---
 
@@ -40,14 +80,14 @@
 
 | # | 任务 | 说明 | 优先级 | 状态 |
 |---|------|------|--------|------|
-| B4 | 商店刷新机制 (reroll) | $1-2/次，全部商品刷新，上限规则 | P2 | ⬜ |
-| B5 | 附魔卡使用流程 | 购买 → 选目标牌 → 应用效果（花色/点数/增强/复制等） | P2 | ⬜ |
-| B6 | 星图卡使用流程 | 购买 → 选牌型 → 升级（永久提升该牌型基础筹码/倍率） | P2 | ⬜ |
+| B4 | **商店刷新机制 (reroll)** ✅ — 递进式费用 $3+$1/次（Balatro 风），每趟商店重置，无硬上限。shop_handler._reroll_count 跟踪刷新次数 + _get_reroll_cost() 计算动态费用。shop_ui: 删 REROLL_COST 常量，加 update_reroll_cost() 动态更新按钮禁用状态。ui_manager 加 shop_panel_update_reroll_cost() 委托。金币不足时 Toast 提示 | `shop_handler.gd` + `shop_ui.gd` + `ui_manager.gd` | P2 | ✅ |
+| B5 | **附魔卡使用流程** 🔵 — Balatro 风购买即用：`consumable_data.gd` 花色符 1→4 拆分 + `get_random_fujutsu` 过滤放逐令。新建 `enchant_target_selector.gd`（手牌 SVG 渲染选牌弹窗）。`shop_ui.gd` 加 `enchant_purchase_requested` 信号 + `start_enchant_targeting`。`shop_handler.gd` 加 `on_enchant_purchase_requested`（扣钱→选牌→应用效果）。`ui_manager`/`game_manager` 接线。影响 6 文件 | `consumable_data.gd` + `enchant_target_selector.gd`(新) + `shop_ui.gd` + `shop_handler.gd` + `ui_manager.gd` + `game_manager.gd` | P2 | 🔵 |
+| B6 | **星图卡使用流程** ✅ — 购买即用（Balatro 风不进背包）。`shop_handler._purchase_star_chart()` 检测 `item.has("hand_type")` → 扣钱 → `ShopManager.apply_star_chart()` +1 等级 → Toast "散牌 Lv.2 → Lv.3!" + manga_burst。卡面当前等级显示在 effect_label，购买后灰色标记 | `shop_handler.gd` + `shop_item_card.gd` + `shop_ui.gd` + `ui_manager.gd` | P2 | ✅ |
 | B7 | 秘仪卡系统 | 购买即生效的全局限效果（消耗品，不占槽位） | P2 | ⬜ |
-| B8 | 忍者牌条件效果 | 部分忍者牌带条件触发（如"影为同花时+x mult"），需实现条件检测 | P2 | ⬜ |
+| B8 | **忍者牌条件效果** | 已实现：score_calculator.gd _ninja_condition_met() 完整支持 group/hand_type/xi 条件检测 | P2 | ✅ |
 | B9 | **主菜单系统** — 闪屏→按钮→牌组选择→继续确认 | 详见审阅报告。要点：① 按钮 hover/click SFX ② `_ready` 触发菜单 BGM ③ `stagger_slide_in(slide_offset=80)` ④ 牌组中文名映射 `DECK_NAMES` ⑤ 未实现牌组(night/sun)置灰不可点击 ⑥ CRT 滤镜开启 ⑦ `_panel_open` 双击守卫 | **P0** | ✅ |
-| B10 | **接入修炼忍者成长系统** — `NinjaScaling.process_scaling()` 接入 `finalize_play` (on_play) 和 `execute_redraw` (on_redraw)，构建 context (head/mid/tail_type + triggered_xis) | `NinjaScaling` 已提取，6 张修炼忍者数据已有，需在出牌/重抽后调用 `process_scaling` | P2 | ⬜ |
-| B11 | **MusicManager 扩展 BGM 3 段变奏** — 新增 `set_game_variation(barrier)`，根据結界 1-3(轻)/4-6(中)/7-8(重) 自动切换变奏，`_crossfade_to()` 已有 | 3 首 game_bgm 变奏素材 + MusicManager ~15 行扩展 + `_on_seal_started()` 触发 | P1 | ⬜ |
+| B10 | **接入修炼忍者成长系统** ✅ — `NinjaScaling.process_scaling()` 接入 `finalize_play` (on_play)，构建 context (head/mid/tail_type + triggered_xis)。n_s04 忍法帖 已删除（trigger: on_redraw 对应手替え已废弃）| `seal_controller.gd` `finalize_play` xi_triggered 后、win/lose 前调用。剩余 5 张修炼忍者全部正常工作 | P2 | ✅ |
+| B11 | **BGM 3 段变奏完成** ✅ — DOVA-SYNDROME 3 首战忍BGM下载 → `game_bgm_light/medium/heavy.mp3` → `MusicManager.set_game_variation(barrier)` 根据结界 1-3(轻)/4-6(中)/7-8(重) 自动 crossfade → `_on_seal_started()` + 商店退出统一触发 | MusicManager + game_manager + sound_bank | P1 | ✅ |
 
 ---
 
@@ -58,11 +98,11 @@
 | V1 | 卡牌背面 (Card Back) | 140×196 像素风 PNG，程序绘制：`card_back_generator.gd` → `card_back.png`（手里剑十字星+交叉纹底+金色硬边框+内边框+角钻），已集成到 `ninking_card.gd` | **P0** | ✅ |
 | V2 | 像素中文字体 | Press Start 2P (EN) + 凤凰点阵体 12px/16px (CJK) 三套已导入并配置回退链 | **P0** | ✅ |
 | V3 | pixel_theme.tres | 全局 Theme 资源（字体/颜色/按钮样式） → **已由 V16 完成** | **P0** | ✅ |
-| V4 | 按钮素材（普通/按下） | 可拉伸像素风边框 PNG | P1 | ⬜ |
-| V5 | 商店面板/顶部信息栏背景 | 半透明深色背景 | P1 | ⬜ |
+| V4 | ~~按钮素材（普通/按下）~~ | 🗑️ 像素风旧计划，当前 manga_theme.tres StyleBoxFlat 三态方案已覆盖 | P1 | 🗑️ |
+| V5 | **商店面板/顶部信息栏背景** | 已完成：Overlay + TitleBar + BottomBar + FocusLines + ScrollFrame + 动态 BarrierTheme 配色 | P1 | ✅ |
 | V6 | 忍者牌槽位背景 | 100×140 像素风边框，`CardBackGenerator.generate_slot_bg()` 程序绘制：深蓝底+交叉纹+金边框+内凹区域+中央小手里剑+角钻+上下装饰线，已接入 `ability_slot.tscn` TextureRect | **P0** | ✅ |
 | V7 | ~~CRT 扫描线效果接入~~ | ⛔ 已废弃 — 漫画风移除 CRT。见 V24 | P1 | ⛔ |
-| V8 | VFX 接入（卡牌翻转/粒子/闪烁/震动） | Tween/FX 框架已有，接入各流程 | P2 | ⬜ |
+| V8 | **VFX 粒子纹理替换** ✅ — 豆包出图 2 张（`shuriken_particle.png`/`sakura_particle.png`）→ 替换 `particle_pool.gd` 程序绘制 8×8 占位，改用 `load()` 运行时加载。`manga_ink` 仍预载未触发、`speed_line` 死资产未清理 | `particle_pool.gd` | P2 | ✅ |
 | V9 | **ParticlePool 扩展** — shuriken + sakura 粒子预设 | 程序绘制 8×8 纹理，shuriken=铁灰十字星(4尖)，sakura=淡粉圆点+径向渐变，写入 `scripts/tween/particle_pool.gd`，后续全局复用 | **P0** | ✅ |
 | V16 | **pixel_theme.tres 像素忍者风重写** | StyleBox 全部 corner_radius→0、border→2px 硬边；按钮三态（normal/hover/pressed 瞬间切换 + content_margin 下移）；面板双层硬边框（外层 2px 暗色 + 内层 1px 强调色）；三墩 DunHead(1px)/DunMiddle(2px)/DunTail(3px) 边框递进区分。覆盖 V3 原占位 Theme | P1 | ✅ |
 | V17 | **barrier_theme.gd 新建** | 8 結界冷暖交替配色表 `class_name BarrierTheme`，字典 `BARRIER_COLORS`：冷(紫/青/蓝/翠) 暖(红/橙/金/粉) 交替，每結界含 bg/panel/accent/name 四字段。`scripts/ninking/barrier_theme.gd` | P1 | ✅ |
@@ -75,25 +115,36 @@
 | V12 | **计分动画主题化** — 粒子替换 | `game_manager.gd` `_run_scoring_animation()`: sparkle→shuriken、confetti→sakura | P2 | ✅ |
 | V13 | **过关过渡** — 屏风转场 | `game_manager.gd` `_on_go_shop_pressed()`: `fade_out(ui, 0.3)` → change_scene | P1 | ✅ |
 | V14 | **Boss 封印揭晓** — 墨字浮现 | `game_manager.gd` `_on_seal_started()`: CRT vignette+aberration → Boss 名 scale_pop → 1s 恢复 | P2 | ✅ |
-| V15 | **屏风转场增强** — logo 遮罩版 | 过关时在 fade 中间叠 NinKing logo/忍字 ColorRect，需评估 autoload vs 场景内实现方案 | P3 | ⬜ |
-| V22 | **商店 BGM** — 轻松明亮短循环 | 和风 chioptune 商店主题，`assets/audio/music/shop_bgm.ogg`，MusicManager 新增 `play_shop_bgm()` | P1 | ⬜ |
+| V15 | **屏风转场增强** — logo 遮罩版 | ⚠️ 主路径(过关→商店)已无场景切换(Phase C)，仅重试/回菜单仍用 change_scene_to_file 硬切。可叠加 logo ColorRect 但效益有限 | P3 | ⬜ |
+| V22 | **商店 BGM** ✅ — 接线完成：`MusicManager.play_shop_bgm()` + `sound_bank.gd SHOP_BGM` + shop_ui 入场触发 + 离开时恢复 game BGM | 和风店 BGM `dova_Cooler...mp3` → MusicManager + shop_ui.gd + game_manager.gd | P1 | ✅ |
 | V23 | **音效素材替换+新增** — Anime Game Pack(1,433 WAV) 自动匹配 20/20 需求 → ffmpeg WAV→OGG 转换 → 复制到项目。P0 核心(11)：deal/group_reveal/count_tick/xi_trigger/xi_fanfare/seal_clear/seal_fail/swap/discard/redraw_pop/ninja_activate。P1 关卡+UI(9)：boss_reveal/boss_final_layer/shop_enter/ui_coin/item_purchase/shop_reroll/shop_exit/ui_click/ui_error。旧 FanKing 占位已备份至 `legacy_placeholders/`，待 C8 SoundBank 更新后清理 | 详情见 `18-audio-asset-matching-guide.md`。旧文件仍保留在目录中待 sound_bank.gd 更新 | P0 | ✅ |
 | V24 | **CRT 滤镜移除** — 删除 `crt_filter.gd` + `crt_filter.gdshader` + `GlobalTweens` CRT 引用 + `game_manager.gd` 6 处 CRT 调用 | 漫画风不需要扫描线。覆盖 V7/V18。详见 `16-art-direction-principles.md` §9 | **P0** | ✅ |
 | V25 | **barrier_theme.gd 八属性亮色重写** — 8 結界冷暖交替暗色系 → 8 属性（火水風雷土光暗无）亮色版；新增 `particle_color` 字段；name 改为「壱·火」格式 | 覆盖 V17。详见 `16-art-direction-principles.md` §2 | **P0** | ✅ |
 | V26 | **漫画粒子预设** — `ParticlePool` 新增 `manga_burst`(集中线) + `manga_ink`(墨迹) + `TweenFX.speed_line_trail()`(速度线) | 覆盖 V9 的像素粒子(shuriken/sakura)。详见 `16-art-direction-principles.md` §8。纹理已部署 `assets/images/effects/` | P1 | ✅ |
 | V27 | **卡背漫画风重绘** — 豆包 AI 生成：漫画网点+粗黑描边+中心「忍」字 | 覆盖 V1 的像素卡背。详见 `16-art-direction-principles.md` §7.2。纹理已部署 `assets/images/cards/card_back.png` | P1 | ✅ |
-| V36 | **人牌 J/Q/K 漫画插图** — 豆包 AI 生成：少年漫画风人物（Jack 忍者学徒 / Queen 女忍大师 / King 忍皇），每花色不同角色 | 原 `04-asset-gap-list.md` §1 唯一未迁移缺口。4 花色 × 3 人牌 = 12 张 | P2 | ⬜ |
+| V36 | **人牌 J/Q/K 漫画插图** ✅ — 3 张 PNG 豆包出图（332×524, 透明背景）→ nanosvg 不支持 `<image>` 标签 → 改用 imagetracer 矢量路径追踪 → 12 个 SVGs 内嵌（~400-800KB/张）→ 额外清理：蓝色内框 `<rect>` + 中心叠层小花色 `<use height='52'>`。实际渲染通过。工具脚本 `tools/trace_face_portraits.js` | 规格书 `V36-face-card-prompts.md` | P2 | ✅ |
 | V37 | **图像素材匹配 Phase 0-3 全线完成** 🎉 — Phase 0: 双包闸门+豆包样板验证 ✅ Phase 1: 16 张 Layer 1 匹配部署 ✅ Phase 2: 31 张 Layer 3 AI 生成→部署 ✅ Phase 3: 45 张后处理（pngquant+网点叠加+dilate检查）✅ | 累计交付 47 张到项目。现成包匹配 16 张 = 节省 34% AI 额度。详见 `19-image-asset-matching-guide.md` | P1 | ✅ |
 | V28 | **UI 组件漫画风更新** — `06-ui-layout-reference.md` §6 重写（配色表→8属性亮色版、像素风原则→漫画风原则）；按钮/面板/三墩区分按新规范更新 | 覆盖 V16/V19/V20/V21。详见 `16-art-direction-principles.md` §3/§9 | **P0** | ✅ |
-| V29 | **06-ui-layout-reference.md §2 场景树按实际代码重写** — GameLayout 类型(HBoxContainer)、LeftPanel/CenterColumn 层级、RedrawBtn/AiRearrangeBtn/ColumnLabelRow、CardManager 全部补全。对照 `ninking_main.tscn` 实际结构 | review-plan 审阅 A1。文档当前与实际代码严重脱节 | P1 | ⬜ |
-| V30 | **06-ui-layout-reference.md OVL_→实际节点名统一** — ScoringOverlay/LevelComplete/GameOver（或注明 OVL_ 为逻辑分类前缀，非实际节点名） | review-plan 审阅 A2 | P2 | ⬜ |
-| V31 | **06-ui-layout-reference.md §5 API 方法名/签名/信号名更新** — refresh_abilities→refresh_ninjas、update_match_info 参数修正、删除不存在的 4 方法、swap_used→redraws_changed、level_started→seal_started | review-plan 审阅 A4/A5 | P1 | ⬜ |
-| V32 | **06-ui-layout-reference.md §4 补充 VICTORY 视图** — show_view() 映射表加 victory 行；状态切换图补 VICTORY 分支 | review-plan 审阅 A6 | P2 | ⬜ |
-| V33 | **06-ui-layout-reference.md §7 文件索引更新** — 新增 hand_display/hand_interaction/deck_viewer_controller/auto_arranger/seal_controller；删除 main_menu.gd；barrier_theme.gd 描述更新为"8 属性亮色色板" | review-plan 审阅 C2/C3 | P2 | ⬜ |
-| V34 | **VictoryOverlay 独立覆盖层** — 新建通关覆盖层（VictoryLabel + StatsSummary + MenuButton），`ui_manager.gd` `show_view("victory")` 切换至 VictoryOverlay 而非复用 GameOver，通关粒子庆祝（manga_burst + screen_shake + hit_stop） | review-plan 10-main-ui-design 审阅 Q1/A2 | P1 | ⬜ |
-| V35 | **GameOver 补充 ScoreSummary + MenuButton** — 场景加 ScoreSummary（战绩摘要 Label） + MenuButton（返回主菜单），`11-main-overlay-design.md` §6 同步更新 | review-plan 10-main-ui-design 审阅 Q2/A3 | P2 | ⬜ |
+| V29 | **06-ui-layout-reference.md §2 场景树按实际代码重写** ✅ — HandTypeRow VBox/3行/Dun+Type+Score 修复、ScoringOverlay 注释修正、VictoryOverlay 无 % 标注、DeckViewer 展开+ViewerBg 补全。**追加：** ink-bleed 右侧渐隐 shader 挂载、ScoreCard content_margin_right=68 + layout_mode=2 (进度条止于渐隐起始)、MatchPanel/AntePanel 去圆角去边框加 content_margin_left=16、字体提升 (MatchTitle 20px / 内容 28px)、SpacerTop 删除实现 ScoreCard 顶对齐、左边 3 面板统一挂 panel_edge_fade.gdshader、三文档同步更新 | 对照 `ninking_main.tscn` 实际结构 | P1 | ✅ |
+| V30 | **06-ui-layout-reference.md OVL_→实际节点名统一** ✅ — §1 前缀表加注"逻辑分类前缀，非实际节点名"，示例加 `OVL_Scoring → ScoringOverlay` 对照 | review-plan 审阅 A2 | P2 | ✅ |
+| V31 | **06-ui-layout-reference.md §5 API 方法名/签名/信号名更新** ✅ — 全部方法加完整类型注解、补充 shop 信号、删除不存在的旧方法 swap_used/level_started/update_seal_info/show_upgrade_option/on_shop_exit、数据流图补全 signal 签名、§6/§7 同时恢复（被 linter 压缩）。对照 `ui_manager.gd` + `game_state.gd` 实际代码 | review-plan 审阅 A4/A5 | P1 | ✅ |
+| V32 | **06-ui-layout-reference.md §4 补充 VICTORY 视图** ✅ — show_view() 映射表已有 victory 行 + 流程图有 VictoryOverlay 分支。V31 恢复时自动完成 | review-plan 审阅 A6 | P2 | ✅ |
+| V33 | **06-ui-layout-reference.md §7 文件索引更新** ✅ — hand_display/hand_interaction 等已新增，main_menu.gd 已删除，barrier_theme 描述已更新。V31 恢复时自动完成 | review-plan 审阅 C2/C3 | P2 | ✅ |
+| V34 | **VictoryOverlay 独立覆盖层** ✅ — 场景节点+视图切换+文字显示已有；补 celebration VFX（manga_burst + screen_shake + do_hit_stop + XI_FANFARE + Light BGM）共 5 行到 `game_manager.gd` VICTORY 分支 | review-plan 10-main-ui-design 审阅 Q1/A2 | P1 | ✅ |
+| V35 | **GameOver 补充 ScoreSummary + MenuButton** ✅ — 场景节点已有（GameOverLabel/ScoreSummary/RetryButton/BackToMenuButton），`10-main-ui-design.md` §2 场景树展开 GameOver 子树 | review-plan 10-main-ui-design 审阅 Q2/A3 | P2 | ✅ |
 | V38 | **商店入场临时粒子替代速度线** — 面板 slam 落地用 `GlobalTweens.burst_particles("shuriken")` 临时替代速度线拖尾，V26 `manga_speed` 预设到位后替换 | `nin_king_tween.gd` `play_shop_entrance()` | P1 | ✅ |
-| V39 | **集中线 AI 出图 2 套 + 卷轴匾额 1 套** — 重集中线(600×120, 10-12条放射线, 4-5px粗, 尾端渐尖G-pen手绘感, 透明底纯白线条)用于标题栏+底栏 / 轻集中线(500×70, 4-6条放射线, 2-3px粗)用于分区标题 / 卷轴匾额(500×60, 横向卷轴, 两端轴杆, 粗墨描边, 透明底)用于分区标题衬底。Prompt关键词: `少年漫画集中线, 放射线, 手绘G-pen, 粗细不均, 尾端尖细, 透明底, 纯白线条, manga focus lines, radial speed lines, G-pen tip`。出图后用 modulate 染 BarrierTheme accent 色 | 豆包 AI → `assets/textures/ui/focus_lines_heavy.png` + `focus_lines_light.png` + `section_scroll_frame.png` | P0 | ⬜ |
+| V40 | **牌桌背景 `table_bg.png` 接入** — GameBg ColorRect → TextureRect, modulate 跟随 BarrierTheme | `ninking_main.tscn` + `ui_manager.gd` + `game_manager.gd` | **P1** | ✅ |
+| V41 | **Boss 揭示立绘接入** — 9 Boss PNG → LevelIntro 场景加 BossPortrait TextureRect, seal_lord_name→portrait 映射, scale_pop 动画 | `ninking_main.tscn` + `ui_manager.gd` + `game_manager.gd` | **P1** | ✅ |
+| V42 | **漫画粒子预设接入** — ParticlePool 新增 `manga_burst`(集中线) + `manga_ink`(墨迹) 预设, 预加载 AI 纹理 | `particle_pool.gd` | P2 | ✅ |
+| V43 | **忍者图标接入** ✅ — 11 PNG 按 id 前缀分 11 类映射 + 忍槽显示图标 + 商店卡片图标替换 | `ninja_data.gd` + `ability_slot.tscn/.gd` + `ninja_bar_display.gd` + `shop_ability_card.tscn/.gd` | P1 | ✅ |
+| V44 | **物品底板与图标接入** ✅ — 3 底板 + 4 图标按 id 前缀映射, ArtArea 加底板 TextureRect + 图标 Label→TextureRect | `consumable_data.gd` + `shop_item_card.tscn/.gd` | P1 | ✅ |
+| V39 | **集中线 + 卷轴匾额全部就绪** ✅ 3 张 PNG 已部署 + 场景 6 个 TextureRect 全部接入（TitleFocusLines/AbilityFocusLines+ScrollFrame/ItemFocusLines+ScrollFrame/BottomFocusLines）。pngquant 下次 editor 环境执行 | 豆包 AI → `assets/images/ui/focus_lines_heavy.png` + `focus_lines_light.png` + `section_scroll_frame.png` | P0 | ✅ |
+| V39.1 | ~~集中线纹理接入~~ | ✅ 已合并到 V39 | P0 | ✅ |
+| V45 | **商店卡片图标差异化 — 按子类别细分** ✅ — 通用加成拆 3 子类(chips/mult/both)新 PNG + `get_icon_path()` 加 effect 参数做子类解析 + 稀有度4档视觉系统（边框色/宽/阴影/Badge）+ `apply_barrier_theme()` 稀有度边界保护 + 忍条同步子类图标。验证通过 | `ninja_data.gd` + `shop_ability_card.gd` + `ninja_bar_display.gd` + `assets/images/ninjas/icons/+3PNG` | **P0** | ✅ |
+| V46 | **ArtIcon 归入 ArtArea 子节点** ✅ — ArtIcon(TextureRect) 从根 Panel 直子移入 ArtArea 子节点，锚定居中(Ability 80×80/Item 64×64)。`@onready` 路径改为 `$ArtArea/ArtIcon`，`_cache_nodes()`同步。2 tscn + 2 gd 改动，场景树/运行时验证通过 | `shop_ability_card.tscn` + `shop_item_card.tscn` + `shop_ability_card.gd` + `shop_item_card.gd` | P1 | ✅ |
+| V47 | **商店稀有度视觉系统接入** ✅ — 已随 V45 一并实现：RarityBadge 4 档（common无/ uncommon无/ rare红"稀有"标签/ legend金"伝説"标签）+ 边框色/宽度/阴影跟随稀有度 | `shop_ability_card.gd` | P1 | ✅ |
+| V48 | **素材注册表 AssetRegistry 统一管理** ✅ — 新建 `asset_registry.gd`(class_name AssetRegistry)，合并 `ninja_data.gd` 的 `CATEGORY_ICONS`+`get_icon_path()`+`_get_effect_subtype_suffix()` 和 `consumable_data.gd` 的 `ITEM_CATEGORY_MAP`+`get_item_icon_path()`+`get_item_base_path()` 到单一源。3 调用文件直接引用 `AssetRegistry.get_xx()`。旧文件保留 delegation stub。运行时验证通过 | 新建 `asset_registry.gd` + 3 调用文件 | P2 | ✅ |
+| V49 | **物品 `icon_upgrade.png` 死资产清理** ✅ — 无任何物品类别使用升级图标，文件已删除（含 `.import`） | `assets/images/items/icons/` | P2 | ✅ |
 
 ---
 
@@ -112,14 +163,23 @@
 | R4 | 交换行为变更同步 `06-complete-redesign.md` — 交换不再触发 AI 重排 | P2 | ✅ |
 | R5 | AI 重排按钮补充 `03-technical-design.md` 场景树 | P2 | ✅ |
 | C7 | 确认清理 `ninking_main.tscn` 中旧 MainMenu 视图节点 | `scenes/ninking/ninking_main.tscn` | P2 | ✅ |
-| C8 | **SoundBank 忍者主题重命名** — 废弃 FanKing 遗留名（`HU`→`GROUP_REVEAL` / `YAKU_REVEAL`→`XI_TRIGGER` / `BAO_ACTIVATE`→`NINJA_ACTIVATE` 等），旧常量保留 alias 到全部接线完毕 | `scripts/config/sound_bank.gd` | P1 | ⬜ |
+| C8 | **SoundBank 忍者主题重命名 + 全部音效接线完成** — 常量重命名(HU→GROUP_REVEAL 等) + 新增 8 常量 + 保留旧 alias + 接线到 game_manager/shop_ui/hand_interaction/redraw_vfx_handler 共 17 处 play_sfx | `scripts/config/sound_bank.gd` + 4 接线文件 | P1 | ✅ |
 | C10 | **漫画风字体替换** — F1 思源黑体 SC Heavy（粗体）+ F2 SC Regular（正文）+ F3 Yusei Magic（手写/P2）。Phase 1 ✅：字体下载、import 配置（抗锯齿/fallback）、manga_theme.tres 新建、3 tscn 引用切换、旧字体→legacy/、游戏测试通过。 | `pixel_theme.tres` → `manga_theme.tres` / `17-font-design-plan.md` | P1 | ✅ |
-| C11 | **术语统一：能力牌→忍者牌** — 文档 §1 术语表更新 + 代码 `ABILITY_SLOT_SCENE`→`NINJA_SLOT_SCENE` + `%AbilityBar`→`%NinjaBar` + `ability_slot.tscn`→`ninja_slot.tscn`。三套术语（忍者/能力/ability）统一为"忍者牌" | review-plan 审阅 Q2 / C4。`ui_manager.gd` 已用 `refresh_ninjas()`，文档和场景未跟上 | P2 | ⬜ |
-| C12 | **ScoreCard 节点加 `unique_name_in_owner`** — 计分动效 BounceScore 需要 `%ScoreCard` 引用；`ui_manager.gd` 加 `@onready var score_card: Panel = %ScoreCard` | 审阅 C1。当前 ScoreCard 有 unique_id 但未勾选 unique_name flag | P2 | ⬜ |
+| C11 | **术语统一：能力牌→忍者牌** ✅ — ability_slot.tscn→ninja_slot.tscn + ability_slot.gd→ninja_slot.gd；`ABILITY_SLOT_SCENE`→`NINJA_SLOT_SCENE`；`%AbilityBar`→`%NinjaBar`；变量 `ability_bar`→`ninja_bar_container`。影响 tscn×2 + gd×4 + docs×2 | review-plan 审阅 Q2 / C4 | P2 | ✅ |
+| C12 | **ScoreCard 节点加 `unique_name_in_owner`** ✅ — tscn 加 unique_name flag；ui_manager.gd 加 `@onready var score_card: Panel = %ScoreCard`；game_manager.gd get_node 调用改为 `ui.score_card` | 审阅 C1。当前 ScoreCard 有 unique_id 但未勾选 unique_name flag | P2 | ✅ |
 | C13 | **game_manager.gd 删除 `const CountUp = preload(...)` 死代码** — 已替换为 `const BounceScore = preload(...)`，CountUp 由 BounceScore 内部加载 | `scripts/ninking/ui/game_manager.gd:6` | P2 | ✅ |
-| C14 | **BounceScore 峰值"咚"音效素材缺失** — 过冲峰值处需短促有重量感的音效，当前 SoundBank 无匹配。候选：试听 `redraw_pop.ogg` 或 `item_purchase.ogg`，不合适则需新素材 | `scripts/tween/bounce_score.gd` — `bounce_sfx` 参数当前默认 null | P2 | ⬜ |
+| C14 | **BounceScore 峰值音效** — 已传入 `COUNT_TICK` 作为 `bounce_sfx`（C8 接线完成）。如需更重量的"咚"感，后续可替换专用素材 | `game_manager.gd:274` — `SB.COUNT_TICK` 传入 | P2 | ✅ |
 | C15 | **shop_ability_card.gd `setup()` 存 `_card_style` 成员变量** — `apply_barrier_theme()` 直接改 `_card_style.bg_color` 等属性，避免重建 StyleBox 覆盖问题 | `shop_ability_card.gd` + `shop_item_card.gd` | **P0** | ✅ |
-| C16 | **SoundBank 新增商店音效常量** — `SHOP_ENTER` / `SHOP_EXIT` / `ITEM_PURCHASE` / `SHOP_REROLL` 接入 `sound_bank.gd`（素材已匹配 V23，待常量命名+preload） | `scripts/config/sound_bank.gd` | P1 | ⬜ |
+| C16 | **SoundBank 新增商店音效常量** — `SHOP_ENTER` / `SHOP_EXIT` / `ITEM_PURCHASE` / `SHOP_REROLL` 接入 `sound_bank.gd` + 接线到 shop_ui.gd | `scripts/config/sound_bank.gd` + `shop_ui.gd` | P1 | ✅ |
+| C17 | **发牌音效 `DEAL` 接入** — `game_manager.gd` PLAYING 状态入场时 `play_sfx(SB.DEAL)` | `assets/audio/sound/game/deal.ogg` | P2 | ✅ |
+| C18 | **忍者能力激活音效 `NINJA_ACTIVATE` 接入** — `game_manager.gd` 计分 Phase 2 前，有忍者牌时 `play_sfx(SB.NINJA_ACTIVATE)` | `assets/audio/sound/game/ninja_activate.ogg` | P2 | ✅ |
+| C19 | **最终 Boss 层音效 `BOSS_FINAL_LAYER` 接入** — `game_manager.gd` `_on_seal_started` barrier≥8 时用 `SB.BOSS_FINAL_LAYER` | `assets/audio/sound/game/boss_final_layer.ogg` | P2 | ✅ |
+| C20 | **卡牌选择音效 `SELECT` 接入** — `sound_bank.gd` 真常量 + `hand_interaction.gd` 选中分支 `play_sfx(SB.SELECT)` | `assets/audio/sound/game/select.ogg` | P2 | ✅ |
+| C21 | **game_manager.gd 拆分** ✅ — 599→275 行（-54%），提取 `shop_handler.gd` (115行) + `animation_handler.gd` (238行)。game_manager 保留状态回调 + 按钮 + BOSS 揭示，商店逻辑委托 ShopHandler，计分动画委托 AnimationHandler。通过 callable 注入 `_auto_shop_pending` 避免循环依赖 | `scripts/ninking/ui/game_manager.gd` | P2 | ✅ |
+| C22 | **shop_ui.gd 行数优化** ✅ — `_apply_impact_button_style()` (40行)提取到 `BarrierTheme.apply_impact_button_style()` 静态方法。shop_ui.gd 366→326行。barrier_theme.gd 100→141行 | `scripts/ninking/ui/shop_ui.gd` + `barrier_theme.gd` | P2 | ✅ |
+| C23 | **商店自动过渡 — Balatro 风免确认流程** — `_auto_shop_pending` 标记 + SEAL_COMPLETE 1.2s 自动 timer + VICTORY 清除 + game_bg complete 可见。Code Review 修复 A1: flag 移到 finalize_play 之前（信号同步发射时序） | `scripts/ninking/ui/game_manager.gd` + `ui_manager.gd` | P1 | ✅ |
+| C24 | **商店忍者槽位数不准** ✅ — `shop_ui.gd` 改为由 `init()`/`update_gold()` 通过 `owned_ninja_count` 参数传入实际拥有数，`_update_ninja_slot_label()` 使用 `_owned_ninja_count` + `_max_ninja_slots`。同步更新 `ui_manager.gd` 两处调用传参。运行时验证: 购买前"忍者 0/5"→购买后"忍者 1/5" ✅ | `shop_ui.gd` + `ui_manager.gd` | P2 | ✅ |
+| D9 | **设计文档同步 计分公式重构 (3 文件)** ✅ — 06-complete-redesign §3 重写(公式+列+喜整数表)；13-blinds-and-bosses 散牌王列描述更新；03-technical-design 类图 ScoreResult/AutoArranger/XiResult 更新 | `docs/ninking/06-complete-redesign.md` + `13-blinds-and-bosses.md` + `03-technical-design.md` | **P0** | ✅ |
 
 ---
 
@@ -157,6 +217,23 @@ Phase A (当前) ──→ Phase B ──→ Phase C ──→ Phase D ──→
 
 | 日期 | 变更 |
 |------|------|
+| 2026-06-11 | 🐛 **C24 商店忍者槽位数修正**: `shop_ui.gd._update_ninja_slot_label()` 从读库存数改为接收参数 `_owned_ninja_count` + `_max_ninja_slots`。`init()` 和 `update_gold()` 由 `ui_manager.gd` 传入 `NinKingGameState.owned_ninjas.size()`。运行时验证: 购买前"忍者 0/5"→购买后"忍者 1/5" ✅ |
+| 2026-06-11 | 🗂️ **V48 AssetRegistry 统一素材注册表**: 新建 `asset_registry.gd`，合并 `ninja_data.gd`(CATEGORY_ICONS+get_icon_path) 和 `consumable_data.gd`(ITEM_CATEGORY_MAP+get_item_xx_path)。3 调用文件改为直接引用 `AssetRegistry`。旧文件保留 delegation stub ✅ |
+| 2026-06-11 | 🗑️ **V49 死资产清理: icon_upgrade.png 删除** — 无任何物品类别需要升级图标（3 类为 transform/constellation/ritual），PNG + `.import` 一并删除 |
+| 2026-06-11 | 📐 **C22 shop_ui.gd 行数优化**: `_apply_impact_button_style()` (40行) 提取到 `BarrierTheme.apply_impact_button_style()` 静态方法。shop_ui.gd 366→326行 ✅ |
+| 2026-06-11 | 🎴 **V46 ArtIcon 归入 ArtArea 完成**: 商店 Ability/Item 卡 ArtIcon 从根 Panel 直子移入 ArtArea 内居中（Ability 80×80/Item 64×64）。`@onready` + `_cache_nodes()` 路径同步为 `$ArtArea/ArtIcon`。2 tscn + 2 gd 改动，场景树验证通过。 |
+| 2026-06-11 | 🎴 **V45+V47 商店卡片图标差异化+稀有度视觉系统完成**: 通用加成 n_ 按效果拆 3 子类图标(chips/mult/both, 新 PNG 3 张) + `get_icon_path()` 加 effect 参数做子类解析 + 4 档稀有度边框(common墨/uncommon accent/rare红/legend金) + RarityBadge(rare"稀有"/legend"伝説") + `apply_barrier_theme()` 保护稀有度边框不被覆盖 + 忍条同步传参。3 脚本+3 PNG, 验证通过。覆盖 V45(P0)+V47(P1)。 |
+| 2026-06-11 | 🃏 **B5 附魔卡使用流程实现**: 花色符 1→4 拆分(Balatro 风固定花色)。新建 `EnchantTargetSelector`(手牌 SVG 渲染+点击选牌)。shop_ui 加 `enchant_purchase_requested` 信号 + `start_enchant_targeting`。shop_handler 加 `on_enchant_purchase_requested`(扣钱→选牌→应用效果: set_suit/rank_shift/enhancement)。ui_manager/game_manager 全链路接线。影响 6 文件。 |
+| 2026-06-11 | 🧹 **TODO 清理**: V5(商店背景)✅已实现, B8(条件效果)✅已实现, V4(按钮素材)🗑️废弃, V15(屏风转场)保留P3但标注范围缩小。实际待做项: B5/B6/B7/B10/C22。 |
+| 2026-06-11 | 🏗️ **LeftPanel 三块锚定重构 + 文档同步**: ContentVBox 删除，ScoreCard(上半 1/2)/MatchPanel(中间 1/4)/AntePanel(底部 1/4) 直属于 LeftPanel，全部 anchor-based。`03-technical-design.md`/`06-ui-layout-reference.md`/`10-main-ui-design.md` §2-§3 同步更新。 |
+| 2026-06-11 | 🎬 **计分动画增强: Phase 1 渐强三幕 + Phase 2.5 定格脉冲**: Phase 1 重写为每墩逐卡翻牌(0.06/0.09/0.12s) + 三档递进(scale_pop→加震→punch_in+粒子+hit_stop)。Phase 2.5 新增数字呼吸脉动(1.06↔1.0, 1.2s) + 面板泛光。BounceScore 各阶段放慢 ~1.7×。PlayBtn 灰色 bug 修复(disabled 在 `_refresh_internal` 中同步 `is_constraint_satisfied`)。文档同步: 10-main-ui-design.md §6 + 06-ui-layout-reference.md §3.4。 |
+| 2026-06-11 | 🏪 **Phase C 实施完成**: S1-S10 全部 ✅ — shop_panel.tscn 提取/shop_ui 重写 panel 模式/NinKingTween 扩展/ui_manager 加 ShopOverlay/ninking_main 子树/game_manager SHOP 状态+0.5s 水印/Boss 战中揭晓/牌桌清理/文档同步/shop.tscn 删除。10 文件修改，~550 行新增。 |
+| 2026-06-11 | 🖼️ **图像素材接入 3 项**: V40 牌桌背景 table_bg → GameBg TextureRect / V41 Boss 揭示立绘 9 张映射+动画 / V42 漫画粒子预设 manga_burst+manga_ink |
+| 2026-06-11 | 🖼️ **V43+V44 图标接入**: 忍者 11 图标按 id 前缀映射到忍槽+商店卡片 + 物品 3 底板+4 图标按类别映射到商店卡片。ArtIcon Label→TextureRect, `ninja_data.gd` 加 `CATEGORY_ICONS`+`get_icon_path()`, `consumable_data.gd` 加 `ITEM_CATEGORY_MAP`+`get_item_icon_path()`/`get_item_base_path()`, 3 场景+4 脚本改动 |
+| 2026-06-11 | 🖼️ **V39 集中线+卷轴匾额全量完成**: 3 张 PNG（focus_lines_heavy 600×120 / focus_lines_light 500×70 / section_scroll_frame 500×60）AI 出图+部署到 `assets/images/ui/`，场景 `shop_panel.tscn` 6 个 TextureRect 全部接入纹理：TitleFocusLines(重)/AbilityFocusLines(轻)/AbilityScrollFrame(匾额)/ItemFocusLines(轻)/ItemScrollFrame(匾额)/BottomFocusLines(重) |
+| 2026-06-11 | 🔊 **V22 商店 BGM 接线完成**: MusicManager `play_shop_bgm()` + shop_ui 入场触发 + game_manager 离开恢复 game BGM |
+| 2026-06-11 | 🔊 **B11 BGM 3 段变奏全面完成**: DOVA-SYNDROME 3 首 BGM（Light 216s / Medium 198s / Heavy 102s）→ MusicManager `set_game_variation(barrier)` 按 结界 1-3/4-6/7-8 自动 crossfade + `sound_bank.gd` 3 常量 + `_on_seal_started()` + 商店退出统一触发。**本次会话音频素材全部完成** |
+| 2026-06-11 | 🔊 **C8+C16 音效全面接入**: `sound_bank.gd` 常量忍者主题重命名(HU→GROUP_REVEAL 等) + 新增 8 常量(SHOP_ENTER/SHOP_EXIT/ITEM_PURCHASE/SHOP_REROLL/BOSS_REVEAL/XI_FANFARE/REDRAW_POP/NINJA_ACTIVATE) + 旧名 alias 保留。接线到 `game_manager.gd`(8 处: BOSS_REVEAL/GROUP_REVEAL×3/COUNT_TICK→bounce_sfx/XI_TRIGGER/XI_FANFARE/SEAL_CLEAR/SEAL_FAIL/SHOP_EXIT)、`shop_ui.gd`(4 处: ITEM_PURCHASE+UI_COIN×2/SHOP_REROLL/SHOP_EXIT)、`hand_interaction.gd`(2 处: SWAP×2)、`redraw_vfx_handler.gd`(2 处: DISCARD+REDRAW_POP)。覆盖 16/20 音效素材接入。 |
 | 2026-06-10 | 📋 **方案审阅+Grill: 商店 UI 漫画热血风重制**: 27 轮 grill 决策确认（亮色 BarrierTheme 配色/冲击帧标题栏+分区标题/卡片安静/底栏对称重炸/按钮中二化/入场电影感节奏 1.6s/NinKingTween 新建）。review-plan 审阅 3 维度通过，B6/B7/C15/C16/V38 共 5 项加入 TODO。10 项实施任务待执行。 |
 | 2026-06-10 | 📋 **方案审阅+Grill: 计分动效 BounceScore**: 10 轮 grill 决策确认（主分数弹性着陆 0.6s + ProgressBar 延迟 + Chips/Mult 闪 + ScoreCard 发光）。review-plan 审阅 3 维度通过，C12/C13 共 2 项加入 TODO。新文件 `bounce_score.gd`，改 `game_manager.gd` 一行。 |
 | 2026-06-10 | 🎨 **V24+V25 漫画风基建完成**: V24 CRT 滤镜移除 — 删 `crt_filter.gd`/`.gdshader` + `global_tweens.gd` CRT 子系统(3 public API + `_on_first_scene_loaded`) + `game_manager.gd` 6 处 CRT 调用(`_crt_offset`/`_process`/Boss reveal vignette+aberration/failure aberration)。V25 `barrier_theme.gd` 八属性亮色重写 — 暗色系(紫/红/青/橙/蓝/金/翠/粉)→亮色版(火水風雷土光暗无)，新增 `particle_color` 字段 + `get_particle_color()` API，name 格式「壱·火」。global_tweens 从 8→7 个子系统。 |
@@ -197,3 +274,17 @@ Phase A (当前) ──→ Phase B ──→ Phase C ──→ Phase D ──→
 | 2026-06-10 | 🖼️ **图像素材匹配 Phase 0-1 执行完成**: Phase 0 双包闸门 star+katana 通过(2/3)，coin→AI 占位。豆包 3 样板全过 §6.4（suit_spade⭐/icon_star✅/boss_broken_tail✅）。Phase 1: 16 张 Layer 1 资产部署（4 花色+10 忍者图标+2 消耗品图标）→ `assets/images/`。`19-image-asset-matching-guide.md` v3 同步。剩余 Layer 3 AI: 31 张。|
 | 2026-06-10 | 🖼️ **Phase 2 AI 图像生成全部完成**: 31 张 Layer 3 全部生成+部署（4 忍者底板+3 消耗品底板+10 Boss+4 图标+1 Logo+1 卡背+1 顶栏+1 面板角+1 游戏图标+3 粒子+1 牌桌背景）。V26/V27/V37 标记完成。累计交付 47 张到 `assets/images/`。Phase 1 现成包匹配 16 张 = 节省 34% AI 额度。|
 | 2026-06-10 | 🖼️ **Phase 3 后处理统一全部完成**: pngquant --colors 32 批量（45 张）+ ordered-dither h4x4a 漫画网点（13 张底板/卡背/花色/面板/顶栏）+ stroke check 通过。table_bg（800×500）跳过 dither 仅保留 pngquant（网点过粗）。`19-image-asset-matching-guide.md` v4 同步。|
+| 2026-06-11 | 📋 **Phase C Code Review + 文档同步**: 审查 Phase C 4 文件 → 🔴 R4 修复（`ui._current_shop_panel` 封装破坏 → 加 getter）、🟢 R2 修复（冗余 `@onready var panel`）、🟢 R3 修复（`-> Array`→`-> Array[Node]`）。C21/C22 加入 TODO（game_manager 拆分建议、shop_ui 行数优化）。`06-ui-layout-reference.md` §2/§3/§5/§7 对齐实际 tscn + API。`07-shop-ui-design.md` shop.tscn 删除标记更新。|
+| 2026-06-11 | 🧹 **商店素材↔框架结合问题盘点 — V45-V49 + C24 加入 TODO**: 梳理商店卡片 7 项问题 — V45 图标差异化不足(P0)、V46 ArtIcon 布局修复(P1)、V47 稀有度视觉接入(P1)、V48 AssetRegistry 统一注册表(P2)、V49 死资产引用(P2)、C24 忍者槽位数不准(P2)。源自 shop_ui/shop_ability_card/shop_item_card 代码审查。|
+| 2026-06-11 | 📋 **商店自动过渡 Codereview**: 审查 `game_manager.gd` auto-shop 实现 → 🔴 A1 修复（`_auto_shop_pending` 设在 `finalize_play` 之后，信号同步发射导致 handler 读不到 flag → 移到之前）。C23 加入 TODO（✅ 已完成）。计划文档 Step 2 同步更新。|
+| 2026-06-11 | 📝 **V29 完成: §2 场景树对照 ninking_main.tscn 重写** — HandTypeRow(VBox+3行)修复、ScoringOverlay 注释、VictoryOverlay 无 %、DeckViewer ViewerBg 展开。|
+| 2026-06-11 | 📝 **V31 完成: §4-§7 恢复+重写** — §5 API 全部加类型注解、删除 5 个不存在旧方法、数据流补 signal 签名、§6 配色表+漫画风原则恢复、§7 文件索引按当前代码全面更新（hand_display/hand_interaction 等）。同时修复被 linter 覆盖的 §2 ScoringOverlay/DeckViewer。|
+| 2026-06-11 | 📝 **V30 完成: OVL_ 前缀注明逻辑分类** — §1 前缀表加注释 + 示例对照。|
+| 2026-06-11 | 🧹 **C21 game_manager.gd 拆分**: 599→275 行（-54%）。shop_handler.gd (115行) + animation_handler.gd (238行) 提取。商店逻辑委托 ShopHandler，计分动画委托 AnimationHandler。03-technical-design.md + 06-ui-layout-reference.md 同步。|
+| 2026-06-11 | 🛒 **B4 商店刷新递进费用**: Balatro 风 $3+$1/次递进，每趟商店重置，无硬上限。shop_handler._reroll_count + _get_reroll_cost(), shop_ui 删 REROLL_COST 常量改用动态 update_reroll_cost(), ui_manager 加委托。14-economy + 07-shop-ui 文档同步。|
+| 2026-06-11 | ⭐ **B6 星图卡购买流程实现**: 购买即用（不进背包）。shop_handler._purchase_star_chart() 检测 hand_type → 扣钱 → apply_star_chart +1 级 → Toast "散牌 Lv.2 → Lv.3!" → manga_burst 粒子。卡面显示当前 Lv.。4 文件改动。文档同步。|
+| 2026-06-11 | 📈 **B10 修炼忍者成长接入 + n_s04 忍法帖删除**: `NinjaScaling.process_scaling()` 接入 `finalize_play`（on_play），xi_triggered 后、win/lose 前调用。构建 ctx 包含 head/mid/tail_type + triggered_xis。n_s04 忍法帖 删除（on_redraw 触发因手替え废弃永不生效）。剩余 5 张修炼忍者正常成长。|
+| 2026-06-11 | 📋 **Grill 20 轮 → review-plan → 实施: 计分公式 v4.0 重构 — 扁平池→各行独立×列累乘**: A10(score_calculator)完全重写 | A11(auto_arranger)_fast_score per-group | A12(arrange_controller)分组忍者 | A13(card_data)列函数清理 | A14(xi_detector)四张×5 | A15(item_data)暴击骰子×2 | A16(animation_handler)breakdown格式新 | A17(hand_type_labeler)无需改 | A18(seal_controller)无需改 | A19(列VFX阈值降为同花) | D9(三文档同步: 06/13/03)。12 项全部完成 ✅ |
+| 2026-06-11 | 📋 **Grill 20 轮 + review-plan: 计分公式重构 — 扁平池→各行独立×列累乘**: 完整决策链（各行独立计分、列×mult 2/4/8/16/32 累乘、星图只影响横排、忍者/附魔/卡片×mult/金剛力/黄金律/道具跟组走三组各得一份、全局喜最终级、四张 +50→×5、暴击骰子 1.5→2、约束不变、Ante 暂不变）。A10-A19 + D9 共 12 项加入 TODO。|
+| 2026-06-11 | 📋 **方案审阅: LeftPanel 展示调整（计分 v4.0 后）**: 9 轮 grill 决策确认（CMC→列喜预览同排行、HandTypeRow 保持 `37×2`、Phase 1 ShadowScore color_flash + text、ColumnLabelRow 保留、BounceScore 删参）。review-plan 3 维度通过。A20-A28 共 9 项加入 TODO。|
+| 2026-06-11 | 🎴 **A20-A28 全部完成: LeftPanel 展示调整**: 场景节点替换(CMC→ColXiLabel) + ui_manager/hand_display/hand_type_labeler 接口更新 + BounceScore 删参 + animation_handler Phase 1 分数动效 + card_data 列×mult 字典 + 3 文档同步。9 项全部 ✅ |

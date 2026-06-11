@@ -3,40 +3,57 @@ extends Control
 
 ## Centralized UI management for NinKing (忍者牌 × 比鸡).
 ## Delegates to HandDisplay, HandInteraction, DeckViewerController,
-## DunHighlighter, RedrawVFXHandler, ResultScreenDisplay, NinjaBarDisplay.
+## DunHighlighter, ResultScreenDisplay, NinjaBarDisplay.
 ## All display updates go through this class — game_manager.gd only handles flow.
 
 # ═══ Sub-views ═══
 @onready var level_intro: Control = %LevelIntro
 @onready var game_layout: Control = %GameLayout
-@onready var game_bg: ColorRect = %GameBg
+@onready var game_bg: TextureRect = %GameBg
 @onready var scoring_overlay: Control = %ScoringOverlay
 @onready var level_complete: Control = %LevelComplete
 @onready var game_over: Control = %GameOver
+@onready var shop_overlay: Control = %ShopOverlay  # Phase C 🏪
 
 # ═══ Level intro ═══
 @onready var intro_level_label: Label = %LevelLabel
 @onready var intro_target_label: Label = %TargetLabel
+@onready var boss_portrait: TextureRect = %BossPortrait
+
+# Boss portrait texture mapping (name -> res path)
+const BOSS_PORTRAITS: Dictionary = {
+	"断尾": "res://assets/images/boss/boss_broken_tail.png",
+	"无头": "res://assets/images/boss/boss_headless.png",
+	"独柱": "res://assets/images/boss/boss_lone_pillar.png",
+	"反目": "res://assets/images/boss/boss_mirror.png",
+	"封印师": "res://assets/images/boss/boss_sealer.png",
+	"散牌王": "res://assets/images/boss/boss_chaos.png",
+	"饿鬼": "res://assets/images/boss/boss_devourer.png",
+	"喜之克星": "res://assets/images/boss/boss_curse.png",
+	"终焉": "res://assets/images/boss/boss_countdown.png",
+}
 
 # ═══ Left panel ═══
 @onready var left_panel: Control = %LeftPanel
 @onready var panel_bg: ColorRect = %PanelBg
-@onready var chips_label: Label = %ChipsLabel
-@onready var mult_label: Label = %MultLabel
+@onready var score_card: Panel = %ScoreCard
+@onready var col_xi_label: Label = %ColXiLabel
 @onready var shadow_type_label: Label = %ShadowType
 @onready var flash_type_label: Label = %FlashType
 @onready var destroy_type_label: Label = %DestroyType
+@onready var shadow_score_label: Label = %ShadowScore
+@onready var flash_score_label: Label = %FlashScore
+@onready var destroy_score_label: Label = %DestroyScore
 @onready var score_label: Label = %ScoreLabel
 @onready var target_score_label: Label = %TargetScoreLabel
 @onready var progress_bar: ProgressBar = %ProgressBar
 @onready var hands_label: Label = %HandsLabel
-@onready var redraws_label: Label = %RedrawsLabel
 @onready var gold_label: Label = %GoldLabel
 @onready var barrier_label: Label = %BarrierLabel
 @onready var round_label: Label = %RoundLabel
 
 # ═══ Ninja bar ═══
-@onready var ability_bar: HBoxContainer = %AbilityBar
+@onready var ninja_bar_container: HBoxContainer = %NinjaBar
 
 # ═══ Center ═══
 @onready var status_label: Label = %StatusLabel
@@ -55,7 +72,6 @@ extends Control
 @onready var middle_type_label: Label = %MiddleTypeLabel
 @onready var tail_type_label: Label = %TailTypeLabel
 @onready var play_btn: Button = %PlayBtn
-@onready var redraw_btn: Button = %RedrawBtn
 
 # ═══ Column labels ═══
 @onready var col0_label: Label = %Col0Label
@@ -92,7 +108,6 @@ var hand_display: RefCounted  # HandDisplay
 var hand_interaction: RefCounted  # HandInteraction
 var deck_viewer_ctrl: DeckViewerController
 var dun_highlighter: DunHighlighter
-var redraw_vfx_handler: RedrawVFXHandler
 var result_screen: ResultScreenDisplay
 var ninja_bar: NinjaBarDisplay
 
@@ -103,12 +118,13 @@ func _ready() -> void:
 	hand_display.setup(
 		head_cards, middle_cards, tail_cards,
 		head_type_label, middle_type_label, tail_type_label,
-		col0_label, col1_label, col2_label,
-		chips_label, mult_label, shadow_type_label, flash_type_label, destroy_type_label,
-		play_btn, redraw_btn, status_label
+		col0_label, col1_label, col2_label, col_xi_label,
+		shadow_type_label, flash_type_label, destroy_type_label,
+		shadow_score_label, flash_score_label, destroy_score_label,
+		play_btn, status_label
 	)
 
-	# Hand interaction (swap/redraw state machine)
+	# Hand interaction (swap state machine)
 	hand_interaction = HandInteraction.new()
 	hand_interaction.setup(hand_display)
 
@@ -127,14 +143,6 @@ func _ready() -> void:
 		head_cards, middle_cards, tail_cards
 	)
 
-	# Redraw VFX handler (手替え animation sequence)
-	redraw_vfx_handler = RedrawVFXHandler.new()
-	redraw_vfx_handler.setup(
-		hand_interaction,
-		head_cards, middle_cards, tail_cards,
-		play_btn, redraw_btn, status_label
-	)
-
 	# Result screen display (scoring / complete / victory / gameover / xi)
 	result_screen = ResultScreenDisplay.new()
 	result_screen.setup(
@@ -146,7 +154,7 @@ func _ready() -> void:
 
 	# Ninja bar display
 	ninja_bar = NinjaBarDisplay.new()
-	ninja_bar.setup(ability_bar)
+	ninja_bar.setup(ninja_bar_container)
 
 	# ── Three-Dun title progressive outline (V20) ──
 	head_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.3))
@@ -164,13 +172,131 @@ func _ready() -> void:
 # ══════════════════════════════════════════
 
 func show_view(view: String) -> void:
-	game_bg.visible = (view in ["game", "intro", "scoring"])
+	game_bg.visible = (view in ["game", "intro", "scoring", "complete"])
 	level_intro.visible = (view == "intro")
 	game_layout.visible = (view in ["game", "scoring"])
 	# Balatro-style: no overlay dimming during scoring — inline HUD animation
 	level_complete.visible = (view == "complete")
+	shop_overlay.visible = (view == "shop")
 	game_over.visible = (view == "gameover")
 	victory_overlay.visible = (view == "victory")
+
+
+# ══════════════════════════════════════════
+# Shop overlay (Phase C)
+# ══════════════════════════════════════════
+
+var _current_shop_panel: Control = null
+
+func get_current_shop_panel() -> Control:
+	return _current_shop_panel
+
+
+func show_shop(shop_mgr: ShopManager, gold: int, colors: Dictionary) -> void:
+	## Create and show shop_panel instance inside ShopOverlay.
+	## Also triggers panel entrance animation.
+	if _current_shop_panel != null and is_instance_valid(_current_shop_panel):
+		_current_shop_panel.queue_free()
+		_current_shop_panel = null
+
+	var panel_scene := preload("res://scenes/ninking/shop_panel.tscn")
+	var panel := panel_scene.instantiate()
+	shop_overlay.add_child(panel)
+
+	_current_shop_panel = panel
+	panel.init(shop_mgr, gold, colors, NinKingGameState.owned_ninjas.size(), NinKingGameState.max_ninja_slots)
+
+	# Wire signals to game_manager (emitted via UIManager for relay)
+	panel.purchase_requested.connect(_on_shop_purchase_requested)
+	panel.item_purchase_requested.connect(_on_shop_item_purchase_requested)
+	panel.enchant_purchase_requested.connect(_on_shop_enchant_purchase_requested)
+
+	panel.reroll_requested.connect(_on_shop_reroll_requested)
+	panel.continue_requested.connect(_on_shop_continue_requested)
+
+	show_view("shop")
+	panel.play_entrance_animation()
+
+
+func hide_shop() -> void:
+	## Close shop panel with exit animation, then clean up.
+	if _current_shop_panel == null or not is_instance_valid(_current_shop_panel):
+		shop_overlay.visible = false
+		return
+
+	var panel := _current_shop_panel
+	var all_cards: Array = []
+	if panel.has_method("get_all_cards"):
+		all_cards = panel.get_all_cards()
+
+	await NinKingTween.play_shop_exit({
+		overlay = panel.overlay,
+		panel = panel,
+		all_cards = all_cards,
+	})
+
+	if is_instance_valid(panel):
+		panel.queue_free()
+	_current_shop_panel = null
+	shop_overlay.visible = false
+
+
+func is_shop_open() -> bool:
+	return _current_shop_panel != null and is_instance_valid(_current_shop_panel) and shop_overlay.visible
+
+
+func shop_panel_update_gold(gold: int) -> void:
+	## Update gold on the active shop panel (called by game_manager after purchase/reroll).
+	if _current_shop_panel != null and is_instance_valid(_current_shop_panel):
+		_current_shop_panel.update_gold(gold, NinKingGameState.owned_ninjas.size())
+
+
+func shop_panel_update_reroll_cost(cost: int) -> void:
+	## B4: Update reroll cost display on the active shop panel.
+	if _current_shop_panel != null and is_instance_valid(_current_shop_panel):
+		_current_shop_panel.update_reroll_cost(cost)
+
+
+func shop_panel_refresh_stock() -> void:
+	## Refresh stock on the active shop panel (called by game_manager after reroll).
+	if _current_shop_panel != null and is_instance_valid(_current_shop_panel):
+		_current_shop_panel.refresh_stock()
+
+
+## B6: Mark a specific item card as purchased in the shop panel (greys out + disables).
+func shop_panel_mark_item_purchased(item_id: String) -> void:
+	if _current_shop_panel != null and is_instance_valid(_current_shop_panel):
+		_current_shop_panel.mark_item_purchased(item_id)
+
+
+## B5: Open enchant target selector on the active shop panel.
+## `on_card_selected` receives (card_index: int).
+func shop_panel_start_enchant_targeting(hand: Array, on_card_selected: Callable) -> void:
+	if _current_shop_panel != null and is_instance_valid(_current_shop_panel):
+		_current_shop_panel.start_enchant_targeting(hand, on_card_selected)
+
+
+# 🏪 Shop signal relay — game_manager connects to these
+signal shop_purchase_requested(ability_data: Dictionary)
+signal shop_item_purchase_requested(item_data: Dictionary)
+signal shop_enchant_purchase_requested(item_data: Dictionary)  # B5
+signal shop_reroll_requested()
+signal shop_continue_requested()
+
+func _on_shop_purchase_requested(data: Dictionary) -> void:
+	shop_purchase_requested.emit(data)
+
+func _on_shop_item_purchase_requested(data: Dictionary) -> void:
+	shop_item_purchase_requested.emit(data)
+
+func _on_shop_enchant_purchase_requested(data: Dictionary) -> void:
+	shop_enchant_purchase_requested.emit(data)
+
+func _on_shop_reroll_requested() -> void:
+	shop_reroll_requested.emit()
+
+func _on_shop_continue_requested() -> void:
+	shop_continue_requested.emit()
 
 
 # ══════════════════════════════════════════
@@ -183,12 +309,16 @@ func on_seal_start(barrier: int, seal_idx: int, target: int, seal_lord_name: Str
 	intro_level_label.text = "結界%d · %s" % [barrier, seal_str]
 	if seal_lord_name != "":
 		intro_target_label.text = "封印 %d | 封印ノ主: %s" % [target, seal_lord_name]
+		if BOSS_PORTRAITS.has(seal_lord_name):
+			boss_portrait.texture = load(BOSS_PORTRAITS[seal_lord_name])
+			boss_portrait.visible = true
 	else:
 		intro_target_label.text = "封印 %d" % target
+		boss_portrait.visible = false
 
 	update_score(0, target)
 	update_target(target)
-	update_match_info(3, 2)
+	update_match_info(3)
 	update_gold(NinKingGameState.gold)
 
 
@@ -206,9 +336,8 @@ func update_gold(amount: int) -> void:
 	gold_label.text = "$%d" % amount
 
 
-func update_match_info(plays_left: int, redraws_left: int) -> void:
+func update_match_info(plays_left: int) -> void:
 	hands_label.text = "討伐 %d" % plays_left
-	redraws_label.text = "手替え %d" % redraws_left
 
 
 func update_target(target: int) -> void:
@@ -221,60 +350,34 @@ func update_target(target: int) -> void:
 
 func _refresh_internal(hand: Array[CardData.PlayingCard]) -> void:
 	hand_interaction.set_hand(hand)
-	hand_display.refresh(hand, hand_interaction.swap_source_idx, hand_interaction.redraw_targets, hand_interaction.redraw_mode, _on_ninking_card_clicked, _on_ninking_card_dragged)
-	dun_highlighter.update(NinKingGameState.current_arrangement, redraw_mode)
+	hand_display.refresh(hand, hand_interaction.swap_source_idx, _on_ninking_card_clicked, _on_ninking_card_dragged)
+	dun_highlighter.update(NinKingGameState.current_arrangement)
+	play_btn.disabled = not NinKingGameState.is_constraint_satisfied()
 
 
 func refresh_hand(hand: Array[CardData.PlayingCard]) -> void:
 	_refresh_internal(hand)
 
 
-func refresh_groups(head_cards_arr: Array[CardData.PlayingCard], mid_cards_arr: Array[CardData.PlayingCard], tail_cards_arr: Array[CardData.PlayingCard], _constraint_ok: bool) -> void:
+func refresh_groups(head_cards_arr: Array[CardData.PlayingCard], mid_cards_arr: Array[CardData.PlayingCard], tail_cards_arr: Array[CardData.PlayingCard], constraint_ok: bool) -> void:
 	var combined: Array[CardData.PlayingCard] = []
 	combined.append_array(head_cards_arr)
 	combined.append_array(mid_cards_arr)
 	combined.append_array(tail_cards_arr)
 	_refresh_internal(combined)
+	play_btn.disabled = not constraint_ok  # B10: 约束不满足时禁止出牌
 
 
 # ══════════════════════════════════════════
 # Card interaction — delegated to HandInteraction
 # ══════════════════════════════════════════
 
-var redraw_mode: bool:
-	get:
-		return hand_interaction.redraw_mode if hand_interaction else false
-
 func _on_ninking_card_clicked(idx: int) -> void:
 	hand_interaction.handle_card_clicked(idx)
-	_update_redraw_button_text()
 
 
 func _on_ninking_card_dragged(idx: int, drop_position: Vector2) -> void:
 	hand_interaction.handle_card_dragged(idx, drop_position)
-
-
-func enable_redraw_mode() -> void:
-	if NinKingGameState.redraws_remaining <= 0:
-		return
-	hand_interaction.enable_redraw_mode()
-	play_btn.disabled = true
-	status_label.text = "选择要替换的卡牌 (最多 3 张)"
-	hand_interaction.set_cards_interactable(head_cards, middle_cards, tail_cards, false)
-	_update_redraw_button_text()
-
-
-func confirm_redraw() -> void:
-	if hand_interaction.redraw_targets.is_empty():
-		return
-	if redraw_vfx_handler.is_running():
-		return
-	redraw_vfx_handler.execute()
-
-
-func _update_redraw_button_text() -> void:
-	if hand_interaction.redraw_mode:
-		redraw_btn.text = "手替え(%d/3)" % hand_interaction.redraw_targets.size()
 
 
 # ══════════════════════════════════════════
@@ -329,7 +432,7 @@ func restore_ui_state() -> void:
 	var gs: NinKingGameState = NinKingGameState
 	on_seal_start(gs.barrier_num, gs.seal_idx, int(gs.target_score), gs.current_seal_lord_name)
 	update_score(int(gs.current_score), int(gs.target_score))
-	update_match_info(gs.plays_remaining, gs.redraws_remaining)
+	update_match_info(gs.plays_remaining)
 	update_gold(gs.gold)
 	refresh_hand(gs.hand)
 	refresh_ninjas(gs.owned_ninjas, gs.max_ninja_slots)

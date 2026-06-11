@@ -53,9 +53,7 @@ func setup(
 ## Update 影/瞬/滅 labels to reflect constraint satisfaction pair-by-pair.
 ## Pair1 (影<=瞬) → lights 影+瞬; Pair2 (瞬<=滅) → lights 瞬+滅.
 ## StatusLabel shows hint text only when constraint fails.
-func update(arrangement: AutoArranger.Arrangement, redraw_mode: bool) -> void:
-	if redraw_mode:
-		return
+func update(arrangement: AutoArranger.Arrangement) -> void:
 
 	if arrangement == null:
 		reset()

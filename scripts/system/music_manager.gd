@@ -9,11 +9,16 @@ const CROSSFADE_DUR: float = 0.8
 const DEFAULT_VOLUME_DB: float = -8.0
 
 var _menu_bgm: AudioStream
-var _game_bgm: AudioStream
+var _game_bgm_light: AudioStream
+var _game_bgm_medium: AudioStream
+var _game_bgm_heavy: AudioStream
+var _shop_bgm: AudioStream
 
 var _active_player: AudioStreamPlayer
 var _fading_out_player: AudioStreamPlayer
 var _is_playing: bool = false
+
+var _current_variation: String = ""  # "light" | "medium" | "heavy" | "menu" | "shop"
 
 
 func _ready() -> void:
@@ -25,7 +30,10 @@ func _ready() -> void:
 
 func _preload_audio() -> void:
 	_ensure_menu_bgm()
-	_ensure_game_bgm()
+	_ensure_game_bgm_light()
+	_ensure_game_bgm_medium()
+	_ensure_game_bgm_heavy()
+	_ensure_shop_bgm()
 
 
 func _ensure_menu_bgm() -> AudioStream:
@@ -34,18 +42,74 @@ func _ensure_menu_bgm() -> AudioStream:
 	return _menu_bgm
 
 
-func _ensure_game_bgm() -> AudioStream:
-	if _game_bgm == null:
-		_game_bgm = load("res://assets/audio/music/main_game_bgm.wav")
-	return _game_bgm
+func _ensure_game_bgm_light() -> AudioStream:
+	if _game_bgm_light == null:
+		_game_bgm_light = load("res://assets/audio/music/game_bgm_light.mp3")
+	return _game_bgm_light
+
+
+func _ensure_game_bgm_medium() -> AudioStream:
+	if _game_bgm_medium == null:
+		_game_bgm_medium = load("res://assets/audio/music/game_bgm_medium.mp3")
+	return _game_bgm_medium
+
+
+func _ensure_game_bgm_heavy() -> AudioStream:
+	if _game_bgm_heavy == null:
+		_game_bgm_heavy = load("res://assets/audio/music/game_bgm_heavy.mp3")
+	return _game_bgm_heavy
+
+
+func _ensure_shop_bgm() -> AudioStream:
+	if _shop_bgm == null:
+		_shop_bgm = load("res://assets/audio/music/dova_Cooler Ninjari Ninjarous miaster.mp3")
+	return _shop_bgm
+
+
+func get_game_stream_for_barrier(barrier: int) -> AudioStream:
+	## Return the appropriate game BGM variation based on barrier number.
+	## barrier 1-3 → light, 4-6 → medium, 7-8 → heavy.
+	if barrier <= 3:
+		return _ensure_game_bgm_light()
+	elif barrier <= 6:
+		return _ensure_game_bgm_medium()
+	else:
+		return _ensure_game_bgm_heavy()
 
 
 func play_menu_bgm() -> void:
 	_crossfade_to(_ensure_menu_bgm())
+	_current_variation = "menu"
 
 
 func play_game_bgm() -> void:
-	_crossfade_to(_ensure_game_bgm())
+	## Play default game BGM (light). Prefer set_game_variation(barrier) instead.
+	_crossfade_to(_ensure_game_bgm_light())
+	_current_variation = "light"
+
+
+func set_game_variation(barrier: int) -> void:
+	## Automatically select and play game BGM based on barrier difficulty.
+	## barrier 1-3: light, 4-6: medium, 7-8: heavy.
+	## Crossfades if already playing a different variation.
+	var stream: AudioStream = get_game_stream_for_barrier(barrier)
+	if stream == null:
+		return
+
+	var var_name: String = "light" if barrier <= 3 else ("medium" if barrier <= 6 else "heavy")
+
+	# Don't restart if same variation is already playing
+	if _active_player.stream == stream and _active_player.playing:
+		_current_variation = var_name
+		return
+
+	_crossfade_to(stream)
+	_current_variation = var_name
+
+
+func play_shop_bgm() -> void:
+	_crossfade_to(_ensure_shop_bgm())
+	_current_variation = "shop"
 
 
 func stop_all() -> void:
@@ -56,6 +120,7 @@ func stop_all() -> void:
 	if _fading_out_player.playing:
 		_fading_out_player.stop()
 	_is_playing = false
+	_current_variation = ""
 
 
 func set_master_volume(db: float) -> void:

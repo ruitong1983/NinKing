@@ -120,15 +120,16 @@ const HAND_TYPE3_BASE_VALUES: Dictionary = {
 	HandType3.THREE_OF_KIND_3: {"chips": 100, "mult": 8},
 }
 
-## 3-card hand type base values for COLUMNS (vertical) — ~1.8x horizontal values
-## Reduced from 2.5x (Plan C) so column optimization is rewarding but not mandatory
-const COLUMN_HAND_TYPE3_BASE_VALUES: Dictionary = {
-	HandType3.HIGH_CARD_3: {"chips": 0, "mult": 0},
-	HandType3.ONE_PAIR_3: {"chips": 15, "mult": 4},
-	HandType3.STRAIGHT_3: {"chips": 35, "mult": 7},
-	HandType3.FLUSH_3: {"chips": 55, "mult": 11},
-	HandType3.STRAIGHT_FLUSH_3: {"chips": 100, "mult": 22},
-	HandType3.THREE_OF_KIND_3: {"chips": 180, "mult": 35},
+# COLUMN_HAND_TYPE3_BASE_VALUES removed in v4.0 — columns now use ×mult (2/4/8/16/32)
+
+## Column ×mult values (v4.0: fixed, not affected by star chart)
+const COL_X_MULT_VALUES: Dictionary = {
+	HandType3.HIGH_CARD_3: 1,
+	HandType3.ONE_PAIR_3: 2,
+	HandType3.STRAIGHT_3: 4,
+	HandType3.FLUSH_3: 8,
+	HandType3.STRAIGHT_FLUSH_3: 16,
+	HandType3.THREE_OF_KIND_3: 32,
 }
 
 ## Star chart level-up increments per use
@@ -280,18 +281,7 @@ static func get_hand_type3_leveled_mult(ht: HandType3, levels: Dictionary) -> in
 	return base["mult"] + upgrade["mult"] * lvl
 
 
-static func get_hand_type3_column_leveled_chips(ht: HandType3, levels: Dictionary) -> int:
-	var base: Dictionary = COLUMN_HAND_TYPE3_BASE_VALUES.get(ht, {"chips": 0, "mult": 0})
-	var upgrade: Dictionary = get_star_chart_upgrade(ht)
-	var lvl: int = levels.get(ht, 0)
-	return base["chips"] + upgrade["chips"] * lvl
 
-
-static func get_hand_type3_column_leveled_mult(ht: HandType3, levels: Dictionary) -> int:
-	var base: Dictionary = COLUMN_HAND_TYPE3_BASE_VALUES.get(ht, {"chips": 0, "mult": 0})
-	var upgrade: Dictionary = get_star_chart_upgrade(ht)
-	var lvl: int = levels.get(ht, 0)
-	return base["mult"] + upgrade["mult"] * lvl
 
 
 ## Calculate hand strength for 3-card group (used for constraint: 头 ≤ 中 ≤ 尾)

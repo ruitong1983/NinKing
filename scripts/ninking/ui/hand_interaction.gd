@@ -1,28 +1,25 @@
 class_name HandInteraction
 extends RefCounted
 
-## Swap/redraw interaction state machine for the 9-card hand.
+## Swap interaction state machine for the 9-card hand.
 ## Pure logic — no rendering. Calls HandDisplay.refresh() when visual state changes.
 ## Extracted from UIManager to allow reuse and independent testing.
+
+const SB = preload("res://scripts/config/sound_bank.gd")
 
 var _display: RefCounted  # HandDisplay
 var _current_hand: Array[CardData.PlayingCard] = []
 
 var swap_source_idx: int = -1
-var redraw_mode: bool = false
-var redraw_targets: Array[int] = []
 
 
 func setup(display: RefCounted) -> void:
 	_display = display
 
 
-## Main entry point — route a card click to swap or redraw logic.
+## Main entry point — route a card click to swap logic.
 func handle_card_clicked(idx: int) -> void:
-	if redraw_mode:
-		_toggle_redraw(idx)
-	else:
-		_handle_swap(idx)
+	_handle_swap(idx)
 
 
 ## Set the current hand data (used when refreshing after state changes).
@@ -32,7 +29,7 @@ func set_hand(hand: Array[CardData.PlayingCard]) -> void:
 
 func _refresh_display() -> void:
 	if _display:
-		_display.refresh(_current_hand, swap_source_idx, redraw_targets, redraw_mode)
+		_display.refresh(_current_hand, swap_source_idx)
 
 
 # ══════════════════════════════════════════
@@ -42,12 +39,14 @@ func _refresh_display() -> void:
 func _handle_swap(idx: int) -> void:
 	if swap_source_idx == -1:
 		swap_source_idx = idx
+		GlobalTweens.play_sfx(SB.SELECT)  # C20: 选中音效
 		_refresh_display()
 	elif swap_source_idx == idx:
 		swap_source_idx = -1
 		_refresh_display()
 	else:
 		SealController.swap_cards(NinKingGameState, swap_source_idx, idx)
+		GlobalTweens.play_sfx(SB.SWAP)
 		swap_source_idx = -1
 		_current_hand = NinKingGameState.hand
 		_refresh_display()
@@ -67,40 +66,7 @@ func handle_card_dragged(src_idx: int, drop_position: Vector2) -> void:
 	if tgt_idx < 0 or tgt_idx >= _current_hand.size() or tgt_idx == src_idx:
 		return
 	SealController.swap_cards(NinKingGameState, src_idx, tgt_idx)
-	swap_source_idx = -1
-	_current_hand = NinKingGameState.hand
-	_refresh_display()
-
-
-# ══════════════════════════════════════════
-# Redraw (手替え — discard and redraw)
-# ══════════════════════════════════════════
-
-func _toggle_redraw(idx: int) -> void:
-	if idx in redraw_targets:
-		redraw_targets.erase(idx)
-	else:
-		if redraw_targets.size() >= 3:
-			return
-		redraw_targets.append(idx)
-	_refresh_display()
-
-
-func enable_redraw_mode() -> void:
-	if NinKingGameState.redraws_remaining <= 0:
-		return
-	redraw_mode = true
-	redraw_targets.clear()
-	swap_source_idx = -1
-	_refresh_display()
-
-
-func confirm_redraw() -> void:
-	if redraw_targets.is_empty():
-		return
-	SealController.execute_redraw(NinKingGameState, redraw_targets)
-	redraw_mode = false
-	redraw_targets.clear()
+	GlobalTweens.play_sfx(SB.SWAP)
 	swap_source_idx = -1
 	_current_hand = NinKingGameState.hand
 	_refresh_display()

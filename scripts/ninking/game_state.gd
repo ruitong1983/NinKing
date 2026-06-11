@@ -24,10 +24,6 @@ signal plays_changed(remaining: int)
 
 func emit_plays_changed() -> void:
 	plays_changed.emit(plays_remaining)
-signal redraws_changed(remaining: int)
-
-func emit_redraws_changed() -> void:
-	redraws_changed.emit(redraws_remaining)
 @warning_ignore("unused_signal")
 signal gold_changed(amount: int)
 signal hand_updated(hand: Array)           # 9 cards, arranged: [0-2]=head, [3-5]=mid, [6-8]=tail
@@ -50,7 +46,6 @@ var current_seal_lord_effects: Dictionary = {}
 
 # Resources
 var plays_remaining: int = 3
-var redraws_remaining: int = 2
 var gold: int = 8
 
 # Hand & deck
@@ -103,7 +98,6 @@ func _start_seal() -> void:
 	target_score = seal_cfg["target"]
 	current_score = 0
 	plays_remaining = 3
-	redraws_remaining = 2
 
 	# Seal Lord effects
 	current_seal_lord_name = ""
@@ -112,10 +106,6 @@ func _start_seal() -> void:
 		var lord: Dictionary = BarrierConfig.assign_seal_lord(barrier_num)
 		current_seal_lord_name = lord["name"]
 		current_seal_lord_effects = lord.get("effect", {}).duplicate()
-
-	# Check if Seal Lord disables redraws
-	if current_seal_lord_effects.get("no_redraw", false):
-		redraws_remaining = 0
 
 	# Check if Seal Lord changes constraint
 	if current_seal_lord_effects.has("constraint"):
@@ -180,7 +170,7 @@ func get_scoring_rules() -> Dictionary:
 
 
 # ══════════════════════════════════════════
-# Play / Redraw / Seal — delegated to SealController
+# Play / Seal — delegated to SealController
 # ══════════════════════════════════════════
 
 func execute_play() -> void:
@@ -189,10 +179,6 @@ func execute_play() -> void:
 
 func swap_cards(idx1: int, idx2: int) -> void:
 	SealController.swap_cards(self, idx1, idx2)
-
-
-func execute_redraw(indices: Array[int]) -> void:
-	SealController.execute_redraw(self, indices)
 
 
 func go_to_shop() -> void:
@@ -274,7 +260,6 @@ func continue_run() -> void:
 	current_score = int(data.get("current_score", 0))
 	target_score = int(data.get("target_score", 0))
 	plays_remaining = int(data.get("plays_remaining", 3))
-	redraws_remaining = int(data.get("redraws_remaining", 2))
 	gold = int(data.get("gold", 4))
 	current_deck_name = data.get("current_deck_name", "standard")
 

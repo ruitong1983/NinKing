@@ -16,9 +16,10 @@ var _current_hand: Array[CardData.PlayingCard] = []
 func setup(
 	head: Hand, mid: Hand, tail: Hand,
 	head_type: Label, mid_type: Label, tail_type: Label,
-	col0: Label, col1: Label, col2: Label,
-	chips: Label, mult: Label, shadow_type: Label, flash_type: Label, destroy_type: Label,
-	play: Button, redraw: Button, status: Label
+	col0: Label, col1: Label, col2: Label, col_xi: Label,
+	shadow_type: Label, flash_type: Label, destroy_type: Label,
+	shadow_score: Label, flash_score: Label, destroy_score: Label,
+	play: Button, status: Label
 ) -> void:
 	assert(head != null, "HandDisplay.setup: head must not be null")
 	assert(mid != null, "HandDisplay.setup: mid must not be null")
@@ -31,9 +32,10 @@ func setup(
 	_labeler = HandTypeLabeler.new()
 	_labeler.setup(
 		head_type, mid_type, tail_type,
-		col0, col1, col2,
-		chips, mult, shadow_type, flash_type, destroy_type,
-		play, redraw
+		col0, col1, col2, col_xi,
+		shadow_type, flash_type, destroy_type,
+		shadow_score, flash_score, destroy_score,
+		play
 	)
 
 
@@ -47,7 +49,7 @@ func _clear_all() -> void:
 
 
 func _add_card(hand: Hand, card_data: CardData.PlayingCard, idx: int,
-		swap_idx: int, redraw_idxs: Array[int],
+		swap_idx: int,
 		on_card_clicked: Callable = Callable(),
 		on_card_dragged: Callable = Callable()) -> void:
 	var pc: NinKingCard = NinKingCard.new()
@@ -61,26 +63,24 @@ func _add_card(hand: Hand, card_data: CardData.PlayingCard, idx: int,
 		pc.ninking_card_dragged.connect(on_card_dragged)
 	if idx == swap_idx:
 		pc.set_visual_state(NinKingCard.VisualState.SWAP_SOURCE)
-	elif idx in redraw_idxs:
-		pc.set_visual_state(NinKingCard.VisualState.REDRAW_TARGET)
 	hand.add_card(pc)
 	pc.update_display()
 	GlobalTweens.pop_in(pc, 0.25)
 
 
-func refresh(hand: Array[CardData.PlayingCard], swap_idx: int, redraw_idxs: Array[int], redraw_mode: bool, on_card_clicked: Callable = Callable(), on_card_dragged: Callable = Callable()) -> void:
+func refresh(hand: Array[CardData.PlayingCard], swap_idx: int, on_card_clicked: Callable = Callable(), on_card_dragged: Callable = Callable()) -> void:
 	_current_hand = hand
 	_clear_all()
 	if hand.size() < 9:
 		_labeler.reset_labels()
 		return
 	for i: int in range(3):
-		_add_card(_head_hand, hand[i], i, swap_idx, redraw_idxs, on_card_clicked, on_card_dragged)
+		_add_card(_head_hand, hand[i], i, swap_idx, on_card_clicked, on_card_dragged)
 	for i: int in range(3, 6):
-		_add_card(_mid_hand, hand[i], i, swap_idx, redraw_idxs, on_card_clicked, on_card_dragged)
+		_add_card(_mid_hand, hand[i], i, swap_idx, on_card_clicked, on_card_dragged)
 	for i: int in range(6, 9):
-		_add_card(_tail_hand, hand[i], i, swap_idx, redraw_idxs, on_card_clicked, on_card_dragged)
-	_labeler.update_all(hand, redraw_mode)
+		_add_card(_tail_hand, hand[i], i, swap_idx, on_card_clicked, on_card_dragged)
+	_labeler.update_all(hand)
 
 	# Card Framework move-tween race fix: rapid sequential add_card cycles
 	# (kill→move→kill→deferred reapply) leave cards at intermediate positions.
@@ -119,8 +119,8 @@ func find_drop_target(global_pos: Vector2) -> Dictionary:
 
 
 func add_card_to_hand(target: Hand, card_data: CardData.PlayingCard, idx: int,
-		swap_idx: int = -1, redraw_idxs: Array[int] = []) -> void:
-	_add_card(target, card_data, idx, swap_idx, redraw_idxs)
+		swap_idx: int = -1) -> void:
+	_add_card(target, card_data, idx, swap_idx)
 
 
 func clear() -> void:

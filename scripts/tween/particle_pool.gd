@@ -1,4 +1,4 @@
-# scripts/tween/particle_pool.gd
+# scripts/tween/particle_pool.gd  [V8 updated 2026-06-11]
 # ============================================================
 # ParticlePool — 粒子预设池
 # 可独立移植: 单文件拷走即用
@@ -9,14 +9,22 @@ extends Node
 
 
 var _placeholder_tex: ImageTexture = null
-var _shuriken_tex: ImageTexture = null
-var _sakura_tex: ImageTexture = null
+
+# Preloaded manga-style particle textures
+var _manga_burst_tex: Texture2D
+var _manga_ink_tex: Texture2D
+var _shuriken_particle_tex: Texture2D
+var _sakura_particle_tex: Texture2D
+var _speed_line_tex: Texture2D
 
 
 func _init() -> void:
 	_placeholder_tex = _make_radial_texture(Color.WHITE)
-	_shuriken_tex = _make_shuriken_texture()
-	_sakura_tex = _make_sakura_texture()
+	_manga_burst_tex = load("res://assets/images/effects/particle_manga_burst.png")
+	_manga_ink_tex = load("res://assets/images/effects/particle_manga_ink.png")
+	_shuriken_particle_tex = load("res://assets/images/effects/shuriken_particle.png")
+	_sakura_particle_tex = load("res://assets/images/effects/sakura_particle.png")
+	_speed_line_tex = load("res://assets/images/effects/particle_speed_line.png")
 
 
 # ─── 预设爆发 ───
@@ -39,9 +47,9 @@ class PresetConfig:
 	var color: Color
 	var spread: float
 	var velocity_range: Vector2
-	var texture: ImageTexture = null
+	var texture: Texture2D = null
 
-	func _init(p_amount: int, p_lifetime: float, p_color: Color, p_spread: float, p_vel_range: Vector2, p_texture: ImageTexture = null) -> void:
+	func _init(p_amount: int, p_lifetime: float, p_color: Color, p_spread: float, p_vel_range: Vector2, p_texture: Texture2D = null) -> void:
 		amount = p_amount
 		lifetime = p_lifetime
 		color = p_color
@@ -57,9 +65,13 @@ func _get_preset(preset: String) -> PresetConfig:
 		"confetti":
 			return PresetConfig.new(18, 0.8, Color.GOLD, 120.0, Vector2(60, 150))
 		"shuriken":
-			return PresetConfig.new(8, 0.35, Color(0.35, 0.35, 0.4, 0.85), 360.0, Vector2(60, 130), _shuriken_tex)
+			return PresetConfig.new(8, 0.35, Color(0.35, 0.35, 0.4, 0.85), 360.0, Vector2(60, 130), _shuriken_particle_tex)
 		"sakura":
-			return PresetConfig.new(12, 0.7, Color(0.95, 0.65, 0.75, 0.8), 150.0, Vector2(30, 90), _sakura_tex)
+			return PresetConfig.new(12, 0.7, Color(0.95, 0.65, 0.75, 0.8), 150.0, Vector2(30, 90), _sakura_particle_tex)
+		"manga_burst":
+			return PresetConfig.new(8, 0.5, Color(1.0, 1.0, 1.0, 0.9), 30.0, Vector2(40, 100), _manga_burst_tex)
+		"manga_ink":
+			return PresetConfig.new(12, 0.6, Color(0.1, 0.1, 0.1, 0.85), 60.0, Vector2(30, 80), _manga_ink_tex)
 		_:  # sparkle (default)
 			return PresetConfig.new(10, 0.4, Color(1.0, 0.843, 0.0, 0.9), 90.0, Vector2(40, 100))
 
@@ -104,47 +116,4 @@ static func _make_radial_texture(base_color: Color) -> ImageTexture:
 			var d := Vector2(float(x) - cx, float(y) - cy).length() / r
 			var a := clampf(1.0 - d, 0.0, 1.0)
 			img.set_pixel(x, y, Color(base_color.r, base_color.g, base_color.b, a))
-	return ImageTexture.create_from_image(img)
-
-
-## 手里剑纹理 — 铁灰色 4 尖十字星
-static func _make_shuriken_texture() -> ImageTexture:
-	var img := Image.create(8, 8, false, Image.FORMAT_RGBA8)
-	# 星型 pattern: 十字 + X 形对角线形成 4 尖
-	for y in range(8):
-		for x in range(8):
-			var fx := float(x) - 3.5
-			var fy := float(y) - 3.5
-			# 十字骨架：水平 + 垂直
-			var cross_dist := minf(absf(fx), absf(fy))
-			# 距中心距离
-			var center_dist := Vector2(fx, fy).length()
-			# 星尖沿对角线方向亮，内部渐暗
-			var a: float
-			if center_dist < 1.0:
-				a = 1.0  # 中心亮
-			elif center_dist > 3.5:
-				a = 0.0  # 边缘透明
-			elif cross_dist < 0.6:
-				a = 1.0 - center_dist / 3.5  # 十字臂
-			else:
-				a = maxf(0.0, 0.3 - center_dist / 5.0)  # 对角方向微亮形成尖
-			img.set_pixel(x, y, Color(1.0, 1.0, 1.0, clampf(a, 0.0, 1.0)))
-	return ImageTexture.create_from_image(img)
-
-
-## 樱花纹理 — 淡粉色 5 瓣柔点
-static func _make_sakura_texture() -> ImageTexture:
-	var img := Image.create(8, 8, false, Image.FORMAT_RGBA8)
-	# 柔和的径向渐变 + 微偏心产生花瓣感
-	for y in range(8):
-		for x in range(8):
-			var fx := float(x) - 3.5
-			var fy := float(y) - 3.5
-			var d := Vector2(fx, fy).length()
-			# 柔边径向渐变
-			var a := clampf(1.0 - d / 3.5, 0.0, 1.0)
-			# 平滑 falloff
-			a = a * a * (3.0 - 2.0 * a)  # smoothstep
-			img.set_pixel(x, y, Color(1.0, 1.0, 1.0, a))
 	return ImageTexture.create_from_image(img)

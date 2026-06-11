@@ -1,6 +1,6 @@
 [gd_resource type="Theme" format=3 uid="uid://bqb2i07k0v8jt"]
 
-[ext_resource type="FontFile" uid="uid://l5d7mx0hlykx" path="res://assets/fonts/SourceHanSansSC-Heavy.otf" id="1_f1heavy"]
+[ext_resource type="FontFile" uid="uid://bltjg4x1xnkf3" path="res://assets/fonts/SourceHanSansSC-Heavy.otf" id="1_f1heavy"]
 
 [sub_resource type="StyleBoxFlat" id="slot_frame"]
 content_margin_left = 6.0
@@ -62,86 +62,15 @@ border_width_right = 2
 border_width_bottom = 2
 border_color = Color(0.94, 0.75, 0.25, 0.45)
 
-[sub_resource type="StyleBoxFlat" id="impact_normal"]
-content_margin_left = 20.0
-content_margin_top = 10.0
-content_margin_right = 20.0
-content_margin_bottom = 10.0
-bg_color = Color(0.9, 0.18, 0.1, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_left = 8
-corner_radius_bottom_right = 8
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.102, 0.102, 0.102, 1)
-
-[sub_resource type="StyleBoxFlat" id="impact_hover"]
-content_margin_left = 20.0
-content_margin_top = 10.0
-content_margin_right = 20.0
-content_margin_bottom = 10.0
-bg_color = Color(0.99, 0.2, 0.11, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_left = 8
-corner_radius_bottom_right = 8
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.102, 0.102, 0.102, 1)
-
-[sub_resource type="StyleBoxFlat" id="impact_pressed"]
-content_margin_left = 20.0
-content_margin_top = 12.0
-content_margin_right = 20.0
-content_margin_bottom = 8.0
-bg_color = Color(0.77, 0.15, 0.09, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_left = 8
-corner_radius_bottom_right = 8
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.102, 0.102, 0.102, 1)
-
-[sub_resource type="StyleBoxFlat" id="impact_disabled"]
-content_margin_left = 20.0
-content_margin_top = 10.0
-content_margin_right = 20.0
-content_margin_bottom = 10.0
-bg_color = Color(0.8, 0.8, 0.8, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_left = 8
-corner_radius_bottom_right = 8
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.6, 0.6, 0.6, 1)
-
 [resource]
 default_font = ExtResource("1_f1heavy")
 default_font_size = 16
 BaoPaiSlot/styles/normal = SubResource("slot_frame")
 Button/colors/font_color = Color(0.95, 0.95, 0.9, 1)
-Button/colors/font_hover_color = Color(1.0, 1.0, 1.0, 1)
+Button/colors/font_hover_color = Color(1, 1, 1, 1)
 Button/colors/font_pressed_color = Color(0.85, 0.85, 0.8, 1)
 Button/styles/hover = SubResource("button_hover")
 Button/styles/normal = SubResource("button_normal")
 Button/styles/pressed = SubResource("button_pressed")
-Button/types/ImpactButton/colors/font_color = Color(1.0, 1.0, 1.0, 1)
-Button/types/ImpactButton/colors/font_hover_color = Color(1.0, 1.0, 1.0, 1)
-Button/types/ImpactButton/colors/font_pressed_color = Color(0.9, 0.9, 0.9, 1)
-Button/types/ImpactButton/styles/normal = SubResource("impact_normal")
-Button/types/ImpactButton/styles/hover = SubResource("impact_hover")
-Button/types/ImpactButton/styles/pressed = SubResource("impact_pressed")
-Button/types/ImpactButton/styles/disabled = SubResource("impact_disabled")
 Panel/styles/panel = SubResource("panel_bg")
 PanelContainer/styles/panel = SubResource("panel_bg")

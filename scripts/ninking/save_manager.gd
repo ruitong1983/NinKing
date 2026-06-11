@@ -44,7 +44,6 @@ static func build_run_data(gs: Node) -> Dictionary:
 		"current_score": gs.current_score,
 		"target_score": gs.target_score,
 		"plays_remaining": gs.plays_remaining,
-		"redraws_remaining": gs.redraws_remaining,
 		"gold": gs.gold,
 		"current_deck_name": gs.current_deck_name,
 		"owned_ninjas": gs.owned_ninjas.duplicate(true),

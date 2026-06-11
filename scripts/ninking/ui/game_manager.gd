@@ -2,39 +2,68 @@ extends Control
 
 ## Main game flow coordinator — UI operations delegated to UIManager.
 ## NinKing v2: 9 cards → 3 groups × 3 cards (比鸡 + 忍者牌)
+## Phase C: 同场景 immersive flow — shop as overlay, no scene switching.
+## C21: Shop logic → ShopHandler, scoring animation → AnimationHandler.
 
-const BounceScore = preload("res://scripts/tween/bounce_score.gd")
+const SB = preload("res://scripts/config/sound_bank.gd")
 
 @onready var ui: UIManager = %UIManager
 
-# Cached play data during scoring animation (A7)
-var _current_play_data: Dictionary = {}
+# Delegates (C21)
+var shop_handler: ShopHandler
+var animation_handler: AnimationHandler
 
-# Active toast label — freed before showing next to avoid overlap (CR#3)
-var _active_toast: Label = null
+# Boss reveal guard — Phase C
+var _boss_revealed: bool = false
 
-# Double-click guard for scene transitions (V13)
-var _transition_guard: bool = false
+# Auto-shop: SCORING → shop transition without click (Balatro-style)
+var _auto_shop_pending: bool = false
 
 
 func _ready() -> void:
+	# Init delegates
+	shop_handler = ShopHandler.new()
+	shop_handler.setup(ui)
+	animation_handler = AnimationHandler.new()
+	animation_handler.setup(ui, func(): _auto_shop_pending = true)
+
+	# Wire UI buttons
 	ui.play_btn.pressed.connect(_on_play_pressed)
-	ui.redraw_btn.pressed.connect(_on_redraw_pressed)
 	ui.ai_rearrange_btn.pressed.connect(_on_ai_rearrange_pressed)
-	ui.to_shop_button.pressed.connect(_on_go_shop_pressed)
+	ui.to_shop_button.pressed.connect(shop_handler.go_shop_pressed)
 	ui.retry_button.pressed.connect(_on_retry_pressed)
 	ui.back_to_menu_button.pressed.connect(_on_back_to_menu_pressed)
 	ui.victory_menu_button.pressed.connect(_on_back_to_menu_pressed)
 
+	# Phase C: Shop overlay signals → delegate
+	ui.shop_purchase_requested.connect(shop_handler.on_purchase_requested)
+	ui.shop_enchant_purchase_requested.connect(shop_handler.on_enchant_purchase_requested)
+
+	ui.shop_item_purchase_requested.connect(shop_handler.on_item_purchase_requested)
+	ui.shop_reroll_requested.connect(shop_handler.on_reroll_requested)
+	ui.shop_continue_requested.connect(shop_handler.on_continue_requested)
+
+	# State signals
 	NinKingGameState.state_changed.connect(_on_state_changed)
 	NinKingGameState.score_updated.connect(_on_score_updated)
 	NinKingGameState.plays_changed.connect(_on_plays_changed)
-	NinKingGameState.redraws_changed.connect(_on_redraws_changed)
 	NinKingGameState.gold_changed.connect(_on_gold_changed)
 	NinKingGameState.hand_updated.connect(_on_hand_updated)
 	NinKingGameState.arrangement_changed.connect(_on_arrangement_changed)
 	NinKingGameState.seal_started.connect(_on_seal_started)
 	NinKingGameState.xi_triggered.connect(_on_xi_triggered)
+
+	# A3: Ink-bleed edge fade — left panel right edge blends into background
+	var fade_shader: Shader = preload("res://scripts/ninking/ui/panel_edge_fade.gdshader")
+	var make_fade := func(node: Node) -> void:
+		var m := ShaderMaterial.new()
+		m.shader = fade_shader
+		m.set_shader_parameter("fade_start", 0.64)
+		node.material = m
+	make_fade.call(ui.panel_bg)
+	make_fade.call(ui.score_card)
+	make_fade.call(ui.left_panel.get_node("MatchPanel"))
+	make_fade.call(ui.left_panel.get_node("AntePanel"))
 
 	_on_state_changed(NinKingGameState.current_state)
 	ui.restore_ui_state()
@@ -47,9 +76,7 @@ func _ready() -> void:
 		NinKingGameState.current_seal_lord_name
 	)
 
-	# Transition SEAL_INTRO → PLAYING after intro display.
-	# Moved from game_state._begin_seal_phase() because change_scene_to_file
-	# destroys the old scene tree along with any pending await timers.
+	# Transition SEAL_INTRO → PLAYING after intro watermark (Phase C: 0.5s)
 	await _intro_timer()
 
 
@@ -61,23 +88,46 @@ func _on_state_changed(new_state: NinKingGameState.State) -> void:
 			ui.show_view("intro")
 		NinKingGameState.State.PLAYING:
 			ui.show_view("game")
+			# Reset table after shop (Phase C)
+			ui.game_layout.modulate = Color.WHITE
+			GlobalTweens.play_sfx(SB.DEAL)  # C17: 发牌音效
 			ui.refresh_hand(NinKingGameState.hand)
 			ui.refresh_ninjas(NinKingGameState.owned_ninjas, NinKingGameState.max_ninja_slots)
 			ui.ai_rearrange_btn.disabled = false
 			_update_deck_display()
+			# Phase C: Boss reveal happens in PLAYING (not during SEAL_INTRO)
+			_boss_revealed = false
+			if NinKingGameState.current_seal_lord_name != "":
+				_trigger_boss_reveal_in_playing()
 		NinKingGameState.State.SCORING:
 			ui.show_view("scoring")
-			_run_scoring_animation()
+			animation_handler.run_scoring()
 		NinKingGameState.State.SEAL_COMPLETE:
 			ui.show_view("complete")
 			var seal_cfg: Dictionary = BarrierConfig.get_seal(NinKingGameState.barrier_num, NinKingGameState.seal_idx)
 			ui.set_level_complete(seal_cfg.get("gold", 0))
+
+			# Auto-shop: show reward briefly then auto-enter shop (Balatro-style)
+			if _auto_shop_pending:
+				_auto_shop_pending = false
+				await get_tree().create_timer(1.2).timeout
+				if is_instance_valid(ui) and NinKingGameState.current_state == NinKingGameState.State.SEAL_COMPLETE:
+					shop_handler.go_shop_pressed()
+		NinKingGameState.State.SHOP:
+			shop_handler.on_enter_shop()
 		NinKingGameState.State.GAME_OVER:
 			ui.show_view("gameover")
 			ui.show_game_over("忍気不足", NinKingGameState.barrier_num, int(NinKingGameState.current_score))
 		NinKingGameState.State.VICTORY:
+			_auto_shop_pending = false  # Safety: clear in case finalize_play reached victory
 			ui.show_view("victory")
 			ui.set_victory(NinKingGameState.barrier_num, int(NinKingGameState.current_score))
+			# ── Victory celebration VFX (V34) ──
+			GlobalTweens.play_sfx(SB.XI_FANFARE)
+			GlobalTweens.burst_particles(get_viewport_rect().size * 0.5, "manga_burst")
+			GlobalTweens.do_hit_stop(0.1, 0.05)
+			GlobalTweens.screen_shake(0.15, 0.1)
+			MusicManager.set_game_variation(1)  # Light BGM for victory screen
 
 
 func _on_score_updated(current: float, target: float) -> void:
@@ -85,11 +135,7 @@ func _on_score_updated(current: float, target: float) -> void:
 
 
 func _on_plays_changed(remaining: int) -> void:
-	ui.update_match_info(remaining, NinKingGameState.redraws_remaining)
-
-
-func _on_redraws_changed(remaining: int) -> void:
-	ui.update_match_info(NinKingGameState.plays_remaining, remaining)
+	ui.update_match_info(remaining)
 
 
 func _on_gold_changed(amount: int) -> void:
@@ -115,12 +161,15 @@ func _on_seal_started(barrier: int, seal_idx: int, target: float, seal_lord_name
 
 	# ── Barrier theme: apply 8-attribute bright palette (V25) ──
 	var c: Dictionary = BarrierTheme.get_colors(barrier)
-	ui.game_bg.color = c.bg
+	ui.game_bg.modulate = c.bg
 	ui.panel_bg.color = c.panel
 	ui.progress_bar.add_theme_color_override("font_color", c.accent)
 	ui.progress_bar.add_theme_color_override("font_outline_color", c.accent)
 
-	# Accent font only for neutral-bg buttons (PlayBtn/RedrawBtn/DeckBtn have own colors)
+	# ── BGM: auto-switch variation based on barrier difficulty (B11) ──
+	MusicManager.set_game_variation(barrier)
+
+	# Accent font only for neutral-bg buttons
 	var btns: Array[Button] = [
 		ui.ai_rearrange_btn,
 		ui.to_shop_button,
@@ -132,11 +181,8 @@ func _on_seal_started(barrier: int, seal_idx: int, target: float, seal_lord_name
 		btn.add_theme_color_override("font_hover_color", c.accent.lightened(0.2))
 		btn.add_theme_color_override("font_pressed_color", c.accent.darkened(0.3))
 
-	# Boss reveal: 墨字浮现 — text pop
-	if seal_lord_name != "":
-		ui.level_intro.visible = true
-		GlobalTweens.scale_pop(ui.intro_target_label, 1.2, 0.3)
-		await get_tree().create_timer(1.0).timeout
+	# ⚠️ Phase C: Boss reveal moved to PLAYING state (_trigger_boss_reveal_in_playing).
+	# No more 1s wait here. Theme + intro watermark only.
 
 
 func _on_xi_triggered(xis: Array[String]) -> void:
@@ -148,8 +194,6 @@ func _on_xi_triggered(xis: Array[String]) -> void:
 # ═══ Button handlers ═══
 
 func _on_play_pressed() -> void:
-	if ui.redraw_mode:
-		return
 	if NinKingGameState.current_state != NinKingGameState.State.PLAYING:
 		return
 	if not NinKingGameState.is_constraint_satisfied():
@@ -162,27 +206,11 @@ func _on_play_pressed() -> void:
 
 	# Capture per-dun evals for A7 sequential reveal
 	var arr: AutoArranger.Arrangement = NinKingGameState.current_arrangement
-	_current_play_data = play_data
-	_current_play_data["head_eval"] = arr.head_eval
-	_current_play_data["mid_eval"] = arr.mid_eval
-	_current_play_data["tail_eval"] = arr.tail_eval
+	animation_handler.current_play_data = play_data
+	animation_handler.current_play_data["head_eval"] = arr.head_eval
+	animation_handler.current_play_data["mid_eval"] = arr.mid_eval
+	animation_handler.current_play_data["tail_eval"] = arr.tail_eval
 	NinKingGameState._transition_to(NinKingGameState.State.SCORING)
-
-
-func _on_redraw_pressed() -> void:
-	if ui.redraw_mode:
-		ui.confirm_redraw()
-	else:
-		ui.enable_redraw_mode()
-
-
-func _on_go_shop_pressed() -> void:
-	if _transition_guard:
-		return
-	_transition_guard = true
-	SealController.go_to_shop(NinKingGameState)
-	await GlobalTweens.fade_out(ui, 0.3).finished
-	get_tree().change_scene_to_file("res://scenes/ninking/shop.tscn")
 
 
 func _on_ai_rearrange_pressed() -> void:
@@ -211,171 +239,40 @@ func _update_deck_display() -> void:
 # Intro timer — SEAL_INTRO → PLAYING
 # ══════════════════════════════════════════
 
-## Wait 2 seconds then transition from SEAL_INTRO to PLAYING.
-## Extracted from game_state._begin_seal_phase() because
-## change_scene_to_file destroys the old scene tree (and its timers).
+## Phase C: Wait 0.5 seconds for intro watermark, then transition to PLAYING.
 func _intro_timer() -> void:
-	await get_tree().create_timer(2.0).timeout
+	await get_tree().create_timer(0.5).timeout
 	if NinKingGameState.current_state == NinKingGameState.State.SEAL_INTRO:
 		NinKingGameState._transition_to(NinKingGameState.State.PLAYING)
 
 
 # ══════════════════════════════════════════
-# Scoring animation (A7)
+# Boss reveal in PLAYING (Phase C)
 # ══════════════════════════════════════════
 
-func _run_scoring_animation() -> void:
-	var play_data: Dictionary = _current_play_data
-	var score_result: ScoreCalculator.ScoreResult = play_data["score_result"]
-	var xi_result: XiDetector.XiResult = play_data["xi_result"]
+func _trigger_boss_reveal_in_playing() -> void:
+	## Boss lord revealed mid-PLAYING: brief delay then punch-in portrait.
+	## Player can still interact with cards during the reveal.
+	await get_tree().create_timer(0.3).timeout
+	if NinKingGameState.current_state != NinKingGameState.State.PLAYING or _boss_revealed:
+		return
+	_boss_revealed = true
 
-	var gs: NinKingGameState = NinKingGameState
-	var old_score: int = int(gs.current_score)
-	var new_score: int = old_score + int(score_result.total_score)
-	var gain: int = new_score - old_score
+	var lord_name: String = NinKingGameState.current_seal_lord_name
+	if lord_name == "":
+		return
+	var barrier: int = NinKingGameState.barrier_num
 
-	# Determine outcome before finalize
-	var is_pass: bool = new_score >= int(gs.target_score)
-	var is_fail: bool = (gs.plays_remaining <= 1) and not is_pass
-	var barrier_color: Color = BarrierTheme.get_colors(NinKingGameState.barrier_num).accent
-
-	# ═══ Phase 1: Per-dun sequential reveal — inline on dun type labels ═══
-	# Balatro-style: animate on HeadTypeLabel / MiddleTypeLabel / TailTypeLabel.
-	# No overlay dimming — game stays fully visible, left panel BounceScore visible.
-
-	var dun_evals: Array = [
-		play_data.get("head_eval"),
-		play_data.get("mid_eval"),
-		play_data.get("tail_eval"),
-	]
-	var dun_names: Array[String] = ["影", "瞬", "滅"]
-	var dun_type_labels: Array[Label] = [ui.head_type_label, ui.middle_type_label, ui.tail_type_label]
-	var dun_hands: Array[Hand] = [ui.head_cards, ui.middle_cards, ui.tail_cards]
-
-	# Save original label states to restore after
-	var _original_texts: Array[String] = []
-	for lbl: Label in dun_type_labels:
-		_original_texts.append(lbl.text)
-
-	for i: int in range(3):
-		var eval: HandEvaluator3.EvalResult = dun_evals[i]
-		if eval != null:
-			var type_label: Label = dun_type_labels[i]
-			var hand_name: String = CardData.get_hand_type3_name(eval.hand_type)
-			type_label.text = "%s: %s" % [dun_names[i], hand_name]
-			GlobalTweens.scale_pop(type_label, 1.3, 0.3)
-			GlobalTweens.color_flash(type_label, barrier_color, 0.2)
-			ui.flash_hand(dun_hands[i])
-		await get_tree().create_timer(0.55).timeout
-
-	# ═══ Phase 2: Score bounce in left panel + "+N" float + breakdown ═══
-	BounceScore.play(ui.score_label, ui.progress_bar, ui.chips_label, ui.mult_label, ui.panel_bg, old_score, new_score, barrier_color)
-
-	# "+ N" floats up from score_label
-	if gain > 0:
-		_float_score_gain(ui.score_label, gain, barrier_color)
-
-	# Breakdown toast near score area (brief, auto-fade)
-	var breakdown_text: String = "筹码 %d  ×  倍率 %d" % [int(score_result.chips_sum), int(score_result.mult_sum)]
-	if score_result.x_mult_product > 1.0:
-		breakdown_text += "  ×%.1f" % score_result.x_mult_product
-	var col_chips: int = score_result.breakdown.get("col_chips", 0)
-	var col_mult: int = score_result.breakdown.get("col_mult", 0)
-	if col_chips > 0 or col_mult > 0:
-		breakdown_text += "\n列: +%d筹码 +%d倍率" % [col_chips, col_mult]
-	_show_breakdown_toast(breakdown_text, barrier_color)
-
-	# ═══ Column VFX celebration ═══
-	var col_evals: Array = play_data.get("col_evals", [])
-	if col_evals.size() == 3:
-		for i: int in range(3):
-			var ct: CardData.HandType3 = col_evals[i].hand_type
-			if int(ct) >= int(CardData.HandType3.STRAIGHT_FLUSH_3):
-				var col_labels: Array[Label] = [ui.col0_label, ui.col1_label, ui.col2_label]
-				GlobalTweens.burst_particles(col_labels[i].global_position + col_labels[i].size * 0.5, "shuriken")
-				GlobalTweens.color_flash(col_labels[i], Color(0.831, 0.659, 0.263, 1.0), 0.15)
-	await get_tree().create_timer(0.65).timeout
-
-	# ═══ Phase 3: Xi effects ═══
-	if xi_result and xi_result.has_any():
-		GlobalTweens.burst_particles(get_viewport_rect().size * 0.5, "shuriken")
-		GlobalTweens.do_hit_stop(0.06, 0.05)
-		GlobalTweens.screen_shake(0.12, 0.08)
-		var xi_names: Array[String] = []
-		for xi_name: String in xi_result.triggered:
-			xi_names.append(xi_name)
-		_show_breakdown_toast("喜: " + ", ".join(xi_names), Color.GOLD)
-		await get_tree().create_timer(0.5).timeout
-
-	# Restore dun type labels
-	for i: int in range(3):
-		if i < _original_texts.size():
-			dun_type_labels[i].text = _original_texts[i]
-
-	# ═══ Phase 4: Outcome + finalize ═══
-	if is_pass:
-		GlobalTweens.burst_particles(get_viewport_rect().size * 0.5, "sakura")
-		GlobalTweens.do_hit_stop(0.08, 0.05)
-		GlobalTweens.punch_in(ui.score_label, 0.4, 1.5)
-		await get_tree().create_timer(0.6).timeout
-		SealController.finalize_play(gs, play_data)
-	elif is_fail:
-		GlobalTweens.screen_shake(0.2, 0.12)
-		GlobalTweens.color_flash(ui.game_bg, Color(0.6, 0.1, 0.1, 1.0), 0.3)
-		await get_tree().create_timer(0.6).timeout
-		SealController.finalize_play(gs, play_data)
+	if barrier >= 8:
+		GlobalTweens.play_sfx(SB.BOSS_FINAL_LAYER)
 	else:
-		await get_tree().create_timer(0.3).timeout
-		SealController.finalize_play(gs, play_data)
+		GlobalTweens.play_sfx(SB.BOSS_REVEAL)
 
-	_current_play_data.clear()
+	ui.boss_portrait.visible = true
+	GlobalTweens.punch_in(ui.boss_portrait, 0.4, 1.5)
+	GlobalTweens.scale_pop(ui.intro_target_label, 1.2, 0.3)
 
-
-# ══════════════════════════════════════════
-# Score animation helpers
-# ══════════════════════════════════════════
-
-## Float "+N" text upward from score_label, then free it.
-## Added to panel_bg (not anchor) because anchor is inside a VBoxContainer
-## which would override the floater's position.
-func _float_score_gain(anchor: Label, gain: int, color: Color) -> void:
-	var floater := Label.new()
-	floater.text = "+ %d" % gain
-	floater.add_theme_font_size_override("font_size", 36)
-	floater.add_theme_color_override("font_color", color)
-	floater.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	ui.panel_bg.add_child(floater)
-	floater.global_position = anchor.global_position + Vector2(anchor.size.x * 0.5 - 60, -20)
-	floater.size = Vector2(120, 40)
-
-	var tw := floater.create_tween()
-	tw.set_ignore_time_scale(true)
-	tw.tween_property(floater, "position:y", floater.position.y - 60, 1.0).set_ease(Tween.EASE_OUT)
-	tw.parallel().tween_property(floater, "modulate:a", 0.0, 0.8).set_delay(0.2)
-	tw.tween_callback(floater.queue_free)
-
-
-## Show a brief toast-like breakdown text that fades out and self-frees.
-## Frees any previous active toast before creating a new one to avoid overlap.
-func _show_breakdown_toast(text: String, _color: Color) -> void:
-	if _active_toast != null and is_instance_valid(_active_toast):
-		_active_toast.queue_free()
-
-	var toast := Label.new()
-	toast.text = text
-	toast.add_theme_font_size_override("font_size", 16)
-	toast.add_theme_color_override("font_color", Color(0.9, 0.9, 0.85, 1.0))
-	toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	ui.panel_bg.add_child(toast)
-	toast.anchor_left = 0.0
-	toast.anchor_right = 1.0
-	toast.offset_top = ui.score_label.position.y + ui.score_label.size.y + 8
-	toast.offset_bottom = toast.offset_top + 50
-
-	var tw := toast.create_tween()
-	tw.set_ignore_time_scale(true)
-	tw.tween_interval(1.5)
-	tw.tween_property(toast, "modulate:a", 0.0, 0.5)
-	tw.tween_callback(toast.queue_free)
-
-	_active_toast = toast
+	# Float for 1.5s — player can still interact
+	await get_tree().create_timer(1.5).timeout
+	if is_instance_valid(ui.boss_portrait):
+		GlobalTweens.fade_out(ui.boss_portrait, 0.3)

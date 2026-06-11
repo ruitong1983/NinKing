@@ -282,7 +282,7 @@ static func slide_out(node: Control, to_dir: SlideDir = SlideDir.DOWN, duration:
 
 ## 列表逐项错峰入场：淡入 + 从左滑入，每项间隔 stagger 秒
 ## 注意：此函数不参与 auto_kill（操作数组，按项索引独立创建补间）
-static func stagger_slide_in(nodes: Array[CanvasItem], stagger: float = 0.12, dur: float = 0.3, slide_offset: float = 30.0) -> void:
+static func stagger_slide_in(nodes: Array, stagger: float = 0.12, dur: float = 0.3, slide_offset: float = 30.0) -> void:
 	for i in range(nodes.size()):
 		var node: CanvasItem = nodes[i]
 		if not is_instance_valid(node):

@@ -98,7 +98,6 @@ const SEAL_LORD_POOL: Array[Dictionary] = [
 	{ "name": "无头", "effect": {"skip_head": true} },
 	# 参ノ結界
 	{ "name": "独柱", "effect": {"skip_head": true, "skip_mid": true, "tail_x2": true} },
-	{ "name": "铁链", "effect": {"no_redraw": true} },
 	# 肆ノ結界
 	{ "name": "反目", "effect": {"constraint": "descending"} },
 	{ "name": "封印师", "effect": {"lowest_group_zero": true} },

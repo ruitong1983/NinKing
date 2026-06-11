@@ -1,7 +1,8 @@
 class_name ShopItemCard
 extends Panel
 
-@onready var art_icon: Label = $ArtIcon
+@onready var art_icon: ColorRect = $ArtArea/ArtIcon
+@onready var item_base: ColorRect = $ArtArea/ItemBase
 @onready var name_label: Label = $NameLabel
 @onready var effect_label: Label = $EffectLabel
 @onready var desc_label: Label = $DescLabel
@@ -20,7 +21,8 @@ const COLOR_INK: Color = Color(0.102, 0.102, 0.102)  # #1A1A1A 漫画墨色
 func _cache_nodes() -> void:
 	## Ensure @onready vars are initialized — setup() may be called before enter_tree.
 	if not name_label:
-		art_icon = $ArtIcon
+		art_icon = $ArtArea/ArtIcon
+		item_base = $ArtArea/ItemBase
 		name_label = $NameLabel
 		effect_label = $EffectLabel
 		desc_label = $DescLabel
@@ -49,11 +51,14 @@ func setup(data: Dictionary) -> void:
 	name_label.text = data.get("name", "???")
 	effect_label.text = data.get("effect_desc", "")
 
+	# B6: Star charts — show current level on the card face
+	if data.has("hand_type"):
+		var ht: int = data["hand_type"]
+		var level: int = NinKingGameState.star_chart_levels.get(ht, 0)
+		effect_label.text = "Lv.%d" % level
+
 	var cost: int = data.get("cost", 1)
 	price_label.text = "$%d" % cost
-
-	var icon: String = _get_item_icon(data.get("name", ""))
-	art_icon.text = icon
 
 	buy_button.pressed.connect(_on_buy_pressed)
 
@@ -128,23 +133,6 @@ func apply_barrier_theme(colors: Dictionary) -> void:
 func _on_buy_pressed() -> void:
 	if not is_purchased:
 		purchase_requested.emit(item_data)
-
-
-func _get_item_icon(item_name: String) -> String:
-	if "暴击" in item_name or "骰子" in item_name:
-		return "[赛]"
-	if "药水" in item_name or "倍率" in item_name:
-		return "[药]"
-	if "幸运" in item_name:
-		return "[运]"
-	if "满堂" in item_name:
-		return "[满]"
-	if "王牌" in item_name:
-		return "[王]"
-	if "Ace" in item_name:
-		return "[A]"
-	return "[物]"
-
 
 func set_purchased() -> void:
 	is_purchased = true

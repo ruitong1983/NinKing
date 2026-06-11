@@ -174,7 +174,7 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"desc": "四张以上每多一张 ×2（上限2次）"
 	},
 
-	# ─── 成长修炼 (6) ───
+	# ─── 成长修炼 (5) ───
 	{
 		"id": "n_s01", "name": "修行者",
 		"effect": {"add_mult": 0},
@@ -202,17 +202,6 @@ const ALL_NINJAS: Array[Dictionary] = [
 			"trigger": "on_play",
 			"add_chips": 30,
 			"condition": {"group": "tail", "hand_type": 4}
-		}
-	},
-	{
-		"id": "n_s04", "name": "忍法帖",
-		"effect": {"x_mult": 1},
-		"cost": 10, "rarity": "rare",
-		"desc": "每次手替え ×倍率 +1（上限×4）",
-		"scaling": {
-			"trigger": "on_redraw",
-			"x_mult_growth": 1,
-			"x_cap": 4
 		}
 	},
 	{
@@ -252,12 +241,6 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"effect": {"gold_per_gold_card_in_tail": 3},
 		"cost": 5, "rarity": "uncommon",
 		"desc": "滅有镀金增强牌时 +$3/张"
-	},
-	{
-		"id": "n_e03", "name": "俭约",
-		"effect": {"gold_per_small_redraw": 4},
-		"cost": 4, "rarity": "common",
-		"desc": "手替え张数 ≤2 时 +$4"
 	},
 	{
 		"id": "n_e04", "name": "利息之印",
@@ -379,6 +362,19 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"desc": "手中每张 Ace +5 倍率（上限 +20）"
 	},
 ]
+
+
+# ═══ Icon mapping — DEPRECATED: use AssetRegistry ═══
+# ⚠️ 路径和函数已迁移到 scripts/ninking/asset_registry.gd
+# 保留此 stub 为向后兼容，新代码请直接调用 AssetRegistry.get_icon_path()。
+
+static func get_icon_path(ninja_id: String, effect: Dictionary = {}) -> String:
+	return AssetRegistry.get_icon_path(ninja_id, effect)
+
+
+static func _get_effect_subtype_suffix(ninja_id: String, effect: Dictionary) -> String:
+	return AssetRegistry._get_effect_subtype_suffix(ninja_id, effect)
+
 
 
 ## Starter set for Phase A testing (updated v3.2)

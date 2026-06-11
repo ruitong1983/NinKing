@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://cpbjm8wnrn5ae"]
+[gd_scene format=3 uid="uid://b27dfr3pmqqn"]
 
-[ext_resource type="Script" uid="uid://cgmftbp56ll6h" path="res://scripts/ninking/ui/shop_ui.gd" id="1_shop"]
+[ext_resource type="Script" uid="uid://py2jsudkqhq" path="res://scripts/ninking/ui/shop_ui.gd" id="1_shop"]
 [ext_resource type="Theme" uid="uid://bqb2i07k0v8jt" path="res://assets/themes/manga_theme.tres" id="2_theme"]
 
 [node name="Shop" type="Control" unique_id=1001952410]
@@ -36,15 +36,13 @@ offset_right = 1520.0
 offset_bottom = 90.0
 color = Color(0.12, 0.12, 0.2, 1)
 
-[node name="TitleFocusLines" type="TextureRect" parent="ShopPanel/TitleBar" unique_id=2000000001]
+[node name="TitleFocusLines" type="ColorRect" parent="ShopPanel/TitleBar" unique_id=2000000001]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 460.0
 offset_top = -15.0
 offset_right = 1060.0
 offset_bottom = 105.0
-expand_mode = 1
-stretch_mode = 1
 mouse_filter = 2
 
 [node name="ShopTitle" type="Label" parent="ShopPanel" unique_id=1746807318]
@@ -64,11 +62,10 @@ offset_left = 910.0
 offset_top = 20.0
 offset_right = 1020.0
 offset_bottom = 52.0
+rotation = 0.0872665
 text = "萬屋！"
 horizontal_alignment = 1
 vertical_alignment = 1
-rotation = 0.0872665
-mouse_filter = 2
 
 [node name="GoldPill" type="Panel" parent="ShopPanel" unique_id=1121733264]
 layout_mode = 0
@@ -105,8 +102,8 @@ offset_left = 1350.0
 offset_top = 19.0
 offset_right = 1500.0
 offset_bottom = 71.0
+theme_type_variation = &"ImpactButton"
 text = "入替"
-theme_type_variation = "ImpactButton"
 
 [node name="RerollLabel" type="Label" parent="ShopPanel/RerollBtn" unique_id=144345993]
 unique_name_in_owner = true
@@ -125,21 +122,18 @@ offset_left = -24.0
 offset_top = -14.0
 offset_right = 20.0
 offset_bottom = 14.0
+rotation = -0.0872665
 text = "替！"
 horizontal_alignment = 1
 vertical_alignment = 1
-rotation = -0.0872665
-mouse_filter = 2
 
-[node name="AbilityFocusLines" type="TextureRect" parent="ShopPanel" unique_id=2000000004]
+[node name="AbilityFocusLines" type="ColorRect" parent="ShopPanel" unique_id=2000000004]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 510.0
 offset_top = 96.0
 offset_right = 1010.0
 offset_bottom = 166.0
-expand_mode = 1
-stretch_mode = 1
 mouse_filter = 2
 
 [node name="AbilityLabel" type="Label" parent="ShopPanel" unique_id=1203868350]
@@ -162,15 +156,13 @@ offset_bottom = 620.0
 theme_override_constants/separation = 40
 alignment = 1
 
-[node name="ItemFocusLines" type="TextureRect" parent="ShopPanel" unique_id=2000000005]
+[node name="ItemFocusLines" type="ColorRect" parent="ShopPanel" unique_id=2000000005]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 510.0
 offset_top = 631.0
 offset_right = 1010.0
 offset_bottom = 701.0
-expand_mode = 1
-stretch_mode = 1
 mouse_filter = 2
 
 [node name="ItemLabel" type="Label" parent="ShopPanel" unique_id=1857544634]
@@ -200,15 +192,13 @@ offset_right = 1520.0
 offset_bottom = 960.0
 color = Color(0.12, 0.12, 0.2, 1)
 
-[node name="BottomFocusLines" type="TextureRect" parent="ShopPanel/BottomBar" unique_id=2000000006]
+[node name="BottomFocusLines" type="ColorRect" parent="ShopPanel/BottomBar" unique_id=2000000006]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 460.0
 offset_top = -15.0
 offset_right = 1060.0
 offset_bottom = 95.0
-expand_mode = 1
-stretch_mode = 1
 mouse_filter = 2
 
 [node name="Separator" type="ColorRect" parent="ShopPanel" unique_id=1974193999]
@@ -226,8 +216,8 @@ offset_left = 590.0
 offset_top = 895.0
 offset_right = 930.0
 offset_bottom = 951.0
+theme_type_variation = &"ImpactButton"
 text = "討伐へ  ▶"
-theme_type_variation = "ImpactButton"
 
 [node name="NextLevelHint" type="Label" parent="ShopPanel" unique_id=868989748]
 unique_name_in_owner = true

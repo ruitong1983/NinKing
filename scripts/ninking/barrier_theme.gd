@@ -98,3 +98,48 @@ static func get_name(barrier_num: int) -> String:
 
 static func get_particle_color(barrier_num: int) -> Color:
 	return get_colors(barrier_num)["particle_color"]
+
+
+## Apply manga-style impact button styles (normal/hover/pressed/disabled) to a Button.
+## Creates 4 StyleBoxFlat states with the given accent color and ink border.
+static func apply_impact_button_style(btn: Button, accent: Color, ink_color: Color = Color(0.102, 0.102, 0.102)) -> void:
+	var s_normal := StyleBoxFlat.new()
+	s_normal.bg_color = accent
+	s_normal.border_color = ink_color
+	s_normal.border_width_left = 3
+	s_normal.border_width_right = 3
+	s_normal.border_width_top = 3
+	s_normal.border_width_bottom = 3
+	s_normal.corner_radius_top_left = 8
+	s_normal.corner_radius_top_right = 8
+	s_normal.corner_radius_bottom_left = 8
+	s_normal.corner_radius_bottom_right = 8
+	s_normal.content_margin_left = 20
+	s_normal.content_margin_top = 10
+	s_normal.content_margin_right = 20
+	s_normal.content_margin_bottom = 10
+	btn.add_theme_stylebox_override("normal", s_normal)
+	btn.add_theme_color_override("font_color", Color.WHITE)
+
+	var s_hover := s_normal.duplicate() as StyleBoxFlat
+	s_hover.bg_color = Color(accent).lightened(0.1)
+	s_hover.border_width_left = 4
+	s_hover.border_width_right = 4
+	s_hover.border_width_top = 4
+	s_hover.border_width_bottom = 4
+	btn.add_theme_stylebox_override("hover", s_hover)
+
+	var s_pressed := s_normal.duplicate() as StyleBoxFlat
+	s_pressed.bg_color = Color(accent).darkened(0.15)
+	s_pressed.content_margin_top = 12
+	s_pressed.content_margin_bottom = 8
+	btn.add_theme_stylebox_override("pressed", s_pressed)
+
+	var s_disabled := s_normal.duplicate() as StyleBoxFlat
+	s_disabled.bg_color = Color(0.8, 0.8, 0.8, 1)
+	s_disabled.border_color = Color(0.6, 0.6, 0.6, 1)
+	s_disabled.border_width_left = 2
+	s_disabled.border_width_right = 2
+	s_disabled.border_width_top = 2
+	s_disabled.border_width_bottom = 2
+	btn.add_theme_stylebox_override("disabled", s_disabled)

@@ -1,8 +1,8 @@
 class_name ConsumableData
 extends RefCounted
 
-## All consumable cards for NinKing (v3.1 — grilled): 符術 (12), 南斗六星 (6), 禁術 (4).
-## Changes: merged 4 suit cards → 1, deleted enc_007/arc_005, modified enc_009/enc_014/arc_001/arc_003.
+## All consumable cards for NinKing (v3.1 — grilled): 符術 (15), 南斗六星 (6), 禁術 (4).
+## Changes: suit cards 1→4 split (B5), 放逐令 skipped (B5 not implemented).
 
 # ══════════════════════════════════════════
 # 符術 (Fujutsu) — 12 total (was 16)
@@ -10,9 +10,15 @@ extends RefCounted
 # ══════════════════════════════════════════
 
 const FUJUTSU_CARDS: Array[Dictionary] = [
-	# ── 花色转化 (1 — merged from 4) ──
-	{ "id": "enc_001", "name": "花色符", "effect": {"set_suit_choice": true}, "cost": 2,
-	  "desc": "将1张牌变为指定花色（♠/♥/♦/♣ 自选）" },
+	# ── 花色转化 (4 — Balatro 风，每张固定花色) ──
+	{ "id": "enc_001_c", "name": "♣花色符", "effect": {"set_suit": 0}, "cost": 2,
+	  "desc": "将1张牌变为♣" },
+	{ "id": "enc_001_d", "name": "♦花色符", "effect": {"set_suit": 1}, "cost": 2,
+	  "desc": "将1张牌变为♦" },
+	{ "id": "enc_001_h", "name": "♥花色符", "effect": {"set_suit": 2}, "cost": 2,
+	  "desc": "将1张牌变为♥" },
+	{ "id": "enc_001_s", "name": "♠花色符", "effect": {"set_suit": 3}, "cost": 2,
+	  "desc": "将1张牌变为♠" },
 
 	# ── 点数转化 (2) ──
 	{ "id": "enc_005", "name": "晋升令", "effect": {"rank_shift": 1}, "cost": 3,
@@ -86,12 +92,29 @@ const KINJUTSU_CARDS: Array[Dictionary] = [
 ]
 
 
+# ═══ Item icon / base plate mapping — DEPRECATED: use AssetRegistry ═══
+# ⚠️ 路径和函数已迁移到 scripts/ninking/asset_registry.gd
+# 保留此 stub 为向后兼容，新代码请直接调用 AssetRegistry.get_item_icon_path()。
+
+static func get_item_base_path(item_id: String) -> String:
+	return AssetRegistry.get_item_base_path(item_id)
+
+
+static func get_item_icon_path(item_id: String) -> String:
+	return AssetRegistry.get_item_icon_path(item_id)
+
+
 # ══════════════════════════════════════════
 # Query helpers
 # ══════════════════════════════════════════
 
 static func get_random_fujutsu(count: int) -> Array[Dictionary]:
-	var pool: Array = FUJUTSU_CARDS.duplicate()
+	## Returns random 附術 cards, excluding ones with `destroy` effect (暂未实现).
+	var pool: Array = []
+	for card: Dictionary in FUJUTSU_CARDS:
+		var effect: Dictionary = card.get("effect", {})
+		if not effect.has("destroy"):
+			pool.append(card)
 	pool.shuffle()
 	var result: Array[Dictionary] = []
 	for i: int in range(min(count, pool.size())):

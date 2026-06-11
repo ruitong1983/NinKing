@@ -10,7 +10,7 @@ const XI_DEFINITIONS: Array[Dictionary] = [
 	{ "name": "全红", "x_mult": 2, "chips": 0 },
 	{ "name": "全顺", "x_mult": 2, "chips": 0 },
 	{ "name": "全同花", "x_mult": 3, "chips": 0 },
-	{ "name": "四张", "x_mult": 1, "chips": 50 },
+	{ "name": "四张", "x_mult": 5, "chips": 0 },
 	{ "name": "三清", "x_mult": 2, "chips": 0 },
 	{ "name": "三顺清", "x_mult": 3, "chips": 0 },
 	{ "name": "顺清打头", "x_mult": 2, "chips": 0 },

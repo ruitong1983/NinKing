@@ -230,67 +230,116 @@ NinKingTween.play_shop_entrance():
 
 ### 5.3 Reroll (刷新商店)
 
+**B4 (2026-06-11):** 递进式费用，参考 Balatro 设计。
+
+| 次数 | 1 | 2 | 3 | 4 | 5+ |
+|------|---|---|---|---|----|
+| 费用 | $3 | $4 | $5 | $6 | +$1/次 |
+
+每次商店刷新后重置计次。
+
 ```
-点击 🔄$5 →
-  - 消耗 5 金币
+点击 🔄$N →
+  - 检查 gold ≥ cost（由 shop_handler._get_reroll_cost() 计算）
+  - 消耗 `3 + _reroll_count` 金币，_reroll_count++
+  - 通知 shop_ui.update_reroll_cost(new_cost) 刷新按钮价格显示
+  - 金币不足时 Toast("需要 $N 才能刷新!")
   - 速度线横扫 0.2s → 所有卡片翻转动画 0.3s
   - 重新随机抽取商品
 ```
 
-### 5.4 继续闯关
+### 5.4 继续闯关 (Phase C: 同场景收缩离场)
 
 ```
-面板向下滑出 0.3s → 遮罩淡出 → 进入下一关 LevelIntro
+点击"討伐へ ▶" →
+  ── Phase C 同场景流程 ──
+  1. 商店卡片 gather 回中心（反向 stagger，0.3s）
+  2. ShopPanel slide_out 向下（0.3s） + 内部 Overlay fade_out
+  3. 结界名浮水印 0.5s
+
+  如果下一封印有 Boss:
+  4. → PLAYING 站稳 → 0.3s 延迟 → Boss立绘punch_in + 浮水1.5s
+
+  如果无 Boss:
+  4. → PLAYING
+
+  注: 不涉及场景切换。shop_panel 实例在过渡完成后 queue_free()。
+  ShopOverlay 容器节点保留 (visible=false)，下次实例化新 shop_panel。
 ```
 
 ---
 
 ## 六、Godot 实现规划
 
+> **Phase C 同场景化更新 (2026-06-11):** 商店从独立场景 `shop.tscn` 改为场景片段 `shop_panel.tscn`，通过 `UIManager` 下的 `ShopOverlay` 在 `ninking_main.tscn` 内动态实例化。详见 `TODO.md` §Phase C。
+
 ### 需要新增/修改的文件
 
 | 文件 | 操作 | 说明 |
 |------|------|------|
-| `scenes/ninking/shop.tscn` | **重写 ✅** | 漫画风商店场景 — 新增 4 个集中线 TextureRect + 2 个拟声词印章 Label + ImpactButton type_variation + 按钮中二化。删除 4 条装饰分隔线 (集中线天然分隔) |
-| `scripts/ninking/ui/shop_ui.gd` | **重写 ✅** | 新增 `_apply_barrier_theme()` 集中配色管理 + `_play_entrance()` 改用 `await NinKingTween.play_shop_entrance()` + `_entrance_active` 守卫 + `_render_*` 调 `card.apply_barrier_theme(barrier_colors)` |
-| `scripts/ninking/ui/nin_king_tween.gd` | **新建 ✅** | `class_name NinKingTween` 项目级动画序列层。静态方法 `play_shop_entrance(config)` ~90 行，每个 await 后 `is_instance_valid(panel)` 守卫 |
+| ~~`scenes/ninking/shop.tscn`~~ | **⛔ 已删除** | 已由 `shop_panel.tscn` 替代 (Phase C, 2026-06-11) |
+| `scenes/ninking/shop_panel.tscn` | **新建** | 从旧 `shop.tscn` 提取的商店面板场景片段，根节点为 `Panel`/`Control`。由 `UIManager/ShopOverlay` 动态 `add_child(load(...).instantiate())` |
+| `scripts/ninking/ui/shop_ui.gd` | **重写** | 从独立场景控制器改为 ShopPanel 组件脚本。接受 init data + 信号上报（`purchase_requested` / `reroll_requested` / `continue_requested`），不直接读 `NinKingGameState` |
+| `scripts/ninking/ui/nin_king_tween.gd` | **扩展** | 已实现 `play_shop_entrance()`。Phase C 新增 `play_shop_exit()` / `play_reroll_vfx()` / `play_ninja_pop_in()` |
+| `scripts/ninking/ui/ui_manager.gd` | **修改** | 新增 `%ShopOverlay` 引用、`show_view("shop")`、`show_shop()` / `hide_shop()` |
+| `scripts/ninking/ui/game_manager.gd` | **修改** | `_on_state_changed` 加 SHOP 分支；`_on_go_shop_pressed` 从 change_scene 改为同场景过渡；`_intro_timer` 2s→0.5s；Boss 揭示移至 PLAYING 中 |
 | `scripts/ninking/shop_manager.gd` | **确认** | reroll/generate_stock/buy 方法已实现，无需修改 |
-| `scripts/ninking/game_state.gd` | **确认** | buy_ability/buy_item 方法已实现 |
-| `scripts/ninking/ui/shop_ability_card.gd` | **修改 ✅** | 删除硬编码 COLOR_* / 新增 `_card_style` 成员 + `apply_barrier_theme(colors)` 方法 / 稀有判断改为 `cost>=12` 占位 / 按钮"入手""入手済" |
-| `scripts/ninking/ui/shop_item_card.gd` | **修改 ✅** | 同上 |
-| `assets/themes/manga_theme.tres` | **修改 ✅** | 新增 ImpactButton type_variation (normal/hover/pressed/disabled 四态) |
-| `docs/ninking/07-shop-ui-design.md` | **同步 ✅** | v3→v4 — 冲击帧标题 / 视觉层级 / 按钮中二化 / 入场动画 1.6s / 节点结构更新 |
+| `scripts/ninking/game_state.gd` | **确认** | `SHOP` 状态已存在枚举；`go_to_shop()`/`continue_from_shop()` 已为直接状态切换，无需修改 |
+| `scripts/ninking/ui/shop_ability_card.gd` | **✅ 已完成** | 删除硬编码 COLOR_* / 新增 `_card_style` 成员 + `apply_barrier_theme(colors)` 方法 / 按钮"入手""入手済" |
+| `scripts/ninking/ui/shop_item_card.gd` | **✅ 已完成** | 同上 |
+| `assets/themes/manga_theme.tres` | **✅ 已完成** | 新增 ImpactButton type_variation |
+| `scenes/ninking/ninking_main.tscn` | **修改** | UIManager 下新增 ShopOverlay (Control) 节点子树，包含 Overlay (ColorRect) + ShopPanel 运行实例化入口 |
+| `docs/ninking/07-shop-ui-design.md` | **同步** | 本文档 — v4→同场景版，节点结构/路径更新 |
 
 ### 场景节点结构
 
+> **v2026-06-11 (Phase C):** 商店改为场景片段，由 `ninking_main.tscn` 的 `UIManager/ShopOverlay` 在运行时实例化。
+> `shop_panel.tscn` 的根节点为 `Control`，不依赖 CanvasLayer（继承自 UIManager 层级）。
+
+**shop_panel.tscn 内部节点（v2 — 2026-06-11 扁平化结构, Overlay 为首孩子）：**
+
 ```
-Shop (Control) [shop_ui.gd]                          ← theme = manga_theme.tres
-├── Overlay (ColorRect, #000 65%)
-├── %ShopPanel (Panel, 1520×960, 属性panel色, 圆角8, 3px #1A1A1A仿手绘描边)
-│   ├── TitleBar (ColorRect, 属性bg调暗8%)           ← _apply_barrier_theme() 运行时赋值
-│   │   └── %TitleFocusLines (TextureRect, 600×120)  ← 重集中线, modulate=accent×0.6
-│   ├── ShopTitle (Label, "商 店", 52px, accent色)
-│   ├── %ShopSubtitle (Label, "萬屋！", 24px Bold, rotation+5°) ← 拟声词印章 P0
-│   ├── GoldPill (Panel, 圆角胶囊, 2px粗黑描边)
-│   │   ├── CoinIcon (Label→TextureRect 占位)
-│   │   └── %GoldLabel
-│   ├── %RerollBtn (Button, "入替", ImpactButton)
-│   │   ├── %RerollLabel ("$5")
-│   │   └── RerollStamp (Label, "替！", rotation-5°)  ← 小印章
-│   ├── %AbilityFocusLines (TextureRect, 500×70)     ← 轻集中线, modulate=accent×0.4
-│   ├── AbilityLabel (Label, "忍 者 牌", accent色)
-│   ├── %AbilityRow (HBoxContainer, 间距40)
-│   │   ├── AbilityCard1..N (N=2 修羅/明王, N=3 夜叉)
-│   ├── %ItemFocusLines (TextureRect, 500×70)        ← 轻集中线, modulate=accent×0.4
-│   ├── ItemLabel (Label, "道 具 卡", accent色)
-│   ├── %ItemRow (HBoxContainer, 间距36)
-│   │   ├── ItemCard1..M
-│   ├── BottomBar (ColorRect, 属性bg调暗8%)
-│   │   └── %BottomFocusLines (TextureRect, 600×120) ← 重集中线, modulate=accent×0.6
-│   ├── Separator (ColorRect, 1px, accent×0.25)
-│   ├── %ContinueBtn (Button, "討伐へ ▶", ImpactButton)
-│   ├── %NextLevelHint (Label)
-│   └── %NinjaSlotLabel (Label, "忍者 X/5")
+ShopPanel (Control) [shop_ui.gd]                     ← 根节点, 1520×960, 无嵌套 Panel
+├── Overlay (ColorRect, #000 65%)                    ← 首孩子: 渲染在底层, 做背景暗化
+├── TitleBar (ColorRect, #1E1E33 100%, 1520×90)     ← _apply_barrier_theme() 运行时赋值
+│   └── TitleFocusLines (TextureRect, 1520×120)      focus_lines_heavy.png, expand=1
+├── ShopTitle (Label, "商  店", 48px, 居中)
+├── ShopSubtitle (Label, "萬屋！", rotation+5°)
+├── GoldPill (Panel)                                  ← 金币胶囊
+│   └── %GoldLabel                                    "$0" 32px
+├── %RerollBtn (Button, "入替", ImpactButton)
+├── RerollLabel ("$5", 16px)                          ← 重置价格
+├── AbilityFocusLines (TextureRect, 500×70)           focus_lines_light.png, expand=1
+├── AbilityScrollFrame (TextureRect, 500×60)          section_scroll_frame.png
+├── AbilityLabel (Label, "忍 者 牌", 24px, 居中)
+├── %AbilityRow (HBoxContainer, 1100×470, gap=40)
+│   └── [shop_ability_card × N]                       N=2/3 动态生成
+├── ItemFocusLines (TextureRect, 500×70)              focus_lines_light.png, expand=1
+├── ItemScrollFrame (TextureRect, 500×60)             section_scroll_frame.png
+├── ItemLabel (Label, "道 具 卡", 24px, 居中)
+├── %ItemRow (HBoxContainer, 1068×340, gap=36)
+│   └── [shop_item_card × M]                          M=2/3 动态生成
+├── BottomBar (ColorRect, #1E1E33 100%, 1520×80)
+│   └── BottomFocusLines (TextureRect, 1520×120)      focus_lines_heavy.png, expand=1
+├── Separator (ColorRect, #D4A843 25%, 1460×1)
+├── %ContinueBtn (Button, "討伐へ ▶", ImpactButton)
+├── %NextLevelHint (Label, "次: 结界X", 12px, 灰)
+└── NinjaSlotLabel (Label, "忍者 0/5", 20px)
+```
+
+**ShopPanel 在 ninking_main.tscn 中的实例化位置：**
+
+```
+UIManager (Node) [ui_manager.gd] — 1920×1080 CanvasLayer
+├── LevelIntro       ← 关卡入场水印
+├── GameLayout       ← 游戏主界面
+├── DeckViewer       ← 牌库查看器
+├── ScoringOverlay   ← (未使用，Balatro 风内联计分)
+├── LevelComplete    ← 过关弹窗
+├── ShopOverlay (Control)  ← **新增** — 商店容器节点, visible=false
+│   └── 运行时: add_child(load(shop_panel).instantiate())
+├── GameOver         ← 失败
+└── VictoryOverlay   ← 通关
 ```
 
 > **3/2 商店变体（来自 `shop_manager.gd`）：** 修羅/明王商店 = 2 能力 + 1 附魔 + 1 星图。夜叉商店（Boss 后）= 3 能力 + 2 附魔 + 2 星图 + 50% 概率 1 禁術。`AbilityRow` 和 `ItemRow` 动态生成卡片数量，不硬编码 3 列。
