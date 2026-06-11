@@ -21,7 +21,7 @@
 
 | 前缀 | 类别 | 示例 |
 |------|------|------|
-| `%` 前缀 | 跨层级引用节点 (unique_name_in_owner) | `%ChipsLabel` |
+| `%` 前缀 | 跨层级引用节点 (unique_name_in_owner) | `%ScoreLabel` |
 | `PNL_` | 面板容器 | `PNL_MatchInfo` |
 | `LBL_` | 标签文字 | `LBL_Score` |
 | `BTN_` | 按钮 | `BTN_Play` |

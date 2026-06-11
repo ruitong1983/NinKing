@@ -32,7 +32,7 @@ GlobalTweens (autoload, 胶水层)
 | **AudioCoupler** | `scripts/tween/audio_coupler.gd` | class_name | Tween 内联音效 + 一次性音效 |
 | **CardTilt** | `scripts/tween/card_tilt.gd` | class_name | 卡牌随鼠标倾斜 + 手牌扇形摊开 |
 | **CountUp** | `scripts/tween/count_up.gd` | class_name | Label 数字递增滚动（BounceScore 内部依赖） |
-| **BounceScore** | `scripts/tween/bounce_score.gd` | RefCounted (preload) | 计分弹性着陆：蓄力→过冲暴涨→缩放弹跳→ProgressBar延迟→Chips/Mult闪→PanelBg发光 |
+| **BounceScore** | `scripts/tween/bounce_score.gd` | RefCounted (preload) | 计分弹性着陆：蓄力→过冲暴涨→缩放弹跳→ProgressBar延迟→ColXiLabel闪+PanelBg发光 |
 
 ---
 
@@ -432,8 +432,7 @@ CountUp.play_gold(label, amount, duration, prefix, suffix) -> Tween
 BounceScore.play(
     score_label,     # Label — 主分数 Label
     progress_bar,    # ProgressBar — 进度条
-    chips_label,     # Label — 筹码数字
-    mult_label,      # Label — 倍率数字
+    col_xi_label,    # Label — 列喜预览 Label (金闪)
     panel_bg,        # ColorRect — 左侧面板背景（发光）
     old_score,       # int — 旧分数
     new_score,       # int — 新分数

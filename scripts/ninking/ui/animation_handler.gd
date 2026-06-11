@@ -111,7 +111,7 @@ func _run_scoring_animation() -> void:
 			var dc: int = dun_chips_vals[i]
 			var dm: int = dun_mult_vals[i]
 			if dc > 0 and dm > 0:
-				sl.text = "%dx%d" % [dc, dm]
+				sl.text = "%d×%d" % [dc, dm]
 				GlobalTweens.color_flash(sl, Color.GOLD, 0.2)
 		await _ui.get_tree().create_timer([0.40, 0.55, 0.65][i]).timeout
 

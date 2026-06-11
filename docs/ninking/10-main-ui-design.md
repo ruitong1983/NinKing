@@ -136,9 +136,7 @@ NinKingMain (Control) [game_manager.gd]
 
 | 元素 | 字号 | 颜色 | 用途 |
 |------|------|------|------|
-| ChipsLabel | 48px | `(0.831, 0.659, 0.263)` 金 | 筹码和 |
-| MultSign | 48px | `(0.478, 0.478, 0.416)` 灰 | "x" |
-| MultLabel | 48px | `(0.878, 0.251, 0.251)` 红 | 倍率和 |
+| ColXiLabel | 32px | 列#C4A843金 / 喜accent | 列×累乘 + 喜预览 |
 | ScoreLabel | 48px | `(0.941, 0.929, 0.894)` 白 | "気 N" |
 | ProgressBar | 28px | 灰底+金 fill, 圆角 6px | 进度条 |
 | TargetScoreLabel | **28px** | `(0.478, 0.478, 0.416)` 灰 | "封印 N" |

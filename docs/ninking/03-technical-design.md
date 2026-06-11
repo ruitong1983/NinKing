@@ -46,11 +46,11 @@
 | 标题 | TitleLabel "N I N K I N G" | 72 | 交集 ✓ |
 | 中文标签 | SubtitleLabel, DeckLabel, StatusLabel 等 | 24 | 交集 ✓ |
 | 中文大号 | LevelLabel, CompleteLabel, GameOverLabel, HandNameLabel | 48 | 交集 ✓ |
-| 分数 | ChipsLabel, MultLabel | 48 | 交集 ✓ |
-| 分数弹出 | ScoreValueLabel | 72 | 交集 ✓ |
+| 分数预览 | ColXiLabel | 32 | PS2P ✓ |
+| 分数 | ScoreLabel, ScoreValueLabel | 48 / 72 | 交集 ✓ |
 | 按钮 | StartButton, PlayBtn, RedrawBtn 等 | 24 | 交集 ✓ |
 | 牌面 | CORNER_FONT_SZ / CENTER_FONT_SZ | 24 / 56 | PS2P ✓ |
-| 特殊 | MultSign ("×"), VersionLabel, TitleBar | 40 / 16 / 24 | PS2P ✓ |
+| 特殊 | VersionLabel, TitleBar | 16 / 24 | PS2P ✓ |
 
 ---
 

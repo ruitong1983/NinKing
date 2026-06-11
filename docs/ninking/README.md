@@ -7,7 +7,7 @@
 | 文档 | 内容 |
 |------|------|
 | [`06-complete-redesign.md`](06-complete-redesign.md) | **核心玩法主文档 (v3.1):** 核心循环、AI排列、计分公式、喜系统、存档格式 |
-| [`11-ninja-cards.md`](11-ninja-cards.md) | **忍者牌独立参考:** 43 张忍者牌完整定义（分类/效果/价格/条件/版本） |
+| [`11-ninja-cards.md`](11-ninja-cards.md) | **忍者牌完整参考（视觉设计+技术实现+游戏数据）:** 拼装系统、场景结构、数据流、素材清单、45 张忍者牌定义 |
 | [`12-consumable-cards.md`](12-consumable-cards.md) | **消耗品独立参考:** 15 附魔 + 6 星图 + 4 秘仪 |
 | [`13-blinds-and-bosses.md`](13-blinds-and-bosses.md) | **关卡与Boss:** 分数目标、10 Boss 设计、AI 适配 |
 | [`14-economy-and-progression.md`](14-economy-and-progression.md) | **经济与进程:** 金币/利息/奖励/路线图/待定清单 |
