@@ -19,9 +19,9 @@ GameLayout ───────────────────────
 │ │ 忍気 0        │ │ │ StatusLabel             │ │
 │ │ ████░░░░ 300  │ │ ├─────────────────────────┤ │
 │ ├───────────────┤ │ │ HandArea                │ │
-│ │ 影  对子 37×2 │ │ │ [討伐] [影][瞬][滅] [陣形] │ │
-│ │ 瞬  对子 37×2 │ │ ├─────────────────────────┤ │
-│ │ 滅  同花 53×4 │ │ │ DeckBtn                │ │
+│ │ 影  对子 37×2 Lv.2 │ │ [討伐] [影][瞬][滅] [陣形] │
+│ │ 瞬  对子 37×2 Lv.4 │ │
+│ │ 滅  同花 53×4 Lv.1 │ │
 │ ├───────────────┤ │ └─────────────────────────┘ │
 │ │ 比赛信息      │ │                              │
 │ │ 討伐 3        │ └──────────────────────────────┘
@@ -59,9 +59,9 @@ NinKingMain (Control) [game_manager.gd]
     │   │   │   └── ScoreCardVBox       ← anchors full rect (layout_mode=1)
     │   │   │       ├── ColXiLabel (32px 列金/喜accent)
     │   │   │       ├── HandTypeRow (VBoxContainer)    ← 合入 ScoreCardVBox
-    │   │   │       │   ├── Row影 → ShadowDun/ShadowType/ShadowScore
-    │   │   │       │   ├── Row瞬 → FlashDun/FlashType/FlashScore
-    │   │   │       │   └── Row滅 → DestroyDun/DestroyType/DestroyScore
+    │   │   │       │   ├── Row影 → ShadowDun/ShadowType/ShadowScore/%ShadowLv
+    │   │   │       │   ├── Row瞬 → FlashDun/FlashType/FlashScore/%FlashLv
+    │   │   │       │   └── Row滅 → DestroyDun/DestroyType/DestroyScore/%DestroyLv
     │   │   │       ├── ScoreLabel (48px "忍気 N")
     │   │   │       ├── ProgressBar (28px, 右端止于 312px 渐隐起始)
     │   │   │       └── TargetScoreLabel (28px "封印 N")
@@ -78,7 +78,7 @@ NinKingMain (Control) [game_manager.gd]
     │   │           └── RoundLabel (28px "回合 N")
     │   │
     │   └── CenterColumn (VBoxContainer)
-    │       ├── NinjaBar (HBox)        ← 忍者牌槽位行
+    │       ├── NinjaBar (HBox)        ← 忍者牌栏（差值刷新/stagger pop-in/拖拽排序/zoom-in详情）
     │       ├── StatusLabel (24px 绿)   ← "影 <= 瞬 <= 滅 -- 可以出牌"
     │       ├── HandArea (HBox 1138×728)
     │       │   ├── PlayBtn (84×116)    ← 「討伐」
@@ -149,18 +149,22 @@ ScoreCardVBox 子序：`ColXiLabel → HandTypeRow → ScoreLabel → ProgressBa
 VBoxContainer 含 3 行，每行 HBoxContainer 对应一墩：
 
 ```
-影  对子  37×2
-瞬  顺子  50×3
-滅  同花  53×4
+影  对子  37×2  Lv.2
+瞬  顺子  50×3  Lv.4
+滅  同花  53×4  Lv.1
 ```
 
-每行布局：墩名(40px R) | 牌型名(弹性 L) | 分数(70px R)
+每行布局：墩名(40px R) | 牌型名(弹性 L) | 分数(70px R) | Lv badge(弹性 L)
 
 墩名颜色：影 `#588CF2` / 瞬 `#BFBFCB` / 滅 `#F24D4D`
 牌型名：白色 `#F0EDE4`
 分数颜色：同该行墩名
+Lv badge 色阶：Lv.1-2 `#7A7A7A` 灰 | Lv.3-4 `#588CF2` 蓝 | Lv.5-6 `#C4A843` 金。Lv.0 隐藏。
+鼠标悬浮 Lv badge 弹出浮层（牌型名+等级+筹码/倍率），计分 Phase 1 跟随分数 GOLD flash。
 
-由 `HandTypeLabeler._update_dun_types()` 实时更新。
+**数据源：** `NinKingGameState.star_chart_levels`（`{ HandType3: int }`）→ `CardData.get_hand_type3_leveled_chips/mult()`。
+
+由 `HandTypeLabeler._update_dun_types()` 实时更新。Lv hover tooltip 由同文件 `_show_lv_tooltip()` 实现。
 
 ### 3.4 MatchPanel (中间 1/4) — 直属于 LeftPanel
 

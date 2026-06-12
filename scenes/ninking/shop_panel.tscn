@@ -2,14 +2,16 @@
 
 [ext_resource type="Script" uid="uid://py2jsudkqhq" path="res://scripts/ninking/ui/shop_ui.gd" id="1_v2fv5"]
 
-[node name="ShopPanel" type="Control"]
+[node name="ShopPanel" type="Control" unique_id=876907262]
 layout_mode = 3
 anchors_preset = 0
-offset_right = 1520.0
-offset_bottom = 960.0
+offset_left = 420.0
+offset_top = 380.0
+offset_right = 1920.0
+offset_bottom = 1080.0
 script = ExtResource("1_v2fv5")
 
-[node name="Overlay" type="ColorRect" parent="."]
+[node name="StageBg" type="ColorRect" parent="." unique_id=1914915915]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -17,99 +19,124 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0, 0, 0, 0.45)
+color = Color(0.9607843, 0.9411765, 0.9098039, 1)
 
-[node name="TitleBar" type="ColorRect" parent="."]
+[node name="ScreentoneOverlay" type="TextureRect" parent="StageBg" unique_id=831825616]
+modulate = Color(0, 0, 0, 0.14901961)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 2
+
+[node name="TitleBar" type="ColorRect" parent="." unique_id=1075858990]
 unique_name_in_owner = true
 layout_mode = 0
-offset_right = 1520.0
-offset_bottom = 60.0
+offset_right = 1500.0
+offset_bottom = 44.0
 color = Color(0.12, 0.12, 0.2, 1)
 
-[node name="ShopSubtitle" type="Label" parent="."]
+[node name="ShopSubtitle" type="Label" parent="." unique_id=1309644081]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 24.0
-offset_top = 0.0
-offset_right = 200.0
-offset_bottom = 60.0
+offset_right = 500.0
+offset_bottom = 40.0
+theme_override_font_sizes/font_size = 36
 text = "萬屋！"
-horizontal_alignment = 0
 vertical_alignment = 1
 
-[node name="GoldPill" type="Panel" parent="."]
-layout_mode = 0
-offset_left = 1130.0
-offset_top = 5.0
-offset_right = 1320.0
-offset_bottom = 55.0
-
-[node name="GoldLabel" type="Label" parent="GoldPill"]
+[node name="RerollBtn" type="Button" parent="." unique_id=874043978]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 20.0
-offset_top = 8.0
-offset_right = 170.0
-offset_bottom = 47.0
-text = "0"
-horizontal_alignment = 1
-vertical_alignment = 1
+offset_left = 1400.0
+offset_top = 6.0
+offset_right = 1497.0
+offset_bottom = 34.0
+text = "入替 $3"
 
-[node name="RerollBtn" type="Button" parent="."]
+[node name="GoldLabel" type="Label" parent="." unique_id=1258927178]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 1340.0
-offset_top = 5.0
-offset_right = 1496.0
-offset_bottom = 55.0
-theme_type_variation = &"ImpactButton"
-text = "入替"
+offset_right = 1400.0
+offset_bottom = 40.0
+theme_override_font_sizes/font_size = 20
+text = "$0"
+horizontal_alignment = 2
+vertical_alignment = 1
 
-[node name="AbilityGrid" type="GridContainer" parent="."]
+[node name="AbilityGrid" type="GridContainer" parent="." unique_id=1317939004]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 156.0
-offset_top = 80.0
-offset_right = 756.0
-offset_bottom = 880.0
-columns = 2
-theme_override_constants/h_separation = 40
+offset_left = 40.0
+offset_top = 58.0
+offset_right = 1460.0
+offset_bottom = 448.0
+theme_override_constants/h_separation = 20
 theme_override_constants/v_separation = 0
+columns = 4
 
-[node name="ItemColumn" type="VBoxContainer" parent="."]
+[node name="BottomBar" type="ColorRect" parent="." unique_id=61798574]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 1086.0
-offset_top = 122.0
-offset_right = 1346.0
-offset_bottom = 838.0
-theme_override_constants/separation = 36
-alignment = 1
-
-[node name="BottomBar" type="ColorRect" parent="."]
-unique_name_in_owner = true
-layout_mode = 0
-offset_top = 900.0
-offset_right = 1520.0
-offset_bottom = 960.0
+offset_top = 660.0
+offset_right = 1500.0
+offset_bottom = 700.0
 color = Color(0.12, 0.12, 0.2, 1)
 
-[node name="ContinueBtn" type="Button" parent="."]
+[node name="ContinueBtn" type="Button" parent="." unique_id=1638016468]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 590.0
-offset_top = 902.0
-offset_right = 930.0
-offset_bottom = 958.0
+offset_left = 660.0
+offset_top = 664.0
+offset_right = 840.0
+offset_bottom = 696.0
 theme_type_variation = &"ImpactButton"
 text = "討伐へ ▶"
 
-[node name="NextLevelHint" type="Label" parent="."]
+[node name="ItemColumn" type="GridContainer" parent="." unique_id=127680420]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 560.0
-offset_top = 956.0
-offset_right = 960.0
-offset_bottom = 960.0
-horizontal_alignment = 1
-vertical_alignment = 1
+offset_left = 375.0
+offset_top = 468.0
+offset_right = 1085.0
+offset_bottom = 648.0
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 0
+columns = 2
+
+[node name="Separator" type="ColorRect" parent="." unique_id=1910746012]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 40.0
+offset_top = 458.0
+offset_right = 1460.0
+offset_bottom = 459.0
+mouse_filter = 2
+color = Color(0.1, 0.1, 0.1, 0.15)
+
+[node name="TopBorder" type="ColorRect" parent="." unique_id=568768423]
+layout_mode = 0
+offset_right = 1500.0
+offset_bottom = 4.0
+mouse_filter = 2
+color = Color(0.101960786, 0.101960786, 0.101960786, 1)
+
+[node name="LeftBorder" type="ColorRect" parent="." unique_id=1879793029]
+layout_mode = 0
+offset_right = 2.0
+offset_bottom = 700.0
+mouse_filter = 2
+color = Color(0.101960786, 0.101960786, 0.101960786, 1)
+
+[node name="RightBorder" type="ColorRect" parent="." unique_id=392377888]
+layout_mode = 0
+offset_left = 1498.0
+offset_right = 1500.0
+offset_bottom = 700.0
+mouse_filter = 2
+color = Color(0.101960786, 0.101960786, 0.101960786, 1)

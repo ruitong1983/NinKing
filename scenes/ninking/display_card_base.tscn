@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://b4wd5mplcb50m"]
+
+[ext_resource type="Script" uid="uid://qw5kchvieb8h" path="res://scripts/ninking/ui/display_card_base.gd" id="1_mra0x"]
+
+[node name="DisplayCardBase" type="Control" unique_id=92712522]
+custom_minimum_size = Vector2(120, 160)
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_mra0x")
+
+[node name="FrontFace" type="Control" parent="." unique_id=1859349753]
+anchors_preset = 0
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="FrontFace"]
+visible = false
+layout_mode = 0
+
+[node name="BackFace" type="Control" parent="." unique_id=141102320]
+anchors_preset = 0
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="BackFace"]
+visible = false
+layout_mode = 0
+
+[node name="card_panel" type="Panel" parent="." unique_id=1965085892]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="content_slot" type="Control" parent="card_panel" unique_id=1753550173]
+clip_contents = true
+anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2

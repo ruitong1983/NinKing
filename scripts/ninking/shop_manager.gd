@@ -9,48 +9,25 @@ const NINJA_COUNT: int = 4
 const ITEM_COUNT: int = 2
 
 var available_ninjas: Array[Dictionary] = []
-var available_fujutsu: Array[Dictionary] = []
 var available_star_charts: Array[Dictionary] = []
-var available_kinjutsu: Array[Dictionary] = []
-var is_yasha_shop: bool = false
 
 
-func generate_stock(yasha_shop: bool = false, exclude_ninja_ids: Array = []) -> void:
-	is_yasha_shop = yasha_shop
-
+func generate_stock(_yasha_shop: bool = false, exclude_ninja_ids: Array = []) -> void:
 	available_ninjas = NinjaPool.get_random_ninjas(NINJA_COUNT, exclude_ninja_ids)
 	assert(available_ninjas.size() == NINJA_COUNT,
 		"ShopManager: pool too small — need %d ninjas, got %d" % [NINJA_COUNT, available_ninjas.size()])
 
-	available_kinjutsu.clear()
-
-	if yasha_shop and randf() < 0.5:
-		available_fujutsu = ConsumableData.get_random_fujutsu(1)
-		available_star_charts.clear()
-		available_kinjutsu = ConsumableData.get_random_kinjutsu(1)
-	else:
-		available_fujutsu = ConsumableData.get_random_fujutsu(1)
-		available_star_charts = ConsumableData.get_random_star_charts(1)
-
-	var total_items: int = available_fujutsu.size() + available_star_charts.size() + available_kinjutsu.size()
-	assert(total_items == ITEM_COUNT,
-		"ShopManager: expected %d items, got %d" % [ITEM_COUNT, total_items])
+	available_star_charts = ConsumableData.get_random_star_charts(ITEM_COUNT)
+	assert(available_star_charts.size() == ITEM_COUNT,
+		"ShopManager: expected %d star charts, got %d" % [ITEM_COUNT, available_star_charts.size()])
 
 
 func get_ninjas_for_display() -> Array[Dictionary]:
 	return available_ninjas
 
 
-func get_fujutsu_for_display() -> Array[Dictionary]:
-	return available_fujutsu
-
-
 func get_star_charts_for_display() -> Array[Dictionary]:
 	return available_star_charts
-
-
-func get_kinjutsu_for_display() -> Array[Dictionary]:
-	return available_kinjutsu
 
 
 # ══════════════════════════════════════════

@@ -48,7 +48,7 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"id": "n_006", "name": "奥义之卷",
 		"effect": {"add_chips": 30, "add_mult": 10},
 		"cost": 14, "rarity": "rare",
-		"desc": "+30 筹码, +10 倍率"
+		"desc": "+30筹码 +10倍率"
 	},
 
 	# ─── 组别定向 (6) ───
@@ -85,7 +85,7 @@ const ALL_NINJAS: Array[Dictionary] = [
 			"x_mult_per_head_weakness": true
 		},
 		"cost": 8, "rarity": "rare",
-		"desc": "影越弱滅越强: 散牌×3, 对子×2, 顺子/同花×1",
+		"desc": "影越弱滅越强: 散×3 对×2 其余×1",
 		"head_weakness_scale": {
 			"0": 3,
 			"1": 2,
@@ -102,13 +102,13 @@ const ALL_NINJAS: Array[Dictionary] = [
 			"condition": {"group": "head_or_mid", "at_least_hand_type": 2}
 		},
 		"cost": 5, "rarity": "uncommon",
-		"desc": "影或瞬为顺子或同花时 +40 筹码"
+		"desc": "影或瞬≥顺子时 +40 筹码"
 	},
 	{
 		"id": "n_g06", "name": "金字塔",
 		"effect": {"x_mult": 2, "condition": {"strict_ascending_types": true}},
 		"cost": 12, "rarity": "rare",
-		"desc": "影<瞬<滅牌型严格递升 → ×2"
+		"desc": "影<瞬<滅严格递升×2"
 	},
 
 	# ─── 规则变更 (2, 互斥) ───
@@ -171,7 +171,7 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"id": "n_x06", "name": "龙之眼",
 		"effect": {"x_mult_per_extra_card": 2, "x_extra_cap": 2},
 		"cost": 12, "rarity": "rare",
-		"desc": "四张以上每多一张 ×2（上限2次）"
+		"desc": "四张喜时每多一张×2（上限2次）"
 	},
 
 	# ─── 成长修炼 (5) ───
@@ -208,7 +208,7 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"id": "n_s05", "name": "头悬梁",
 		"effect": {"add_mult": 0},
 		"cost": 5, "rarity": "uncommon",
-		"desc": "影为散牌时 +3 倍率；影不是散牌则重置",
+		"desc": "影为散牌+3倍率，否则重置",
 		"scaling": {
 			"trigger": "on_play",
 			"add_mult": 3,
@@ -220,7 +220,7 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"id": "n_s06", "name": "尾刺骨",
 		"effect": {"add_mult": 0},
 		"cost": 6, "rarity": "uncommon",
-		"desc": "滅为同花顺或豹子时 +5 倍率；不满足则重置",
+		"desc": "滅为同花顺/豹子+5倍率，否则重置",
 		"scaling": {
 			"trigger": "on_play",
 			"add_mult": 5,
@@ -252,13 +252,13 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"id": "n_e05", "name": "金剛力",
 		"effect": {"mult_per_gold": 1, "mult_gold_step": 5, "mult_gold_cap": 10},
 		"cost": 8, "rarity": "rare",
-		"desc": "每 $5 持有 +1 倍率（上限 +10）"
+		"desc": "每持有$5 +1倍率（上限+10）"
 	},
 	{
 		"id": "n_e06", "name": "黄金律",
 		"effect": {"x_per_gold": 2, "x_gold_step": 15, "x_gold_cap": 3},
 		"cost": 14, "rarity": "rare",
-		"desc": "每 $15 持有 ×2（上限 ×3）"
+		"desc": "每$15持有×2（最多触发3次）"
 	},
 
 	# ─── 忍具 (4) ───
@@ -278,13 +278,13 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"id": "n_t05", "name": "疾风",
 		"effect": {"first_play_x2": true},
 		"cost": 7, "rarity": "uncommon",
-		"desc": "首回合出牌 ×2"
+		"desc": "首回合出牌得分×2"
 	},
 	{
 		"id": "n_t06", "name": "烟幕",
 		"effect": {"death_save": true},
 		"cost": 10, "rarity": "rare",
-		"desc": "过关失败时保留金币回到结界开头（一局1次）"
+		"desc": "战败保留金币重开本结界（1局1次）"
 	},
 
 	# ─── 传说 (3) ───
@@ -305,7 +305,7 @@ const ALL_NINJAS: Array[Dictionary] = [
 			"wild_break_chance": 0.1
 		},
 		"cost": 999, "rarity": "legendary",
-		"desc": "1/2手牌视为万能花色，出牌时 1/10 概率销毁 1 张"
+		"desc": "出牌时半数手牌视作万能，10%概率损失1张"
 	},
 	{
 		"id": "n_l03", "name": "影武者",
@@ -325,7 +325,7 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"id": "n_d02", "name": "赌命",
 		"effect": {"extra_redraw_card": 1, "plays_minus": 1},
 		"cost": 7, "rarity": "uncommon",
-		"desc": "手替え上限 +1 张，但出牌次数 -1"
+		"desc": "手替え可多弃1张，但出牌次数-1"
 	},
 
 	# ─── 跨组联动 (2) — 新增 ───
@@ -345,7 +345,7 @@ const ALL_NINJAS: Array[Dictionary] = [
 			"condition": {"any_two_groups_same_type": true}
 		},
 		"cost": 8, "rarity": "rare",
-		"desc": "三组中有两组牌型相同 → 各 +15 筹码 +3 倍率"
+		"desc": "两组同牌型→全组+15筹码+3倍率"
 	},
 
 	# ─── 点数/人牌 (2) — 新增 ───

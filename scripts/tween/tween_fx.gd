@@ -296,6 +296,20 @@ static func stagger_slide_in(nodes: Array, stagger: float = 0.12, dur: float = 0
 		tw.tween_property(node, "position:x", node.position.x + slide_offset, dur)
 
 
+## 卡片逐张 scale 0->1 弹入（仿落在纸面上）
+## fire-and-forget，不返回 Tween
+static func stagger_pop_in(nodes: Array, stagger: float = 0.06, duration: float = 0.25) -> void:
+	for i in range(nodes.size()):
+		var node: Node = nodes[i]
+		if not is_instance_valid(node):
+			continue
+		node.scale = Vector2.ZERO
+		var tw := node.create_tween()
+		tw.tween_property(node, "scale", Vector2.ONE, duration)\
+			.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)\
+			.set_delay(i * stagger)
+
+
 ## 卡牌从中心向弧位散开：卷轴展开效果。
 ## 单张居中，多张沿圆弧均匀分布（Y 轴压缩模拟透视）。
 ## 每张牌从中心 stagger 延迟后并行 scale+alpha 弹入归位。

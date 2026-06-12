@@ -23,6 +23,7 @@
 | [`09-launch-ui-design.md`](09-launch-ui-design.md) | Launch UI 设计 — 主菜单/牌组选择/继续确认 |
 | [`10-main-ui-design.md`](10-main-ui-design.md) | Main Game UI 设计 — 游戏主界面完整布局 |
 | [`11-main-overlay-design.md`](11-main-overlay-design.md) | Main Overlay 设计 — 入场/计分/过关/失败覆盖层 |
+| [`20-debug-scene-design.md`](20-debug-scene-design.md) | **Debug 计分测试场景** — 独立于主场景，52牌选择+忍者/星图测试 |
 | [`TODO.md`](TODO.md) | **工作清单:** Bug / 待实现 / 优化 / 素材缺口 |
 | [`testing-guide.md`](testing-guide.md) | **测试指南:** Godot MCP Pro 测试流程/常见陷阱/命令速查 |
 

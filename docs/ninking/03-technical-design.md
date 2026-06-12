@@ -141,13 +141,13 @@ res://
 ├── scenes/ninking/
 │   ├── ninking_launcher.tscn       ← 入口场景 (主菜单)
 │   ├── ninking_main.tscn           ← 主游戏场景（含 ShopOverlay Phase C）
+│   ├── ninking_debug.tscn          ← Debug 计分测试场景 (2026-06-12)
 │   ├── shop_panel.tscn             ← 🆕 商店面板场景片段 (替代旧 shop.tscn)
-│   ├── card_button.tscn            ← 手牌按钮组件
+│   ├── display_card_base.tscn      ← 非扑克牌展示基类 120×160 纯卡面
 │   ├── ninking_card.tscn           ← 卡牌组件 (NinKingCard)
 │   ├── ninking_card_factory.tscn   ← 卡牌工厂 (Card-Framework)
 │   ├── ability_slot.tscn           ← 忍者牌槽位组件 (已重命名)
-│   ├── shop_ability_card.tscn      ← 商店忍者牌卡片
-│   ├── shop_item_card.tscn         ← 商店道具卡片
+│   ├── shop_slot.tscn              ← 🆕 商店展示容器 (DisplayCard + 购买UI)
 ```
 
 ### ninking_launcher.tscn
@@ -196,8 +196,8 @@ NinKingMain (Control) [game_manager.gd]
     │       ├── ColumnLabelRow — 列牌型标签
     │       └── DeckBtn "🎴 牌库"
     ├── ScoringOverlay (Control) — ⛔ 未使用 (Balatro 风内联动画)
-    ├── LevelComplete (Control) — 过关弹窗
-    │   └── CompleteLabel / RewardLabel / ToShopButton
+    │   ⛔ LevelComplete (已删除, 2026-06-12 Phase E)
+    │      Phase E 移除: 计分动画结束后金币飞入左面板, ~1.5s 自动进 Shop
     ├── ShopOverlay (Control) — ← **Phase C 新增** 商店覆盖层
     │   └── 运行时: add_child(load("res://scenes/ninking/shop_panel.tscn").instantiate())
     ├── GameOver (Control) — 失败弹窗
@@ -368,10 +368,11 @@ SealController.execute_play(gs)
 
 ```
 res://
-├── scenes/ninking/          # 场景文件 (11 tscn)
+├── scenes/ninking/          # 场景文件 (12 tscn)
 ├── scripts/
-│   ├── ninking/             # NinKing 核心逻辑 (19 脚本)
+│   ├── ninking/             # NinKing 核心逻辑 (22 脚本)
 │   │   ├── ui/              # NinKing UI (13 脚本)
+│   │   ├── debug/           # Debug 场景 (3 脚本 — 2026-06-12)
 │   │   │   ├── ninking_card.gd           ← 卡牌渲染 (NinKingCard)
 │   │   │   ├── ninking_card_factory.gd   ← 卡牌工厂 (NinKingCardFactory)
 │   │   │   ├── game_manager.gd           ← 主场景控制器
@@ -381,10 +382,9 @@ res://
 │   │   │   ├── hand_display.gd           ← 手牌渲染器
 │   │   │   ├── hand_interaction.gd       ← 交互状态机
 │   │   │   ├── deck_viewer_controller.gd ← 牌库查看器
-│   │   │   ├── card_button.gd            ← 手牌按钮
+│   │   │   ├── display_card_base.gd      ← 非扑克牌展示基类 120×160
+│   │   │   ├── shop_slot.gd              ← 🆕 商店展示容器 (DisplayCard + 购买UI)
 │   │   │   ├── ability_slot.gd           ← 忍者牌槽位
-│   │   │   ├── shop_ability_card.gd      ← 商店忍者牌卡片
-│   │   │   └── shop_item_card.gd         ← 商店道具卡片
 │   │   ├── card_data.gd                  ← 扑克牌数据 (CardData)
 │   │   ├── deck_manager.gd               ← 牌库管理 (DeckManager)
 │   │   ├── hand_evaluator.gd             ← 牌型评估 (HandEvaluator3)

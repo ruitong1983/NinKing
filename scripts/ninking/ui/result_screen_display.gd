@@ -1,12 +1,9 @@
 class_name ResultScreenDisplay
 extends RefCounted
 
-## Displays end-of-action result screens: scoring overlay, seal complete,
-## victory, game over, and xi popup.
+## Displays end-of-action result screens: victory, game over, and xi popup.
 ## Extracted from UIManager.
 
-var _reward_label: Label
-var _complete_label: Label
 var _victory_label: Label
 var _victory_stats_summary: Label
 var _game_over_label: Label
@@ -17,8 +14,6 @@ var _score_breakdown: Label
 
 
 func setup(
-	reward_label: Label,
-	complete_label: Label,
 	victory_label: Label,
 	victory_stats_summary: Label,
 	game_over_label: Label,
@@ -27,8 +22,6 @@ func setup(
 	score_value_label: Label,
 	score_breakdown: Label,
 ) -> void:
-	_reward_label = reward_label
-	_complete_label = complete_label
 	_victory_label = victory_label
 	_victory_stats_summary = victory_stats_summary
 	_game_over_label = game_over_label
@@ -36,15 +29,6 @@ func setup(
 	_hand_name_label = hand_name_label
 	_score_value_label = score_value_label
 	_score_breakdown = score_breakdown
-
-
-# ══════════════════════════════════════════
-# Seal complete
-# ══════════════════════════════════════════
-
-func set_level_complete(gold_reward: int) -> void:
-	_reward_label.text = "+%d 金币" % gold_reward
-	_complete_label.text = "过关!"
 
 
 # ══════════════════════════════════════════

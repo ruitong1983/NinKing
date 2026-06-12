@@ -1,0 +1,619 @@
+[gd_scene format=3 uid="uid://c8q3j5k2f1k4x"]
+
+[ext_resource type="Script" uid="uid://b5wb4af5a6w1a" path="res://scripts/ninking/debug/debug_controller.gd" id="1_ctrl"]
+[ext_resource type="Script" uid="uid://dgug0lj2v2uoh" path="res://scripts/ninking/debug/debug_card_tray.gd" id="2_tray"]
+[ext_resource type="Script" uid="uid://c56l87nvs3gi5" path="res://scripts/ninking/debug/debug_ninja_selector.gd" id="3_sel"]
+[ext_resource type="PackedScene" uid="uid://c7u8hryloq7hy" path="res://addons/card-framework/card_manager.tscn" id="4_cm"]
+[ext_resource type="Theme" uid="uid://bqb2i07k0v8jt" path="res://assets/themes/manga_theme.tres" id="5_theme"]
+[ext_resource type="PackedScene" uid="uid://bkpjlq7ggckg6" path="res://addons/card-framework/hand.tscn" id="6_hand"]
+[ext_resource type="Texture2D" uid="uid://cmh6fgxip28j3" path="res://assets/images/background/table_bg.png" id="7_bg"]
+
+[node name="NinKingDebug" type="Control" unique_id=633977509]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("5_theme")
+script = ExtResource("1_ctrl")
+
+[node name="GameBg" type="TextureRect" parent="." unique_id=528846051]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("7_bg")
+expand_mode = 1
+
+[node name="CardManager" parent="." unique_id=163910758 instance=ExtResource("4_cm")]
+layout_mode = 0
+
+[node name="MainVBox" type="VBoxContainer" parent="." unique_id=1325739821]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+
+[node name="ContentRow" type="HBoxContainer" parent="MainVBox" unique_id=989193329]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LeftPanel" type="Control" parent="MainVBox/ContentRow" unique_id=711798334]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="ScoreCard" type="Panel" parent="MainVBox/ContentRow/LeftPanel" unique_id=1233021539]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_bottom = 0.5
+
+[node name="ScoreCardVBox" type="VBoxContainer" parent="MainVBox/ContentRow/LeftPanel/ScoreCard" unique_id=619962255]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="ColXiLabel" type="Label" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox" unique_id=1205393969]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.769, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 32
+
+[node name="HandTypeRow" type="VBoxContainer" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox" unique_id=1493402944]
+layout_mode = 2
+
+[node name="Row影" type="HBoxContainer" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox/HandTypeRow" unique_id=534773057]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="ShadowDun" type="Label" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox/HandTypeRow/Row影" unique_id=1548658251]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.345, 0.549, 0.949, 1)
+text = "影"
+horizontal_alignment = 2
+
+[node name="ShadowType" type="Label" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox/HandTypeRow/Row影" unique_id=1373391489]
+unique_name_in_owner = true
+layout_mode = 2
+text = "-"
+
+[node name="ShadowScore" type="Label" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox/HandTypeRow/Row影" unique_id=174219346]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.345, 0.549, 0.949, 1)
+horizontal_alignment = 2
+
+[node name="ShadowLv" type="Label" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox/HandTypeRow/Row影"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+mouse_filter = 2
+
+[node name="Row瞬" type="HBoxContainer" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox/HandTypeRow" unique_id=628923215]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="FlashDun" type="Label" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox/HandTypeRow/Row瞬" unique_id=1394395360]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.749, 0.749, 0.796, 1)
+text = "瞬"
+horizontal_alignment = 2
+
+[node name="FlashType" type="Label" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox/HandTypeRow/Row瞬" unique_id=1228415715]
+unique_name_in_owner = true
+layout_mode = 2
+text = "-"
+
+[node name="FlashScore" type="Label" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox/HandTypeRow/Row瞬" unique_id=244705428]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.749, 0.749, 0.796, 1)
+horizontal_alignment = 2
+
+[node name="FlashLv" type="Label" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox/HandTypeRow/Row瞬"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+mouse_filter = 2
+
+[node name="Row滅" type="HBoxContainer" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox/HandTypeRow" unique_id=1857155069]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="DestroyDun" type="Label" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox/HandTypeRow/Row滅" unique_id=2024433679]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.949, 0.302, 0.302, 1)
+text = "滅"
+horizontal_alignment = 2
+
+[node name="DestroyType" type="Label" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox/HandTypeRow/Row滅" unique_id=648551570]
+unique_name_in_owner = true
+layout_mode = 2
+text = "-"
+
+[node name="DestroyScore" type="Label" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox/HandTypeRow/Row滅" unique_id=1805393508]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.949, 0.302, 0.302, 1)
+horizontal_alignment = 2
+
+[node name="DestroyLv" type="Label" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox/HandTypeRow/Row滅"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+mouse_filter = 2
+
+[node name="ScoreLabel" type="Label" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox" unique_id=56620536]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
+theme_override_font_sizes/font_size = 48
+text = "気 0"
+
+[node name="ProgressBar" type="ProgressBar" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox" unique_id=735929432]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+show_percentage = false
+
+[node name="TargetScoreLabel" type="Label" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox" unique_id=1493206990]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.478, 0.478, 0.416, 1)
+theme_override_font_sizes/font_size = 28
+text = "封印 0"
+
+[node name="MatchPanel" type="Panel" parent="MainVBox/ContentRow/LeftPanel" unique_id=1796966859]
+custom_minimum_size = Vector2(0, 160)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.5
+anchor_bottom = 0.75
+
+[node name="MatchVBox" type="VBoxContainer" parent="MainVBox/ContentRow/LeftPanel/MatchPanel" unique_id=2094229000]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="MatchTitle" type="Label" parent="MainVBox/ContentRow/LeftPanel/MatchPanel/MatchVBox" unique_id=1667409660]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 20
+text = "DEBUG"
+
+[node name="HandsLabel" type="Label" parent="MainVBox/ContentRow/LeftPanel/MatchPanel/MatchVBox" unique_id=1951021593]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "討伐 3"
+
+[node name="GoldLabel" type="Label" parent="MainVBox/ContentRow/LeftPanel/MatchPanel/MatchVBox" unique_id=66464054]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "$0"
+
+[node name="AntePanel" type="Panel" parent="MainVBox/ContentRow/LeftPanel" unique_id=1818565819]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.75
+anchor_bottom = 1.0
+
+[node name="AnteVBox" type="VBoxContainer" parent="MainVBox/ContentRow/LeftPanel/AntePanel" unique_id=1740474216]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="BarrierLabel" type="Label" parent="MainVBox/ContentRow/LeftPanel/AntePanel/AnteVBox" unique_id=789626804]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "結界 DEBUG"
+
+[node name="RoundLabel" type="Label" parent="MainVBox/ContentRow/LeftPanel/AntePanel/AnteVBox" unique_id=1741712037]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+
+[node name="CenterColumn" type="VBoxContainer" parent="MainVBox/ContentRow" unique_id=1653549085]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="NinjaBar" type="HBoxContainer" parent="MainVBox/ContentRow/CenterColumn" unique_id=561822439]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="StatusLabel" type="Label" parent="MainVBox/ContentRow/CenterColumn" unique_id=792052520]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.3, 0.8, 0.3, 1)
+theme_override_font_sizes/font_size = 24
+text = "从底栏选中牌 → 点击上方空格放入"
+
+[node name="HandArea" type="HBoxContainer" parent="MainVBox/ContentRow/CenterColumn" unique_id=1701895185]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+
+[node name="PlayBtn" type="Button" parent="MainVBox/ContentRow/CenterColumn/HandArea" unique_id=1578254149]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(84, 116)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "討伐"
+
+[node name="DunArea" type="Panel" parent="MainVBox/ContentRow/CenterColumn/HandArea" unique_id=533102076]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="DunHead" type="Panel" parent="MainVBox/ContentRow/CenterColumn/HandArea/DunArea" unique_id=465039438]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 612.0
+offset_bottom = 244.0
+
+[node name="HeadLabel" type="Label" parent="MainVBox/ContentRow/CenterColumn/HandArea/DunArea/DunHead" unique_id=644943780]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 12.0
+offset_top = 96.0
+offset_right = 52.0
+offset_bottom = 124.0
+theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 24
+text = "影"
+horizontal_alignment = 1
+
+[node name="HeadTypeLabel" type="Label" parent="MainVBox/ContentRow/CenterColumn/HandArea/DunArea/DunHead" unique_id=1701815863]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 510.0
+offset_top = 100.0
+offset_right = 596.0
+offset_bottom = 121.0
+theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+
+[node name="HeadCards" parent="MainVBox/ContentRow/CenterColumn/HandArea/DunArea/DunHead" unique_id=1679928223 instance=ExtResource("6_hand")]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 40.0
+offset_top = 32.0
+offset_right = 580.0
+offset_bottom = 228.0
+max_hand_size = 3
+max_hand_spread = 480
+
+[node name="DunMiddle" type="Panel" parent="MainVBox/ContentRow/CenterColumn/HandArea/DunArea" unique_id=491127964]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 4.0
+offset_top = 248.0
+offset_right = 612.0
+offset_bottom = 488.0
+
+[node name="MiddleLabel" type="Label" parent="MainVBox/ContentRow/CenterColumn/HandArea/DunArea/DunMiddle" unique_id=1295848028]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 12.0
+offset_top = 96.0
+offset_right = 52.0
+offset_bottom = 124.0
+theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 24
+text = "瞬"
+horizontal_alignment = 1
+
+[node name="MiddleTypeLabel" type="Label" parent="MainVBox/ContentRow/CenterColumn/HandArea/DunArea/DunMiddle" unique_id=2098140275]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 510.0
+offset_top = 100.0
+offset_right = 596.0
+offset_bottom = 121.0
+theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+
+[node name="MiddleCards" parent="MainVBox/ContentRow/CenterColumn/HandArea/DunArea/DunMiddle" unique_id=613409401 instance=ExtResource("6_hand")]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 40.0
+offset_top = 32.0
+offset_right = 580.0
+offset_bottom = 228.0
+max_hand_size = 3
+max_hand_spread = 480
+
+[node name="DunTail" type="Panel" parent="MainVBox/ContentRow/CenterColumn/HandArea/DunArea" unique_id=1517933413]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 4.0
+offset_top = 492.0
+offset_right = 612.0
+offset_bottom = 732.0
+
+[node name="TailLabel" type="Label" parent="MainVBox/ContentRow/CenterColumn/HandArea/DunArea/DunTail" unique_id=791189117]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 12.0
+offset_top = 96.0
+offset_right = 52.0
+offset_bottom = 124.0
+theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 24
+text = "滅"
+horizontal_alignment = 1
+
+[node name="TailTypeLabel" type="Label" parent="MainVBox/ContentRow/CenterColumn/HandArea/DunArea/DunTail" unique_id=1085454674]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 510.0
+offset_top = 100.0
+offset_right = 596.0
+offset_bottom = 121.0
+theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+
+[node name="TailCards" parent="MainVBox/ContentRow/CenterColumn/HandArea/DunArea/DunTail" unique_id=918134054 instance=ExtResource("6_hand")]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 40.0
+offset_top = 32.0
+offset_right = 580.0
+offset_bottom = 228.0
+max_hand_size = 3
+max_hand_spread = 480
+
+[node name="ColumnLabelRow" type="HBoxContainer" parent="MainVBox/ContentRow/CenterColumn/HandArea/DunArea" unique_id=1076051945]
+layout_mode = 0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -28.0
+
+[node name="Col0Label" type="Label" parent="MainVBox/ContentRow/CenterColumn/HandArea/DunArea/ColumnLabelRow" unique_id=1076051946]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+
+[node name="Col1Label" type="Label" parent="MainVBox/ContentRow/CenterColumn/HandArea/DunArea/ColumnLabelRow" unique_id=1076051947]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+
+[node name="Col2Label" type="Label" parent="MainVBox/ContentRow/CenterColumn/HandArea/DunArea/ColumnLabelRow" unique_id=1076051948]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+
+[node name="AiRearrangeBtn" type="Button" parent="MainVBox/ContentRow/CenterColumn/HandArea" unique_id=152265503]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(84, 116)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+disabled = true
+text = "陣形"
+
+[node name="DeckBtn" type="Button" parent="MainVBox/ContentRow/CenterColumn" unique_id=1852593262]
+custom_minimum_size = Vector2(200, 48)
+layout_mode = 2
+text = "牌库: 52"
+
+[node name="RightPanel" type="Control" parent="MainVBox/ContentRow" unique_id=1745320107]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="RightVBox" type="VBoxContainer" parent="MainVBox/ContentRow/RightPanel" unique_id=1903653115]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="RightTitle" type="Label" parent="MainVBox/ContentRow/RightPanel/RightVBox" unique_id=530168360]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 24
+text = "DEBUG 控制"
+
+[node name="NinjaSelectBtn" type="Button" parent="MainVBox/ContentRow/RightPanel/RightVBox" unique_id=971337664]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🥷 忍者選択"
+
+[node name="NinjaStatusLabel" type="Label" parent="MainVBox/ContentRow/RightPanel/RightVBox" unique_id=635370630]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "已選: 0/5"
+
+[node name="StarTitle" type="Label" parent="MainVBox/ContentRow/RightPanel/RightVBox" unique_id=852451693]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 18
+text = "⭐ 星図レベル"
+
+[node name="StarChartContainer" type="VBoxContainer" parent="MainVBox/ContentRow/RightPanel/RightVBox" unique_id=1470507460]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ClearBtn" type="Button" parent="MainVBox/ContentRow/RightPanel/RightVBox" unique_id=1588101761]
+unique_name_in_owner = true
+layout_mode = 2
+text = "🗑 清空牌桌"
+
+[node name="RandomBtn" type="Button" parent="MainVBox/ContentRow/RightPanel/RightVBox" unique_id=1799831506]
+unique_name_in_owner = true
+layout_mode = 2
+text = "🎲 随机发牌"
+
+[node name="BackBtn" type="Button" parent="MainVBox/ContentRow/RightPanel/RightVBox" unique_id=1735654840]
+unique_name_in_owner = true
+layout_mode = 2
+text = "← 返回"
+
+[node name="BottomTray" type="Control" parent="MainVBox" unique_id=1583477840]
+custom_minimum_size = Vector2(0, 164)
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="CardTray" type="Control" parent="MainVBox/BottomTray" unique_id=1064549681]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_tray")
+
+[node name="CardGrid" type="GridContainer" parent="MainVBox/BottomTray/CardTray" unique_id=174254646]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/h_separation = 2
+theme_override_constants/v_separation = 2
+columns = 13
+
+[node name="NinjaSelector" type="Control" parent="." unique_id=949234871]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("3_sel")
+
+[node name="SelectorBg" type="ColorRect" parent="NinjaSelector" unique_id=2038129589]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+color = Color(0, 0, 0, 0.7)
+
+[node name="SelectorPanel" type="PanelContainer" parent="NinjaSelector" unique_id=1846044451]
+layout_mode = 0
+offset_left = 310.0
+offset_top = 140.0
+offset_right = 1610.0
+offset_bottom = 940.0
+
+[node name="SelectorVBox" type="VBoxContainer" parent="NinjaSelector/SelectorPanel" unique_id=987651571]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SelectorTitle" type="Label" parent="NinjaSelector/SelectorPanel/SelectorVBox" unique_id=1888824651]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 28
+text = "选择忍者 (0/5)"
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="NinjaSelector/SelectorPanel/SelectorVBox" unique_id=1608571202]
+custom_minimum_size = Vector2(0, 500)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="NinjaGrid" type="GridContainer" parent="NinjaSelector/SelectorPanel/SelectorVBox/ScrollContainer" unique_id=1033898175]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
+columns = 5
+
+[node name="BtnRow" type="HBoxContainer" parent="NinjaSelector/SelectorPanel/SelectorVBox" unique_id=965870097]
+layout_mode = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="ConfirmBtn" type="Button" parent="NinjaSelector/SelectorPanel/SelectorVBox/BtnRow" unique_id=1147877949]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "确认"
+
+[node name="CancelBtn" type="Button" parent="NinjaSelector/SelectorPanel/SelectorVBox/BtnRow" unique_id=374796005]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "取消"
+
+[node name="@TextureRect@38708" type="TextureRect" parent="." unique_id=1875700798]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = ExtResource("7_bg")
+expand_mode = 1

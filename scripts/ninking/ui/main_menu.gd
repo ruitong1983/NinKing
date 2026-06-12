@@ -12,6 +12,7 @@ const BUTTON_SLIDE_OFFSET: float = 80.0
 @onready var _btn_continue: Button = %ContinueBtn
 @onready var _btn_settings: Button = %SettingsBtn
 @onready var _btn_quit: Button = %QuitBtn
+@onready var _btn_debug: Button = %DebugBtn
 var _buttons: Array[Button] = []
 
 var _overlay: ColorRect
@@ -56,6 +57,7 @@ func _build_ui() -> void:
 	_btn_continue.pressed.connect(_on_continue_pressed)
 	_btn_settings.pressed.connect(_on_settings_pressed)
 	_btn_quit.pressed.connect(_on_quit_pressed)
+	_btn_debug.pressed.connect(_on_debug_pressed)
 
 	for btn: Button in _buttons:
 		btn.mouse_entered.connect(_on_button_hovered.bind(btn))
@@ -134,6 +136,11 @@ func _on_settings_pressed() -> void:
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()
+
+
+func _on_debug_pressed() -> void:
+	## Launch the Debug scoring scene (independent of main game).
+	get_tree().change_scene_to_file("res://scenes/ninking/ninking_debug.tscn")
 
 
 # ══════════════════════════════════════════

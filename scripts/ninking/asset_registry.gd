@@ -44,6 +44,7 @@ const CATEGORY_ICONS: Dictionary = {
 # ═══ Item icon / base plate mapping ── id prefix → asset info ═══
 const ITEM_BASE_PATH: String = "res://assets/images/items/"
 const ITEM_ICON_PATH: String = "res://assets/images/items/icons/"
+const STAR_CHART_CARD_PATH: String = "res://assets/images/items/star_charts/"
 
 ## id prefix → { base, icon, category_name }
 const ITEM_CATEGORY_MAP: Dictionary = {
@@ -114,3 +115,10 @@ static func get_item_icon_path(item_id: String) -> String:
 		if item_id.begins_with(prefix):
 			return ITEM_ICON_PATH + ITEM_CATEGORY_MAP[prefix]["icon"] + ".png"
 	return ITEM_ICON_PATH + "icon_transform.png"
+
+
+## Get the full star chart card illustration PNG path by its ID (e.g. "star_001").
+static func get_star_chart_card_path(item_id: String) -> String:
+	if not item_id.begins_with("star_"):
+		return ""
+	return STAR_CHART_CARD_PATH + item_id + ".png"

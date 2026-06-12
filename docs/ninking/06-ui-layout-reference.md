@@ -55,14 +55,14 @@ NinKingMain (Control) 1920×1080                [game_manager.gd]
     │   ├── LevelLabel [%LevelLabel]            "结界X · 修罗ノ封印" 48px
     │   └── TargetLabel [%TargetLabel]          "封印 300" 24px
     │
-    ├── GameLayout (HBoxContainer) [%GameLayout] — 游戏主界面 (view: "game"/"scoring")
-    │   │  HBox: LeftPanel(420px) | CenterColumn(fill)
-    │   │
-    │   ├── LeftPanel (Control) [%LeftPanel]    — 左侧信息面板 420px
-    │   │   ├── PanelBg (ColorRect) [%PanelBg]  — 全透明 (保留节点供代码引用)
-    │   │   │
-    │   │   ├── ScoreCard (Panel) [%ScoreCard]   — 得分卡, anchor_top=0, anchor_bottom=0.5 (上半 1/2)
-    │   │   │   └── ScoreCardVBox                — layout_mode=1, anchors_preset=15 (full rect)
+    │   │   ├── ScoreCard (Panel)           — 得分卡, anchor_top=0, anchor_bottom=0.5 (上半 1/2)
+    │   │   │   └── ScoreCardVBox           — anchors full rect (layout_mode=1)
+    │   │   │       ├── ColXiLabel (32px 列金/喜accent)
+    │   │   │       ├── HandTypeRow (VBoxContainer)    — 合入 ScoreCardVBox
+    │   │   │       │   ├── Row影 → ShadowDun/ShadowType/ShadowScore/%ShadowLv
+    │   │   │       │   ├── Row瞬 → FlashDun/FlashType/FlashScore/%FlashLv
+    │   │   │       │   └── Row滅 → DestroyDun/DestroyType/DestroyScore/%DestroyLv
+    │   │   │       ├── ScoreLabel (48px "忍気 N")
     │   │   │       ├── ColXiLabel [%ColXiLabel]   "列: x16  喜: x2" 32px 金
     │   │   │       ├── HandTypeRow (VBoxContainer)
     │   │   │       │   ├── Row影 (HBoxContainer, separation=8)
@@ -122,48 +122,30 @@ NinKingMain (Control) 1920×1080                [game_manager.gd]
     │   ├── HandNameLabel [%HandNameLabel]       "高牌" 48px
     │   ├── ScoreValueLabel [%ScoreValueLabel]   "+ 0" 72px 金
     │   └── ScoreBreakdown [%ScoreBreakdown]     24px 分解文字
+    │   ⛔ LevelComplete (已删除, 2026-06-12 Phase E)
+    │      Phase E 移除: 计分动画结束后金币飞入左面板, ~1.5s 自动进 Shop
     │
-    ├── LevelComplete (Control) [%LevelComplete] — 过关弹窗 (view: "complete")
-    │   ├── OverlayBg #000 70%
-    │   ├── CompleteLabel [%CompleteLabel]      "过关!" 48px
-    │   ├── RewardLabel [%RewardLabel]           "+X 金币"
-    │   └── ToShopButton [%ToShopButton]         "进入商店"
-    │
-    ├── ShopOverlay (Control) [%ShopOverlay]    — 商店覆盖层 (view: "shop", Phase C)
+    ├── ShopOverlay (Control) [%ShopOverlay]    — 底部滑入商店 (view: "shop", mouse_filter=STOP)
+    │   │ ⚠️ shop 状态下 GameLayout + GameBg 保持可见 (左边栏 + 顶部忍者牌)
+    │   │    面板只覆盖底部 364~1080 区域, ShopOverlay 用 STOP 拦截区域外点击
     │   └── 运行时: add_child(load("shop_panel.tscn").instantiate())
-    │       └── ShopPanel (Control) — 商店主面板, 1520×960, [shop_ui.gd]
-    │           ├── Overlay (ColorRect)                #000 65%  ← 首孩子, 渲染在底层
-    │           ├── TitleBar (ColorRect)                #1E1E33 100%, 1520×90
-    │           │   └── TitleFocusLines (TextureRect)   focus_lines_heavy.png (expand=1)
-    │           ├── ShopTitle (Label)                   "商  店" 居中 48px
-    │           ├── ShopSubtitle (Label)                "萬屋！" 旋转5°
-    │           ├── GoldPill (Panel)                    #000 70% 圆角
-    │           │   └── GoldLabel [%GoldLabel]          "$0" 32px 金
-    │           ├── RerollBtn [%RerollBtn]              "入替" ImpactButton 变体
-    │           ├── RerollLabel                        "$5" 16px (重置价格)
-    │           ├── AbilityFocusLines (TextureRect)     focus_lines_light.png (expand=1)
-    │           ├── AbilityScrollFrame (TextureRect)    section_scroll_frame.png
-    │           ├── AbilityLabel                        "忍 者 牌" 居中 24px
-    │           ├── AbilityRow (HBoxContainer)          1100×470, gap=40
-    │           │   └── [shop_ability_card × N]        动态生成
-    │           ├── ItemFocusLines (TextureRect)        focus_lines_light.png (expand=1)
-    │           ├── ItemScrollFrame (TextureRect)       section_scroll_frame.png
-    │           ├── ItemLabel                           "道 具 卡" 居中 24px
-    │           ├── ItemRow (HBoxContainer)             1068×340, gap=36
-    │           │   └── [shop_item_card × N]           动态生成
-    │           ├── BottomBar (ColorRect)                #1E1E33 100%, 1520×80
-    │           │   └── BottomFocusLines (TextureRect)  focus_lines_heavy.png (expand=1)
-    │           ├── Separator (ColorRect)               #D4A843 25%, 1460×1
-    │           ├── ContinueBtn [%ContinueBtn]          "討伐へ ▶" ImpactButton
-    │           ├── NextLevelHint                       "次: 结界X" 12px 灰
-    │           └── NinjaSlotLabel                      "忍者 0/5" 20px
+    │       └── ShopPanel (Control) — 右下角锚定, 800×716, x:880 y:364, [shop_ui.gd]
+    │           ├── Overlay (ColorRect)                BarrierTheme.panel 纯色 ← 非透明遮罩
+    │           ├── TopBorder (ColorRect)              800×3, #1A1A1A 墨色分割线
+    │           ├── TitleBar (ColorRect)                800×40  #1E1E33 100%
+    │           ├── ShopSubtitle (Label)                "萬屋！" 32px 左对齐 x:24
+    │           ├── GoldLabel [%GoldLabel]              "$0" 20px 纯文字, x:610
+    │           ├── RerollBtn [%RerollBtn]              "入替 $3" 97×28, x:685 y:6
+    │           ├── AbilityGrid (GridContainer)         680×380 2列 h_sep:20, x:24-704 y:58-438
+    │           │   └── [ShopSlot × 4]                  横排 330×190 忍者卡
+    │           ├── Separator (ColorRect)               680×1 y:458, #000 15%
+    │           ├── ItemColumn (GridContainer)          680×190 2列 h_sep:20, x:24-704 y:469-659
+    │           │   └── [ShopSlot × 2]                  横排 330×190 星图卡
+    │           ├── BottomBar (ColorRect)               800×40 y:676, #1E1E33 100%
+    │           └── ContinueBtn [%ContinueBtn]          "討伐へ ▶" 180×32 居中
     │
-    │       ═══ B5: 时动态创建 — EnchantTargetSelector ═══
-    │       └── 购买附魔卡时: add_child(EnchantTargetSelector.new())
-    │           ├── Overlay (ColorRect)              #000 60% — 遮住商店
-    │           ├── "选择目标牌" Label 28px
-    │           └── CardRow (HBoxContainer)
-    │               └── Button(9) × TextureRect(SVG 130×181) — 点击回调, hover 1.08x
+    │       ⛔ NextLevelHint (已删除, 零高度)
+    │       ⛔ B5 EnchantTargetSelector (已删除, 无信号连接)
     │
     ├── GameOver (Control) [%GameOver]           — 失败弹窗 (view: "gameover")
     │   ├── OverlayBg #000 80%
@@ -188,7 +170,7 @@ NinKingMain (Control) 1920×1080                [game_manager.gd]
             │   ├── DrawCountLabel [%DrawCountLabel]    "牌堆: 0 张"
             │   └── DiscardCountLabel [%DiscardCountLabel] "手替札: 0 张"
             ├── CardScroll (ScrollContainer)
-            │   └── CardGrid [%CardGrid] (GridContainer, 13列, 动态 card_button)
+            │   └── CardGrid [%CardGrid] (GridContainer, 13列, 动态 NinKingCard)
             └── (CardPanel 边界)
 ```
 
@@ -258,15 +240,16 @@ StyleBoxFlat: `content_margin(16,16,16,16)`，无边框、无圆角。`bg_color 
 
 ##### b. HandTypeRow (VBoxContainer 含 3 行) — 位于 ScoreCardVBox 内
 
-每行为 HBoxContainer，展示对应墩的牌型名 + 分数预览：
+每行为 HBoxContainer，展示对应墩的牌型名 + 分数预览 + Lv badge（星图等级）：
 
-| 行 | 墩名 (40px R) | 牌型名 (弹性 L) | 分数 (70px R) |
-|----|-------------|--------------|--------------|
-| 影 | `ShadowDun` "影" #588CF2 | `%ShadowType` "对子" 白 | `%ShadowScore` "37×2" #588CF2 |
-| 瞬 | `FlashDun` "瞬" #BFBFCB | `%FlashType` "顺子" 白 | `%FlashScore` "50×3" #BFBFCB |
-| 滅 | `DestroyDun` "滅" #F24D4D | `%DestroyType` "同花" 白 | `%DestroyScore` "53×4" #F24D4D |
+| 行 | 墩名 (40px R) | 牌型名 (弹性 L) | 分数 (70px R) | Lv badge (弹性 L) |
+|----|-------------|--------------|--------------|------------------|
+| 影 | `ShadowDun` "影" #588CF2 | `%ShadowType` "对子" 白 | `%ShadowScore` "37×2" #588CF2 | `%ShadowLv` "Lv.2" 色阶 |
+| 瞬 | `FlashDun` "瞬" #BFBFCB | `%FlashType` "顺子" 白 | `%FlashScore` "50×3" #BFBFCB | `%FlashLv` "Lv.4" 色阶 |
+| 滅 | `DestroyDun` "滅" #F24D4D | `%DestroyType` "同花" 白 | `%DestroyScore` "53×4" #F24D4D | `%DestroyLv` "Lv.1" 色阶 |
 
 分数 = (卡牌筹码 + 牌型筹码) × 牌型倍率，由 `HandTypeLabeler._update_dun_types()` 实时预览。
+Lv badge 色阶：Lv.1-2 `#7A7A7A` 灰 | Lv.3-4 `#588CF2` 蓝 | Lv.5-6 `#C4A843` 金。Lv.0 不显示。鼠标悬浮 badge 弹出浮层显示牌型名+等级+筹码/倍率。计分 Phase 1 揭示时跟随分数 GOLD flash。
 
 ##### c. MatchPanel (中间 1/4) — 直属于 LeftPanel
 
@@ -305,14 +288,22 @@ StyleBoxFlat: `content_margin(16,16,16,16)`，无边框、无圆角。`bg_color 
 |------|-----|
 | 节点 | `UIManager/GameLayout/CenterColumn/NinjaBar` |
 | 访问名 | `%NinjaBar` |
-| 层叠 | 5 槽位忍者牌，商店购买时 pop_in 动画 |
-| 刷新 | `ui.refresh_ninjas(owned, max_slots)` |
+| 管理节点 | `NinjaBarNode` (Node)，%NinjaBar 的子节点，不参与布局 |
+| 卡片 | 动态显示拥有的忍者牌，无空槽占位（Balatro 风） |
+| 入场 | 刷新时 staggger pop-in（80ms 间隔，`GlobalTweens.pop_in`） |
+| 移除 | 淡出+缩小（0.2s），其余卡自动重排 |
+| 间距 | 弹性压缩 8~24px，居中排列，卡片尺寸 130×170 固定 |
+| 悬停 | `GlobalTweens.card_hover` → scale 1.15，上浮 -6px |
+| 点击 | 左键 → Balatro 风 zoom-in 详情（全屏遮罩+卡面 4x+名+desc） |
+| 拖拽 | Godot 内置拖放：拖起预览半透明卡面，落位到另一槽完成排序 |
+| 排序持久化 | `owned_ninjas` 数组顺序自动保存到存档 |
+| 刷新 | `NinjaBarNode.refresh(owned_ninjas, max_slots)` — 差值更新 |
 
 ##### b. 手牌区 `HandArea` (HBoxContainer, 1138×728)
 
 | 属性 | 值 |
 |------|-----|
-| 组件场景 | `res://scenes/ninking/card_button.tscn` |
+| 组件场景 | `res://scenes/ninking/ninking_card.tscn` (NinKingCard) |
 | 卡牌数 | **9** (3×3 三组) |
 | 单牌尺寸 | 90×130 |
 | 交互 | 点击两张牌互换（蓝高亮=交换源）；换牌模式（红高亮=标记丢弃） |
@@ -387,15 +378,17 @@ Overlay  (封印达成)    (忍気不足)  (全结界制霸)
 | `"intro"` | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | `"game"` | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | `"scoring"` | ✅ | ❌ | ✅(Balatro内联) | ❌ | ❌ | ❌ | ❌ | ❌ |
-| `"complete"` | ✅(沉浸牌桌) | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
-| `"shop"` | ❌(纯黑+Overlay) | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| `"complete"` | ⛔ 已废弃 (Phase E) — 不再调用 | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ |
+| `"shop"` | ✅(游戏背景可见) | ❌ | ✅(底部面板遮挡) | ❌ | ❌ | ✅(mouse_filter=STOP) | ❌ | ❌ |
 | `"gameover"` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
 | `"victory"` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 
 > **注意：** `"scoring"` 状态下 GameLayout 保持可见（Balatro 风内联计分，无全屏暗幕），
 > ScoringOverlay 始终隐藏——计分文字由 ResultScreenDisplay 在 scene tree 内联操作。
-> `"shop"` 视图下 GameBg 隐藏（商店自带 Overlay #000 65% 背景），GameLayout 隐藏。
-> `"complete"` 视图下 GameBg 保持可见（结界桌布持续展示，增加沉浸感）。
+> **v2026-06-12 (底部滑入):** `"shop"` 视图下 GameBg + GameLayout 保持可见。
+> 商店面板只覆盖屏幕底部 364~1080 区域，左边栏+顶部忍者牌栏始终可见。
+> ShopOverlay 设 `mouse_filter=STOP` 防止误操作游戏区，面板无需全屏遮罩。
+> `"complete"` 视图 **⛔ 已废弃 (Phase E)** — 不再调用。计分动画结束后金币飞入左面板 MatchPanel/GoldLabel，~1.5s 后自动进 Shop。
 
 ---
 
@@ -438,7 +431,9 @@ func refresh_groups(
 
 # ── 忍者栏 ──
 func refresh_ninjas(owned_ninjas: Array, max_slots: int) -> void
-  # 委托 NinjaBarDisplay（原名 refresh_abilities）
+  # 委托 NinjaBarNode.refresh()（差值更新 + stagger pop-in）。
+  # max_slots 保留以兼容调用方；无空槽占位（Balatro 风）。
+  # 详见 NinjaBarNode: add_ninja() / remove_ninja() / move_ninja()。
 
 # ── 计分结果 ──
 func show_scoring_result(
@@ -447,7 +442,6 @@ func show_scoring_result(
   tail_eval: HandEvaluator3.EvalResult,
   total_score: int
 ) -> void
-func set_level_complete(gold_reward: int) -> void
 func set_victory(barrier: int, score: int) -> void
 func show_game_over(reason: String, barrier: int, score: int) -> void
 func show_xi_popup(xis: Array[String]) -> void
@@ -563,14 +557,14 @@ NinKingGameState (autoload)
 | `scripts/ninking/ui/hand_display.gd` | 手牌渲染（HandDisplay delegate） |
 | `scripts/ninking/ui/hand_interaction.gd` | 交互状态机（点击/拖拽交换） |
 | `scripts/ninking/ui/dun_highlighter.gd` | 三墩约束高亮 |
-| `scripts/ninking/ui/ninja_bar_display.gd` | 忍者栏渲染（NinjaBarDisplay delegate） |
+| `scripts/ninking/ui/ninja_bar_node.gd` | 忍者栏管理（diff 刷新/拖拽排序/详情浮层） |
 | `scripts/ninking/ui/result_screen_display.gd` | 结果屏幕渲染（计分/过关/失败/喜） |
 | `scripts/ninking/ui/nin_king_tween.gd` | 项目级动画序列（商店入场/出场/reroll） |
 | `scripts/ninking/ui/deck_viewer_controller.gd` | 牌库查看器 |
 | `scripts/ninking/ui/ninking_card.gd` | 忍者卡牌显示 (Card Framework 扩展) |
 | `scripts/ninking/ui/shop_ui.gd` | 商店 UI 控制 (ShopPanel) |
-| `scripts/ninking/ui/shop_ability_card.gd` | 商店忍者牌卡片组件 |
-| `scripts/ninking/ui/shop_item_card.gd` | 商店道具卡片组件 |
+| `scripts/ninking/ui/display_card_base.gd` | 非扑克牌展示基类 120×160 纯卡面 |
+| `scripts/ninking/ui/shop_slot.gd` | 🆕 商店展示容器 (DisplayCard + 购买UI) |
 | `scripts/ninking/game_state.gd` | 游戏状态 autoload |
 | `scripts/ninking/seal_controller.gd` | 出牌/封印逻辑 |
 | `scripts/ninking/arrange_controller.gd` | 排列/规则收集 |

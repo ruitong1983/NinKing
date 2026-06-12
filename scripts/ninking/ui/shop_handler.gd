@@ -24,7 +24,7 @@ func _get_reroll_cost() -> int:
 
 func go_shop_pressed() -> void:
 	## Phase C: In-scene shop overlay entry (no scene switch).
-	## Fades out level complete + cleans table, then triggers SHOP state.
+	## Phase E: No full game_layout fade — LeftPanel + NinjaBar stay visible.
 	if _transition_guard:
 		return
 	_transition_guard = true
@@ -39,13 +39,12 @@ func go_shop_pressed() -> void:
 		"colors": BarrierTheme.get_colors(NinKingGameState.barrier_num),
 	}
 
-	# Phase 1: Fade out LevelComplete + clean table (0.3s)
-	var tw := _ui.create_tween()
-	tw.tween_property(_ui.level_complete, "modulate:a", 0.0, 0.3)
-	tw.parallel().tween_property(_ui.game_layout, "modulate:a", 0.0, 0.3)
-	await tw.finished
+	# Keep LeftPanel + NinjaBar visible — only dim hand/dun play area
+	# Shop panel starts at x:420, left column stays uncovered.
+	if _ui.game_layout.has_node("CenterColumn/HandArea"):
+		_ui.game_layout.get_node("CenterColumn/HandArea").modulate.a = 0.0
 
-	# Phase 2: Transition to SHOP
+	# Transition to SHOP
 	SealController.go_to_shop(NinKingGameState)
 	_transition_guard = false
 
@@ -69,9 +68,14 @@ func on_purchase_requested(ability: Dictionary) -> void:
 		GlobalTweens.play_sfx(SB.ITEM_PURCHASE)
 		GlobalTweens.play_sfx(SB.UI_COIN)
 		_ui.shop_panel_update_gold(NinKingGameState.gold)
-		var slots := _ui.ninja_bar_container.get_children()
-		if slots.size() > 0:
-			NinKingTween.play_ninja_pop_in(slots[-1])
+		# Find the actual ninja slot node (filter out NinjaBarNode which is a plain Node)
+		var all_children := _ui.ninja_bar_container.get_children()
+		var ninja_slots: Array[Node] = []
+		for c: Node in all_children:
+			if c is NinjaSlotNode:
+				ninja_slots.append(c)
+		if ninja_slots.size() > 0:
+			NinKingTween.play_ninja_pop_in(ninja_slots[-1] as CanvasItem)
 		ToastManager.show("获得: %s!" % ability.get("name", "???"), 1.5)
 	else:
 		ToastManager.show("金币不足!", 1.5)
@@ -93,45 +97,6 @@ func on_item_purchase_requested(item: Dictionary) -> void:
 
 
 # ═══ B6: 星图卡 — 购买即升级（不存入背包）═══
-
-
-
-# ═══ B5: 附魔卡 — 扣钱后打开选牌器 ═══
-
-func on_enchant_purchase_requested(item: Dictionary) -> void:
-	## Handle enchant card purchase: deduct gold, show target selector,
-	## apply effect when player picks a card.
-	var cost: int = item.get("cost", 2)
-	if NinKingGameState.gold < cost:
-		ToastManager.show("金币不足!", 1.5)
-		return
-
-	# Deduct gold
-	NinKingGameState.gold -= cost
-	NinKingGameState.gold_changed.emit(NinKingGameState.gold)
-	GlobalTweens.play_sfx(SB.ITEM_PURCHASE)
-	GlobalTweens.play_sfx(SB.UI_COIN)
-	_ui.shop_panel_update_gold(NinKingGameState.gold)
-	_ui.shop_panel_mark_item_purchased(item.get("id", ""))
-
-	# Open target selector on the shop panel
-	_ui.shop_panel_start_enchant_targeting(
-		NinKingGameState.hand,
-		func(card_idx: int):
-			_apply_enchant_effect(NinKingGameState.hand[card_idx], item.get("effect", {}))
-			NinKingGameState.hand_updated.emit(NinKingGameState.hand)
-	)
-
-
-static func _apply_enchant_effect(card: CardData.PlayingCard, effect: Dictionary) -> void:
-	## Apply an enchant effect to a card (modifies suit, rank, or enhancement in-place).
-	if effect.has("set_suit"):
-		card.suit = effect["set_suit"] as CardData.Suit
-	elif effect.has("rank_shift"):
-		var shift: int = effect["rank_shift"] as int
-		card.rank = clampi(card.rank + shift, 1, 14) as CardData.Rank
-	elif effect.has("enhancement"):
-		card.enhancement = effect["enhancement"] as CardData.Enhancement
 
 func _purchase_star_chart(item: Dictionary) -> void:
 	var cost: int = item.get("cost", 3)
@@ -159,7 +124,7 @@ func _purchase_star_chart(item: Dictionary) -> void:
 
 	# Toast with hand type name + level info
 	var hand_name: String = CardData.get_hand_type3_name(hand_type as CardData.HandType3)
-	ToastManager.show("%s Lv.%d → Lv.%d!" % [hand_name, old_level, old_level + 1], 2.0)
+	ToastManager.show("%s Lv.%d -> Lv.%d!" % [hand_name, old_level, old_level + 1], 2.0)
 
 	# VFX: Manga burst at viewport center
 	var vp_size: Vector2 = _ui.get_viewport_rect().size
@@ -195,7 +160,7 @@ func on_reroll_requested() -> void:
 
 
 func on_continue_requested() -> void:
-	## Phase C: Exit shop overlay → advance to next seal (no scene switch).
+	## Phase C: Exit shop overlay -> advance to next seal (no scene switch).
 	if _transition_guard:
 		return
 	_transition_guard = true

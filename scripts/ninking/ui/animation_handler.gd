@@ -58,6 +58,7 @@ func _run_scoring_animation() -> void:
 	var dun_type_labels: Array[Label] = [_ui.head_type_label, _ui.middle_type_label, _ui.tail_type_label]
 	var dun_hands: Array[Hand] = [_ui.head_cards, _ui.middle_cards, _ui.tail_cards]
 	var dun_score_labels: Array[Label] = [_ui.shadow_score_label, _ui.flash_score_label, _ui.destroy_score_label]
+	var dun_lv_labels: Array[Label] = [_ui.shadow_lv_label, _ui.flash_lv_label, _ui.destroy_lv_label]
 	var dun_chips_vals: Array[int] = [score_result.head_chips, score_result.mid_chips, score_result.tail_chips]
 	var dun_mult_vals: Array[int] = [score_result.head_mult, score_result.mid_mult, score_result.tail_mult]
 
@@ -113,6 +114,10 @@ func _run_scoring_animation() -> void:
 			if dc > 0 and dm > 0:
 				sl.text = "%d×%d" % [dc, dm]
 				GlobalTweens.color_flash(sl, Color.GOLD, 0.2)
+				# Flash Lv badge alongside score
+				var ll: Label = dun_lv_labels[i]
+				if is_instance_valid(ll) and ll.visible:
+					GlobalTweens.color_flash(ll, Color.GOLD, 0.2)
 		await _ui.get_tree().create_timer([0.40, 0.55, 0.65][i]).timeout
 
 	# ═══ Phase 2: Score bounce in left panel + "+N" float + breakdown ═══
@@ -197,6 +202,7 @@ func _run_scoring_animation() -> void:
 		GlobalTweens.punch_in(_ui.score_label, 0.4, 1.5)
 		await _ui.get_tree().create_timer(0.6).timeout
 		_mark_auto_shop.call()
+		play_data["gold_before_settlement"] = gs.gold
 		SealController.finalize_play(gs, play_data)
 		current_play_data.clear()
 		return

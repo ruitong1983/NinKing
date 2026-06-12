@@ -1,11 +1,13 @@
 extends Control
 
 ## Main game flow coordinator — UI operations delegated to UIManager.
-## NinKing v2: 9 cards → 3 groups × 3 cards (比鸡 + 忍者牌)
+## NinKing v2: 9 cards -> 3 groups x 3 cards (比鸡 + 忍者牌)
 ## Phase C: 同场景 immersive flow — shop as overlay, no scene switching.
-## C21: Shop logic → ShopHandler, scoring animation → AnimationHandler.
+## C21: Shop logic -> ShopHandler, scoring animation -> AnimationHandler.
+## Phase E: No LevelComplete overlay — gold flies into left panel, then auto-shop.
 
 const SB = preload("res://scripts/config/sound_bank.gd")
+const CountUp = preload("res://scripts/tween/count_up.gd")
 
 @onready var ui: UIManager = %UIManager
 
@@ -16,8 +18,12 @@ var animation_handler: AnimationHandler
 # Boss reveal guard — Phase C
 var _boss_revealed: bool = false
 
-# Auto-shop: SCORING → shop transition without click (Balatro-style)
+# Auto-shop: SCORING -> shop transition without click (Balatro-style)
 var _auto_shop_pending: bool = false
+
+# Phase E: skip overlay for shop transition
+var _shop_skip_overlay: Control = null
+var _shop_skip_requested: bool = false
 
 
 func _ready() -> void:
@@ -30,15 +36,12 @@ func _ready() -> void:
 	# Wire UI buttons
 	ui.play_btn.pressed.connect(_on_play_pressed)
 	ui.ai_rearrange_btn.pressed.connect(_on_ai_rearrange_pressed)
-	ui.to_shop_button.pressed.connect(shop_handler.go_shop_pressed)
 	ui.retry_button.pressed.connect(_on_retry_pressed)
 	ui.back_to_menu_button.pressed.connect(_on_back_to_menu_pressed)
 	ui.victory_menu_button.pressed.connect(_on_back_to_menu_pressed)
 
-	# Phase C: Shop overlay signals → delegate
+	# Phase C: Shop overlay signals -> delegate
 	ui.shop_purchase_requested.connect(shop_handler.on_purchase_requested)
-	ui.shop_enchant_purchase_requested.connect(shop_handler.on_enchant_purchase_requested)
-
 	ui.shop_item_purchase_requested.connect(shop_handler.on_item_purchase_requested)
 	ui.shop_reroll_requested.connect(shop_handler.on_reroll_requested)
 	ui.shop_continue_requested.connect(shop_handler.on_continue_requested)
@@ -76,7 +79,7 @@ func _ready() -> void:
 		NinKingGameState.current_seal_lord_name
 	)
 
-	# SEAL_INTRO → PLAYING timer now fires from _on_state_changed on every seal entry
+	# SEAL_INTRO -> PLAYING timer now fires from _on_state_changed on every seal entry
 
 
 # ═══ State callbacks ═══
@@ -90,7 +93,10 @@ func _on_state_changed(new_state: NinKingGameState.State) -> void:
 			ui.show_view("game")
 			# Reset table after shop (Phase C)
 			ui.game_layout.modulate = Color.WHITE
-			GlobalTweens.play_sfx(SB.DEAL)  # C17: 发牌音效
+			# Restore hand area if dimmed during shop
+			if ui.game_layout.has_node("CenterColumn/HandArea"):
+				ui.game_layout.get_node("CenterColumn/HandArea").modulate = Color.WHITE
+			GlobalTweens.play_sfx(SB.DEAL)  # C17: deal SFX
 			ui.refresh_hand(NinKingGameState.hand)
 			ui.refresh_ninjas(NinKingGameState.owned_ninjas, NinKingGameState.max_ninja_slots)
 			ui.ai_rearrange_btn.disabled = false
@@ -103,26 +109,28 @@ func _on_state_changed(new_state: NinKingGameState.State) -> void:
 			ui.show_view("scoring")
 			animation_handler.run_scoring()
 		NinKingGameState.State.SEAL_COMPLETE:
-			ui.show_view("complete")
 			var seal_cfg: Dictionary = BarrierConfig.get_seal(NinKingGameState.barrier_num, NinKingGameState.seal_idx)
-			ui.set_level_complete(seal_cfg.get("gold", 0))
+			var gold_reward: int = seal_cfg.get("gold", 0)
+			var old_gold: int = animation_handler.current_play_data.get(
+				"gold_before_settlement",
+				max(0, NinKingGameState.gold - gold_reward - mini(floori(NinKingGameState.gold / 5.0), 5))
+			)
+			_play_gold_settlement(old_gold, NinKingGameState.gold, NinKingGameState.gold - old_gold)
 
-			# Auto-shop: show reward briefly then auto-enter shop (Balatro-style)
+			# Auto-shop with skip-on-click
 			if _auto_shop_pending:
 				_auto_shop_pending = false
-				await get_tree().create_timer(1.2).timeout
-				if is_instance_valid(ui) and NinKingGameState.current_state == NinKingGameState.State.SEAL_COMPLETE:
-					shop_handler.go_shop_pressed()
+				_create_shop_skip_overlay()
 		NinKingGameState.State.SHOP:
 			shop_handler.on_enter_shop()
 		NinKingGameState.State.GAME_OVER:
 			ui.show_view("gameover")
-			ui.show_game_over("忍気不足", NinKingGameState.barrier_num, int(NinKingGameState.current_score))
+			ui.show_game_over("not enough score", NinKingGameState.barrier_num, int(NinKingGameState.current_score))
 		NinKingGameState.State.VICTORY:
 			_auto_shop_pending = false  # Safety: clear in case finalize_play reached victory
 			ui.show_view("victory")
 			ui.set_victory(NinKingGameState.barrier_num, int(NinKingGameState.current_score))
-			# ── Victory celebration VFX (V34) ──
+			# Victory celebration VFX (V34)
 			GlobalTweens.play_sfx(SB.XI_FANFARE)
 			GlobalTweens.burst_particles(get_viewport_rect().size * 0.5, "manga_burst")
 			GlobalTweens.do_hit_stop(0.1, 0.05)
@@ -159,20 +167,19 @@ func _on_arrangement_changed(_arr: AutoArranger.Arrangement) -> void:
 func _on_seal_started(barrier: int, seal_idx: int, target: float, seal_lord_name: String) -> void:
 	ui.on_seal_start(barrier, seal_idx, int(target), seal_lord_name)
 
-	# ── Barrier theme: apply 8-attribute bright palette (V25) ──
+	# Barrier theme: apply 8-attribute bright palette (V25)
 	var c: Dictionary = BarrierTheme.get_colors(barrier)
 	ui.game_bg.modulate = c.bg
 	ui.panel_bg.color = c.panel
 	ui.progress_bar.add_theme_color_override("font_color", c.accent)
 	ui.progress_bar.add_theme_color_override("font_outline_color", c.accent)
 
-	# ── BGM: auto-switch variation based on barrier difficulty (B11) ──
+	# BGM: auto-switch variation based on barrier difficulty (B11)
 	MusicManager.set_game_variation(barrier)
 
 	# Accent font only for neutral-bg buttons
 	var btns: Array[Button] = [
 		ui.ai_rearrange_btn,
-		ui.to_shop_button,
 		ui.retry_button, ui.back_to_menu_button,
 		ui.victory_menu_button,
 	]
@@ -181,7 +188,7 @@ func _on_seal_started(barrier: int, seal_idx: int, target: float, seal_lord_name
 		btn.add_theme_color_override("font_hover_color", c.accent.lightened(0.2))
 		btn.add_theme_color_override("font_pressed_color", c.accent.darkened(0.3))
 
-	# ⚠️ Phase C: Boss reveal moved to PLAYING state (_trigger_boss_reveal_in_playing).
+	# Phase C: Boss reveal moved to PLAYING state (_trigger_boss_reveal_in_playing).
 	# No more 1s wait here. Theme + intro watermark only.
 
 
@@ -236,7 +243,7 @@ func _update_deck_display() -> void:
 
 
 # ══════════════════════════════════════════
-# Intro timer — SEAL_INTRO → PLAYING
+# Intro timer — SEAL_INTRO -> PLAYING
 # ══════════════════════════════════════════
 
 ## Phase C: Wait 0.5 seconds for intro watermark, then transition to PLAYING.
@@ -276,3 +283,80 @@ func _trigger_boss_reveal_in_playing() -> void:
 	await get_tree().create_timer(1.5).timeout
 	if is_instance_valid(ui.boss_portrait):
 		GlobalTweens.fade_out(ui.boss_portrait, 0.3)
+
+# ══════════════════════════════════════════
+# Phase E: Gold settlement animation
+# ══════════════════════════════════════════
+
+func _play_gold_settlement(old_gold: int, new_gold: int, gain: int) -> void:
+	## Animate gold count-up on GoldLabel + float text flying to MatchPanel.
+	if gain <= 0:
+		return
+
+	# Count up gold label from old to new value (0.5s)
+	CountUp.play(ui.gold_label, old_gold, new_gold, 0.5, "$")
+
+	# Create float text "+X$" near score area, fly to GoldLabel
+	var floater := Label.new()
+	floater.text = "+%d$" % gain
+	floater.add_theme_font_size_override("font_size", 36)
+	floater.add_theme_color_override("font_color", Color(0.941, 0.816, 0.376))
+	floater.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	# Position above the score label (center of left panel area)
+	var start_pos: Vector2 = ui.score_label.global_position + Vector2(ui.score_label.size.x * 0.5 - 60, -40)
+	floater.global_position = start_pos
+	floater.size = Vector2(120, 40)
+	ui.panel_bg.add_child(floater)
+
+	# Fly to GoldLabel position
+	var target_pos: Vector2 = ui.gold_label.global_position + Vector2(ui.gold_label.size.x * 0.5 - 20, 0)
+	var tw := floater.create_tween()
+	tw.set_ignore_time_scale(true)
+	tw.tween_property(floater, "global_position", target_pos, 0.5).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_SINE)
+	tw.parallel().tween_property(floater, "scale", Vector2(0.7, 0.7), 0.5).set_ease(Tween.EASE_IN)
+
+	# On arrival: flash + SFX
+	tw.tween_callback(func():
+		if is_instance_valid(floater):
+			floater.queue_free()
+		if is_instance_valid(ui.gold_label):
+			GlobalTweens.scale_pop(ui.gold_label, 1.15, 0.2)
+		GlobalTweens.play_sfx(SB.UI_COIN)
+	)
+
+
+# ══════════════════════════════════════════
+# Phase E: Shop skip overlay + auto-enter
+# ══════════════════════════════════════════
+
+func _create_shop_skip_overlay() -> void:
+	## Create transparent fullscreen overlay to skip shop wait on click/key.
+	_shop_skip_requested = false
+	_shop_skip_overlay = Control.new()
+	_shop_skip_overlay.name = "ShopSkipOverlay"
+	_shop_skip_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	_shop_skip_overlay.anchor_right = 1.0
+	_shop_skip_overlay.anchor_bottom = 1.0
+	_shop_skip_overlay.gui_input.connect(_on_skip_overlay_input)
+	add_child(_shop_skip_overlay)
+
+	# Wait for 0.9s dwell, then enter shop (unless already skipped)
+	await get_tree().create_timer(0.9).timeout
+	_do_shop_transition()
+
+
+func _on_skip_overlay_input(event: InputEvent) -> void:
+	if _shop_skip_requested:
+		return
+	if (event is InputEventMouseButton and event.pressed) or (event is InputEventKey and event.pressed):
+		_shop_skip_requested = true
+		_do_shop_transition()
+
+
+func _do_shop_transition() -> void:
+	## Clean up skip overlay and enter shop (guarded against double call by shop_handler).
+	if _shop_skip_overlay != null and is_instance_valid(_shop_skip_overlay):
+		_shop_skip_overlay.queue_free()
+		_shop_skip_overlay = null
+	if is_instance_valid(ui) and NinKingGameState.current_state == NinKingGameState.State.SEAL_COMPLETE:
+		shop_handler.go_shop_pressed()

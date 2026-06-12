@@ -19,6 +19,7 @@ func setup(
 	col0: Label, col1: Label, col2: Label, col_xi: Label,
 	shadow_type: Label, flash_type: Label, destroy_type: Label,
 	shadow_score: Label, flash_score: Label, destroy_score: Label,
+	shadow_lv: Label, flash_lv: Label, destroy_lv: Label,
 	play: Button, status: Label
 ) -> void:
 	assert(head != null, "HandDisplay.setup: head must not be null")
@@ -35,6 +36,7 @@ func setup(
 		col0, col1, col2, col_xi,
 		shadow_type, flash_type, destroy_type,
 		shadow_score, flash_score, destroy_score,
+		shadow_lv, flash_lv, destroy_lv,
 		play
 	)
 

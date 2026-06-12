@@ -72,3 +72,17 @@ theme = ExtResource("3_theme")
 theme_override_fonts/font = ExtResource("4_font")
 theme_override_font_sizes/font_size = 32
 text = "退出游戏"
+
+[node name="DebugBtn" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 1540.0
+offset_top = 968.0
+offset_right = 1840.0
+offset_bottom = 1040.0
+theme = ExtResource("3_theme")
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(0.6, 0.3, 0.3, 1.0)
+text = "DEBUG"
+mouse_filter = 0

@@ -3,15 +3,16 @@ extends Control
 
 ## Centralized UI management for NinKing (忍者牌 × 比鸡).
 ## Delegates to HandDisplay, HandInteraction, DeckViewerController,
-## DunHighlighter, ResultScreenDisplay, NinjaBarDisplay.
+## DunHighlighter, ResultScreenDisplay, NinjaBarNode (preloaded).
 ## All display updates go through this class — game_manager.gd only handles flow.
+## NinjaBarNode loaded dynamically (avoids editor cache conflicts).
+
 
 # ═══ Sub-views ═══
 @onready var level_intro: Control = %LevelIntro
 @onready var game_layout: Control = %GameLayout
 @onready var game_bg: TextureRect = %GameBg
 @onready var scoring_overlay: Control = %ScoringOverlay
-@onready var level_complete: Control = %LevelComplete
 @onready var game_over: Control = %GameOver
 @onready var shop_overlay: Control = %ShopOverlay  # Phase C 🏪
 
@@ -44,6 +45,9 @@ const BOSS_PORTRAITS: Dictionary = {
 @onready var shadow_score_label: Label = %ShadowScore
 @onready var flash_score_label: Label = %FlashScore
 @onready var destroy_score_label: Label = %DestroyScore
+@onready var shadow_lv_label: Label = %ShadowLv
+@onready var flash_lv_label: Label = %FlashLv
+@onready var destroy_lv_label: Label = %DestroyLv
 @onready var score_label: Label = %ScoreLabel
 @onready var target_score_label: Label = %TargetScoreLabel
 @onready var progress_bar: ProgressBar = %ProgressBar
@@ -86,11 +90,6 @@ const BOSS_PORTRAITS: Dictionary = {
 @onready var score_value_label: Label = %ScoreValueLabel
 @onready var score_breakdown: Label = %ScoreBreakdown
 
-# ═══ Level complete ═══
-@onready var complete_label: Label = %CompleteLabel
-@onready var reward_label: Label = %RewardLabel
-@onready var to_shop_button: Button = %ToShopButton
-
 # ═══ Game over ═══
 @onready var game_over_label: Label = %GameOverLabel
 @onready var score_summary: Label = %ScoreSummary
@@ -109,7 +108,7 @@ var hand_interaction: RefCounted  # HandInteraction
 var deck_viewer_ctrl: DeckViewerController
 var dun_highlighter: DunHighlighter
 var result_screen: ResultScreenDisplay
-var ninja_bar: NinjaBarDisplay
+var ninja_bar
 
 
 func _ready() -> void:
@@ -121,6 +120,7 @@ func _ready() -> void:
 		col0_label, col1_label, col2_label, col_xi_label,
 		shadow_type_label, flash_type_label, destroy_type_label,
 		shadow_score_label, flash_score_label, destroy_score_label,
+		shadow_lv_label, flash_lv_label, destroy_lv_label,
 		play_btn, status_label
 	)
 
@@ -143,18 +143,17 @@ func _ready() -> void:
 		head_cards, middle_cards, tail_cards
 	)
 
-	# Result screen display (scoring / complete / victory / gameover / xi)
+	# Result screen display (scoring / victory / gameover / xi)
 	result_screen = ResultScreenDisplay.new()
 	result_screen.setup(
-		reward_label, complete_label,
 		victory_label, victory_stats_summary,
 		game_over_label, score_summary,
 		hand_name_label, score_value_label, score_breakdown
 	)
 
-	# Ninja bar display
-	ninja_bar = NinjaBarDisplay.new()
-	ninja_bar.setup(ninja_bar_container)
+	# Ninja bar — attached as Node child of the HBoxContainer
+	ninja_bar = load("res://scripts/ninking/ui/ninja_bar_node.gd").new()
+	ninja_bar_container.add_child(ninja_bar)
 
 	# ── Three-Dun title progressive outline (V20) ──
 	head_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.3))
@@ -172,11 +171,9 @@ func _ready() -> void:
 # ══════════════════════════════════════════
 
 func show_view(view: String) -> void:
-	game_bg.visible = (view in ["game", "intro", "scoring", "complete"])
+	game_bg.visible = (view in ["game", "intro", "scoring", "shop"])
 	level_intro.visible = (view == "intro")
-	game_layout.visible = (view in ["game", "scoring"])
-	# Balatro-style: no overlay dimming during scoring — inline HUD animation
-	level_complete.visible = (view == "complete")
+	game_layout.visible = (view in ["game", "scoring", "shop"])
 	shop_overlay.visible = (view == "shop")
 	game_over.visible = (view == "gameover")
 	victory_overlay.visible = (view == "victory")
@@ -209,8 +206,6 @@ func show_shop(shop_mgr: ShopManager, gold: int, colors: Dictionary) -> void:
 	# Wire signals to game_manager (emitted via UIManager for relay)
 	panel.purchase_requested.connect(_on_shop_purchase_requested)
 	panel.item_purchase_requested.connect(_on_shop_item_purchase_requested)
-	panel.enchant_purchase_requested.connect(_on_shop_enchant_purchase_requested)
-
 	panel.reroll_requested.connect(_on_shop_reroll_requested)
 	panel.continue_requested.connect(_on_shop_continue_requested)
 
@@ -230,7 +225,6 @@ func hide_shop() -> void:
 		all_cards = panel.get_all_cards()
 
 	await NinKingTween.play_shop_exit({
-		overlay = panel.overlay,
 		panel = panel,
 		all_cards = all_cards,
 	})
@@ -239,6 +233,9 @@ func hide_shop() -> void:
 		panel.queue_free()
 	_current_shop_panel = null
 	shop_overlay.visible = false
+	# Restore hand area visibility (dimmed during shop entry)
+	if game_layout.has_node("CenterColumn/HandArea"):
+		game_layout.get_node("CenterColumn/HandArea").modulate = Color.WHITE
 
 
 func is_shop_open() -> bool:
@@ -269,17 +266,9 @@ func shop_panel_mark_item_purchased(item_id: String) -> void:
 		_current_shop_panel.mark_item_purchased(item_id)
 
 
-## B5: Open enchant target selector on the active shop panel.
-## `on_card_selected` receives (card_index: int).
-func shop_panel_start_enchant_targeting(hand: Array, on_card_selected: Callable) -> void:
-	if _current_shop_panel != null and is_instance_valid(_current_shop_panel):
-		_current_shop_panel.start_enchant_targeting(hand, on_card_selected)
-
-
 # 🏪 Shop signal relay — game_manager connects to these
 signal shop_purchase_requested(ability_data: Dictionary)
 signal shop_item_purchase_requested(item_data: Dictionary)
-signal shop_enchant_purchase_requested(item_data: Dictionary)  # B5
 signal shop_reroll_requested()
 signal shop_continue_requested()
 
@@ -288,9 +277,6 @@ func _on_shop_purchase_requested(data: Dictionary) -> void:
 
 func _on_shop_item_purchase_requested(data: Dictionary) -> void:
 	shop_item_purchase_requested.emit(data)
-
-func _on_shop_enchant_purchase_requested(data: Dictionary) -> void:
-	shop_enchant_purchase_requested.emit(data)
 
 func _on_shop_reroll_requested() -> void:
 	shop_reroll_requested.emit()
@@ -391,10 +377,6 @@ func refresh_ninjas(owned_ninjas: Array, max_slots: int) -> void:
 # ══════════════════════════════════════════
 # Result screens — delegated to ResultScreenDisplay
 # ══════════════════════════════════════════
-
-func set_level_complete(gold_reward: int) -> void:
-	result_screen.set_level_complete(gold_reward)
-
 
 func set_victory(barrier: int, score: int) -> void:
 	result_screen.set_victory(barrier, score)

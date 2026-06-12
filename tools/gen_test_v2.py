@@ -1,0 +1,673 @@
+#!/usr/bin/env python3
+"""
+NinKing 忍者牌测试数据批量生成器 v2
+- 覆盖 30 张计分类忍者（66 基础 + 90 扩展 = 156 测试对，312 行 CSV）
+- 每卡 5-6 组测试：基础(T1/T2/T3) + 扩展(高强度/喜联动/高列乘/边界)
+- 支持 xi_bonus（喜鹊）、xi_override（清一色）、模拟累积状态（成长卡 n_s*）
+- 输出 UTF-8 BOM CSV
+"""
+
+import csv, os
+
+# ════════════════════════════════
+# 牌值定义
+# ════════════════════════════════
+
+RANK_VAL = {'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14}
+RANK_CHIP = {2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:10,12:10,13:10,14:11}
+SUIT_TIE = {'♠':4,'♥':3,'♦':2,'♣':1}
+HT_NAMES = {0:'散牌',1:'对子',2:'顺子',3:'同花',4:'同花顺',5:'豹子'}
+H_CHIPS = {0:5,1:10,2:20,3:30,4:50,5:100}
+H_MULT = {0:1,1:2,2:3,3:4,4:5,5:8}
+COL_X = {0:1,1:2,2:4,3:8,4:16,5:32}
+XI_GLOBAL = {'全黑':2,'全红':2,'全顺':2,'全同花':3,'四张':5,'全三条':4}
+XI_GROUP = {'三清':2,'三顺清':3,'顺清打头':2}
+
+def pc(s):
+    return (s[0], RANK_VAL[s[1:]])
+
+def cchip(c): return RANK_CHIP[c[1]]
+def gchips(cs): return sum(cchip(c) for c in cs)
+def is_flush(cs): return len({c[0] for c in cs}) == 1
+
+def eval_group(cs):
+    r = sorted([c[1] for c in cs])
+    flush = is_flush(cs)
+    straight = (r[1]==r[0]+1 and r[2]==r[1]+1) or (r[0]==2 and r[1]==3 and r[2]==14)
+    rc = {}
+    for v in r: rc[v]=rc.get(v,0)+1
+    if 3 in rc.values(): ht=5
+    elif flush and straight: ht=4
+    elif flush: ht=3
+    elif straight: ht=2
+    elif 2 in rc.values(): ht=1
+    else: ht=0
+    str_val = ht*100 + r[2]*10 + r[1] + SUIT_TIE.get(cs[2][0],1)
+    return ht, str_val
+
+def eval_col(cs): return eval_group(cs)[0]
+
+def detect_xi(h, m, t, he, me, te):
+    all_c = h+m+t
+    ht,mt,tt = he[0],me[0],te[0]
+    xi = []
+    if all(c[0] in '♠♣' for c in all_c): xi.append('全黑')
+    if all(c[0] in '♥♦' for c in all_c): xi.append('全红')
+    ar = sorted(c[1] for c in all_c)
+    if all(ar[i]==ar[i-1]+1 for i in range(1,9)): xi.append('全顺')
+    if all(c[0]==all_c[0][0] for c in all_c): xi.append('全同花')
+    rc = {}
+    for c in all_c: rc[c[1]]=rc.get(c[1],0)+1
+    if any(v>=4 for v in rc.values()): xi.append('四张')
+    if is_flush(h) and is_flush(m) and is_flush(t): xi.append('三清')
+    if ht==4 and mt==4 and tt==4: xi.append('三顺清')
+    if ht==4: xi.append('顺清打头')
+    if all(v==3 for v in rc.values()): xi.append('全三条')
+    return xi
+
+def calc(cs_h, cs_m, cs_t, ne, xi_bonus=0, xi_override=None):
+    he = eval_group(cs_h)
+    me = eval_group(cs_m)
+    te = eval_group(cs_t)
+    hk,mk,tk = he[0],me[0],te[0]
+
+    def gs(cs, tp, ne_g):
+        cc = gchips(cs)
+        chips = cc + H_CHIPS[tp] + ne_g['c']
+        mult = H_MULT[tp] + ne_g['m']
+        xp = 1
+        for xv in ne_g['x']: xp *= xv
+        return chips*mult*xp, cc, H_CHIPS[tp], chips, H_MULT[tp], mult
+
+    hs, hcc, hhc, hct, hhm, hmt = gs(cs_h, hk, ne['h'])
+    ms, mcc, mhc, mct, mhm, mmt = gs(cs_m, mk, ne['m'])
+    ts, tcc, thc, tct, thm, tmt = gs(cs_t, tk, ne['t'])
+
+    c0t = eval_col([cs_h[0],cs_m[0],cs_t[0]])
+    c1t = eval_col([cs_h[1],cs_m[1],cs_t[1]])
+    c2t = eval_col([cs_h[2],cs_m[2],cs_t[2]])
+    col_x = []
+    for ct in [c0t,c1t,c2t]:
+        xv = COL_X[ct]
+        if xv > 1: col_x.append(xv)
+    col_str = ','.join(str(x) for x in col_x)
+
+    xi_list = detect_xi(cs_h, cs_m, cs_t, he, me, te)
+    xi_glob = [x for x in xi_list if x in XI_GLOBAL]
+    xi_grp  = [x for x in xi_list if x in XI_GROUP]
+    if xi_override is None: xi_override = {}
+
+    sq = 2 + xi_bonus
+    if '三清' in xi_override: sq = xi_override['三清']
+    if '三清' in xi_list: hs*=sq; ms*=sq; ts*=sq
+    ssq = 3 + xi_bonus
+    if '三顺清' in xi_list: hs*=ssq; ms*=ssq; ts*=ssq
+    shq = 2 + xi_bonus
+    if '顺清打头' in xi_list: hs*=shq
+
+    raw = hs + ms + ts
+    final = max(raw, 1)
+    for x in col_x: final *= x
+    for x in xi_glob: final *= XI_GLOBAL[x] + xi_bonus
+
+    return {
+        'hs':hs,'ms':ms,'ts':ts,
+        'hcc':hcc,'hhc':hhc,'hct':hct,'hhm':hhm,'hmt':hmt,
+        'mcc':mcc,'mhc':mhc,'mct':mct,'mhm':mhm,'mmt':mmt,
+        'tcc':tcc,'thc':thc,'tct':tct,'thm':thm,'tmt':tmt,
+        'raw':raw,'col_x':col_x,'col_str':col_str,
+        'xi_list':xi_list,'xi_glob':xi_glob,'final':final,
+        'ht':hk,'mt':mk,'tt':tk,
+        'ct0':c0t,'ct1':c1t,'ct2':c2t,
+    }
+
+# ════════════════════════════════
+# CSV 输出
+# ════════════════════════════════
+
+HEADER = [
+    'version','card_id','card_name','test_no','test_desc',
+    'h1','h2','h3','m1','m2','m3','t1','t2','t3',
+    'h_type','m_type','t_type','h_tc','m_tc','t_tc',
+    'c0_type','c1_type','c2_type','col_str','xi_str',
+    'nc_h_c','nc_h_m','nc_h_x','nc_m_c','nc_m_m','nc_m_x','nc_t_c','nc_t_m','nc_t_x',
+    'h_card_chips','h_hand_chips','h_chips_total','h_hand_mult','h_mult_total','h_score',
+    'm_card_chips','m_hand_chips','m_chips_total','m_hand_mult','m_mult_total','m_score',
+    't_card_chips','t_hand_chips','t_chips_total','t_hand_mult','t_mult_total','t_score',
+    'total_raw','col_x_prod','xi_x_prod','final_score'
+]
+
+def mkrow(ver, cid, cname, tno, desc, hs, ms, ts, r, ne, xi_bonus=0):
+    def colp(xs): return 1 if not xs else xs[0] if len(xs)==1 else eval('*'.join(str(x) for x in xs))
+    xi_prod = 1
+    for x in r['xi_glob']: xi_prod *= XI_GLOBAL[x] + xi_bonus
+    ne_hc = ne['h']['c']; ne_hm = ne['h']['m']; ne_hx = ne['h']['x']
+    ne_mc = ne['m']['c']; ne_mm = ne['m']['m']; ne_mx = ne['m']['x']
+    ne_tc = ne['t']['c']; ne_tm = ne['t']['m']; ne_tx = ne['t']['x']
+    return {
+        'version':ver,'card_id':cid,'card_name':cname,
+        'test_no':tno,'test_desc':desc,
+        'h1':hs[0],'h2':hs[1],'h3':hs[2],
+        'm1':ms[0],'m2':ms[1],'m3':ms[2],
+        't1':ts[0],'t2':ts[1],'t3':ts[2],
+        'h_type':HT_NAMES[r['ht']],'m_type':HT_NAMES[r['mt']],'t_type':HT_NAMES[r['tt']],
+        'h_tc':r['ht'],'m_tc':r['mt'],'t_tc':r['tt'],
+        'c0_type':HT_NAMES[r['ct0']],'c1_type':HT_NAMES[r['ct1']],'c2_type':HT_NAMES[r['ct2']],
+        'col_str':r['col_str'],'xi_str':','.join(r['xi_list']),
+        'nc_h_c':ne_hc,'nc_h_m':ne_hm,'nc_h_x':str(ne_hx).replace('[','').replace(']','').replace(', ','/'),
+        'nc_m_c':ne_mc,'nc_m_m':ne_mm,'nc_m_x':str(ne_mx).replace('[','').replace(']','').replace(', ','/'),
+        'nc_t_c':ne_tc,'nc_t_m':ne_tm,'nc_t_x':str(ne_tx).replace('[','').replace(']','').replace(', ','/'),
+        'h_card_chips':r['hcc'],'h_hand_chips':r['hhc'],'h_chips_total':r['hct'],
+        'h_hand_mult':r['hhm'],'h_mult_total':r['hmt'],'h_score':r['hs'],
+        'm_card_chips':r['mcc'],'m_hand_chips':r['mhc'],'m_chips_total':r['mct'],
+        'm_hand_mult':r['mhm'],'m_mult_total':r['mmt'],'m_score':r['ms'],
+        't_card_chips':r['tcc'],'t_hand_chips':r['thc'],'t_chips_total':r['tct'],
+        't_hand_mult':r['thm'],'t_mult_total':r['tmt'],'t_score':r['ts'],
+        'total_raw':r['raw'],'col_x_prod':colp(r['col_x']),
+        'xi_x_prod':xi_prod,'final_score':r['final'],
+    }
+
+def no_ninja():
+    return {'h':{'c':0,'m':0,'x':[]},'m':{'c':0,'m':0,'x':[]},'t':{'c':0,'m':0,'x':[]}}
+
+def ne_all(c=0,m=0,x=None):
+    if x is None: x=[]
+    return {'h':{'c':c,'m':m,'x':x},'m':{'c':c,'m':m,'x':x},'t':{'c':c,'m':m,'x':x}}
+
+def ne_partial(**kwargs):
+    """Build ne — only specify groups that differ from default zero.
+       e.g. ne_partial(h={'m':5}, t={'x':[2]})
+       Each group dict auto-fills missing c/m/x to zero."""
+    base = {'h':{'c':0,'m':0,'x':[]},'m':{'c':0,'m':0,'x':[]},'t':{'c':0,'m':0,'x':[]}}
+    for k,v in kwargs.items():
+        g = {'c':0,'m':0,'x':[]}
+        g.update(v)
+        base[k] = g
+    return base
+
+ALL = []
+
+def tc(cid, cname, tno, desc, hs, ms, ts, ne=None, xi_bonus=0, xi_override=None):
+    if ne is None: ne = no_ninja()
+    h = [pc(x) for x in hs]
+    m = [pc(x) for x in ms]
+    t = [pc(x) for x in ts]
+    r0 = calc(h,m,t,no_ninja())
+    ALL.append(mkrow('baseline',cid,cname,tno,desc+'无忍',hs,ms,ts,r0,no_ninja()))
+    r1 = calc(h,m,t,ne, xi_bonus=xi_bonus, xi_override=xi_override)
+    ALL.append(mkrow('with_ninja',cid,cname,tno,desc,hs,ms,ts,r1,ne, xi_bonus=xi_bonus))
+    return r1['final'] - r0['final']
+
+# ════════════════════════════════
+# Batch 1: 无条件通用 (6 cards) — T1全散/T2头豹 + T3高强度/T4喜/T5高列乘
+# ════════════════════════════════
+
+total_delta = 0
+
+# n_001 +10 chips
+total_delta += tc('n_001','手里剑','T1','全散+10chips',
+    ['♠2','♥7','♦J'], ['♣4','♠9','♥Q'], ['♣3','♠6','♥8'], ne_all(c=10))
+total_delta += tc('n_001','手里剑','T2','头豹中散尾散+10chips',
+    ['♠J','♥J','♦J'], ['♣5','♠7','♥10'], ['♣2','♠6','♥8'], ne_all(c=10))
+total_delta += tc('n_001','手里剑','T3','高强度头豹中同花尾同花顺+10c',
+    ['♠J','♥J','♦J'], ['♠3','♠5','♠9'], ['♥Q','♥K','♥A'], ne_all(c=10))
+total_delta += tc('n_001','手里剑','T4','全同花喜+10c',
+    ['♠2','♠5','♠9'], ['♠3','♠7','♠J'], ['♠4','♠8','♠K'], ne_all(c=10))
+total_delta += tc('n_001','手里剑','T5','三列顺×64+10c',
+    ['♠2','♠7','♠10'], ['♥3','♥8','♥J'], ['♦4','♦9','♦Q'], ne_all(c=10))
+
+# n_002 +4 mult
+total_delta += tc('n_002','苦无','T1','全散+4mult',
+    ['♠2','♥7','♦J'], ['♣4','♠9','♥Q'], ['♣3','♠6','♥K'], ne_all(m=4))
+total_delta += tc('n_002','苦无','T2','头豹中豹尾散+4mult',
+    ['♠J','♥J','♦J'], ['♠3','♥3','♦3'], ['♣5','♠7','♥9'], ne_all(m=4))
+total_delta += tc('n_002','苦无','T3','高强度头同花中同花顺尾豹+4m',
+    ['♠3','♠7','♠9'], ['♥Q','♥K','♥A'], ['♦J','♣J','♠J'], ne_all(m=4))
+total_delta += tc('n_002','苦无','T4','四张喜+4m',
+    ['♠A','♥A','♦A'], ['♣A','♠2','♥7'], ['♣3','♠6','♥9'], ne_all(m=4))
+total_delta += tc('n_002','苦无','T5','三列豹×32768+4m',
+    ['♠3','♥7','♦J'], ['♦3','♠7','♥J'], ['♣3','♣7','♠J'], ne_all(m=4))
+
+# n_003 +15 chips +2 mult
+total_delta += tc('n_003','风魔手里剑','T1','全散+15c+2m',
+    ['♠2','♥7','♦J'], ['♣4','♠9','♥Q'], ['♣3','♠6','♥K'], ne_all(c=15,m=2))
+total_delta += tc('n_003','风魔手里剑','T2','头豹尾顺+15c+2m',
+    ['♠J','♥J','♦J'], ['♣5','♠7','♥9'], ['♠A','♥K','♦Q'], ne_all(c=15,m=2))
+total_delta += tc('n_003','风魔手里剑','T3','高强度头豹中同花顺尾同花+15c+2m',
+    ['♠J','♥J','♦J'], ['♥Q','♥K','♥A'], ['♠3','♠7','♠9'], ne_all(c=15,m=2))
+total_delta += tc('n_003','风魔手里剑','T4','全同花喜+15c+2m',
+    ['♠2','♠5','♠9'], ['♠3','♠7','♠J'], ['♠4','♠8','♠K'], ne_all(c=15,m=2))
+total_delta += tc('n_003','风魔手里剑','T5','三列顺×64+15c+2m',
+    ['♠2','♠7','♠10'], ['♥3','♥8','♥J'], ['♦4','♦9','♦Q'], ne_all(c=15,m=2))
+
+# n_004 +20 chips
+total_delta += tc('n_004','重刃','T1','全散+20chips',
+    ['♠2','♥7','♦J'], ['♣4','♠9','♥Q'], ['♣3','♠6','♥K'], ne_all(c=20))
+total_delta += tc('n_004','重刃','T2','头豹中顺尾散+20chips',
+    ['♠J','♥J','♦J'], ['♠5','♥6','♣7'], ['♣2','♠9','♥K'], ne_all(c=20))
+total_delta += tc('n_004','重刃','T3','高强度头豹中同花顺尾同花+20c',
+    ['♠J','♥J','♦J'], ['♥Q','♥K','♥A'], ['♠3','♠7','♠9'], ne_all(c=20))
+total_delta += tc('n_004','重刃','T4','四张喜+20c',
+    ['♠A','♥A','♦A'], ['♣A','♠2','♥7'], ['♣3','♠6','♥9'], ne_all(c=20))
+total_delta += tc('n_004','重刃','T5','三列豹×32768+20c',
+    ['♠3','♥7','♦J'], ['♦3','♠7','♥J'], ['♣3','♣7','♠J'], ne_all(c=20))
+
+# n_005 +10 mult
+total_delta += tc('n_005','影缝','T1','全散+10mult',
+    ['♠2','♥7','♦J'], ['♣4','♠9','♥Q'], ['♣3','♠6','♥K'], ne_all(m=10))
+total_delta += tc('n_005','影缝','T2','头豹尾顺+10mult',
+    ['♠J','♥J','♦J'], ['♣5','♠7','♥9'], ['♠A','♥K','♦Q'], ne_all(m=10))
+total_delta += tc('n_005','影缝','T3','高强度头同花中同花顺尾豹+10m',
+    ['♠3','♠7','♠9'], ['♥Q','♥K','♥A'], ['♦J','♣J','♠J'], ne_all(m=10))
+total_delta += tc('n_005','影缝','T4','全同花喜+10m',
+    ['♠2','♠5','♠9'], ['♠3','♠7','♠J'], ['♠4','♠8','♠K'], ne_all(m=10))
+total_delta += tc('n_005','影缝','T5','三列豹×32768+10m',
+    ['♠3','♥7','♦J'], ['♦3','♠7','♥J'], ['♣3','♣7','♠J'], ne_all(m=10))
+
+# n_006 +30 chips +10 mult
+total_delta += tc('n_006','奥义之卷','T1','全散+30c+10m',
+    ['♠2','♥7','♦J'], ['♣4','♠9','♥Q'], ['♣3','♠6','♥K'], ne_all(c=30,m=10))
+total_delta += tc('n_006','奥义之卷','T2','头豹尾顺+30c+10m',
+    ['♠J','♥J','♦J'], ['♣5','♠7','♥9'], ['♠A','♥K','♦Q'], ne_all(c=30,m=10))
+total_delta += tc('n_006','奥义之卷','T3','高强度头豹中同花顺尾同花+30c+10m',
+    ['♠J','♥J','♦J'], ['♥Q','♥K','♥A'], ['♠3','♠7','♠9'], ne_all(c=30,m=10))
+total_delta += tc('n_006','奥义之卷','T4','全同花喜+30c+10m',
+    ['♠2','♠5','♠9'], ['♠3','♠7','♠J'], ['♠4','♠8','♠K'], ne_all(c=30,m=10))
+total_delta += tc('n_006','奥义之卷','T5','三列顺×64+30c+10m',
+    ['♠2','♠7','♠10'], ['♥3','♥8','♥J'], ['♦4','♦9','♦Q'], ne_all(c=30,m=10))
+
+
+# ════════════════════════════════
+# Batch 2: 组别定向 (6 cards) — 边界/替代触发/喜联动
+# ════════════════════════════════
+
+# n_g01 虎头 head≤对子→+5m head
+tc('n_g01','虎头','T1','头散触发+5m',
+    ['♠9','♥10','♣Q'], ['♠8','♥8','♣J'], ['♦J','♦Q','♦K'],
+    ne_partial(h={'c':0,'m':5,'x':[]}))
+tc('n_g01','虎头','T2','头对边界+5m',
+    ['♠2','♥2','♣5'], ['♠4','♥4','♣8'], ['♦J','♦Q','♦K'],
+    ne_partial(h={'c':0,'m':5,'x':[]}))
+tc('n_g01','虎头','T3','不触发头顺',
+    ['♠2','♥3','♣4'], ['♠5','♥6','♣7'], ['♠J','♥Q','♣K'], no_ninja())
+tc('n_g01','虎头','T4','头散+中豹尾豹+5m',
+    ['♠2','♥5','♠9'], ['♦J','♣J','♥J'], ['♦Q','♣Q','♥Q'],
+    ne_partial(h={'c':0,'m':5,'x':[]}))
+tc('n_g01','虎头','T5','不触发头同花',
+    ['♠2','♠7','♠J'], ['♥3','♥6','♥9'], ['♦4','♦8','♦Q'], no_ninja())
+tc('n_g01','虎头','T6','头散+四张喜+5m',
+    ['♠2','♥7','♦J'], ['♣A','♠A','♥A'], ['♦A','♣2','♠5'],
+    ne_partial(h={'c':0,'m':5,'x':[]}))
+
+# n_g02 龙尾 tail≥同花顺→×2 tail
+tc('n_g02','龙尾','T1','尾同花顺触发×2',
+    ['♠2','♥5','♦9'], ['♣4','♠7','♥10'], ['♦J','♦Q','♦K'],
+    ne_partial(t={'x':[2]}))
+tc('n_g02','龙尾','T2','尾豹触发×2',
+    ['♠2','♥5','♦9'], ['♣4','♠7','♥10'], ['♥J','♠J','♦J'],
+    ne_partial(t={'x':[2]}))
+tc('n_g02','龙尾','T3','不触发尾同花',
+    ['♠2','♥5','♦9'], ['♣4','♠7','♥10'], ['♥3','♥6','♥9'], no_ninja())
+tc('n_g02','龙尾','T4','尾同花顺+全黑三清触发×2',
+    ['♠2','♠5','♠9'], ['♠3','♠7','♠J'], ['♠Q','♠K','♠A'],
+    ne_partial(t={'x':[2]}))
+tc('n_g02','龙尾','T5','尾豹+列对×2触发×2',
+    ['♠3','♠7','♠K'], ['♣3','♣7','♣A'], ['♥J','♠J','♦J'],
+    ne_partial(t={'x':[2]}))
+tc('n_g02','龙尾','T6','不触发尾同花+列顺',
+    ['♠2','♥3','♦4'], ['♠7','♥8','♦9'], ['♠5','♠J','♠Q'], no_ninja())
+
+# n_g03 中流砥柱 mid+50c
+tc('n_g03','中流砥柱','T1','中+50c全散',
+    ['♠2','♥7','♦J'], ['♣4','♠9','♥Q'], ['♣3','♠6','♥K'],
+    ne_partial(m={'c':50}))
+tc('n_g03','中流砥柱','T2','中+50c同花',
+    ['♠2','♥7','♦J'], ['♠3','♠8','♠K'], ['♣4','♥6','♦5'],
+    ne_partial(m={'c':50}))
+tc('n_g03','中流砥柱','T3','中+50c豹子',
+    ['♠2','♥7','♦J'], ['♥5','♠5','♦5'], ['♣4','♠9','♥K'],
+    ne_partial(m={'c':50}))
+tc('n_g03','中流砥柱','T4','中+50c同花顺',
+    ['♠2','♥7','♦J'], ['♥Q','♥K','♥A'], ['♣4','♠9','♦10'],
+    ne_partial(m={'c':50}))
+tc('n_g03','中流砥柱','T5','中+50c+全同花喜',
+    ['♠2','♠5','♠9'], ['♠3','♠7','♠J'], ['♠4','♠8','♠K'],
+    ne_partial(m={'c':50}))
+
+# n_g04 藏锋 head散→tail×3, head对→tail×2, head其他→×1
+tc('n_g04','藏锋','T1','头散尾×3',
+    ['♠2','♥7','♦J'], ['♣4','♠9','♥Q'], ['♣3','♠6','♥K'],
+    ne_partial(t={'x':[3]}))
+tc('n_g04','藏锋','T2','头对尾×2',
+    ['♠3','♥3','♦9'], ['♠2','♠7','♥J'], ['♠5','♥6','♣8'],
+    ne_partial(t={'x':[2]}))
+tc('n_g04','藏锋','T3','头顺尾不变',
+    ['♠2','♥3','♣4'], ['♠6','♦8','♥J'], ['♠A','♥K','♦Q'], no_ninja())
+tc('n_g04','藏锋','T4','头豹尾不变(最高却不触发)',
+    ['♥J','♠J','♦J'], ['♠2','♥7','♦9'], ['♣3','♠6','♥K'], no_ninja())
+tc('n_g04','藏锋','T5','头同花尾不变',
+    ['♠2','♠7','♠J'], ['♠5','♥6','♦9'], ['♣4','♠8','♥K'], no_ninja())
+tc('n_g04','藏锋','T6','头散+全同花喜尾×3',
+    ['♠2','♠5','♠9'], ['♠3','♠7','♠J'], ['♠4','♠8','♠K'],
+    ne_partial(t={'x':[3]}))
+
+# n_g05 双头蛇 head/mid≥顺子→+40c
+tc('n_g05','双头蛇','T1','中顺触发+40c中',
+    ['♠2','♥7','♦J'], ['♠5','♥6','♣7'], ['♣3','♠9','♥K'],
+    ne_partial(m={'c':40}))
+tc('n_g05','双头蛇','T2','头顺触发+40c头',
+    ['♠2','♥3','♣4'], ['♠7','♦9','♥J'], ['♠6','♥8','♣A'],
+    ne_partial(h={'c':40}))
+tc('n_g05','双头蛇','T3','不触发头散中散',
+    ['♠2','♥7','♦J'], ['♣4','♠9','♥Q'], ['♣3','♠6','♥K'], no_ninja())
+tc('n_g05','双头蛇','T4','中同花触发+40c中',
+    ['♠2','♥7','♦J'], ['♠3','♠8','♠K'], ['♣4','♠9','♥Q'],
+    ne_partial(m={'c':40}))
+tc('n_g05','双头蛇','T5','头同花顺触发+40c头',
+    ['♥Q','♥K','♥A'], ['♠2','♦5','♥9'], ['♣4','♠7','♠J'],
+    ne_partial(h={'c':40}))
+tc('n_g05','双头蛇','T6','不对不触发+列乘',
+    ['♠J','♥J','♦J'], ['♠3','♥3','♦5'], ['♣2','♠9','♥Q'], no_ninja())
+
+# n_g06 金字塔 strict_ascending→×2 all
+tc('n_g06','金字塔','T1','散<对<顺×2',
+    ['♠2','♥5','♦9'], ['♠3','♥3','♣8'], ['♠J','♥Q','♦K'],
+    ne_all(x=[2]))
+tc('n_g06','金字塔','T2','散<顺<同花×2',
+    ['♠2','♥5','♦9'], ['♠3','♥4','♣5'], ['♠7','♠J','♠Q'],
+    ne_all(x=[2]))
+tc('n_g06','金字塔','T3','不触发全散',
+    ['♠2','♥7','♦J'], ['♣4','♠9','♥Q'], ['♣3','♠6','♥K'], no_ninja())
+tc('n_g06','金字塔','T4','对<同花<豹子×2',
+    ['♠3','♥3','♣9'], ['♥2','♥5','♥8'], ['♠A','♦A','♣A'],
+    ne_all(x=[2]))
+tc('n_g06','金字塔','T5','散<同花<同花顺×2',
+    ['♠2','♥5','♦9'], ['♠3','♠6','♠10'], ['♥J','♥Q','♥K'],
+    ne_all(x=[2]))
+tc('n_g06','金字塔','T6','散<对<顺+全黑×2',
+    ['♠2','♠5','♠9'], ['♠3','♠3','♣J'], ['♠7','♠Q','♠K'],
+    ne_all(x=[2]))
+
+
+# ════════════════════════════════
+# Batch 3: 喜强化 (4 cards) — 更多喜组合/边界
+# ════════════════════════════════
+
+# n_x01 喜鹊 +1 per xi
+tc('n_x01','喜鹊','T1','三清×3',
+    ['♠2','♠5','♠9'], ['♥3','♥6','♥8'], ['♦2','♦5','♦9'], no_ninja(), xi_bonus=1)
+tc('n_x01','喜鹊','T2','全黑+三清双喜×3',
+    ['♠2','♠5','♠9'], ['♠3','♠6','♠8'], ['♣2','♣5','♣9'], no_ninja(), xi_bonus=1)
+tc('n_x01','喜鹊','T3','无喜不触发',
+    ['♠2','♥7','♦J'], ['♣4','♠9','♥Q'], ['♣3','♠6','♥K'], no_ninja(), xi_bonus=1)
+tc('n_x01','喜鹊','T4','全红+三顺清双喜+1',
+    ['♥2','♥5','♥9'], ['♦3','♦6','♦8'], ['♥J','♥Q','♥K'], no_ninja(), xi_bonus=1)
+tc('n_x01','喜鹊','T5','全同花+全顺双喜+1',
+    ['♠2','♠5','♠8'], ['♠3','♠6','♠9'], ['♠4','♠7','♠10'], no_ninja(), xi_bonus=1)
+tc('n_x01','喜鹊','T6','全三条×5+1',
+    ['♠3','♥3','♦3'], ['♣4','♠4','♥4'], ['♦5','♣5','♠5'], no_ninja(), xi_bonus=1)
+
+# n_x02 四张猎人 +30c(四张) else +5c
+tc('n_x02','四张猎人','T1','四张触发+30c',
+    ['♠3','♥3','♦3'], ['♣3','♠7','♥10'], ['♣2','♠6','♥8'], ne_all(c=30))
+tc('n_x02','四张猎人','T2','不触发+5c',
+    ['♠2','♥7','♦J'], ['♣4','♠9','♥Q'], ['♣3','♠6','♥K'], ne_all(c=5))
+tc('n_x02','四张猎人','T3','两组四张触发+30c',
+    ['♠3','♥3','♦3'], ['♣3','♠7','♥7'], ['♦7','♣7','♠K'], ne_all(c=30))
+tc('n_x02','四张猎人','T4','四张+全黑喜+30c',
+    ['♠3','♥3','♦3'], ['♣3','♠5','♠9'], ['♠2','♠7','♠J'], ne_all(c=30))
+tc('n_x02','四张猎人','T5','四张+列对+30c',
+    ['♠A','♥A','♦A'], ['♣A','♠2','♠5'], ['♣3','♣7','♣J'], ne_all(c=30))
+
+# n_x03 清一色 三清×3
+tc('n_x03','清一色','T1','三清触发×3',
+    ['♠2','♠5','♠9'], ['♥3','♥6','♥8'], ['♦2','♦5','♦9'], no_ninja(), xi_override={'三清':3})
+tc('n_x03','清一色','T2','三清+全黑叠加×3+×2',
+    ['♠2','♠5','♠9'], ['♠3','♠6','♠8'], ['♣2','♣5','♣9'], no_ninja(), xi_override={'三清':3})
+tc('n_x03','清一色','T3','无三清不触发',
+    ['♠2','♥7','♦J'], ['♣4','♠9','♥Q'], ['♣3','♠6','♥K'], no_ninja(), xi_override={'三清':3})
+tc('n_x03','清一色','T4','三清+全红叠加×3+×2',
+    ['♥2','♥5','♥9'], ['♦3','♦6','♦8'], ['♥A','♥Q','♥7'], no_ninja(), xi_override={'三清':3})
+tc('n_x03','清一色','T5','三清+三顺清双组级×3+×3',
+    ['♠2','♠5','♠9'], ['♥3','♥6','♥8'], ['♦4','♦7','♦J'], no_ninja(), xi_override={'三清':3})
+tc('n_x03','清一色','T6','三清+全同花全局×3',
+    ['♠2','♠5','♠9'], ['♠3','♠6','♠8'], ['♠4','♠7','♠J'], no_ninja(), xi_override={'三清':3})
+
+# n_x06 龙之眼 per四张异点×2(上限×4)
+tc('n_x06','龙之眼','T1','两套四张×4',
+    ['♠3','♥3','♦3'], ['♣3','♠7','♥7'], ['♦7','♣7','♠K'], ne_all(x=[2,2]))
+tc('n_x06','龙之眼','T2','单套四张×2',
+    ['♠3','♥3','♦3'], ['♣3','♠5','♥7'], ['♦9','♠J','♥K'], ne_all(x=[2]))
+tc('n_x06','龙之眼','T3','无四张不触发',
+    ['♠2','♥7','♦J'], ['♣4','♠9','♥Q'], ['♣3','♠6','♥K'], no_ninja())
+tc('n_x06','龙之眼','T4','三套四张上限×4(clamped)',
+    ['♠3','♥3','♦3'], ['♣3','♠7','♥7'], ['♦7','♣7','♠7'], ne_all(x=[2,2]))
+tc('n_x06','龙之眼','T5','两套四张+全黑喜×4',
+    ['♠A','♥A','♦A'], ['♣A','♠2','♥2'], ['♦2','♣2','♠K'], ne_all(x=[2,2]))
+tc('n_x06','龙之眼','T6','单套四张+列对×2',
+    ['♠3','♥3','♦3'], ['♣3','♠5','♠7'], ['♦J','♣Q','♠A'], ne_all(x=[2]))
+
+
+# ════════════════════════════════
+# Batch 4: 跨组联动+点数 (5 cards) — 新牌型组合/极值
+# ════════════════════════════════
+
+# n_c01 镜像 head_type=tail_type→×2 head
+tc('n_c01','镜像','T1','头尾对子×2头',
+    ['♠2','♥2','♦9'], ['♠3','♥5','♣8'], ['♠J','♥J','♦K'],
+    ne_partial(h={'x':[2]}))
+tc('n_c01','镜像','T2','头尾同花×2头',
+    ['♠2','♠5','♠9'], ['♥3','♥6','♥8'], ['♦J','♦7','♦K'],
+    ne_partial(h={'x':[2]}))
+tc('n_c01','镜像','T3','不触发头散尾豹',
+    ['♠2','♥5','♦9'], ['♣4','♠7','♥10'], ['♠J','♥J','♦J'], no_ninja())
+tc('n_c01','镜像','T4','头尾豹子×2头',
+    ['♠Q','♥Q','♦Q'], ['♠2','♥5','♣8'], ['♠A','♥A','♦A'],
+    ne_partial(h={'x':[2]}))
+tc('n_c01','镜像','T5','头尾同花顺×2头',
+    ['♠J','♠Q','♠K'], ['♥2','♥5','♦9'], ['♥10','♥J','♥Q'],
+    ne_partial(h={'x':[2]}))
+tc('n_c01','镜像','T6','头尾顺子×2头+列乘',
+    ['♠2','♥3','♦4'], ['♠7','♦8','♠K'], ['♥9','♣10','♦J'],
+    ne_partial(h={'x':[2]}))
+
+# n_c02 铁索连环 same-type组+15c+3m
+tc('n_c02','铁索连环','T1','头中间散+15c+3m',
+    ['♠2','♥7','♦J'], ['♣4','♠9','♥Q'], ['♣3','♠6','♥K'],
+    ne_partial(h={'c':15,'m':3,'x':[]}, m={'c':15,'m':3,'x':[]}))
+tc('n_c02','铁索连环','T2','中尾同对+15c+3m',
+    ['♠2','♥7','♦J'], ['♠3','♥3','♦5'], ['♣4','♥4','♠9'],
+    ne_partial(m={'c':15,'m':3,'x':[]}, t={'c':15,'m':3,'x':[]}))
+tc('n_c02','铁索连环','T3','头尾同顺+15c+3m',
+    ['♠2','♥3','♦4'], ['♠7','♠9','♠J'], ['♠10','♥J','♦Q'],
+    ne_partial(h={'c':15,'m':3,'x':[]}, t={'c':15,'m':3,'x':[]}))
+tc('n_c02','铁索连环','T4','三组全散全组+15c+3m',
+    ['♠2','♥5','♦9'], ['♣4','♠7','♥10'], ['♣3','♠6','♥8'],
+    ne_all(c=15,m=3))
+tc('n_c02','铁索连环','T5','三组全同花+喜全组+15c+3m',
+    ['♠2','♠5','♠9'], ['♠3','♠7','♠J'], ['♠4','♠8','♠K'],
+    ne_all(c=15,m=3))
+
+# n_f01 影之眷顾 +3c per J/Q/K
+tc('n_f01','影之眷顾','T1','3张人牌+9c全组',
+    ['♠2','♥5','♦9'], ['♣4','♠7','♥10'], ['♠J','♥Q','♦K'], ne_all(c=9))
+tc('n_f01','影之眷顾','T2','0张人牌+0c',
+    ['♠2','♥5','♦9'], ['♣4','♠7','♥10'], ['♠3','♣6','♦8'], no_ninja())
+tc('n_f01','影之眷顾','T3','6张人牌+18c',
+    ['♠J','♥J','♦J'], ['♣Q','♠Q','♥Q'], ['♣3','♠6','♥8'], ne_all(c=18))
+tc('n_f01','影之眷顾','T4','9张全人牌+27c',
+    ['♠J','♥Q','♦K'], ['♣J','♠Q','♥K'], ['♦J','♣Q','♠K'], ne_all(c=27))
+tc('n_f01','影之眷顾','T5','3张人牌+四张喜+9c',
+    ['♠A','♥A','♦A'], ['♣A','♠J','♥Q'], ['♣3','♠6','♥8'], ne_all(c=9))
+
+# n_f02 王牌侍从 +5m per A(cap20)
+tc('n_f02','王牌侍从','T1','1张A+5m',
+    ['♠2','♥5','♦9'], ['♣4','♠7','♥10'], ['♠A','♥Q','♦K'], ne_all(m=5))
+tc('n_f02','王牌侍从','T2','4张A上限+20m',
+    ['♠A','♥A','♦A'], ['♣A','♠2','♥5'], ['♣3','♠7','♥9'], ne_all(m=20))
+tc('n_f02','王牌侍从','T3','0张A+0m',
+    ['♠2','♥5','♦9'], ['♣4','♠7','♥10'], ['♠3','♣6','♦8'], no_ninja())
+tc('n_f02','王牌侍从','T4','2张A+10m',
+    ['♠A','♥A','♦5'], ['♣2','♠7','♥9'], ['♣3','♠6','♦8'], ne_all(m=10))
+tc('n_f02','王牌侍从','T5','4张A+20m+四张喜',
+    ['♠A','♥A','♦A'], ['♣A','♠2','♥7'], ['♣3','♠6','♥9'], ne_all(m=20))
+
+
+# ════════════════════════════════
+# Batch 5: 规则变更+传说+疾风 (4 cards)
+# ════════════════════════════════
+
+# n_r02 均衡之印 三组同牌型→×2全
+tc('n_r02','均衡之印','T1','三组对子×2',
+    ['♠2','♥2','♣9'], ['♠3','♥3','♣8'], ['♠J','♥J','♣5'], ne_all(x=[2]))
+tc('n_r02','均衡之印','T2','三组同花×2',
+    ['♠2','♠5','♠9'], ['♥3','♥6','♥8'], ['♦4','♦7','♦J'], ne_all(x=[2]))
+tc('n_r02','均衡之印','T3','三组散牌×2',
+    ['♠2','♥5','♦9'], ['♣4','♠7','♥10'], ['♣3','♠6','♥8'], ne_all(x=[2]))
+tc('n_r02','均衡之印','T4','三组顺子×2',
+    ['♠2','♥3','♣4'], ['♠5','♥6','♣7'], ['♠8','♥9','♣10'], ne_all(x=[2]))
+tc('n_r02','均衡之印','T5','三组豹子+全三条×2',
+    ['♠3','♥3','♦3'], ['♣Q','♠Q','♥Q'], ['♦K','♣K','♠K'], ne_all(x=[2]))
+
+# n_r03 独尊之印 tail×2 if head+mid≥对子
+tc('n_r03','独尊之印','T1','头中对子触发尾×2',
+    ['♠2','♥2','♣5'], ['♠3','♥3','♣8'], ['♠J','♥J','♦Q'],
+    ne_partial(t={'x':[2]}))
+tc('n_r03','独尊之印','T2','头对中散触发尾×2',
+    ['♠A','♥A','♦5'], ['♠2','♥7','♣9'], ['♠J','♥J','♦Q'],
+    ne_partial(t={'x':[2]}))
+tc('n_r03','独尊之印','T3','不触发头散中散',
+    ['♠2','♥5','♦9'], ['♣4','♠7','♥10'], ['♠3','♣6','♥8'], no_ninja())
+tc('n_r03','独尊之印','T4','头豹中同花触发+全黑喜',
+    ['♠J','♥J','♦J'], ['♠2','♠7','♠9'], ['♠Q','♠K','♠A'],
+    ne_partial(t={'x':[2]}))
+
+# n_t05 疾风 首回合×2全
+tc('n_t05','疾风','T1','全散首回合×2',
+    ['♠2','♥7','♦J'], ['♣4','♠9','♥Q'], ['♣3','♠6','♥K'], ne_all(x=[2]))
+tc('n_t05','疾风','T2','高强度×2',
+    ['♠J','♥J','♦J'], ['♥Q','♥K','♥A'], ['♠3','♠7','♠9'], ne_all(x=[2]))
+tc('n_t05','疾风','T3','全同花喜×2',
+    ['♠2','♠5','♠9'], ['♠3','♠7','♠J'], ['♠4','♠8','♠K'], ne_all(x=[2]))
+tc('n_t05','疾风','T4','三列豹×32768+×2',
+    ['♠3','♥7','♦J'], ['♦3','♠7','♥J'], ['♣3','♣7','♠J'], ne_all(x=[2]))
+
+# n_l01 天下人 constraint_override+×2全
+tc('n_l01','天下人','T1','全散×2',
+    ['♠2','♥7','♦J'], ['♣4','♠9','♥Q'], ['♣3','♠6','♥K'], ne_all(x=[2]))
+tc('n_l01','天下人','T2','高强度×2',
+    ['♠J','♥J','♦J'], ['♥Q','♥K','♥A'], ['♠3','♠7','♠9'], ne_all(x=[2]))
+tc('n_l01','天下人','T3','全同花喜×2',
+    ['♠2','♠5','♠9'], ['♠3','♠7','♠J'], ['♠4','♠8','♠K'], ne_all(x=[2]))
+tc('n_l01','天下人','T4','三列顺×64+×2',
+    ['♠2','♠7','♠10'], ['♥3','♥8','♥J'], ['♦4','♦9','♦Q'], ne_all(x=[2]))
+
+
+# ════════════════════════════════
+# Batch 6: 成长修炼 (5 cards) — 低/中/高累积 + 高强度/喜
+# ════════════════════════════════
+
+SD = ['♠2','♥7','♦J'], ['♣4','♠9','♥Q'], ['♣3','♠6','♥K']
+
+# n_s01 +1m/play
+tc('n_s01','修行者','T1','累积3次+3m', *SD, ne_all(m=3))
+tc('n_s01','修行者','T2','累积6次+6m', *SD, ne_all(m=6))
+tc('n_s01','修行者','T3','未累积', *SD, no_ninja())
+tc('n_s01','修行者','T4','累积4次+4m', *SD, ne_all(m=4))
+tc('n_s01','修行者','T5','累积6次+高强度+6m',
+    ['♠J','♥J','♦J'], ['♠3','♠7','♠9'], ['♥Q','♥K','♥A'], ne_all(m=6))
+tc('n_s01','修行者','T6','累积6次+全同花喜+6m',
+    ['♠2','♠5','♠9'], ['♠3','♠7','♠J'], ['♠4','♠8','♠K'], ne_all(m=6))
+
+# n_s02 +25c/三清play
+tc('n_s02','三清道人','T1','三清累积2次+50c', *SD, ne_all(c=50))
+tc('n_s02','三清道人','T2','三清累积4次+100c', *SD, ne_all(c=100))
+tc('n_s02','三清道人','T3','未累积', *SD, no_ninja())
+tc('n_s02','三清道人','T4','三清累积3次+75c', *SD, ne_all(c=75))
+tc('n_s02','三清道人','T5','累积4次+高强度+100c',
+    ['♠J','♥J','♦J'], ['♠3','♠7','♠9'], ['♥Q','♥K','♥A'], ne_all(c=100))
+tc('n_s02','三清道人','T6','累积4次+全同花喜+100c',
+    ['♠2','♠5','♠9'], ['♠3','♠7','♠J'], ['♠4','♠8','♠K'], ne_all(c=100))
+
+# n_s03 +30c/尾同花顺play
+tc('n_s03','龙脉','T1','尾同花顺累积2次+60c', *SD, ne_all(c=60))
+tc('n_s03','龙脉','T2','尾同花顺累积4次+120c', *SD, ne_all(c=120))
+tc('n_s03','龙脉','T3','未累积', *SD, no_ninja())
+tc('n_s03','龙脉','T4','尾同花顺累积3次+90c', *SD, ne_all(c=90))
+tc('n_s03','龙脉','T5','累积4次+高强度+120c',
+    ['♠J','♥J','♦J'], ['♠3','♠7','♠9'], ['♠Q','♠K','♠A'], ne_all(c=120))
+tc('n_s03','龙脉','T6','累积4次+全同花喜+120c',
+    ['♠2','♠5','♠9'], ['♠3','♠7','♠J'], ['♠4','♠8','♠K'], ne_all(c=120))
+
+# n_s05 +3m/头散play
+tc('n_s05','头悬梁','T1','头散累积3次+9m', *SD, ne_all(m=9))
+tc('n_s05','头悬梁','T2','头散累积6次+18m', *SD, ne_all(m=18))
+tc('n_s05','头悬梁','T3','未累积', *SD, no_ninja())
+tc('n_s05','头悬梁','T4','头散累积4次+12m', *SD, ne_all(m=12))
+tc('n_s05','头悬梁','T5','累积6次+中豹尾同花+18m',
+    ['♠2','♥5','♦9'], ['♥J','♠J','♦J'], ['♠3','♠7','♠Q'], ne_all(m=18))
+tc('n_s05','头悬梁','T6','累积6次+全同花喜+18m',
+    ['♠2','♠5','♠9'], ['♠3','♠7','♠J'], ['♠4','♠8','♠K'], ne_all(m=18))
+
+# n_s06 +5m/尾≥同花顺play
+tc('n_s06','尾刺骨','T1','尾同花顺累积2次+10m', *SD, ne_all(m=10))
+tc('n_s06','尾刺骨','T2','尾同花顺累积4次+20m', *SD, ne_all(m=20))
+tc('n_s06','尾刺骨','T3','未累积', *SD, no_ninja())
+tc('n_s06','尾刺骨','T4','尾同花顺累积3次+15m', *SD, ne_all(m=15))
+tc('n_s06','尾刺骨','T5','累积4次+头豹中同花+20m',
+    ['♠J','♥J','♦J'], ['♠3','♠7','♠9'], ['♠Q','♠K','♠A'], ne_all(m=20))
+tc('n_s06','尾刺骨','T6','累积4次+全同花喜+20m',
+    ['♠2','♠5','♠9'], ['♠3','♠7','♠J'], ['♠4','♠8','♠K'], ne_all(m=20))
+
+
+# ════════════════════════════════
+# 输出 CSV
+# ════════════════════════════════
+
+OUT = r'E:\01 Code\Godot_v4.6.2\NinKing\docs\ninking\testing\ninja-test-full.csv'
+with open(OUT, 'w', newline='', encoding='utf-8-sig') as f:
+    w = csv.DictWriter(f, fieldnames=HEADER)
+    w.writeheader()
+    for row in ALL:
+        w.writerow(row)
+
+n = len(ALL)
+pairs = n // 2
+print(f'[OK] Generated {n} rows ({pairs} test pairs) -> {OUT}')
+
+# Delta validation
+print()
+print('=== Delta 验证摘要 ===')
+errors = []
+for i in range(0, len(ALL), 2):
+    r = ALL[i]
+    r2 = ALL[i+1]
+    d = r2['final_score'] - r['final_score']
+    cid = r['card_id']; name = r['card_name']; tno = r['test_no']
+
+    # baseline has no ne, xi_bonus=0, xi_override=None
+    # with_ninja has whatever ne/xi_bonus/xi_override was passed
+    # If scores differ (d != 0), the ninja is having an effect
+    has_ne = any(int(r2[f'nc_{g}_{s}']) != 0 for g in ['h','m','t'] for s in ['c','m'])
+    has_ne = has_ne or any(r2[f'nc_{g}_x'] not in ['','1','[]'] for g in ['h','m','t'])
+    # xi_bonus/xi_override also count as effect — both change score when xi triggers
+    effect = has_ne or d != 0
+
+    if effect and d == 0:
+        errors.append(f'{cid} {name} {tno}: Δ=0 but effect expected')
+        print(f'  {cid} {name} {tno}: final {r["final_score"]}→{r2["final_score"]} Δ={d} [ERROR] 应有Delta')
+    elif not effect and d != 0:
+        errors.append(f'{cid} {name} {tno}: Δ={d} but no effect')
+        print(f'  {cid} {name} {tno}: final {r["final_score"]}→{r2["final_score"]} Δ={d} [ERROR] 不应有Delta')
+    else:
+        status = '[OK]' + (f' Δ={d}' if effect else ' 不触发Δ=0')
+        print(f'  {cid} {name} {tno}: final {r["final_score"]}→{r2["final_score"]} {status}')
+
+print()
+if errors:
+    print(f'[ERROR] {len(errors)} delta mismatches:')
+    for e in errors:
+        print(f'  - {e}')
+else:
+    print('[OK] All deltas correct!')
+print(f'\n打开: docs/ninking/testing/ninja-test-full.csv')

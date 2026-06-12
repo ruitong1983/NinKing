@@ -47,3 +47,4 @@ slot_test.png
 *.lock.json
 skills-lock.json
 .agents/
+*.translation

@@ -1,9 +1,9 @@
 # 忍者牌 — 设计与实现
 
-> **最后更新:** 2026-06-11
-> **关联文档:** [`05-image-asset-generation-plan.md`](05-image-asset-generation-plan.md) · [`07-shop-ui-design.md`](07-shop-ui-design.md) · [`03-technical-design.md`](03-technical-design.md) · [`12-consumable-cards.md`](12-consumable-cards.md) · [`14-economy-and-progression.md`](14-economy-and-progression.md)
+> **最后更新:** 2026-06-12
+> **关联文档:** [`05-image-asset-generation-plan.md`](05-image-asset-generation-plan.md) · [`07-shop-ui-design.md`](07-shop-ui-design.md) · [`03-technical-design.md`](03-technical-design.md) · [`12-consumable-cards.md`](12-consumable-cards.md) · [`14-economy-and-progression.md`](14-economy-and-progression.md) · [`22-display-card-base-spec.md`](22-display-card-base-spec.md)
 >
-> **关键文件:** [`asset_registry.gd`](../../scripts/ninking/asset_registry.gd) · [`ninja_data.gd`](../../scripts/ninking/ninja_data.gd) · [`shop_ability_card.gd`](../../scripts/ninking/ui/shop_ability_card.gd) · [`shop_ability_card.tscn`](../../scenes/ninking/shop_ability_card.tscn)
+> **关键文件:** [`asset_registry.gd`](../../scripts/ninking/asset_registry.gd) · [`ninja_data.gd`](../../scripts/ninking/ninja_data.gd) · [`display_card_base.gd`](../../scripts/ninking/ui/display_card_base.gd) · [`shop_slot.gd`](../../scripts/ninking/ui/shop_slot.gd) · [`shop_slot.tscn`](../../scenes/ninking/shop_slot.tscn)
 >
 > **⭐ 后续设计方案前必须先读此文档。** 记忆索引: `pending-ninja-card-visual-plan.md`
 
@@ -85,48 +85,84 @@
 
 ## 3. 场景结构
 
-### 3.1 `shop_ability_card.tscn` 节点树
+### 3.1 继承体系
 
 ```
-AbilityCard (Panel)                         280×400  ← custom_minimum_size
-├── ArtArea (ColorRect)                     280×230  ← 卡面艺术区
-│   ├── ArtFrame (ColorRect)                256×206  ← 内框装饰（12px margin）
-│   ├── ArtIcon (ColorRect) ⛔ 当前透明     64×64    ← 应改为 TextureRect
-│   └── ArtNameLabel (Label) ⚠️ 临时方案    240×190  ← 半透明大字显示名称
-├── RarityBadge (Panel)                     64×24    ← 稀有度标签
-│   └── RarityLabel (Label)
-├── NamePlate (ColorRect)                   280×38   ← 名称底条
-├── NameLabel (Label)                       248×26   ← 忍者名称
-├── EffectLabel (Label)                     248×18   ← 效果描述
-├── ConditionLabel (Label)                  248×16   ← 触发条件
-├── PriceBadge (Panel)                      88×38    ← 价格标签
-│   ├── CoinIcon (Label)                    "💰"
-│   └── PriceLabel (Label)                  数字
-└── BuyButton (Button)                      88×36    ← 入手按钮
+Card (card-framework)
+  ├── NinKingCard              ← 扑克牌（纹理体系 + 手牌拖拽）
+  └── DisplayCardBase          ← ⭐ 非扑克牌统一基类（v2026-06-12）
+       ├── ShopAbilityCard     ← 商店忍者卡
+       ├── ShopItemCard        ← 商店道具/星图卡
+       └── (未来) DeckPreviewCard / CollectionCard
 ```
 
-### 3.2 布局坐标速查
+所有非扑克牌共享 `DisplayCardBase` 的统一视觉层：外框/阴影/圆角/结界染色/content_slot/name_plate/入场动效/悬停光效(scale 1.03)/右键详情弹窗。
+详见规格书 [`22-display-card-base-spec.md`](22-display-card-base-spec.md)。
 
-| 节点 | x | y | w | h |
-|------|---|---|---|---|
-| ArtArea | 0 | 0 | 280 | 230 |
-| ArtFrame | 12 | 12 | 256 | 206 |
-| ArtIcon | 居中 | 居中 | 64 | 64 |
-| ArtNameLabel | 20 | 20 | 240 | 190 |
-| RarityBadge | 204 | 18 | 64 | 24 |
-| NamePlate | 0 | 230 | 280 | 38 |
-| NameLabel | 16 | 236 | 248 | 26 |
-| EffectLabel | 16 | 276 | 248 | 18 |
-| ConditionLabel | 16 | 300 | 248 | 16 |
-| PriceBadge | 176 | 344 | 88 | 38 |
-| CoinIcon | 6 | 3 | 18 | 27 |
-| PriceLabel | 26 | 3 | 44 | 27 |
-| BuyButton | 92 | 350 | 88 | 36 |
+### 3.2 `ShopAbilityCard` — 场景树（继承自 DisplayCardBase）
 
-### 3.3 场景文件位置
+```
+ShopAbilityCard (Control → DisplayCardBase)    280×400  ← custom_minimum_size
+  extends DisplayCardBase → Card → DraggableObject → Control
+  
+  FrontFace (Control, hidden)                   ← Card 框架要求，不使用
+  └── TextureRect (TextureRect, hidden)
+  BackFace (Control, hidden)
+  └── TextureRect (TextureRect, hidden)
+  
+  card_panel (Panel)                            ← 铺满整卡
+    StyleBoxFlat: 圆角12, 边框2, 阴影8, bg_color 随结界染色
+    
+    content_slot (Control)                      ← 角色插画区（子类填充）
+      anchors: L=0.04, T=0.04, R=0.96, B=0.50
+      clip_contents = true
+      └── [TextureRect]                         ← _add_content_texture() 统一加载
+    
+    rarity_badge (Panel)                        ← 稀有度徽章（覆盖在插图右上）
+      anchors: L=0.55, T=0.04, R=0.95, B=0.12
+      └── RarityLabel (Label)
+    
+    effect_label (Label)                        ← 效果描述
+      anchors: L=0.04, T=0.52, R=0.96, B=0.62
+    
+    condition_label (Label)                     ← 触发条件
+      anchors: L=0.04, T=0.62, R=0.96, B=0.72
+    
+    name_plate (Panel)                          ← 名称帖
+      anchors: L=0.04, T=0.72, R=0.96, B=0.82
+      └── name_label (Label)
+    
+    price_badge (Panel)                         ← 价格标签
+      anchors: L=0.04, T=0.84, R=0.42, B=0.95
+      └── PriceLabel (Label)
+    
+    buy_button (Button)                         ← 购买按钮
+      anchors: L=0.50, T=0.84, R=0.96, B=0.95
+```
 
-- 场景模板：`scenes/ninking/shop_ability_card.tscn`
-- 脚本逻辑：`scripts/ninking/ui/shop_ability_card.gd`
+### 3.3 `ShopItemCard` — 场景树（继承自 DisplayCardBase）
+
+与 ShopAbilityCard 共享 DisplayCardBase 基类，差异点：
+- 无 `rarity_badge` / `condition_label`
+- 增加 `desc_label`（道具描述）
+- `content_slot` 放星图/道具插画
+
+```
+card_panel
+  content_slot (anchors B=0.55)                ← 星图/道具插画
+  effect_label (T=0.56, B=0.66)                ← 效果文本（星图显示 Lv.N）
+  desc_label (T=0.66, B=0.74)                  ← 道具描述
+  name_plate (T=0.74, B=0.82)
+  price_badge (T=0.84, B=0.95)
+  buy_button (T=0.84, B=0.95)
+```
+
+### 3.4 场景文件位置
+
+- 基类场景（纯卡面 120×160）：`scenes/ninking/display_card_base.tscn`
+- 基类脚本：`scripts/ninking/ui/display_card_base.gd`
+- 商店展示容器（Balatro 风）：`scenes/ninking/shop_slot.tscn`（内嵌 DisplayCard + 购买UI）
+- 容器脚本：`scripts/ninking/ui/shop_slot.gd`（数据驱动 ability/item）
 - 商店批量渲染：`shop_ui.gd._render_abilities()`
 
 ---
@@ -144,36 +180,51 @@ AbilityCard (Panel)                         280×400  ← custom_minimum_size
 渲染层
   shop_ui.gd._render_abilities()            ← 遍历库存
        ↓
-  shop_ability_card.tscn.instantiate()      ← 模板实例化
+  ShopSlot.instantiate()                    ← 商店容器实例化
        ↓
-  card.setup(ninja_data)                    ← 填入数据 → 视觉拼装
+  slot.setup(ninja_data)                    ← DisplayCard.setup() + 加载插画 + 设置文本/价格/按钮
        ↓
-  card.apply_barrier_theme(colors)          ← 结界配色应用
+  slot.apply_barrier_theme(colors)          ← 结界配色 + 稀有度边框/辉光
 ```
 
-### 4.2 `setup()` 伪代码（当前实现 vs 目标实现）
+### 4.2 `ShopSlot.setup()` — 实际实现 (Balatro 风)
 
 ```gdscript
+# shop_slot.gd — 数据驱动 ability/item 统一场景
 func setup(data: Dictionary) -> void:
-    # ✅ 文字标签 — 当前正常工作
+    _data = data
+    _is_item = data.has("hand_type") or data.get("type") == "item"
+
+    # 1. Init DisplayCard (纯卡面 120×160)
+    display_card.setup(data)
+
+    # 2. 加载插画
+    _load_illustration(data)
+
+    # 3. 标签 (卡名/效果/条件 — 在卡下方)
     name_label.text = data.get("name", "???")
-    effect_label.text = data.get("effect_desc", "")
-    cond_label.text = data.get("condition_desc", "无条件触发")
+    effect_label.text = data.get("desc", "")
+    var cond: String = data.get("condition_desc", "")
+    condition_label.visible = not cond.is_empty()
+    condition_label.text = cond + "触发" if not cond.is_empty() else ""
+
+    # 4. 价格 + 购买按钮
+    price_label.text = "$%d" % data.get("cost", 0)
+    buy_button.pressed.connect(_on_buy_pressed)
+
+# 稀有度：边框色 + 辉光 (无浮标 badge)
+func _apply_rarity_border(rarity: String, colors: Dictionary) -> void:
+    match rarity:
+        "uncommon":
+            display_card.set_card_border(2, colors.accent, 6, ...)
+        "rare":
+            display_card.set_card_border(3, #E04040, 10, ...)
+        "legendary":
+            display_card.set_card_border(3, #FFD700, 14, ...)
+
+    # ── 价格 + 按钮 ──
     price_label.text = str(data.get("cost", 0))
-    art_name_label.text = data.get("name", "???")  # ⚠️ 临时
-
-    # ❌ 图标加载 — 此前已实现但被素材清理回退
-    # var icon_path = AssetRegistry.get_icon_path(data.id, data.effect)
-    # art_icon.texture = load(icon_path)
-
-    # ❌ 底板加载 — 从未实现（ninja_frame_*.png 不存在）
-    # var frame_path = "res://assets/images/ninjas/frames/ninja_frame_%s.png" % data.rarity
-    # frame_texture.texture = load(frame_path)
-
-    # ✅ 稀有度边框 — 正常工作
-    var r: String = data.get("rarity", "common")
-    _apply_rarity_style(r)
-    _setup_rarity_badge(r)
+    buy_button.pressed.connect(_on_buy_pressed)
 ```
 
 ### 4.3 忍者 ID → 图标路径映射
@@ -236,7 +287,8 @@ func setup(data: Dictionary) -> void:
 
 ## 6. 稀有度视觉系统
 
-`shop_ability_card.gd` 的 `RARITY_CONFIG` 字典控制：
+稀有度系统由 `shop_slot.gd`（商店容器）管理，不在 `DisplayCardBase` 基类中。
+`shop_slot.gd` 的 `_apply_rarity_border()` 方法控制：
 
 | 稀有度 | 边框宽 | 边框色 | 阴影 | Badge |
 |--------|--------|--------|------|-------|
@@ -251,32 +303,36 @@ func setup(data: Dictionary) -> void:
 
 ## 7. 当前实现问题
 
+> **v2026-06-12 DisplayCardBase 迁移后：** 旧拼装系统（ArtArea/ArtFrame/ArtIcon/ArtNameLabel/FrameTexture）已完全删除。
+> 所有展示卡统一使用 `content_slot` + `_add_content_texture()` 加载插画。以下仅保留未解决的问题。
+
 | # | 问题 | 说明 | 涉及文件 | 影响 |
 |---|------|------|----------|------|
-| 1 | **ArtIcon 类型错误** | 从 TextureRect 改为 ColorRect 后无法加载纹理 | `shop_ability_card.tscn` + `.gd` | 卡面艺术区空 |
-| 2 | **缺少底板节点** | 没有 TextureRect 接收 `ninja_frame_*.png` | `shop_ability_card.tscn` | 无稀有度底板 |
-| 3 | **图标加载代码缺失** | `setup()` 不调用 `AssetRegistry.get_icon_path()` | `shop_ability_card.gd` | 无分类图标 |
-| 4 | **底板加载代码缺失** | 无纹理加载逻辑 | `shop_ability_card.gd` | 无底板 |
-| 5 | **底板素材缺失** | 4 张 PNG 从未 AI 生成 | — | 有代码也没素材 |
-| 6 | **临时 ArtNameLabel** | 半透明文字替代图标，风格不统一 | `shop_ability_card.gd` + `.tscn` | 视觉临时方案 |
-| 7 | **商店道具卡同类问题** | `shop_item_card.tscn` 的 ArtIcon 也是空 ColorRect | `shop_item_card.tscn` + `.gd` | 道具卡也空 |
-| 8 | **忍者槽位图标正常** | `ninja_slot.tscn` 的 TextureRect + AssetRegistry 调用正确，可作为实现参考 | `ninja_slot.gd` | 参考实现 ✅ |
+| 2 | **缺少底板节点** | 旧拼装系统删除后，稀有度底板(`ninja_frame_*.png`)暂无挂载位置 | 已废弃 (Balatro 边框+辉光替代) | 关闭 |
+| 5 | **底板素材缺失** | 4 张 `ninja_frame_*.png` 从未 AI 生成 | — | 需先有素材再设计接入 |
+| 8 | **忍者槽位图标正常** | `ninja_slot.tscn` 的 TextureRect + AssetRegistry 调用正确 | `ninja_slot.gd` | 参考实现 ✅ |
+
+### 已关闭的问题（DisplayCardBase 迁移所致）
+
+| # | 问题 | 关闭原因 |
+|---|------|----------|
+| 1 | ArtIcon 类型错误 | 旧拼装系统删除，`content_slot` 统一加载插画 |
+| 3 | 图标加载代码缺失 | 图标在 `_add_content_texture()` 中统一加载 |
+| 4 | 底板加载代码缺失 | 待重做，不再依赖旧拼装层 |
+| 6 | 临时 ArtNameLabel | 删除 — 不再需要文字替代图标 |
+| 7 | 商店道具卡同类问题 | 道具卡同样迁移到 `content_slot` 模式 |
 
 ---
 
 ## 8. 后续设计方案待办
 
-设计忍者牌视觉制作方案时需覆盖以下议题：
+> **v2026-06-12 DisplayCardBase 迁移后：** 旧 ArtArea 拼装系统已删除。底板需要重新设计挂载方式。
 
-- [ ] **底板素材生成** — AI 生成 4 张 `ninja_frame_*.png`（规格 140×196，透明 PNG）
+- [ ] **底板素材生成** — AI 生成 4 张 `ninja_frame_*.png`（规格 280×400，透明 PNG，适配 DisplayCardBase 尺寸）
   - 参考 `05-image-asset-generation-plan.md` §5.2 提示词模板
   - 豆包 Seedream 4.0 少年漫画风，粗描边 + 半调网点
-- [ ] **场景结构调整** — `shop_ability_card.tscn`：
-  - ArtIcon: ColorRect → TextureRect（恢复纹理加载能力）
-  - 新增 `FrameTexture`（TextureRect）作为底板层（置于 ArtArea 底部）
-  - 层级顺序：底板 → ArtFrame → 图标 → ArtNameLabel
-- [ ] **代码恢复** — `shop_ability_card.gd.setup()`：
-  - 调用 `AssetRegistry.get_icon_path(id, effect)` → `art_icon.texture = load(path)`
+- [ ] **底板接入方式设计** — 底板作为 `content_slot` 中 TextureRect 的背景叠层？或在 card_panel 上叠加 overlay？
+  - 旧方案（ArtArea 多层拼装）已废弃，需基于 DisplayCardBase 重新设计
   - 加载底板：`frame_texture.texture = load("ninja_frame_%s.png" % rarity)`
 - [ ] **低配回退方案** — 底板素材未就绪时卡面至少显示分类图标 + 名称文字
 - [ ] **ArtNameLabel 存废** — 图标恢复后是否保留半透明水印文字
@@ -440,11 +496,11 @@ func setup(data: Dictionary) -> void:
 |------|------|
 | `scripts/ninking/ninja_data.gd` | 45 张忍者牌数据定义 + ALL_NINJAS 数组 |
 | `scripts/ninking/asset_registry.gd` | 图标路径映射（忍者 id→icon.png） |
-| `scripts/ninking/ui/shop_ability_card.gd` | 商店忍者牌组件脚本（setup + apply_barrier_theme） |
-| `scenes/ninking/shop_ability_card.tscn` | 商店忍者牌场景模板 |
+| `scripts/ninking/ui/shop_slot.gd` | 🆕 商店展示容器（DisplayCard + 购买UI，数据驱动） |
+| `scenes/ninking/shop_slot.tscn` | 🆕 商店展示容器场景 |
 | `scripts/ninking/ui/shop_ui.gd` | 商店面板（_render_abilities 批量生成忍者牌） |
 | `scripts/ninking/ui/ninja_slot.gd` | ✅ 忍者槽位（图标加载逻辑正确，可作参考实现） |
-| `scripts/ninking/ui/ninja_bar_display.gd` | ✅ 忍条显示（AssetRegistry 正确调用参考） |
+| `scripts/ninking/ui/ninja_bar_node.gd` | ✅ 忍条管理（diff 刷新/拖拽排序/Balatro zoom-in 详情） |
 | `scripts/ninking/ninja_scaling.gd` | 修炼成长引擎（n_s* 忍者效果） |
 | `scripts/ninking/score_calculator.gd` | 计分计算（忍者条件/效果评估） |
 | `docs/ninking/05-image-asset-generation-plan.md` | 拼装系统原始设计（§5.2 底板/§7.1 拼装） |

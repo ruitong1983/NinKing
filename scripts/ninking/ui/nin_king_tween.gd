@@ -4,150 +4,131 @@ extends RefCounted
 ##
 ## Delegates to GlobalTweens/TweenFX for individual tweens.
 ## Does NOT modify GlobalTweens or TweenFX.
-##
-## Usage:
-##   await NinKingTween.play_shop_entrance({overlay = ..., panel = ..., ...})
+
+# ─── Shared resources ───
+const _sound_bank := preload("res://scripts/config/sound_bank.gd")
 
 
-static func play_shop_entrance(config: Dictionary) -> void:
-	## Play the full shop entrance sequence (~1.6s total). Await-safe.
+static func play_shop_entrance_manga(config: Dictionary) -> void:
+	## 漫画格展开入场 (~0.95s total). Await-safe.
 	##
-	## Each await is guarded with is_instance_valid(panel) —
-	## if the scene is unloaded mid-animation, the sequence aborts silently.
+	## 时序:
+	##   0.00s  TopBorder scale_x: 0->1 墨线画出 + whoosh
+	##   0.15s  StageBg scale_y: 0->1 背景刷出
+	##   0.35s  TitleBar fade in
+	##   0.45s  Cards stagger_pop_in (每张 0.06s 间隔, 0.25s dur)
+	##   0.90s  impact_sfx 踩点
 	##
 	## config keys:
-	##   overlay: ColorRect          — full-screen dark overlay (fade in)
-	##   panel: Control              — shop panel (slam from below, anchor for validity checks)
-	##   all_cards: Array[Control]   — ability + item cards (stagger pop in)
-	##   focus_title: TextureRect    — title-bar focus lines (fade in)
-	##   focus_ability: TextureRect  — ability-section focus lines (fade in)
-	##   focus_item: TextureRect     — item-section focus lines (fade in)
-	##   focus_bottom: TextureRect   — bottom-bar focus lines (fade in)
-	##   whoosh_sfx: AudioStream     — panel descent whoosh (optional)
-	##   impact_sfx: AudioStream     — panel landing impact (optional)
+	##   top_border: ColorRect     — 顶部漫画格分割线
+	##   stage_bg: ColorRect       — 舞台背景
+	##   title_bar: ColorRect      — 标题栏
+	##   panel: Control            — shop panel (validity anchor)
+	##   all_cards: Array[Control] — 所有卡片
+	##   whoosh_sfx: AudioStream   — 墨线画出音效 (optional)
+	##   impact_sfx: AudioStream   — 卡片落地音效 (optional)
 
-	var overlay: ColorRect = config.get("overlay") as ColorRect
+	var top_border: ColorRect = config.get("top_border") as ColorRect
+	var stage_bg: ColorRect = config.get("stage_bg") as ColorRect
+	var title_bar: ColorRect = config.get("title_bar") as ColorRect
 	var panel: Control = config.get("panel") as Control
 	var all_cards: Array = config.get("all_cards", [])
-	var focus_title: ColorRect = config.get("focus_title") as ColorRect
-	var focus_ability: ColorRect = config.get("focus_ability") as ColorRect
-	var focus_item: ColorRect = config.get("focus_item") as ColorRect
-	var focus_bottom: ColorRect = config.get("focus_bottom") as ColorRect
 	var whoosh_sfx: AudioStream = config.get("whoosh_sfx") as AudioStream
 	var impact_sfx: AudioStream = config.get("impact_sfx") as AudioStream
 
-	# ── Phase 0: Overlay fade in (0.4s) ──
-	if overlay and is_instance_valid(overlay):
-		overlay.modulate.a = 0.0
-		GlobalTweens.fade_in(overlay, 0.4)
+	# ── Phase 0: Init states ──
+	if top_border and is_instance_valid(top_border):
+		top_border.scale = Vector2(0, 1)
+	if stage_bg and is_instance_valid(stage_bg):
+		stage_bg.scale = Vector2(1, 0)
+		# pivot: bottom-center (scale_y from bottom edge upward)
+		# Fallback to panel height if layout not yet computed
+		var bg_h: float = stage_bg.size.y if stage_bg.size.y > 0 else (panel.size.y if panel else 700.0)
+		stage_bg.pivot_offset = Vector2(0, bg_h)
+	if title_bar and is_instance_valid(title_bar):
+		title_bar.modulate.a = 0.0
 
-	# ── 溜め: brief silence (0.2s) ──
-	await Engine.get_main_loop().create_timer(0.2).timeout
-	if not is_instance_valid(panel):
-		return
-
-	# ── Phase 1: Panel slam from below (0.5s) ──
-	if panel:
+	# ── Phase 1: 墨线画出 (0.15s) + whoosh ──
+	if top_border and is_instance_valid(top_border):
 		if whoosh_sfx:
 			GlobalTweens.play_sfx(whoosh_sfx)
-		var tw := GlobalTweens.slide_in(panel, TweenFX.SlideDir.DOWN, 0.5)
-		if tw:
-			await tw.finished
-	if not is_instance_valid(panel):
-		return
-
-	# ── Phase 2: Landing impact ──
-	if impact_sfx:
-		GlobalTweens.play_sfx(impact_sfx)
-	GlobalTweens.do_hit_stop(0.08, 0.05)
-	GlobalTweens.shake_node(panel, 6.0, 0.15)
-	# Temporary speed-line substitute until V26 manga_speed is ready
-	GlobalTweens.burst_particles(panel.global_position + panel.size * 0.5, "shuriken")
-
-	# ── 溜め: hold the impact (0.25s) ──
-	await Engine.get_main_loop().create_timer(0.25).timeout
-	if not is_instance_valid(panel):
-		return
-
-	# ── Phase 3: Focus lines stagger ──
-	var focus_dur: float = 0.3
-	if focus_title and is_instance_valid(focus_title):
-		focus_title.modulate.a = 0.0
-		GlobalTweens.fade_in(focus_title, focus_dur)
-	await Engine.get_main_loop().create_timer(0.15).timeout
-	if not is_instance_valid(panel):
-		return
-
-	if focus_ability and is_instance_valid(focus_ability):
-		focus_ability.modulate.a = 0.0
-		GlobalTweens.fade_in(focus_ability, focus_dur)
-	await Engine.get_main_loop().create_timer(0.15).timeout
-	if not is_instance_valid(panel):
-		return
-
-	if focus_item and is_instance_valid(focus_item):
-		focus_item.modulate.a = 0.0
-		GlobalTweens.fade_in(focus_item, focus_dur)
-
-	if focus_bottom and is_instance_valid(focus_bottom):
-		focus_bottom.modulate.a = 0.0
-		focus_bottom.visible = true
-		GlobalTweens.fade_in(focus_bottom, focus_dur)
-
-	# ── Phase 4: Cards stagger pop in ──
-	if not all_cards.is_empty():
-		GlobalTweens.stagger_slide_in(all_cards, 0.1, 0.3, 30.0)
-
-
-static func play_shop_exit(config: Dictionary) -> void:
-	## Play the shop exit sequence (Phase C): cards gather → panel slide out → overlay fade out.
-	## Each await guarded with is_instance_valid(panel).
-	##
-	## config keys:
-	##   overlay: ColorRect          — dark overlay (fade out)
-	##   panel: Control              — shop panel (validity anchor + slide out)
-	##   all_cards: Array[Control]   — ability + item cards (gather to center then fade)
-	##   center_pos: Vector2         — gather target position (default: panel center)
-
-	var overlay: ColorRect = config.get("overlay") as ColorRect
-	var panel: Control = config.get("panel") as Control
-	var all_cards: Array = config.get("all_cards", [])
-	var center_pos: Vector2 = config.get("center_pos",
-		panel.get_viewport_rect().size * 0.5 if panel else Vector2(960, 540))
-
-	# ── Phase 1: Cards gather to center (0.3s) ──
-	for card in all_cards:
-		if is_instance_valid(card):
-			var tw: Tween = card.create_tween()
-			tw.set_parallel()
-			tw.tween_property(card, "scale", Vector2(0.1, 0.1), 0.3).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_BACK)
-			tw.tween_property(card, "global_position", center_pos, 0.3).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_BACK)
-			tw.tween_property(card, "modulate:a", 0.0, 0.25)
-
-	if not is_instance_valid(panel):
-		return
-	await panel.get_tree().create_timer(0.3).timeout
-	if not is_instance_valid(panel):
-		return
-
-	# ── Phase 2: Panel slide out downward (0.3s) ──
-	if panel:
-		GlobalTweens.play_sfx(preload("res://scripts/config/sound_bank.gd").SHOP_EXIT)
-		var tw: Tween = panel.create_tween()
-		tw.tween_property(panel, "position:y", panel.get_viewport_rect().size.y + 100, 0.3).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_BACK)
-		tw.parallel().tween_property(panel, "modulate:a", 0.0, 0.25)
+		var tw := top_border.create_tween()
+		tw.tween_property(top_border, "scale:x", 1.0, 0.15).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SINE)
 		await tw.finished
 
 	if not is_instance_valid(panel):
 		return
 
-	# ── Phase 3: Overlay fade out (0.2s) ──
-	if overlay and is_instance_valid(overlay):
-		GlobalTweens.fade_out(overlay, 0.2)
+	# ── Phase 2: 背景刷出 (0.2s) ──
+	if stage_bg and is_instance_valid(stage_bg):
+		var tw := stage_bg.create_tween()
+		tw.tween_property(stage_bg, "scale:y", 1.0, 0.2).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+		await tw.finished
+
+	if not is_instance_valid(panel):
+		return
+
+	# ── Phase 3: 标题栏淡入 (0.1s) ──
+	if title_bar and is_instance_valid(title_bar):
+		title_bar.modulate.a = 0.0  # SET BEFORE tween captures the value
+		var tw := title_bar.create_tween()
+		tw.tween_property(title_bar, "modulate:a", 1.0, 0.1)
+
+	# ── Phase 4: 卡片 stagger_pop_in (0.25s each, 0.06s stagger) ──
+	if not all_cards.is_empty():
+		GlobalTweens.stagger_pop_in(all_cards, 0.06, 0.25)
+
+	# ── Wait for cards to finish, then impact ──
+	# Only stagger_pop_in remains; Phases 1-2 were already awaited, Phase 3 runs in parallel
+	if not all_cards.is_empty():
+		var stagger_end: float = (all_cards.size() - 1) * 0.06 + 0.25
+		await Engine.get_main_loop().create_timer(stagger_end).timeout
+	else:
+		await Engine.get_main_loop().create_timer(0.001).timeout
+	if not is_instance_valid(panel):
+		return
+
+	if impact_sfx:
+		GlobalTweens.play_sfx(impact_sfx)
+
+
+static func play_shop_exit(config: Dictionary) -> void:
+	## 退场: 卡片 fade -> 舞台向下滑出
+	## 每个 await 带 is_instance_valid(panel) 守卫
+	##
+	## config keys:
+	##   panel: Control              — shop panel (validity anchor)
+	##   all_cards: Array[Control]   — ability + item cards (fade out)
+
+	var panel: Control = config.get("panel") as Control
+	var all_cards: Array = config.get("all_cards", [])
+
+	# ── Phase 1: Cards fade out (0.25s) ──
+	if not all_cards.is_empty():
+		for card in all_cards:
+			if is_instance_valid(card):
+				var tw: Tween = card.create_tween()
+				tw.set_parallel()
+				tw.tween_property(card, "scale", Vector2(0.1, 0.1), 0.25).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_BACK)
+				tw.tween_property(card, "modulate:a", 0.0, 0.2)
+
+	if not is_instance_valid(panel):
+		return
+	await panel.get_tree().create_timer(0.25).timeout
+	if not is_instance_valid(panel):
+		return
+
+	# ── Phase 2: Panel slide out downward (0.2s) ──
+	if panel:
+		GlobalTweens.play_sfx(_sound_bank.SHOP_EXIT)
+		var tw: Tween = panel.create_tween()
+		tw.tween_property(panel, "position:y", panel.get_viewport_rect().size.y + 100, 0.2).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
+		tw.parallel().tween_property(panel, "modulate:a", 0.0, 0.2)
+		await tw.finished
 
 
 static func play_reroll_vfx(old_cards: Array, new_cards_callback: Callable) -> void:
-	## Play reroll VFX: old cards blow away → callback generates new cards → new cards slide in.
+	## Play reroll VFX: old cards blow away -> callback generates new cards -> new cards slide in.
 	## new_cards_callback: Callable() that returns the new Array[Control] after stock refresh.
 	##
 	## Usage:
