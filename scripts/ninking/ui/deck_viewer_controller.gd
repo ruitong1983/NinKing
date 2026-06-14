@@ -71,7 +71,7 @@ func _build_deck_viewer_grid() -> void:
 
 	for card: CardData.PlayingCard in sorted_cards:
 		var pc: NinKingCard = NinKingCard.new()
-		pc.card_size = Vector2(120, 160)
+		pc.card_size = Vector2(125, 175)
 		pc.playing_card_data = card
 		pc.can_be_interacted_with = false
 		pc.name = "DeckCard_%d_%d" % [card.suit, card.rank]

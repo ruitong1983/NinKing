@@ -1,6 +1,6 @@
 # Tween & VFX 库参考手册
 
-> 最后更新：2026-06-10 | 源码：`scripts/tween/` + `scripts/system/crt_filter.gd`
+> 最后更新：2026-06-12 | 源码：`scripts/tween/` + `scripts/system/crt_filter.gd`
 >
 > **铁律：实现任何 Tween/VFX 前，必须先查本文档。确认已有 API 是否覆盖需求，避免手写 `create_tween()`。**
 >
@@ -18,7 +18,7 @@ GlobalTweens (autoload, 胶水层)
 ├── HitStop ─── 顿帧/冻结帧
 ├── AudioCoupler ─── 动效-音效耦合
 ├── CardTilt ─── 卡牌倾斜/手牌摊开
-├── CountUp ─── 数字滚动（线性/缓出，BounceScore 内部依赖）
+├── CountUp ─── 数字滚动（线性/缓出/多段/计分行，BounceScore 内部依赖）
 └── BounceScore ─── 计分弹性着陆（蓄力→过冲→弹跳→ProgressBar→闪色）
 ```
 
@@ -31,7 +31,7 @@ GlobalTweens (autoload, 胶水层)
 | **HitStop** | `scripts/tween/hit_stop.gd` | class_name | 顿帧：冻结 time_scale 后平滑恢复 |
 | **AudioCoupler** | `scripts/tween/audio_coupler.gd` | class_name | Tween 内联音效 + 一次性音效 |
 | **CardTilt** | `scripts/tween/card_tilt.gd` | class_name | 卡牌随鼠标倾斜 + 手牌扇形摊开 |
-| **CountUp** | `scripts/tween/count_up.gd` | class_name | Label 数字递增滚动（BounceScore 内部依赖） |
+| **CountUp** | `scripts/tween/count_up.gd` | class_name | Label 数字递增/多段滚动/计分行（play_multi / play_score） |
 | **BounceScore** | `scripts/tween/bounce_score.gd` | RefCounted (preload) | 计分弹性着陆：蓄力→过冲暴涨→缩放弹跳→ProgressBar延迟→ColXiLabel闪+PanelBg发光 |
 
 ---
@@ -61,6 +61,8 @@ GlobalTweens (autoload, 胶水层)
 | 卡牌中心散开（卷轴展开） | `GlobalTweens.stagger_spread(nodes, center, 400, 40, 0.06, 0.3)` | 弧位计算→归位中心→stagger 弹入。忍者主题发牌 |
 | 数字滚动（计数） | `GlobalTweens.count_up(label, to_val, 0.5)` | 线性递增 |
 | 数字滚动（金币） | `GlobalTweens.count_up_gold(label, amount, 0.6)` | 缓出+金色闪烁 |
+| 多段数字滚动（通用） | `GlobalTweens.play_multi(label, segments, per_tick)` | 多段独立 easing，tick 合并 |
+| 计分行滚动 | `GlobalTweens.play_score(label, chips, mult, result, 0.5, per_tick)` | "chips × mult = result" 顺序滚动，7-tier 分值驱动，pitch 递升(0.88→1.22) |
 
 ### 战斗反馈
 
@@ -151,12 +153,24 @@ GlobalTweens.do_hit_stop(duration: float = 0.06, time_scale: float = 0.05) -> vo
 # 委托给 CountUp
 GlobalTweens.count_up(label: Label, to_value: int, duration: float = 0.5, prefix: String = "", suffix: String = "") -> Tween
 GlobalTweens.count_up_gold(label: Label, amount: int, duration: float = 0.6, prefix: String = "", suffix: String = "") -> Tween
+
+# 多段滚动（v5 新增）
+GlobalTweens.play_multi(label: Label, segments: Array[Dictionary], per_tick: Callable = Callable()) -> Tween
+GlobalTweens.play_score(label: Label, chips: int, mult: int, result: int, duration: float = 0.5, per_tick: Callable = Callable()) -> Tween
 ```
 
+**`play_multi`** — 通用多段数字滚动。一条 tween_method 驱动多段数值按 `delay` 顺序启动，独立 easing + milestone tick 检测，每帧最多一次 `per_tick(pitch)` 回调。segment 结构：
+- `{"value": int, "duration": float, "delay": float?, "ticks": int?, "ease": int?, "trans": int?}` — 从 0 滚到 value，延迟 delay 后启动，独立 easing（默认 EASE_OUT CUBIC），ticks 为音效里程碑数
+- `{"text": String}` — 静态分隔符文本，始终渲染
+
+**`play_score`** — 计分行快捷包装。格式 `"chips × mult = result"`，**顺序滚动**（chips→mult→result 依次延迟启动），7-tier 分值驱动（阈值 20/100/200/400/800/1600），tick 沿 cubic-out 曲线 milestone 分布（稀疏→密集），pitch 递升(0.88→1.22, +0.05/tick)。result 到达时自动 `FX.color_flash(label, Color.GOLD, 0.15)`。
+
 **CountUp 额外能力**（如需直接使用）：
-- `CountUp.play(label, from_value, to_value, duration, prefix, suffix)` — 线性递增
-- `CountUp.play_eased(label, from_value, to_value, duration, prefix, suffix)` — EASE_OUT CUBIC 缓出
-- `CountUp.play_gold(label, amount, duration, prefix, suffix)` — 缓出 + 到达时金色闪烁
+- `CountUp.play(label, from_value, to_value, duration, prefix, suffix, per_tick)` — 线性递增
+- `CountUp.play_eased(label, from_value, to_value, duration, prefix, suffix, per_tick)` — EASE_OUT CUBIC 缓出
+- `CountUp.play_gold(label, amount, duration, prefix, suffix, per_tick)` — 缓出 + 到达时金色闪烁
+- `CountUp.play_multi(label, segments, per_tick)` — 多段滚动（自动 kill 同 label 旧补间）
+- `CountUp.play_score(label, chips, mult, result, duration, per_tick)` — 计分行快捷包装
 
 所有 CountUp 方法内部设置 `set_ignore_time_scale(true)`，HitStop 不影响数字滚动。
 
@@ -408,20 +422,64 @@ GlobalTweens.set_hand_spread(cards, center)    # 扇形摊开
 
 ### 3.6 CountUp — 数字滚动
 
-**文件：** `scripts/tween/count_up.gd` | class_name: `CountUp`
+**文件：** `scripts/tween/count_up.gd` | class_name: `CountUp` | 292 行
 
 ```gdscript
 # 线性递增
-CountUp.play(label, from_val, to_val, duration, prefix, suffix) -> Tween
+CountUp.play(label, from_val, to_val, duration, prefix, suffix, per_tick) -> Tween
 
 # 缓出递增（先快后慢）
-CountUp.play_eased(label, from_val, to_val, duration, prefix, suffix) -> Tween
+CountUp.play_eased(label, from_val, to_val, duration, prefix, suffix, per_tick) -> Tween
 
 # 金币滚动（缓出 + 金色闪烁）
-CountUp.play_gold(label, amount, duration, prefix, suffix) -> Tween
+CountUp.play_gold(label, amount, duration, prefix, suffix, per_tick) -> Tween
+
+# 多段滚动 — 一条 tween 驱动多段数值，各段独立 delay/easing/ticks
+CountUp.play_multi(label, segments: Array[Dictionary], per_tick: Callable) -> Tween
+
+# 计分行快捷包装 — 7-tier 分值驱动顺序滚动
+CountUp.play_score(label, chips: int, mult: int, result: int, _duration_unused: float = 0.5, per_tick: Callable) -> Tween
 ```
 
-所有方法 `set_ignore_time_scale(true)`。
+所有方法 `set_ignore_time_scale(true)`。重复调用同 label 自动 `kill()` 旧补间（per-label 字典追踪）。
+
+**`play_multi` 详解：**
+
+单条 `tween_method(float t, 0.0, max_dur, max_dur)` 驱动，master tween 无 easing（线性 t），各 segment 在回调内部独立计算 `seg_elapsed = max(0, t - delay)` → `ease(seg_elapsed/dur, curve)` → 渲染。自然实现 tick 合并：每帧最多一次 `per_tick(pitch)` 回调。
+
+segment 结构：
+```gdscript
+[
+    {"value": 11, "duration": 0.5, "delay": 0.0, "ticks": 6, "ease": Tween.EASE_OUT, "trans": Tween.TRANS_CUBIC},
+    {"text": " × "},                                     # 文本段：静态，始终渲染
+    {"value": 3,  "duration": 0.4, "delay": 0.55, "ticks": 4},  # delay 控制顺序启动
+    {"text": " = "},
+    {"value": 33, "duration": 0.6, "delay": 1.0,  "ticks": 8},  # result 段 ticks 更多 → 更长音效
+]
+```
+
+特性：
+- `delay` 字段控制段启动时机，实现顺序滚动（非同时）
+- `ticks` 字段控制音效里程碑数，均匀分布在 easing 曲线上（`floor(eased * ticks)`）
+- 零值段跳过 tween，直接渲染 "0"
+- easing 映射：EASE_OUT+CUBIC → curve=2.0, EASE_OUT+QUAD → curve=1.0, EASE_IN → curve=-1.0
+- `per_tick` 回调仅在 label.text 实际变化且 milestone 推进时触发
+
+**`play_score` 详解：**
+
+7-tier 分值驱动计分行。内部按 result 值查表确定各段 ticks 数 + dt + gap_bonus，构建 5 段 `[chips, " × ", mult, " = ", result]` 顺序启动。
+
+| Tier | result | chips ticks | mult ticks | result ticks | 总 tick 数 | 总时长 |
+|------|--------|-------------|------------|--------------|-----------|--------|
+| T0 | <20 | 3 | 2 | 3 | 8 | ~1.4s |
+| T1 | 20-99 | 4 | 3 | 4 | 11 | ~1.8s |
+| T2 | 100-199 | 6 | 4 | 6 | 16 | ~2.9s |
+| T3 | 200-399 | 7 | 5 | 8 | 20 | ~3.4s |
+| T4 | 400-799 | 9 | 6 | 10 | 25 | ~4.5s |
+| T5 | 800-1599 | 10 | 7 | 12 | 29 | ~5.5s |
+| T6 | 1600+ | 11 | 8 | 14 | 33 | ~6.6s |
+
+Tick 分布在 cubic-out 曲线上，稀疏→密集 + pitch 递升(0.88→1.22, +0.05/tick)，gap_bonus 随 tier 递增(0.00→0.10)拉大段间停顿。result 到达目标时链式追加 `FX.color_flash(label, Color.GOLD, 0.15)` 金色闪烁。
 
 ### 3.7 BounceScore — 计分弹性着陆
 

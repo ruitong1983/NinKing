@@ -130,6 +130,12 @@ func count_up(label: Label, to_value: int, duration: float = 0.5, prefix: String
 func count_up_gold(label: Label, amount: int, duration: float = 0.6, prefix: String = "", suffix: String = "", per_tick: Callable = Callable()) -> Tween:
 	return CU.play_gold(label, amount, duration, prefix, suffix, per_tick)
 
+func play_multi(label: Control, segments: Array[Dictionary], per_tick: Callable = Callable()) -> Tween:
+	return CU.play_multi(label, segments, per_tick)
+
+func play_score(label: Control, chips: int, mult: int, result: int, duration: float = 0.5, per_tick: Callable = Callable()) -> Tween:
+	return CU.play_score(label, chips, mult, result, duration, per_tick)
+
 
 # ── 粒子 ──
 
@@ -142,12 +148,13 @@ func burst_particles(position: Vector2, preset: String = "sparkle") -> void:
 func bind_sfx(tween: Tween, stream: AudioStream, at_elapsed: float = 0.0) -> void:
 	AudioCoupler.bind_sfx(tween, stream, at_elapsed)
 
-func play_sfx(stream: AudioStream, volume_db: float = 0.0) -> void:
+func play_sfx(stream: AudioStream, volume_db: float = 0.0, pitch_scale: float = 1.0) -> void:
 	if not stream:
 		return
 	var player := AudioStreamPlayer.new()
 	player.stream = stream
 	player.volume_db = volume_db
+	player.pitch_scale = pitch_scale
 	player.finished.connect(player.queue_free)
 	var tree := Engine.get_main_loop() as SceneTree
 	if tree:

@@ -141,9 +141,9 @@ res://
 ├── scenes/ninking/
 │   ├── ninking_launcher.tscn       ← 入口场景 (主菜单)
 │   ├── ninking_main.tscn           ← 主游戏场景（含 ShopOverlay Phase C）
-│   ├── ninking_debug.tscn          ← Debug 计分测试场景 (2026-06-12)
+│   ├── debug_ninking_main.tscn          ← Debug 计分测试场景 (2026-06-12)
 │   ├── shop_panel.tscn             ← 🆕 商店面板场景片段 (替代旧 shop.tscn)
-│   ├── display_card_base.tscn      ← 非扑克牌展示基类 120×160 纯卡面
+│   ├── display_card_base.tscn      ← 非扑克牌展示基类 125×175 纯卡面 (5:7 对齐标准扑克)
 │   ├── ninking_card.tscn           ← 卡牌组件 (NinKingCard)
 │   ├── ninking_card_factory.tscn   ← 卡牌工厂 (Card-Framework)
 │   ├── ability_slot.tscn           ← 忍者牌槽位组件 (已重命名)
@@ -382,7 +382,7 @@ res://
 │   │   │   ├── hand_display.gd           ← 手牌渲染器
 │   │   │   ├── hand_interaction.gd       ← 交互状态机
 │   │   │   ├── deck_viewer_controller.gd ← 牌库查看器
-│   │   │   ├── display_card_base.gd      ← 非扑克牌展示基类 120×160
+│   │   │   ├── display_card_base.gd      ← 非扑克牌展示基类 125×175 (5:7)
 │   │   │   ├── shop_slot.gd              ← 🆕 商店展示容器 (DisplayCard + 购买UI)
 │   │   │   ├── ability_slot.gd           ← 忍者牌槽位
 │   │   ├── card_data.gd                  ← 扑克牌数据 (CardData)
@@ -426,7 +426,7 @@ res://
 NinKingCard (extends Card) — SVG 牌面渲染
 ├── _ensure_face_nodes() — 创建 FrontFace/BackFace/TextureRect 节点（new() 兜底）
 ├── _load_card_texture() — 加载 SVG 纹理 (res://assets/images/cards/4color_deck_by_heratexx/{rank}{suit}.svg)
-│   └── expand_mode=IGNORE_SIZE + stretch_mode=KEEP_ASPECT_COVERED + size=card_size
+│   └── expand_mode=IGNORE_SIZE + stretch_mode=KEEP_ASPECT_COVERED + size=125×175 (5:7)
 │       (IGNORE_SIZE 防止 Godot 4 每帧覆盖 size 为 SVG viewBox 240×334)
 ├── _get_card_svg_path() — suit/rank → SVG 文件路径
 ├── update_display() — 重载 SVG 纹理（换牌/数据变更时）
@@ -480,7 +480,7 @@ CardData (RefCounted)
 ├── enum Suit, Rank, HandType3, Enhancement, Seal, Edition
 ├── class PlayingCard (suit, rank, enhancement, seal, edition)
 ├── const: HAND_TYPE3_BASE_VALUES, STAR_CHART_UPGRADES, RANK_CHIP_VALUES
-├── static: get_hand_type3_leveled_chips/mult(ht, levels)  # 仅横排，列×mult 固定值无关
+├── static: get_hand_type3_leveled_chips/mult(ht, levels)  # v5.0: 行+列共享星图升级
 └── static: create_standard_deck()
 
 HandEvaluator3 (RefCounted)
@@ -493,12 +493,13 @@ AutoArranger (RefCounted)
 
 ScoreCalculator (RefCounted)
 ├── class ScoreResult (total_score, head_score, mid_score, tail_score,
-│                      col_x_stack, global_xi_x_stack, chips_sum, mult_sum, breakdown)
+│                      col_scores, col_total, global_xi_x_stack, chips_sum, mult_sum, breakdown)
 ├── static: calculate(head, mid, tail, evals, col_evals, ninjas, star_charts,
 │                    xi_result, seal_effects, gold) → ScoreResult
-├── static: collect_ninja_per_group() — 忍效果→三组分账
-├── static: ninja_affected_groups() — 条件→命中组
-└── static: _col_type_to_x_mult() — 列牌型→×mult(2/4/8/16/32)
+├── static: collect_ninja_per_group() — 忍效果→行三组分账
+├── static: _collect_ninja_for_column() — 忍效果→列分账 (v5.0)
+├── static: ninja_affected_groups() — 条件→命中行组
+└── static: _compute_group_score() — 行/列通用评分公式 (v5.0: 列复用此方法)
 
 XiDetector (RefCounted)
 ├── class XiResult (triggered, chips_add, mult_x_stack)

@@ -3,7 +3,7 @@
     "godot-mcp-pro": {
       "command": "node",
       "args": [
-        "C:/Users/candy/Downloads/125037_godotmcpprov1.14.1/server/build/index.js",
+        "C:/Users/Administrator/godot-mcp-pro/server/build/index.js",
         "--minimal"
       ]
     },

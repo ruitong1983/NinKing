@@ -1,406 +1,567 @@
 extends Control
-## Debug 计分测试场景 — 主控制器。
-## 零侵入主场景：不引用 UIManager/NinKingGameState/game_manager。
-## 复用：Hand.tscn × 3、NinKingCard、ScoreCalculator、HandEvaluator3、XiDetector、NinjaBarDisplay。
-## 所有 LeftPanel 标签手动更新，不依赖 HandTypeLabeler（其引用了 NinKingGameState）。
+## Debug 评分测试场景 — 主界面布局 + 右侧控制面板 + 选牌队列。
+##
+## 与主场景共用同一种 LeftPanel / CenterColumn / HandArea 布局，
+## DunArea 内部使用 CardGrid (HandCardContainer) 管理 3×3 卡牌网格，
+## 与主场景 CardGrid 命名与结构完全一致。
 
-signal back_to_launcher()
+const MAX_NINJAS: int = 5
+const COLS: int = 3
 
-# ═══ LeftPanel references ═══
-@onready var score_label: Label = %ScoreLabel
-@onready var target_score_label: Label = %TargetScoreLabel
-@onready var progress_bar: ProgressBar = %ProgressBar
-@onready var col_xi_label: Label = %ColXiLabel
-@onready var head_type_label: Label = %HeadTypeLabel
-@onready var middle_type_label: Label = %MiddleTypeLabel
-@onready var tail_type_label: Label = %TailTypeLabel
-@onready var shadow_type_label: Label = %ShadowType
-@onready var flash_type_label: Label = %FlashType
-@onready var destroy_type_label: Label = %DestroyType
-@onready var shadow_score_label: Label = %ShadowScore
-@onready var flash_score_label: Label = %FlashScore
-@onready var destroy_score_label: Label = %DestroyScore
+const STAR_CHART_TYPES: Array[CardData.HandType3] = [
+	CardData.HandType3.HIGH_CARD_3,
+	CardData.HandType3.ONE_PAIR_3,
+	CardData.HandType3.STRAIGHT_3,
+	CardData.HandType3.FLUSH_3,
+	CardData.HandType3.STRAIGHT_FLUSH_3,
+	CardData.HandType3.THREE_OF_KIND_3,
+]
 
-# ═══ Center references ═══
-@onready var play_btn: Button = %PlayBtn
-@onready var head_cards: Hand = %HeadCards
-@onready var middle_cards: Hand = %MiddleCards
-@onready var tail_cards: Hand = %TailCards
-@onready var ninja_bar_container: HBoxContainer = %NinjaBar
-@onready var status_label: Label = %StatusLabel
-@onready var dun_head: Panel = %DunHead
-@onready var dun_middle: Panel = %DunMiddle
-@onready var dun_tail: Panel = %DunTail
-@onready var hands_label: Label = %HandsLabel
-@onready var gold_label: Label = %GoldLabel
-@onready var barrier_label: Label = %BarrierLabel
-@onready var round_label: Label = %RoundLabel
-
-# ═══ Right panel references ═══
-@onready var ninja_select_btn: Button = %NinjaSelectBtn
-@onready var ninja_status_label: Label = %NinjaStatusLabel
-@onready var star_chart_container: VBoxContainer = %StarChartContainer
-@onready var clear_btn: Button = %ClearBtn
-@onready var random_btn: Button = %RandomBtn
-@onready var back_btn: Button = %BackBtn
-
-# ═══ Tray ═══
-@onready var card_tray: Control = %CardTray
-
-# ═══ Ninja selector ═══
-@onready var ninja_selector: Control = %NinjaSelector
-
-# ═══ Delegates ═══
-var _tray: Control
-var _ninja_bar: NinjaBarDisplay
-var _star_chart_ui: RefCounted
-
-# ═══ State ═══
+# ── State ──
 var _full_deck: Array[CardData.PlayingCard] = []
 var _selected_ninjas: Array[Dictionary] = []
 var _star_chart_levels: Dictionary = {}
-var _current_tray_card: CardData.PlayingCard = null
+var _selected_queue: Array[CardData.PlayingCard] = []
+var _ninja_bar_display: NinjaBarDisplay
+var _deck_visible: bool = false
+var _star_tooltip: Control = null
 
+# Flat 3×3 slot data: 9 entries (row * 3 + col), null = empty
+var _slot_data: Array = []
 
-enum DunSlot { HEAD, MID, TAIL }
-
-const DUN_NAMES: Dictionary = {
-	DunSlot.HEAD: "影",
-	DunSlot.MID: "瞬",
-	DunSlot.TAIL: "滅",
-}
+# ── @onready references ──
+@onready var _card_grid: HandCardContainer = %CardGrid
+@onready var _score_label: Label = %ScoreLabel
+@onready var _target_label: Label = %TargetScoreLabel
+@onready var _progress: ProgressBar = %ProgressBar
+@onready var _col_xi_label: Label = %ColXiLabel
+@onready var _status_label: Label = %StatusLabel
+@onready var _play_btn: Button = %PlayBtn
+@onready var _ai_btn: Button = %AiRearrangeBtn
+@onready var _deck_btn: Button = %DeckBtn
+@onready var _hands_label: Label = %HandsLabel
+@onready var _barrier_label: Label = %BarrierLabel
+@onready var _ninja_status: Label = %NinjaStatusLabel
+@onready var _ninja_bar: Control = %NinjaBar
+@onready var _star_chart_container: VBoxContainer = %StarChartContainer
 
 
 func _ready() -> void:
 	_full_deck = CardData.create_standard_deck()
-	_init_star_chart_ui()
-	_init_tray()
-	_init_ninja_bar()
-	_connect_signals()
-	_reset_ui()
+	_star_chart_levels = _default_star_chart_levels()
+	_slot_data.resize(9)
+	for i: int in range(9):
+		_slot_data[i] = null
 
+	# Setup NinjaBar with an HBoxContainer for proper layout
+	var bar_container := HBoxContainer.new()
+	bar_container.name = "BarContainer"
+	bar_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bar_container.add_theme_constant_override("separation", 8)
+	_ninja_bar.add_child(bar_container)
+	_ninja_bar_display = NinjaBarDisplay.new()
+	_ninja_bar_display.setup(bar_container)
 
-# ══════════════════════════════════════════
-# Initialization
-# ══════════════════════════════════════════
-
-func _init_star_chart_ui() -> void:
-	_star_chart_ui = preload("res://scripts/ninking/debug/debug_star_chart.gd").new()
-	_star_chart_ui.setup(star_chart_container, _star_chart_levels)
-
-
-func _init_tray() -> void:
-	_tray = card_tray
-	_tray.setup(_full_deck)
-
-
-func _init_ninja_bar() -> void:
-	_ninja_bar = NinjaBarDisplay.new()
-	_ninja_bar.setup(ninja_bar_container)
-
-
-func _connect_signals() -> void:
-	play_btn.pressed.connect(_on_play_pressed)
-	clear_btn.pressed.connect(_on_clear_pressed)
-	random_btn.pressed.connect(_on_random_pressed)
-	back_btn.pressed.connect(_on_back_pressed)
-	ninja_select_btn.pressed.connect(_on_ninja_select_pressed)
-	_tray.card_selected.connect(_on_tray_card_selected)
-
-	# Hand clicks for placing / removing cards
-	head_cards.gui_input.connect(_on_hand_gui_input.bind(DunSlot.HEAD))
-	middle_cards.gui_input.connect(_on_hand_gui_input.bind(DunSlot.MID))
-	tail_cards.gui_input.connect(_on_hand_gui_input.bind(DunSlot.TAIL))
+	# Card tray
+	%CardTray.setup(_full_deck)
+	%CardTray.card_selected.connect(_on_tray_card_selected)
 
 	# Ninja selector
-	ninja_selector.ninjas_selected.connect(_on_ninjas_selected)
-	ninja_selector.cancelled.connect(_on_ninja_selector_cancelled)
+	%NinjaSelector.ninjas_selected.connect(_on_ninjas_selected)
+	%NinjaSelector.cancelled.connect(func(): pass)
+
+	# Buttons
+	_play_btn.pressed.connect(_on_play_pressed)
+	%ClearBtn.pressed.connect(_on_clear_pressed)
+	%DealBtn.pressed.connect(_on_deal_pressed)
+	%RandomBtn.pressed.connect(_on_random_pressed)
+	%BackBtn.pressed.connect(_on_back_pressed)
+	%NinjaSelectBtn.pressed.connect(_on_ninja_select_pressed)
+	_ai_btn.pressed.connect(_on_ai_pressed)
+	_deck_btn.pressed.connect(_on_deck_toggle_pressed)
+
+	# Star chart UI
+	_rebuild_star_chart()
+
+	_reset_ui()
+	_update_button_states()
 
 
-func _reset_ui() -> void:
-	score_label.text = "気 0"
-	target_score_label.text = "封印 0"
-	progress_bar.max_value = 1.0
-	progress_bar.value = 0.0
-	col_xi_label.text = ""
-	status_label.text = "从底栏选中牌 → 点击上方空格放入"
-	hands_label.text = "討伐 3"
-	gold_label.text = "$0"
-	barrier_label.text = "結界 DEBUG"
-	round_label.text = ""
-
-	# Reset HandTypeRow labels
-	shadow_type_label.text = "-"
-	flash_type_label.text = "-"
-	destroy_type_label.text = "-"
-	shadow_score_label.text = ""
-	flash_score_label.text = ""
-	destroy_score_label.text = ""
-
-	# Build star chart UI
-	_build_star_chart_ui()
-	_update_ninja_status()
-
-
-# ══════════════════════════════════════════
-# Star Chart UI
-# ══════════════════════════════════════════
-
-func _build_star_chart_ui() -> void:
-	_star_chart_ui.rebuild()
+func _default_star_chart_levels() -> Dictionary:
+	var d: Dictionary = {}
+	for ht: CardData.HandType3 in STAR_CHART_TYPES:
+		d[ht] = 0
+	return d
 
 
 # ══════════════════════════════════════════
-# Tray → Hand card placement
+# Star chart inline (replaces DebugStarChart)
+# ══════════════════════════════════════════
+
+func _rebuild_star_chart() -> void:
+	_dismiss_star_tooltip()
+	for child: Node in _star_chart_container.get_children():
+		child.queue_free()
+
+	for ht: CardData.HandType3 in STAR_CHART_TYPES:
+		var name_str: String = CardData.get_hand_type3_name(ht)
+		var lvl: int = _star_chart_levels.get(ht, 0)
+		var row := HBoxContainer.new()
+		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var label := Label.new()
+		label.text = "%s  Lv.%d" % [name_str, lvl]
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		label.add_theme_font_size_override("font_size", 14)
+		label.mouse_filter = Control.MOUSE_FILTER_STOP
+		label.mouse_entered.connect(_show_star_tooltip.bind(ht, lvl, label))
+		label.mouse_exited.connect(_dismiss_star_tooltip)
+		var plus_btn := Button.new()
+		plus_btn.text = "+"
+		plus_btn.custom_minimum_size = Vector2(30, 30)
+		plus_btn.pressed.connect(_on_star_plus.bind(ht))
+
+		row.add_child(label)
+		row.add_child(plus_btn)
+		_star_chart_container.add_child(row)
+
+
+func _on_star_plus(ht_int: int) -> void:
+	var ht: CardData.HandType3 = ht_int as CardData.HandType3
+	var current: int = _star_chart_levels.get(ht, 0)
+	_star_chart_levels[ht] = current + 1
+	_rebuild_star_chart()
+
+
+func _show_star_tooltip(ht_int: int, lvl: int, label: Label) -> void:
+	_dismiss_star_tooltip()
+	var ht: CardData.HandType3 = ht_int as CardData.HandType3
+	var name_str: String = CardData.get_hand_type3_name(ht)
+	var tier_color: Color = _get_level_tier_color(lvl)
+
+	var chips: int = CardData.get_hand_type3_leveled_chips(ht, _star_chart_levels)
+	var mult: int = CardData.get_hand_type3_leveled_mult(ht, _star_chart_levels)
+	var upgrade: Dictionary = CardData.get_star_chart_upgrade(ht)
+	var up_chips: int = upgrade["chips"]
+	var up_mult: int = upgrade["mult"]
+
+	# ── Build tooltip Control ──
+	var tooltip := Control.new()
+	tooltip.name = "StarTooltip"
+	tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var panel := Panel.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.05, 0.05, 0.1, 0.92)
+	style.set_corner_radius_all(4)
+	style.border_width_left = 1
+	style.border_width_right = 1
+	style.border_width_top = 1
+	style.border_width_bottom = 1
+	style.border_color = tier_color
+	style.border_color.a = 0.4
+	panel.add_theme_stylebox_override("panel", style)
+	panel.size = Vector2(190, 68)
+	tooltip.add_child(panel)
+
+	var title := Label.new()
+	title.text = "%s  Lv.%d" % [name_str, lvl]
+	title.add_theme_font_size_override("font_size", 15)
+	title.add_theme_color_override("font_color", tier_color)
+	title.position = Vector2(10, 6)
+	title.size = Vector2(170, 20)
+	tooltip.add_child(title)
+
+	var stats := Label.new()
+	stats.text = "筹码 %d  倍率 %d" % [chips, max(mult, 1)]
+	stats.add_theme_font_size_override("font_size", 14)
+	stats.add_theme_color_override("font_color", Color(0.85, 0.85, 0.80))
+	stats.position = Vector2(10, 28)
+	stats.size = Vector2(170, 20)
+	tooltip.add_child(stats)
+
+	var hint := Label.new()
+	hint.text = "每级 +%d筹码  +%d倍率" % [up_chips, up_mult]
+	hint.add_theme_font_size_override("font_size", 12)
+	hint.add_theme_color_override("font_color", Color(0.55, 0.55, 0.50))
+	hint.position = Vector2(10, 48)
+	hint.size = Vector2(170, 16)
+	tooltip.add_child(hint)
+
+	tooltip.size = Vector2(190, 68)
+
+	# ── Position: left of the label, vertically aligned ──
+	tooltip.global_position = Vector2(
+		label.global_position.x - tooltip.size.x - 12,
+		label.global_position.y - 2
+	)
+
+	get_tree().current_scene.add_child(tooltip)
+	_star_tooltip = tooltip
+
+
+func _dismiss_star_tooltip() -> void:
+	if _star_tooltip != null and is_instance_valid(_star_tooltip):
+		_star_tooltip.queue_free()
+	_star_tooltip = null
+
+
+func _get_level_tier_color(lvl: int) -> Color:
+	if lvl <= 0:
+		return Color(0.7, 0.7, 0.7)
+	elif lvl <= 2:
+		return Color("#7A7A7A")
+	elif lvl <= 4:
+		return Color("#588CF2")
+	elif lvl <= 6:
+		return Color("#C4A843")
+	else:
+		return Color("#AA66FF")
+
+
+# ══════════════════════════════════════════
+# Card tray → queue → deal
 # ══════════════════════════════════════════
 
 func _on_tray_card_selected(card_data: CardData.PlayingCard) -> void:
-	_current_tray_card = card_data
-	status_label.text = "已选: %s  点击上方空格放入" % card_data.get_display_name()
+	# Toggle: if card already in queue, remove it
+	for i: int in range(_selected_queue.size()):
+		var qc: CardData.PlayingCard = _selected_queue[i]
+		if qc.suit == card_data.suit and qc.rank == card_data.rank:
+			_selected_queue.remove_at(i)
+			_rebuild_queue_display()
+			_update_button_states()
+			_set_status("已移除 %s — 队列 %d/9" % [card_data.get_display_name(), _selected_queue.size()])
+			return
 
-
-func _on_hand_gui_input(event: InputEvent, slot: DunSlot) -> void:
-	if not (event is InputEventMouseButton):
-		return
-	var mb: InputEventMouseButton = event as InputEventMouseButton
-	if not mb.pressed:
-		return
-
-	if mb.button_index == MOUSE_BUTTON_LEFT and _current_tray_card != null:
-		var hand: Hand = _hand_for_slot(slot)
-		if hand.get_card_count() < 3:
-			_add_card_to_hand(hand, _current_tray_card)
-			_current_tray_card = null
-			_tray.clear_highlight()
-			status_label.text = "从底栏选中牌 → 点击上方空格放入"
-
-
-func _on_hand_card_gui_input(event: InputEvent, card: NinKingCard, hand: Hand) -> void:
-	if not (event is InputEventMouseButton):
-		return
-	var mb: InputEventMouseButton = event as InputEventMouseButton
-	if not mb.pressed:
+	if _selected_queue.size() >= 9:
+		_set_status("队列已满 (9张)，请先移除再添加")
 		return
 
-	match mb.button_index:
-		MOUSE_BUTTON_RIGHT:
-			hand.remove_card(card)
-			card.queue_free()
-			_update_left_panel_labels()
-
-		MOUSE_BUTTON_LEFT:
-			if _current_tray_card != null:
-				card.playing_card_data = _current_tray_card
-				card.update_display()
-				_current_tray_card = null
-				_tray.clear_highlight()
-				_update_left_panel_labels()
+	_selected_queue.append(card_data)
+	%CardTray.clear_highlight()
+	_rebuild_queue_display()
+	_update_button_states()
+	_set_status("已添加 %s — 队列 %d/9" % [card_data.get_display_name(), _selected_queue.size()])
 
 
-func _add_card_to_hand(hand: Hand, card_data: CardData.PlayingCard) -> void:
-	var nc: NinKingCard = NinKingCard.new()
-	nc.card_size = Vector2(140, 196)
-	nc.playing_card_data = card_data
-	nc.gui_input.connect(_on_hand_card_gui_input.bind(nc, hand))
-	hand.add_card(nc)
-	nc.update_display()
-	_update_left_panel_labels()
+func _rebuild_queue_display() -> void:
+	for child: Node in %CardQueueContainer.get_children():
+		child.queue_free()
+
+	%CardQueueLabel.text = "📋 已選隊列 (%d/9)" % _selected_queue.size()
+
+	for i: int in range(_selected_queue.size()):
+		var cd: CardData.PlayingCard = _selected_queue[i]
+		var tag := Button.new()
+		tag.text = cd.get_display_name()
+		tag.flat = true
+		tag.add_theme_font_size_override("font_size", 14)
+		if cd.suit == CardData.Suit.HEARTS or cd.suit == CardData.Suit.DIAMONDS:
+			tag.add_theme_color_override("font_color", Color(0.9, 0.2, 0.2))
+		else:
+			tag.add_theme_color_override("font_color", Color(0.1, 0.1, 0.1))
+		var bg := StyleBoxFlat.new()
+		bg.bg_color = Color.WHITE
+		bg.set_corner_radius_all(3)
+		tag.add_theme_stylebox_override("normal", bg)
+		tag.add_theme_stylebox_override("hover", bg)
+		tag.add_theme_stylebox_override("pressed", bg)
+		var idx := i
+		tag.pressed.connect(_remove_queue_card.bind(idx))
+		%CardQueueContainer.add_child(tag)
 
 
-func _hand_for_slot(slot: DunSlot) -> Hand:
-	match slot:
-		DunSlot.HEAD:
-			return head_cards
-		DunSlot.MID:
-			return middle_cards
-		_:
-			return tail_cards
+func _remove_queue_card(idx: int) -> void:
+	if idx >= 0 and idx < _selected_queue.size():
+		var cd := _selected_queue[idx]
+		_selected_queue.remove_at(idx)
+		_rebuild_queue_display()
+		_update_button_states()
+		_set_status("已移除 %s — 队列 %d/9" % [cd.get_display_name(), _selected_queue.size()])
+
+
+func _on_deal_pressed() -> void:
+	if _selected_queue.size() != 9:
+		return
+	for i: int in range(9):
+		_slot_data[i] = _selected_queue[i]
+	_rebuild_grid_display()
+	_update_button_states()
+	_preview_dun_labels()
+	_set_status("已发牌 — 9 张牌进入手牌区")
+
+
+func _rebuild_grid_display() -> void:
+	_card_grid.clear_cards()
+	for i: int in range(9):
+		var cd = _slot_data[i]
+		if cd != null:
+			var card := _create_card(cd)
+			_card_grid.add_card(card)
+			card.update_display()
+
+
+func _create_card(cd: CardData.PlayingCard) -> NinKingCard:
+	var card := NinKingCard.new()
+	card.card_size = Vector2(140, 196)
+	card.playing_card_data = cd
+	card.name = "DebugCard_%d_%d" % [cd.suit, cd.rank]
+	card.show_front = true
+	card.can_be_interacted_with = false
+	return card
 
 
 # ══════════════════════════════════════════
-# 討伐 — Score calculation
+# Scoring
 # ══════════════════════════════════════════
 
 func _on_play_pressed() -> void:
-	var head_data: Array[CardData.PlayingCard] = _get_hand_data(head_cards)
-	var mid_data: Array[CardData.PlayingCard] = _get_hand_data(middle_cards)
-	var tail_data: Array[CardData.PlayingCard] = _get_hand_data(tail_cards)
-
-	if head_data.size() != 3 or mid_data.size() != 3 or tail_data.size() != 3:
-		status_label.text = "需要 9 张牌（影/瞬/滅 各 3 张）"
+	var total: int = _cards_on_table()
+	if total != 9:
+		_set_status("需要恰好 9 张牌，当前 %d 张" % total)
 		return
 
-	# Evaluate groups
-	var head_eval: HandEvaluator3.EvalResult = HandEvaluator3.evaluate(head_data)
-	var mid_eval: HandEvaluator3.EvalResult = HandEvaluator3.evaluate(mid_data)
-	var tail_eval: HandEvaluator3.EvalResult = HandEvaluator3.evaluate(tail_data)
+	var head_cards: Array[CardData.PlayingCard] = _row_data(0)
+	var mid_cards: Array[CardData.PlayingCard] = _row_data(1)
+	var tail_cards: Array[CardData.PlayingCard] = _row_data(2)
 
-	# Column evaluation
-	var col_evals: Array[HandEvaluator3.EvalResult] = []
-	for i: int in range(3):
-		var col_cards: Array[CardData.PlayingCard] = [head_data[i], mid_data[i], tail_data[i]]
-		col_evals.append(HandEvaluator3.evaluate(col_cards))
+	var head_eval := HandEvaluator3.evaluate(head_cards)
+	var mid_eval := HandEvaluator3.evaluate(mid_cards)
+	var tail_eval := HandEvaluator3.evaluate(tail_cards)
 
-	# Xi detection
-	var xi_result: XiDetector.XiResult = XiDetector.detect(
-		head_data, mid_data, tail_data, head_eval, mid_eval, tail_eval
-	)
+	var col_evals: Array[HandEvaluator3.EvalResult] = [
+		_eval_column(0, head_cards, mid_cards, tail_cards),
+		_eval_column(1, head_cards, mid_cards, tail_cards),
+		_eval_column(2, head_cards, mid_cards, tail_cards),
+	]
 
-	# Calculate score
+	var xi_result := XiDetector.detect(head_cards, mid_cards, tail_cards, head_eval, mid_eval, tail_eval)
+
 	var result: ScoreCalculator.ScoreResult = ScoreCalculator.calculate(
-		head_data, mid_data, tail_data,
+		head_cards, mid_cards, tail_cards,
 		head_eval, mid_eval, tail_eval,
-		col_evals,
-		_selected_ninjas,
-		_star_chart_levels,
-		xi_result,
-		{},  # No seal lord effects
-		0    # No gold
+		col_evals, _selected_ninjas, _star_chart_levels, xi_result, {}, 0
 	)
 
-	# ── Update LeftPanel ──
-	score_label.text = "気 %d" % result.total_score
-	target_score_label.text = "封印 %d" % result.total_score
-	progress_bar.max_value = float(max(result.total_score, 1))
-	progress_bar.value = float(result.total_score)
+	_update_score_display(result, head_eval, mid_eval, tail_eval, col_evals, xi_result)
+	_update_hand_type_labels(result, head_eval, mid_eval, tail_eval, col_evals)
+	_set_status("总分: %d" % result.total_score)
 
-	# ── Update HandTypeRow ──
-	shadow_type_label.text = CardData.get_hand_type3_name(head_eval.hand_type)
-	flash_type_label.text = CardData.get_hand_type3_name(mid_eval.hand_type)
-	destroy_type_label.text = CardData.get_hand_type3_name(tail_eval.hand_type)
 
-	shadow_score_label.text = "%d×%d" % [result.head_chips, result.head_mult]
-	flash_score_label.text = "%d×%d" % [result.mid_chips, result.mid_mult]
-	destroy_score_label.text = "%d×%d" % [result.tail_chips, result.tail_mult]
+func _eval_column(idx: int, head: Array, mid: Array, tail: Array) -> HandEvaluator3.EvalResult:
+	return HandEvaluator3.evaluate([head[idx], mid[idx], tail[idx]])
 
-	# ── Dun type labels ──
-	head_type_label.text = shadow_type_label.text
-	middle_type_label.text = flash_type_label.text
-	tail_type_label.text = destroy_type_label.text
 
-	# ── Column × Xi label ──
-	var col_x_parts: Array[String] = []
-	for xv: int in result.col_x_stack:
-		col_x_parts.append("×%d" % xv)
-	var xi_parts: Array[String] = []
-	for xv: int in result.global_xi_x_stack:
-		xi_parts.append("×%d" % xv)
+func _row_data(row: int) -> Array[CardData.PlayingCard]:
+	var arr: Array[CardData.PlayingCard] = []
+	var start := row * COLS
+	for col: int in range(COLS):
+		var idx := start + col
+		if idx < _slot_data.size() and _slot_data[idx] != null:
+			arr.append(_slot_data[idx] as CardData.PlayingCard)
+	return arr
 
-	var col_str: String = ""
-	if not col_x_parts.is_empty():
-		col_str = "列: " + "".join(col_x_parts)
-	var xi_str: String = ""
-	if not xi_parts.is_empty():
-		xi_str = "喜: " + "".join(xi_parts)
-	if col_str != "" and xi_str != "":
-		col_xi_label.text = col_str + " | " + xi_str
-	elif col_str != "":
-		col_xi_label.text = col_str
-	elif xi_str != "":
-		col_xi_label.text = xi_str
+
+func _cards_on_table() -> int:
+	var count := 0
+	for cd in _slot_data:
+		if cd != null:
+			count += 1
+	return count
+
+
+# ══════════════════════════════════════════
+# Score display
+# ══════════════════════════════════════════
+
+func _update_score_display(
+	result: ScoreCalculator.ScoreResult,
+	head_eval: HandEvaluator3.EvalResult,
+	mid_eval: HandEvaluator3.EvalResult,
+	tail_eval: HandEvaluator3.EvalResult,
+	col_evals: Array,
+	xi_result: XiDetector.XiResult
+) -> void:
+	_score_label.text = "%d ×%d = %d" % [result.chips_sum, max(result.mult_sum, 1), result.total_score]
+	_progress.value = result.total_score
+
+	%HeadTypeLabel.text = CardData.get_hand_type3_name(head_eval.hand_type)
+	%MiddleTypeLabel.text = CardData.get_hand_type3_name(mid_eval.hand_type)
+	%TailTypeLabel.text = CardData.get_hand_type3_name(tail_eval.hand_type)
+
+	if col_evals.size() == 3:
+		%Col0Label.text = CardData.get_hand_type3_name(col_evals[0].hand_type)
+		%Col1Label.text = CardData.get_hand_type3_name(col_evals[1].hand_type)
+		%Col2Label.text = CardData.get_hand_type3_name(col_evals[2].hand_type)
+
+	if xi_result and xi_result.has_any():
+		_col_xi_label.text = "[%s]" % ", ".join(xi_result.triggered)
 	else:
-		col_xi_label.text = ""
+		_col_xi_label.text = ""
 
-	# Breakdown in status
-	var col_product: int = 1
-	for xv: int in result.col_x_stack:
-		col_product *= xv
-	var xi_product: int = 1
-	for xv: int in result.global_xi_x_stack:
-		xi_product *= xv
 
-	status_label.text = "影 %d + 瞬 %d + 滅 %d = %d | 列 ×%d | 喜 ×%d | 合計 %d" % [
-		result.head_score, result.mid_score, result.tail_score,
-		result.head_score + result.mid_score + result.tail_score,
-		col_product, xi_product, result.total_score,
+func _update_hand_type_labels(
+	result: ScoreCalculator.ScoreResult,
+	head_eval: HandEvaluator3.EvalResult,
+	mid_eval: HandEvaluator3.EvalResult,
+	tail_eval: HandEvaluator3.EvalResult,
+	col_evals: Array
+) -> void:
+	%ShadowType.text = CardData.get_hand_type3_name(head_eval.hand_type)
+	%ShadowLv.text = "Lv.%d" % _star_chart_levels.get(head_eval.hand_type, 0)
+	%ShadowScore.text = _fmt_chips_x_mult(result.head_chips, result.head_mult, result.head_score)
+
+	%FlashType.text = CardData.get_hand_type3_name(mid_eval.hand_type)
+	%FlashLv.text = "Lv.%d" % _star_chart_levels.get(mid_eval.hand_type, 0)
+	%FlashScore.text = _fmt_chips_x_mult(result.mid_chips, result.mid_mult, result.mid_score)
+
+	%DestroyType.text = CardData.get_hand_type3_name(tail_eval.hand_type)
+	%DestroyLv.text = "Lv.%d" % _star_chart_levels.get(tail_eval.hand_type, 0)
+	%DestroyScore.text = _fmt_chips_x_mult(result.tail_chips, result.tail_mult, result.tail_score)
+
+	if col_evals.size() == 3 and result.col_scores.size() == 3:
+		%LeftColType.text = CardData.get_hand_type3_name(col_evals[0].hand_type)
+		%LeftColLv.text = "Lv.%d" % _star_chart_levels.get(col_evals[0].hand_type, 0)
+		%LeftColScore.text = str(result.col_scores[0]) if result.col_scores[0] > 0 else "-"
+
+		%MidColType.text = CardData.get_hand_type3_name(col_evals[1].hand_type)
+		%MidColLv.text = "Lv.%d" % _star_chart_levels.get(col_evals[1].hand_type, 0)
+		%MidColScore.text = str(result.col_scores[1]) if result.col_scores[1] > 0 else "-"
+
+		%RightColType.text = CardData.get_hand_type3_name(col_evals[2].hand_type)
+		%RightColLv.text = "Lv.%d" % _star_chart_levels.get(col_evals[2].hand_type, 0)
+		%RightColScore.text = str(result.col_scores[2]) if result.col_scores[2] > 0 else "-"
+
+	_progress.max_value = max(300.0, float(result.total_score))
+	_target_label.text = "最大 %d" % max(300, result.total_score)
+
+
+func _preview_dun_labels() -> void:
+	## 发牌后即时评估行/列牌型，更新 DunArea 标签（不触发完整计分）。
+	if _cards_on_table() != 9:
+		return
+
+	var head_cards: Array = _row_data(0)
+	var mid_cards: Array = _row_data(1)
+	var tail_cards: Array = _row_data(2)
+
+	var head_eval := HandEvaluator3.evaluate(head_cards)
+	var mid_eval := HandEvaluator3.evaluate(mid_cards)
+	var tail_eval := HandEvaluator3.evaluate(tail_cards)
+
+	%HeadTypeLabel.text = CardData.get_hand_type3_name(head_eval.hand_type)
+	%MiddleTypeLabel.text = CardData.get_hand_type3_name(mid_eval.hand_type)
+	%TailTypeLabel.text = CardData.get_hand_type3_name(tail_eval.hand_type)
+
+	var col_evals: Array[HandEvaluator3.EvalResult] = [
+		_eval_column(0, head_cards, mid_cards, tail_cards),
+		_eval_column(1, head_cards, mid_cards, tail_cards),
+		_eval_column(2, head_cards, mid_cards, tail_cards),
 	]
+	%Col0Label.text = CardData.get_hand_type3_name(col_evals[0].hand_type)
+	%Col1Label.text = CardData.get_hand_type3_name(col_evals[1].hand_type)
+	%Col2Label.text = CardData.get_hand_type3_name(col_evals[2].hand_type)
+
+
+func _clear_all_type_labels() -> void:
+	for node: Node in [%ShadowType, %FlashType, %DestroyType,
+			%LeftColType, %MidColType, %RightColType]:
+		(node as Label).text = "-"
+	for node: Node in [%ShadowLv, %FlashLv, %DestroyLv,
+			%LeftColLv, %MidColLv, %RightColLv]:
+		(node as Label).text = ""
+	for node: Node in [%ShadowScore, %FlashScore, %DestroyScore,
+			%LeftColScore, %MidColScore, %RightColScore]:
+		(node as RichTextLabel).text = ""
+	%HeadTypeLabel.text = ""
+	%MiddleTypeLabel.text = ""
+	%TailTypeLabel.text = ""
+	%Col0Label.text = ""
+	%Col1Label.text = ""
+	%Col2Label.text = ""
+	_col_xi_label.text = ""
+
+
+func _fmt_chips_x_mult(chips: int, mult: int, score: int) -> String:
+	return "%d ×%d = %d" % [chips, max(mult, 1), score]
 
 
 # ══════════════════════════════════════════
-# Helper — extract PlayingCard data from Hand
-# ══════════════════════════════════════════
-
-func _get_hand_data(hand: Hand) -> Array[CardData.PlayingCard]:
-	## 遍历可视化子节点而非 hand._held_cards（避免访问 Card-Framework 私有成员）
-	var result: Array[CardData.PlayingCard] = []
-	var cards_node: Node = hand.get_node_or_null("Cards")
-	if not cards_node:
-		return result
-	for card: Node in cards_node.get_children():
-		if card is NinKingCard:
-			result.append(card.playing_card_data)
-	return result
-
-
-# ══════════════════════════════════════════
-# LeftPanel label update (hand change, no score yet)
-# ══════════════════════════════════════════
-
-func _update_left_panel_labels() -> void:
-	var head_data: Array[CardData.PlayingCard] = _get_hand_data(head_cards)
-	var mid_data: Array[CardData.PlayingCard] = _get_hand_data(middle_cards)
-	var tail_data: Array[CardData.PlayingCard] = _get_hand_data(tail_cards)
-
-	if head_data.size() == 3 and mid_data.size() == 3 and tail_data.size() == 3:
-		# Show live preview of hand types only
-		var he: HandEvaluator3.EvalResult = HandEvaluator3.evaluate(head_data)
-		var me: HandEvaluator3.EvalResult = HandEvaluator3.evaluate(mid_data)
-		var te: HandEvaluator3.EvalResult = HandEvaluator3.evaluate(tail_data)
-
-		head_type_label.text = CardData.get_hand_type3_name(he.hand_type)
-		middle_type_label.text = CardData.get_hand_type3_name(me.hand_type)
-		tail_type_label.text = CardData.get_hand_type3_name(te.hand_type)
-
-		shadow_type_label.text = head_type_label.text
-		flash_type_label.text = middle_type_label.text
-		destroy_type_label.text = tail_type_label.text
-	else:
-		head_type_label.text = ""
-		middle_type_label.text = ""
-		tail_type_label.text = ""
-		shadow_type_label.text = "-"
-		flash_type_label.text = "-"
-		destroy_type_label.text = "-"
-		shadow_score_label.text = ""
-		flash_score_label.text = ""
-		destroy_score_label.text = ""
-
-	score_label.text = "気 0"
-	col_xi_label.text = ""
-
-	# Update hands count
-	var total: int = head_data.size() + mid_data.size() + tail_data.size()
-	status_label.text = "影 %d/3 | 瞬 %d/3 | 滅 %d/3 | 从底栏选中牌 → 点击空格放入" % [
-		head_data.size(), mid_data.size(), tail_data.size()
-	]
-
-
-# ══════════════════════════════════════════
-# Clear / Random
+# Clear / Random / Back
 # ══════════════════════════════════════════
 
 func _on_clear_pressed() -> void:
-	head_cards.clear_cards()
-	middle_cards.clear_cards()
-	tail_cards.clear_cards()
-	_current_tray_card = null
-	_tray.clear_highlight()
-	_update_left_panel_labels()
+	_clear_all_cards()
+	_reset_ui()
+	_set_status("已清空牌桌")
 
 
 func _on_random_pressed() -> void:
-	_on_clear_pressed()
+	_clear_all_cards()
+	_full_deck.shuffle()
+	var cards: Array[CardData.PlayingCard] = _full_deck.slice(0, 9)
 
-	var shuffled: Array[CardData.PlayingCard] = _full_deck.duplicate()
-	shuffled.shuffle()
-	var deal: Array[CardData.PlayingCard] = shuffled.slice(0, 9)
+	for i: int in range(9):
+		_slot_data[i] = cards[i]
 
-	for i: int in range(3):
-		_add_card_to_hand(head_cards, deal[i])
-	for i: int in range(3, 6):
-		_add_card_to_hand(middle_cards, deal[i])
-	for i: int in range(6, 9):
-		_add_card_to_hand(tail_cards, deal[i])
+	_rebuild_grid_display()
+	_update_button_states()
+	_preview_dun_labels()
+	_set_status("已随机发 9 张牌，点击「討伐」查看分数")
+
+
+func _clear_all_cards() -> void:
+	_card_grid.clear_cards()
+	for i: int in range(9):
+		_slot_data[i] = null
+	%CardTray.clear_highlight()
+	_selected_queue.clear()
+	_rebuild_queue_display()
+
+
+func _on_back_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/ninking/ninking_launcher.tscn")
+
+
+# ══════════════════════════════════════════
+# AI Arrange
+# ══════════════════════════════════════════
+
+func _on_ai_pressed() -> void:
+	var all_cards: Array[CardData.PlayingCard] = []
+	for cd in _slot_data:
+		if cd != null:
+			all_cards.append(cd)
+	if all_cards.size() != 9:
+		_set_status("需要 9 张牌才能自动排列，当前 %d 张" % all_cards.size())
+		return
+
+	var arr := AutoArranger.find_best(all_cards, _empty_ninja(), _empty_ninja(), _empty_ninja(), _star_chart_levels)
+	if arr == null:
+		_set_status("未找到合法排列")
+		return
+
+	_clear_all_cards()
+
+	for col: int in range(COLS):
+		_slot_data[0 * COLS + col] = arr.head[col]
+	for col: int in range(COLS):
+		_slot_data[1 * COLS + col] = arr.mid[col]
+	for col: int in range(COLS):
+		_slot_data[2 * COLS + col] = arr.tail[col]
+
+	_rebuild_grid_display()
+	_update_button_states()
+	_preview_dun_labels()
+	_set_status("已自动排列为最佳阵型 — 影 %s / 瞬 %s / 滅 %s" % [
+		CardData.get_hand_type3_name(arr.head_eval.hand_type),
+		CardData.get_hand_type3_name(arr.mid_eval.hand_type),
+		CardData.get_hand_type3_name(arr.tail_eval.hand_type),
+	])
+
+
+func _empty_ninja() -> Dictionary:
+	return { "chips": 0, "mult": 0, "x_stack": [] }
 
 
 # ══════════════════════════════════════════
@@ -408,27 +569,50 @@ func _on_random_pressed() -> void:
 # ══════════════════════════════════════════
 
 func _on_ninja_select_pressed() -> void:
-	ninja_selector.open(NinjaData.ALL_NINJAS, _selected_ninjas)
+	%NinjaSelector.open(NinjaData.ALL_NINJAS, _selected_ninjas)
 
 
 func _on_ninjas_selected(selected: Array[Dictionary]) -> void:
-	_selected_ninjas = selected
-	_update_ninja_status()
-
-
-func _on_ninja_selector_cancelled() -> void:
-	pass
-
-
-func _update_ninja_status() -> void:
-	var count: int = _selected_ninjas.size()
-	ninja_status_label.text = "已選: %d/5" % count
-	_ninja_bar.refresh(_selected_ninjas, 5)
+	_selected_ninjas = selected.duplicate()
+	_ninja_status.text = "已選: %d/%d" % [_selected_ninjas.size(), MAX_NINJAS]
+	_ninja_bar_display.refresh(_selected_ninjas, MAX_NINJAS)
 
 
 # ══════════════════════════════════════════
-# Navigation
+# Deck toggle
 # ══════════════════════════════════════════
 
-func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/ninking/ninking_launcher.tscn")
+func _on_deck_toggle_pressed() -> void:
+	_deck_visible = not _deck_visible
+	var placed: int = _cards_on_table()
+	var remaining: int = _full_deck.size() - placed
+	_deck_btn.text = "牌库: %d (剩余 %d)" % [_full_deck.size(), remaining]
+	if _deck_visible:
+		_set_status("牌库共 %d 张，已放置 %d 张" % [_full_deck.size(), placed])
+
+
+# ══════════════════════════════════════════
+# UI helpers
+# ══════════════════════════════════════════
+
+func _set_status(msg: String) -> void:
+	_status_label.text = msg
+
+
+func _reset_ui() -> void:
+	_score_label.text = "0 ×0 = 0"
+	_progress.value = 0
+	_progress.max_value = 300
+	_target_label.text = "封印 300"
+	_barrier_label.text = "結界 DEBUG"
+	_hands_label.text = "討伐 0"
+	_clear_all_type_labels()
+	_update_button_states()
+
+
+func _update_button_states() -> void:
+	var count: int = _cards_on_table()
+	_play_btn.disabled = (count != 9)
+	_ai_btn.disabled = (count != 9)
+	%DealBtn.disabled = (_selected_queue.size() != 9)
+	_deck_btn.text = "牌库: %d" % (_full_deck.size() - count)

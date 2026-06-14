@@ -2,14 +2,13 @@ class_name NinjaBarDisplay
 extends RefCounted
 
 ## Manages the ninja bar — clear, populate, empty slots.
-## Extracted from UIManager.
+## Used by the debug test scene. Main game uses NinjaBarNode + NinjaBarContainer.
+## Uses NinjaInventoryCard (card-framework based) instead of ninja_slot.tscn.
 
-var _ninja_bar: HBoxContainer
-
-const NINJA_SLOT_SCENE: PackedScene = preload("res://scenes/ninking/ninja_slot.tscn")
+var _ninja_bar: Control
 
 
-func setup(ninja_bar: HBoxContainer) -> void:
+func setup(ninja_bar: Control) -> void:
 	_ninja_bar = ninja_bar
 
 
@@ -17,19 +16,15 @@ func refresh(owned_ninjas: Array, max_slots: int) -> void:
 	for child: Node in _ninja_bar.get_children():
 		child.queue_free()
 	for ninja: Dictionary in owned_ninjas:
-		var icon_path: String = AssetRegistry.get_icon_path(ninja["id"], ninja.get("effect", {}))
-		_make_slot(ninja["name"], icon_path, ninja["id"])
+		var card := NinjaInventoryCard.new()
+		card.setup(ninja["name"], ninja)
+		_ninja_bar.add_child(card)
 	var empty: int = max_slots - owned_ninjas.size()
 	for _i: int in range(empty):
-		_make_slot("空")
-
-
-func _make_slot(text: String, icon_path: String = "", ninja_id: String = "") -> void:
-	var slot: Panel = NINJA_SLOT_SCENE.instantiate()
-	_ninja_bar.add_child(slot)
-	if slot.has_method("setup"):
-		slot.setup(text, icon_path, ninja_id)
-	else:
-		var label: Label = slot.get_node_or_null("Label")
-		if label != null:
-			label.text = text
+		var label := Label.new()
+		label.text = "空"
+		label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.custom_minimum_size = Vector2(125, 175)
+		_ninja_bar.add_child(label)

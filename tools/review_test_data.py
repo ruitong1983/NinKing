@@ -9,14 +9,14 @@ NinKing 测试数据 Review 报告生成器
 import csv, sys, os
 from datetime import datetime
 
-CSV_PATH = r'E:\01 Code\Godot_v4.6.2\NinKing\docs\ninking\testing\ninja-test-full.csv'
+CSV_PATH = r'E:\Code\Godot_v4.6.2-stable_win64\NinKing\docs\ninking\testing\ninja-test-full.csv'
 
 def load_csv(path=CSV_PATH):
     rows = []
     with open(path, 'r', encoding='utf-8-sig') as f:
         for r in csv.DictReader(f):
             r['final_score'] = int(r['final_score'])
-            r['col_x_prod'] = int(r['col_x_prod'])
+            r['col_total'] = int(r['col_total'])
             r['xi_x_prod'] = int(r['xi_x_prod'])
             rows.append(r)
     pairs = {}
@@ -112,7 +112,7 @@ def main():
         # 2. SD
         print('\n【2】SD牌组一致性')
         count, bases = check_sd(pairs)
-        ok = 1216 in bases and len(bases) == 1
+        ok = 313 in bases and len(bases) == 1
         print(f'  引用: {count}次 | 一致: {"✅" if ok else "❌"} | 基线: {bases}')
 
         # 3. 分类
@@ -131,7 +131,7 @@ def main():
 
         # 4. 纯效果
         print('\n【4】纯效果(无列/无喜干扰)')
-        pure = [p for p in pairs if p['n']['col_x_prod']==1 and p['n']['xi_x_prod']==1
+        pure = [p for p in pairs if p['n']['col_total']==0 and p['n']['xi_x_prod']==1
                 and p['n']['final_score']>p['b']['final_score']]
         pure_d = [p['n']['final_score']-p['b']['final_score'] for p in pure]
         if pure_d:

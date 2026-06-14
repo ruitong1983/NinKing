@@ -20,6 +20,7 @@ dist/
 
 # Claude / AI assistant
 .claude/
+.mcp.json
 .ziva/
 
 # claude-mem synced data (runtime-only files excluded)
@@ -41,9 +42,17 @@ debug_game.png
 deck_panel_test.png
 menu_screenshot.png
 menu_screenshot2.png
-screenshot_debug.png
 slot_bg.png
 slot_test.png
+screenshot*.png
+debug_screenshot*.png
+debug_test_*.png
+_screenshot.png
+card_preview_test.png
+card_with_icons.png
+main_test.png
+tmp_godot_err.txt
+tmp_godot_out.txt
 *.lock.json
 skills-lock.json
 .agents/

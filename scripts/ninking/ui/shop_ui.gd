@@ -1,10 +1,9 @@
 class_name ShopPanel
 extends Control
-## Shop UI panel — bottom-stage layout.
+## Shop UI panel — ink-wash (水墨) bottom-stage layout.
 ##
-## Full 1500px manga-panel stage, barrier-colored background (matching left panel),
+## Paper-textured 740px panel, calligraphy title/buttons,
 ## 4 ability cards (grid) + 2 item cards (2-column centered grid).
-## Color scheme references the left panel: dark barrier-toned bg, cream text, accent details.
 ##
 ## Usage:
 ##   var panel = preload("res://scenes/ninking/shop_panel.tscn").instantiate()
@@ -13,10 +12,15 @@ extends Control
 ##   shop_overlay.add_child(panel)
 
 const SLOT_SCENE: String = "res://scenes/ninking/shop_slot.tscn"
-const COLOR_INK: Color = Color(0.102, 0.102, 0.102)
-const COLOR_CREAM: Color = Color(0.941, 0.929, 0.894)   # Left panel primary text
-const COLOR_GOLD: Color = Color(0.941, 0.816, 0.376)     # Left panel gold accent
-const COLOR_GRAY_OLIVE: Color = Color(0.478, 0.478, 0.416)  # Left panel secondary
+
+# ═══ Ink-wash palette (independent of BarrierTheme) ═══
+const COLOR_PAPER      := Color(0.961, 0.941, 0.910)  # 和纸白 #F5F0E8
+const COLOR_PAPER_DARK := Color(0.910, 0.878, 0.835)  # 纸色暗 #E8E0D0
+const COLOR_SUMI       := Color(0.169, 0.118, 0.063)  # 焦墨 #2B1E10
+const COLOR_PALE_INK   := Color(0.420, 0.420, 0.412)  # 淡墨 #6B6B6B
+const COLOR_CINNABAR   := Color(0.722, 0.227, 0.165)  # 朱砂 #B83A2A
+const COLOR_BLUE_ZAN   := Color(0.180, 0.361, 0.541)  # 蓝锖 #2E5C8A
+const COLOR_GOLD_MUD   := Color(0.769, 0.639, 0.353)  # 金泥 #C4A35A
 
 # ═══ Signals (for game_manager to wire) ═══
 signal purchase_requested(ability_data: Dictionary)
@@ -26,7 +30,6 @@ signal continue_requested()
 
 # ═══ @onready references ═══
 @onready var stage_bg: ColorRect = $StageBg
-@onready var screentone: TextureRect = $StageBg/ScreentoneOverlay
 @onready var gold_label: Label = %GoldLabel
 @onready var reroll_button: Button = %RerollBtn
 @onready var shop_title: Label = %ShopSubtitle
@@ -61,7 +64,7 @@ func init(shop_mgr: ShopManager, gold: int, colors: Dictionary) -> void:
 	shop_manager = shop_mgr
 	barrier_colors = colors
 
-	_apply_barrier_theme()
+	_apply_ink_wash_theme()
 	_refresh_shop()
 	_update_gold_display(gold)
 
@@ -110,67 +113,58 @@ func play_entrance_animation() -> void:
 
 
 # ══════════════════════════════════════════
-# Theme — left-panel-inspired barrier coloring
+# Theme — ink-wash (水墨) styling
 # ══════════════════════════════════════════
 
-func _apply_barrier_theme() -> void:
-	var c: Dictionary = barrier_colors
+func _apply_ink_wash_theme() -> void:
+	# ── Stage: washi paper ──
+	stage_bg.color = COLOR_PAPER
+	# Remove edge-fade shader (paper doesn't fade to ink)
+	stage_bg.material = null
 
-	# StageBg: barrier panel color (like left panel PanelBg), darkened for depth
-	stage_bg.color = Color(c.panel).darkened(0.06)
+	# ── TitleBar: darkened paper background + sumi ink text ──
+	var title_style := StyleBoxFlat.new()
+	title_style.bg_color = COLOR_PAPER_DARK
+	%TitleBar.add_theme_stylebox_override("normal", title_style)
+	%TitleBar.add_theme_color_override("font_color", COLOR_SUMI)
+	%TitleBar.add_theme_font_size_override("font_size", 40)
 
-	# Screentone: very subtle ~5% for texture reference
-	screentone.modulate = Color(0, 0, 0, 0.05)
+	# ── Separator: pale ink ──
+	$Separator.color = Color(COLOR_PALE_INK, 0.4)
 
-	# Edge-fade: ink-bleed fade on right side (matching left panel style)
-	var fade_shader: Shader = preload("res://scripts/ninking/ui/panel_edge_fade.gdshader")
-	var fade_mat := ShaderMaterial.new()
-	fade_mat.shader = fade_shader
-	fade_mat.set_shader_parameter("fade_start", 0.82)
-	stage_bg.material = fade_mat
+	# ── Shop title: sumi ink ──
+	shop_title.add_theme_color_override("font_color", COLOR_SUMI)
+	shop_title.add_theme_font_size_override("font_size", 36)
 
-	# TitleBar / BottomBar: deep barrier panel (like left panel sub-panels)
-	%TitleBar.color = Color(c.panel).darkened(0.35)
-	%BottomBar.color = Color(c.panel).darkened(0.35)
+	# ── Gold label: sumi ink ──
+	gold_label.add_theme_color_override("font_color", COLOR_SUMI)
 
-	# Separator: thin accent line
-	$Separator.color = Color(c.accent, 0.3)
-
-	# Shop title: accent color (decorative heading, like left panel MatchTitle gold)
-	shop_title.add_theme_color_override("font_color", c.accent)
-	shop_title.add_theme_font_size_override("font_size", 32)
-
-	# Gold label: warm gold like left panel's GoldLabel
-	gold_label.add_theme_color_override("font_color", COLOR_GOLD)
-
-	# Buttons: dark bg + accent border/text (left panel style, not impact style)
-	_apply_dark_button_style(continue_button, c.accent, c.panel, "continue")
-	_apply_dark_button_style(reroll_button, c.accent, c.panel, "reroll")
+	# ── Buttons: seal (印章) style ──
+	_apply_seal_button_style(continue_button, COLOR_GOLD_MUD, "continue")
+	_apply_seal_button_style(reroll_button, COLOR_BLUE_ZAN, "reroll")
 
 
-func _apply_dark_button_style(btn: Button, accent: Color, panel_color: Color, label: String) -> void:
-	## Dark button with accent border + cream text — matching left panel button style.
-	var bg_dark: Color = Color(panel_color).darkened(0.50)
+func _apply_seal_button_style(btn: Button, seal_color: Color, _label: String) -> void:
+	## Seal (印章) button: solid mineral-pigment bg + ink border + white calligraphy text.
+	var bg := seal_color
 
 	var normal := StyleBoxFlat.new()
-	normal.bg_color = bg_dark
-	normal.border_color = accent
+	normal.bg_color = bg
+	normal.border_color = COLOR_SUMI
 	normal.border_width_left = 2
 	normal.border_width_right = 2
 	normal.border_width_top = 2
 	normal.border_width_bottom = 2
-	normal.set_corner_radius_all(6)
+	normal.set_corner_radius_all(4)
 	normal.content_margin_left = 12
 	normal.content_margin_top = 6
 	normal.content_margin_right = 12
 	normal.content_margin_bottom = 6
 	btn.add_theme_stylebox_override("normal", normal)
-	btn.add_theme_color_override("font_color", COLOR_CREAM)
-	btn.add_theme_font_size_override("font_size", 16)
+	btn.add_theme_color_override("font_color", Color.WHITE)
 
 	var hovered := normal.duplicate() as StyleBoxFlat
-	hovered.bg_color = Color(bg_dark).lightened(0.12)
-	hovered.border_color = Color(accent).lightened(0.15)
+	hovered.bg_color = Color(bg).lightened(0.10)
 	hovered.border_width_left = 3
 	hovered.border_width_right = 3
 	hovered.border_width_top = 3
@@ -179,11 +173,11 @@ func _apply_dark_button_style(btn: Button, accent: Color, panel_color: Color, la
 	btn.add_theme_color_override("font_hover_color", Color.WHITE)
 
 	var pressed := normal.duplicate() as StyleBoxFlat
-	pressed.bg_color = Color(bg_dark).darkened(0.15)
+	pressed.bg_color = Color(bg).darkened(0.15)
 	pressed.content_margin_top = 8
 	pressed.content_margin_bottom = 4
 	btn.add_theme_stylebox_override("pressed", pressed)
-	btn.add_theme_color_override("font_pressed_color", Color(COLOR_CREAM).darkened(0.2))
+	btn.add_theme_color_override("font_pressed_color", Color(1, 1, 1, 0.85))
 
 
 # ══════════════════════════════════════════
@@ -201,7 +195,7 @@ func _render_abilities() -> void:
 		var slot: ShopSlot = slot_scene.instantiate()
 		ability_grid.add_child(slot)
 		slot.setup(data)
-		slot.apply_barrier_theme(barrier_colors)
+		slot.apply_ink_wash_theme()
 		slot.purchase_requested.connect(_on_ability_purchase)
 		ability_cards.append(slot)
 
@@ -212,7 +206,7 @@ func _render_items() -> void:
 		var slot: ShopSlot = slot_scene.instantiate()
 		item_column.add_child(slot)
 		slot.setup(data)
-		slot.apply_barrier_theme(barrier_colors)
+		slot.apply_ink_wash_theme()
 		slot.purchase_requested.connect(_on_item_purchase)
 		item_cards.append(slot)
 

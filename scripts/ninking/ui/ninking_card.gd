@@ -81,10 +81,6 @@ func _get_card_svg_path() -> String:
 
 
 ## Load the SVG and apply to the card face.
-## SVG imports at its native viewBox size (240x334).
-## Use EXPAND_IGNORE_SIZE so Godot won't override size with the texture's
-## native dimensions every frame — a Godot 4 quirk with KEEP_SIZE + non-SCALE stretch.
-## KEEP_ASPECT_COVERED scales proportionally to fill card_size without distortion.
 func _load_card_texture() -> void:
 	var path: String = _get_card_svg_path()
 	if path.is_empty():
@@ -131,14 +127,30 @@ func set_visual_state(state: int) -> void:
 
 ## Override: detect click vs drag on mouse release.
 ## Click: emit ninking_card_clicked for swap/redraw interaction.
-## Drag: emit ninking_card_dragged for cross-group drag-drop swap.
+## Drag: skip Card Framework drop processing (super), emit ninking_card_dragged.
+## Card Framework's cross-container drop would fail (target hand max_hand_size=3
+## full) and start a return_card() tween that races with NinKing swap-then-refresh
+## which frees all cards.
 func _handle_mouse_released() -> void:
 	var drag_distance: float = global_position.distance_to(_press_global_position)
 	var was_click: bool = drag_distance < CLICK_THRESHOLD
-	super._handle_mouse_released()
+
 	if was_click:
+		super._handle_mouse_released()
 		ninking_card_clicked.emit(card_index)
 	else:
+		# Reset draggable state without Card Framework drop processing
+		is_pressed = false
+		if current_state == DraggableObject.DraggableState.HOLDING:
+			change_state(DraggableObject.DraggableState.IDLE)
+			# Card._enter_state(HOLDING) added us to card_container._holding_cards.
+			# Normally Card._handle_mouse_released() clears it via
+			# release_holding_cards(), but we skip that to avoid the conflicting
+			# CardManager._on_drag_dropped. Clear it manually so stale references
+			# don't crash the next release_holding_cards call.
+			if card_container:
+				var hc: Array = card_container.get("_holding_cards")
+				hc.clear()
 		ninking_card_dragged.emit(card_index, get_global_mouse_position())
 
 

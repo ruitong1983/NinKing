@@ -1,11 +1,10 @@
 [gd_scene format=3 uid="uid://me6pr1t82qb3"]
 
-[ext_resource type="Script" path="res://scripts/ninking/ui/main_menu.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://assets/images/background/launch_bg.png" id="2_bg"]
-[ext_resource type="Theme" path="res://assets/themes/manga_theme.tres" id="3_theme"]
-[ext_resource type="FontFile" path="res://assets/fonts/SourceHanSansSC-Heavy.otf" id="4_font"]
+[ext_resource type="Script" uid="uid://btf5e0u131ub4" path="res://scripts/ninking/ui/main_menu.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://ltpkbnx2nd1j" path="res://assets/images/background/launch_bg.png" id="2_bg"]
+[ext_resource type="Theme" uid="uid://bqb2i07k0v8jt" path="res://assets/themes/manga_theme.tres" id="3_theme"]
 
-[node name="Launcher" type="Control"]
+[node name="Launcher" type="Control" unique_id=1125343157]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -14,66 +13,63 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="LaunchBg" type="TextureRect" parent="."]
+[node name="LaunchBg" type="TextureRect" parent="." unique_id=1190029315]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 texture = ExtResource("2_bg")
 expand_mode = 1
-stretch_mode = 0
-mouse_filter = 2
 
-[node name="StartBtn" type="Button" parent="."]
+[node name="StartBtn" type="Button" parent="." unique_id=210528835]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 80.0
-offset_top = 680.0
-offset_right = 380.0
-offset_bottom = 752.0
+offset_left = 810.0
+offset_top = 669.0
+offset_right = 1110.0
+offset_bottom = 739.0
 theme = ExtResource("3_theme")
-theme_override_fonts/font = ExtResource("4_font")
 theme_override_font_sizes/font_size = 32
 text = "开始游戏"
 
-[node name="ContinueBtn" type="Button" parent="."]
+[node name="ContinueBtn" type="Button" parent="." unique_id=1680238989]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 80.0
-offset_top = 776.0
-offset_right = 380.0
-offset_bottom = 848.0
+offset_left = 810.0
+offset_top = 765.0
+offset_right = 1110.0
+offset_bottom = 835.0
 theme = ExtResource("3_theme")
-theme_override_fonts/font = ExtResource("4_font")
 theme_override_font_sizes/font_size = 32
 text = "继续游戏"
 
-[node name="SettingsBtn" type="Button" parent="."]
+[node name="SettingsBtn" type="Button" parent="." unique_id=1119098392]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 80.0
-offset_top = 872.0
-offset_right = 380.0
-offset_bottom = 944.0
+offset_left = 810.0
+offset_top = 861.0
+offset_right = 1110.0
+offset_bottom = 931.0
 theme = ExtResource("3_theme")
-theme_override_fonts/font = ExtResource("4_font")
 theme_override_font_sizes/font_size = 32
-text = "设置"
 disabled = true
+text = "设置"
 
-[node name="QuitBtn" type="Button" parent="."]
+[node name="QuitBtn" type="Button" parent="." unique_id=2023836522]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 80.0
-offset_top = 968.0
-offset_right = 380.0
-offset_bottom = 1040.0
+offset_left = 810.0
+offset_top = 957.0
+offset_right = 1110.0
+offset_bottom = 1027.0
 theme = ExtResource("3_theme")
-theme_override_fonts/font = ExtResource("4_font")
 theme_override_font_sizes/font_size = 32
 text = "退出游戏"
 
-[node name="DebugBtn" type="Button" parent="."]
+[node name="DebugBtn" type="Button" parent="." unique_id=322939969]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 1540.0
@@ -81,8 +77,6 @@ offset_top = 968.0
 offset_right = 1840.0
 offset_bottom = 1040.0
 theme = ExtResource("3_theme")
-theme_override_fonts/font = ExtResource("4_font")
+theme_override_colors/font_color = Color(0.6, 0.3, 0.3, 1)
 theme_override_font_sizes/font_size = 24
-theme_override_colors/font_color = Color(0.6, 0.3, 0.3, 1.0)
 text = "DEBUG"
-mouse_filter = 0

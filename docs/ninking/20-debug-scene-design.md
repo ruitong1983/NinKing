@@ -1,7 +1,7 @@
 # Debug 计分测试场景
 
-> **建立日期:** 2026-06-12 | **关联场景:** `ninking_debug.tscn` + `debug_controller.gd`
-> **风格权威:** 独立于主场景，零侵入设计
+> **建立日期:** 2026-06-12 | **最后更新:** 2026-06-14 | **关联场景:** `debug_ninking_main.tscn` + `debug_controller.gd` + `debug_panel.gd`
+> **风格权威:** 独立于主场景，零侵入设计。场景结构已与 `ninking_main.tscn` 对齐命名和层级。
 
 ## §1 概述
 
@@ -30,7 +30,7 @@ Launch 场景右下角新增 Debug 按钮：
 | 文本 | `DEBUG` |
 | 位置 | 右下角 (offset_left=1540, offset_top=968, 300×72) |
 | 颜色 | 暗红色 `#993333` |
-| 行为 | `change_scene_to_file("res://scenes/ninking/ninking_debug.tscn")` |
+| 行为 | `change_scene_to_file("res://scenes/ninking/debug_ninking_main.tscn")` |
 | 隐藏条件 | 始终可见（开发用，无条件编译） |
 
 **涉及修改：** `ninking_launcher.tscn`（加节点）+ `main_menu.gd`（4 行：`@onready` + 信号连接 + handler）
@@ -41,6 +41,7 @@ Launch 场景右下角新增 Debug 按钮：
 NinKingDebug (Control) [debug_controller.gd]
 ├── GameBg (TextureRect)                    ← table_bg.png 全屏背景
 ├── CardManager (CardManager)               ← Card-Framework 核心（含 NinKingCardFactory）
+├── DeckBtn (Button)                        ← "牌库: 52"（右下角，仅展示）
 │
 ├── MainVBox (VBoxContainer, full rect)
 │   │
@@ -60,52 +61,124 @@ NinKingDebug (Control) [debug_controller.gd]
 │   │   │       └── AnteVBox → BarrierLabel / RoundLabel
 │   │   │
 │   │   ├── CenterColumn (VBoxContainer, stretch=1)
-│   │   │   ├── NinjaBar (HBoxContainer)    ← 已选忍者展示
+│   │   │   ├── NinjaBar (Control)          ← 已选忍者展示
 │   │   │   ├── StatusLabel                 ← 操作提示
 │   │   │   ├── HandArea (HBoxContainer)
 │   │   │   │   ├── PlayBtn [討伐]          ← 触发计分
-│   │   │   │   ├── DunArea (Panel)
-│   │   │   │   │   ├── DunHead → HeadCards (Hand)   ← 影 3 格
-│   │   │   │   │   ├── DunMiddle → MiddleCards      ← 瞬 3 格
-│   │   │   │   │   └── DunTail → TailCards          ← 滅 3 格
-│   │   │   │   └── AiRearrangeBtn [陣形]   ← disabled
-│   │   │   └── DeckBtn                    ← "牌库: 52"（仅展示）
+│   │   │   │   └── DunArea (Panel)
+│   │   │   │       ├── ColumnLabelRow (HBox)  ← 列牌型标签 (Col0/Col1/Col2)
+│   │   │   │       ├── CardGrid (Control, hand_card_container.gd)  ← 3×3 卡牌网格
+│   │   │   │       ├── DunHead → HeadCards (Hand)   ← 影 3 格
+│   │   │   │       ├── DunMiddle → MiddleCards      ← 瞬 3 格
+│   │   │   │       └── DunTail → TailCards          ← 滅 3 格
+│   │   │   └── AiRearrangeBtn [陣形]       ← disabled
 │   │   │
-│   │   └── RightPanel (Control, 420px)
-│   │       └── RightVBox (VBoxContainer)
+│   │   └── DebugPanel (Control, 390px)
+│   │       └── DebugVBox (VBoxContainer)
 │   │           ├── RightTitle ("DEBUG 控制")
 │   │           ├── NinjaSelectBtn [🥷 忍者選択]
 │   │           ├── NinjaStatusLabel ("已選: 0/5")
 │   │           ├── StarTitle ("⭐ 星図レベル")
 │   │           ├── StarChartContainer      ← 6 牌型等级行 + [+] 按钮
 │   │           ├── ClearBtn [🗑 清空牌桌]
+│   │           ├── CardTrayLabel ("🃏 牌庫")
+│   │           ├── CardTray (GridContainer, 4 cols) [debug_card_tray.gd]
+│   │           │   └── 52 × Button (4列×13行 ♠♥♦♣)
+│   │           ├── CardQueueLabel ("📋 已選隊列")
+│   │           ├── CardQueueContainer (HBoxContainer)  ← 已选牌横向标签
+│   │           ├── DealBtn [发牌]          ← 满 9 张亮起
 │   │           ├── RandomBtn [🎲 随机发牌]
 │   │           └── BackBtn [← 返回]
-│   │
-│   └── BottomTray (Control, h~160, x=420)
-│       └── CardTray [debug_card_tray.gd]
-│           └── CardGrid (GridContainer, 13 cols)
-│               └── 52 × Button [♠A][♠2]...[♦K] ← 底栏牌库
 │
 └── NinjaSelector (Control, full screen, hidden) [debug_ninja_selector.gd]
     ├── SelectorBg (ColorRect, #000 70%)
-    ├── SelectorPanel (PanelContainer, 1300×800, centered)
+    ├── SelectorPanel (PanelContainer, 1300×800)
     │   └── SelectorVBox
-    │       ├── SelectorTitle ("选择忍者 (0/5)")
+    │       ├── TitleRow
+    │       │   ├── SelectorTitle ("选择忍者 (0/5)")
+    │       │   ├── SortSpacer (Control)
+    │       │   └── SortBtns
+    │       │       ├── CategoryBtn [类型]  ← 按类别分组
+    │       │       ├── RarityBtn [稀有度]   ← 按稀有度分组
+    │       │       └── AllBtn [全部]        ← 无分组平铺
     │       ├── ScrollContainer
-    │       │   └── NinjaGrid (GridContainer, 5 cols) ← 忍者名多选
-    │       └── BtnRow → [确认] [取消]
+    │       │   └── NinjaGrid (GridContainer, 11 cols)
+    │       │       ← 每组首行: [金色标题Label] + 按钮×10
+    │       │       ← 同组续行: [spacer] + 按钮×N (左对齐)
+    │       │       ← 全部模式: 纯按钮 11 列
+    │       └── BtnRow → [开始] [取消]
+```
+
+## §4.1 主场景 ↔ Debug 场景对照
+
+> **用途：** 修改任一场时，对照此表决定是否需要同步另一边。
+> **铁律：** 完全对齐节点（§4.1.1）修改后必须双向同步。
+
+### §4.1.1 完全对齐（修改时必须同步）
+
+| 节点 | 主场景路径 | Debug 路径 | 备注 |
+|------|-----------|-----------|------|
+| CardManager | `NinKingMain/CardManager` | `NinKingDebug/CardManager` | 同 scene instance |
+| GameBg | `NinKingMain/GameBg` | `NinKingDebug/GameBg` | 同 `table_bg.png` |
+| LeftPanel 及全部子节点 | `UIManager/GameLayout/LeftPanel` | `MainVBox/ContentRow/LeftPanel` | 内部结构完全一致 |
+| CenterColumn 及全部子节点 | `UIManager/GameLayout/CenterColumn` | `MainVBox/ContentRow/CenterColumn` | 内部结构完全一致 |
+| DunArea 及全部子节点 | `.../CenterColumn/HandArea/DunArea` | `.../CenterColumn/HandArea/DunArea` | **9 个标签 + CardGrid 命名严格一致** |
+| PlayBtn | `.../HandArea/PlayBtn` | `.../HandArea/PlayBtn` | 文本 `討\n伐`、unique_name |
+| AiRearrangeBtn | `.../CenterColumn/AiRearrangeBtn` | `.../CenterColumn/AiRearrangeBtn` | 文本 `陣形` |
+| DeckBtn | `UIManager/DeckBtn` | `NinKingDebug/DeckBtn` | 文本 `牌库: N` |
+| StatusLabel | `UIManager/StatusLabel` | `MainVBox/ContentRow/CenterColumn/StatusLabel` | 提示文本 |
+
+> ⚠️ DunArea 内部 9 个标签命名 **必须** 一一致：`HeadLabel` / `HeadTypeLabel` / `MiddleLabel` / `MiddleTypeLabel` / `TailLabel` / `TailTypeLabel` / `Col0Label` / `Col1Label` / `Col2Label` / `CardGrid`
+
+### §4.1.2 同名不同型（功能等价，不同步结构）
+
+| 对比项 | 主场景 | Debug 场景 | 原因 |
+|--------|--------|-----------|------|
+| 根节点 | `NinKingMain` (Control + `game_manager.gd`) | `NinKingDebug` (Control + `debug_controller.gd`) | 主依赖状态机，Debug 自管 UI |
+| 外层容器 | `UIManager` (Control + `ui_manager.gd`) | `MainVBox` (VBoxContainer) | Debug 不需要 overlay 管理 |
+| 内容行 | `GameLayout` (HBoxContainer) | `ContentRow` (HBoxContainer) | 功能相同；Debug 多一个右侧 DebugPanel |
+| 牌型标签更新 | `HandTypeLabeler` 监听 `layout_changed` | `debug_controller._preview_dun_labels()` 手动调用 | Debug 不依赖 `NinKingGameState` |
+| 计分按钮 | `PlayBtn`  → `game_manager._on_play()` | `PlayBtn` → `debug_controller._on_play_pressed()` | 主走状态机，Debug 直接调 `ScoreCalculator` |
+
+### §4.1.3 独占节点（仅一边有，不同步）
+
+| 节点 | 所在场景 | 说明 |
+|------|---------|------|
+| UIManager 下所有 overlay | 主场景 | LevelIntro / ScoringOverlay / GameOver / VictoryOverlay / DeckViewer / ShopOverlay |
+| DebugPanel + DebugVBox | Debug | 右侧调试控制面板（卡牌托盘/星图/忍者选择） |
+| DebugBtn (Launcher) | 主场景 Launcher | 进入 Debug 的入口按钮 |
+| NinjaSelector | Debug | 忍者选择弹窗 |
+| ToggleBtn | Debug | DebugPanel 折叠按钮 |
+
+### §4.1.4 修改决策速查
+
+```
+改了主场景 DunArea 的标签/布局/主题?
+  → 必须同步到 Debug 场景 (DunArea 节点完全对齐)
+
+改了主场景 LeftPanel 内部?
+  → 必须同步到 Debug 场景 (LeftPanel 结构完全对齐)
+
+改了主场景 CenterColumn 的 HandArea / 按钮?
+  → 必须同步到 Debug 场景
+
+改了 UIManager / GameLayout 的结构?
+  → Debug 不需同步 (§4.1.2 同名不同型)
+
+改了主场景的 overlay / 动画 / 状态机?
+  → Debug 不需同步 (§4.1.3 独占)
 ```
 
 ## §5 交互流程
 
-### 5.1 卡牌放置
+### 5.1 选牌队列 + 发牌
 
 ```
-点击底栏牌库卡牌 → 高亮 (modulate.yellow)
-    → 点击 9 格空格 → NinKingCard 实例化 → 添加到对应 Hand
-    → 或右键点击 9 格已有牌 → 移除该牌
-    → 或左键点击已有牌（有高亮牌时）→ 替换
+点击右侧牌库卡牌 → 加入选牌队列（再次点击同一张→从队列移除）
+    → 队列横向展示在 CardTray 下方（白底标签，红/黑花色文字）
+    → 满 9 张 →「发牌」按钮亮起
+    → 点击「发牌」→ 9 张牌按队列顺序填入 影/瞬/滅（每行 3 张）
+    → 发牌后队列不清空，可反复调整顺序后重新发牌
 ```
 
 ### 5.2 计分触发
@@ -125,9 +198,12 @@ NinKingDebug (Control) [debug_controller.gd]
 ```
 点击 [🥷 忍者選択]
     → 显示 NinjaSelector 覆盖层
-    → Grid 列出所有 47 张忍者（NinjaData.ALL_NINJAS）
-    → 点击切换选中态，最多 5 个
-    → [确认] → 关闭弹窗 → 更新 NinjaBar + NinjaStatusLabel
+    → Grid 列出所有 47 张忍者（NinjaData.ALL_NINJAS），11 列
+    → 排序模式: [类型] 按类别分组 / [稀有度] 按稀有度分组 / [全部] 无分组
+    → 分组模式每组首行: 金色标题 Label + 按钮（同组续行左对齐）
+    → 左键切换选中态，最多 5 个
+    → 右键弹出 CardDetailPopup 查看卡牌详情
+    → [开始] → 关闭弹窗 → 更新 NinjaBar + NinjaStatusLabel
 ```
 
 ### 5.4 星图等级
@@ -136,14 +212,23 @@ NinKingDebug (Control) [debug_controller.gd]
 点击 [⭐ 牌型名 Lv.N] 旁的 [+]
     → 该牌型等级 +1
     → 计分时自动传递给 ScoreCalculator（star_chart_levels 参数）
+
+鼠标悬停到牌型名标签
+    → 弹出 tooltip 面板（深色背景 + 等级色边框）
+    → 显示：牌型名 + 等级 + 当前筹码/倍率 + 每级加成
+    → 移开鼠标自动消失
+    → 等级色：Lv.0 灰 → Lv.1-2 暗灰 → Lv.3-4 蓝 → Lv.5-6 金 → Lv.7+ 紫
 ```
+
+> ⚠️ 实现细节：Label 必须显式设置 `mouse_filter = Control.MOUSE_FILTER_STOP`，否则嵌套在 VBoxContainer → HBoxContainer 中时 `mouse_entered` 信号不会可靠触发。
 
 ### 5.5 其他操作
 
 | 按钮 | 行为 |
 |------|------|
-| 🗑 清空牌桌 | 清空 3 个 Hand，重置 LeftPanel 显示 |
+| 发牌 | 将队列中 9 张牌按序填入手牌区（仅满 9 张可用） |
 | 🎲 随机发牌 | 从 52 张洗牌取 9 张填入影/瞬/滅 |
+| 🗑 清空牌桌 | 清空 3 个 Hand + 队列，重置 LeftPanel 显示 |
 | ← 返回 | `change_scene_to_file("ninking_launcher.tscn")` |
 
 ## §6 复用资产清单
@@ -166,9 +251,9 @@ NinKingDebug (Control) [debug_controller.gd]
 
 | 文件 | 路径 | 说明 |
 |------|------|------|
-| `ninking_debug.tscn` | `scenes/ninking/` | Debug 场景 |
+| `debug_ninking_main.tscn` | `scenes/ninking/` | Debug 场景 |
 | `debug_controller.gd` | `scripts/ninking/debug/` | 主控制器 |
-| `debug_card_tray.gd` | `scripts/ninking/debug/` | 底栏卡牌托盘 |
+| `debug_card_tray.gd` | `scripts/ninking/debug/` | 右侧卡牌托盘 (GridContainer) |
 | `debug_ninja_selector.gd` | `scripts/ninking/debug/` | 忍者选择弹窗 |
 | `main_menu.gd` | `scripts/ninking/ui/` | +4 行 Debug 按钮接线 |
 | `ninking_launcher.tscn` | `scenes/ninking/` | + DebugBtn 节点 |
@@ -177,8 +262,24 @@ NinKingDebug (Control) [debug_controller.gd]
 
 | # | 限制 | 说明 |
 |---|------|------|
-| 1 | 无拖拽放置 | 底栏卡牌暂仅支持点击→点空格放入，不支持拖拽到 Hand（Card-Framework 拖拽事件与 Debug 控制器交互未对接）|
-| 2 | 无列牌型标签 | 列评估已计入计分，但 `ColumnLabelRow`（Col0/Col1/Col2 标签）未包含在场景中 |
+| 1 | 无拖拽放置 | 仅支持点击牌库→队列→发牌，不支持拖拽到 Hand |
+| 2 | ~~无列牌型标签~~ | ✅ 已修复 — `ColumnLabelRow` 已加入 DunArea（与主场景对齐） |
 | 3 | 无 Boss 效果 | `seal_lord_effects` 传空字典，不计 Boss 封印特殊规则 |
 | 4 | 阵形按钮禁用 | AI 重排不适用于 Debug 手动手牌场景 |
 | 5 | 无计分动画 | 点击討伐后直接写 Label，无 BounceScore 弹跳动画 |
+
+## §9 素材替换注意事项
+
+> ⚠️ 用外部工具替换图片/音频等导入资源后，Godot 的 `.import` 缓存会因哈希不匹配而标记 `valid=false`，场景引用失效。
+
+**正确流程：**
+1. 在 Godot 编辑器的 FileSystem dock 中直接拖入新文件覆盖旧文件
+2. Godot 自动更新 `.import`、重新导入、维持 UID 不变
+
+**如已出现"缺少依赖项"错误，手动修复步骤：**
+1. 删除该资源的 `.import` 文件和 `.godot/imported/` 中对应缓存文件
+2. 删除 `.godot/editor/filesystem_cache10`（强制重建索引）
+3. 重启/Reload Project，Godot 自动生成新 `.import`（新 UID）
+4. **关键：** 用新 UID 更新所有引用该资源的场景/资源文件中的 `uid://` 引用
+
+> 详细修复步骤 → `docs/ninking/90-troubleshooting.md` §1

@@ -9,7 +9,7 @@ extends RefCounted
 
 const FX = preload("res://scripts/tween/tween_fx.gd")
 
-const PREFIX: String = "忍気 "
+const PREFIX: String = ""
 const OVERSCALE: float = 1.6
 const UNDERSHOOT: float = 0.82
 const OVERSHOOT_RATIO: float = 0.30

@@ -22,7 +22,7 @@ static func play_shop_entrance_manga(config: Dictionary) -> void:
 	## config keys:
 	##   top_border: ColorRect     — 顶部漫画格分割线
 	##   stage_bg: ColorRect       — 舞台背景
-	##   title_bar: ColorRect      — 标题栏
+	##   title_bar: CanvasItem      — 标题栏 (Label with background)
 	##   panel: Control            — shop panel (validity anchor)
 	##   all_cards: Array[Control] — 所有卡片
 	##   whoosh_sfx: AudioStream   — 墨线画出音效 (optional)
@@ -30,7 +30,7 @@ static func play_shop_entrance_manga(config: Dictionary) -> void:
 
 	var top_border: ColorRect = config.get("top_border") as ColorRect
 	var stage_bg: ColorRect = config.get("stage_bg") as ColorRect
-	var title_bar: ColorRect = config.get("title_bar") as ColorRect
+	var title_bar: CanvasItem = config.get("title_bar") as CanvasItem
 	var panel: Control = config.get("panel") as Control
 	var all_cards: Array = config.get("all_cards", [])
 	var whoosh_sfx: AudioStream = config.get("whoosh_sfx") as AudioStream

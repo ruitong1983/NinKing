@@ -288,15 +288,17 @@ Lv badge 色阶：Lv.1-2 `#7A7A7A` 灰 | Lv.3-4 `#588CF2` 蓝 | Lv.5-6 `#C4A843`
 |------|-----|
 | 节点 | `UIManager/GameLayout/CenterColumn/NinjaBar` |
 | 访问名 | `%NinjaBar` |
+| 容器 | `NinjaBarContainer` (extends CardContainer)，运行时动态实例化，挂载于 %NinjaBar 下 |
+| 卡片类 | `NinjaInventoryCard` (extends Card)，125×175 固定尺寸 (5:7 对齐标准扑克) |
 | 管理节点 | `NinjaBarNode` (Node)，%NinjaBar 的子节点，不参与布局 |
 | 卡片 | 动态显示拥有的忍者牌，无空槽占位（Balatro 风） |
-| 入场 | 刷新时 staggger pop-in（80ms 间隔，`GlobalTweens.pop_in`） |
+| 入场 | 刷新时 staggger pop-in（80ms 间隔，`GlobalTweens.pop_in`，pivot_offset 居中） |
 | 移除 | 淡出+缩小（0.2s），其余卡自动重排 |
-| 间距 | 弹性压缩 8~24px，居中排列，卡片尺寸 130×170 固定 |
-| 悬停 | `GlobalTweens.card_hover` → scale 1.15，上浮 -6px |
+| 间距 | 弹性压缩 8~24px，居中排列，slot_width=125 固定 |
+| 悬停 | DraggableObject hover → scale 1.15，上浮 -6px |
 | 点击 | 左键 → Balatro 风 zoom-in 详情（全屏遮罩+卡面 4x+名+desc） |
-| 拖拽 | Godot 内置拖放：拖起预览半透明卡面，落位到另一槽完成排序 |
-| 排序持久化 | `owned_ninjas` 数组顺序自动保存到存档 |
+| 拖拽 | Card-Framework 状态机驱动，DropZone 竖直分区检测落点，支持任意距离拖拽重排（check_card_can_be_dropped + get_partition_index 双重写绕过传感器限制） |
+| 排序持久化 | `reorder_requested` 信号 → `NinjaBarNode._on_reorder_requested()` → `owned_ninjas` 数组顺序保存 |
 | 刷新 | `NinjaBarNode.refresh(owned_ninjas, max_slots)` — 差值更新 |
 
 ##### b. 手牌区 `HandArea` (HBoxContainer, 1138×728)
@@ -558,12 +560,14 @@ NinKingGameState (autoload)
 | `scripts/ninking/ui/hand_interaction.gd` | 交互状态机（点击/拖拽交换） |
 | `scripts/ninking/ui/dun_highlighter.gd` | 三墩约束高亮 |
 | `scripts/ninking/ui/ninja_bar_node.gd` | 忍者栏管理（diff 刷新/拖拽排序/详情浮层） |
+| `scripts/ninking/ui/ninja_bar_container.gd` | 🆕 忍者栏 CardContainer（水平线性布局/DropZone 分区/拖拽重排） |
+| `scripts/ninking/ui/ninja_inventory_card.gd` | 🆕 忍者库存卡（Card 子类 125×175/稀有度边框/名称标签） |
 | `scripts/ninking/ui/result_screen_display.gd` | 结果屏幕渲染（计分/过关/失败/喜） |
 | `scripts/ninking/ui/nin_king_tween.gd` | 项目级动画序列（商店入场/出场/reroll） |
 | `scripts/ninking/ui/deck_viewer_controller.gd` | 牌库查看器 |
 | `scripts/ninking/ui/ninking_card.gd` | 忍者卡牌显示 (Card Framework 扩展) |
 | `scripts/ninking/ui/shop_ui.gd` | 商店 UI 控制 (ShopPanel) |
-| `scripts/ninking/ui/display_card_base.gd` | 非扑克牌展示基类 120×160 纯卡面 |
+| `scripts/ninking/ui/display_card_base.gd` | 非扑克牌展示基类 125×175 纯卡面 (5:7 对齐标准扑克) |
 | `scripts/ninking/ui/shop_slot.gd` | 🆕 商店展示容器 (DisplayCard + 购买UI) |
 | `scripts/ninking/game_state.gd` | 游戏状态 autoload |
 | `scripts/ninking/seal_controller.gd` | 出牌/封印逻辑 |

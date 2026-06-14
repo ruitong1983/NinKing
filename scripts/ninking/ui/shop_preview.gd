@@ -21,4 +21,4 @@ func _ready() -> void:
 	# Load, add to tree FIRST (so @onready vars init), then call init()
 	var panel: ShopPanel = preload("res://scenes/ninking/shop_panel.tscn").instantiate()
 	add_child(panel)
-	panel.init(shop_mgr, 99, colors, 2, 5)
+	panel.init(shop_mgr, 99, colors)

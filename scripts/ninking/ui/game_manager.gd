@@ -31,7 +31,8 @@ func _ready() -> void:
 	shop_handler = ShopHandler.new()
 	shop_handler.setup(ui)
 	animation_handler = AnimationHandler.new()
-	animation_handler.setup(ui, func(): _auto_shop_pending = true)
+	var _mark_cb := func(): _auto_shop_pending = true
+	animation_handler.setup(ui, _mark_cb)
 
 	# Wire UI buttons
 	ui.play_btn.pressed.connect(_on_play_pressed)
@@ -52,7 +53,7 @@ func _ready() -> void:
 	NinKingGameState.plays_changed.connect(_on_plays_changed)
 	NinKingGameState.gold_changed.connect(_on_gold_changed)
 	NinKingGameState.hand_updated.connect(_on_hand_updated)
-	NinKingGameState.arrangement_changed.connect(_on_arrangement_changed)
+	NinKingGameState.hand_swapped.connect(_on_hand_swapped)
 	NinKingGameState.seal_started.connect(_on_seal_started)
 	NinKingGameState.xi_triggered.connect(_on_xi_triggered)
 
@@ -64,7 +65,8 @@ func _ready() -> void:
 		m.set_shader_parameter("fade_start", 0.64)
 		node.material = m
 	make_fade.call(ui.panel_bg)
-	make_fade.call(ui.score_card)
+	make_fade.call(ui.left_panel.get_node("HandTypePanel"))
+	make_fade.call(ui.left_panel.get_node("ScorePanel"))
 	make_fade.call(ui.left_panel.get_node("MatchPanel"))
 	make_fade.call(ui.left_panel.get_node("AntePanel"))
 
@@ -155,13 +157,9 @@ func _on_hand_updated(_hand: Array) -> void:
 	_update_deck_display()
 
 
-func _on_arrangement_changed(_arr: AutoArranger.Arrangement) -> void:
-	ui.refresh_groups(
-		NinKingGameState.get_head_cards(),
-		NinKingGameState.get_mid_cards(),
-		NinKingGameState.get_tail_cards(),
-		NinKingGameState.is_constraint_satisfied()
-	)
+func _on_hand_swapped(src: int, tgt: int) -> void:
+	ui.on_cards_swapped(src, tgt)
+	_update_deck_display()
 
 
 func _on_seal_started(barrier: int, seal_idx: int, target: float, seal_lord_name: String) -> void:
@@ -184,9 +182,9 @@ func _on_seal_started(barrier: int, seal_idx: int, target: float, seal_lord_name
 		ui.victory_menu_button,
 	]
 	for btn: Button in btns:
-		btn.add_theme_color_override("font_color", c.accent)
-		btn.add_theme_color_override("font_hover_color", c.accent.lightened(0.2))
-		btn.add_theme_color_override("font_pressed_color", c.accent.darkened(0.3))
+		btn.add_theme_color_override("font_color", Color.WHITE)
+		btn.add_theme_color_override("font_hover_color", Color(0.9, 0.9, 0.9))
+		btn.add_theme_color_override("font_pressed_color", Color(0.7, 0.7, 0.7))
 
 	# Phase C: Boss reveal moved to PLAYING state (_trigger_boss_reveal_in_playing).
 	# No more 1s wait here. Theme + intro watermark only.
@@ -217,6 +215,12 @@ func _on_play_pressed() -> void:
 	animation_handler.current_play_data["head_eval"] = arr.head_eval
 	animation_handler.current_play_data["mid_eval"] = arr.mid_eval
 	animation_handler.current_play_data["tail_eval"] = arr.tail_eval
+	# Compute column evaluations for Phase 2 animation
+	var col_evals: Array[HandEvaluator3.EvalResult] = []
+	for i: int in range(3):
+		var col_cards: Array[CardData.PlayingCard] = [arr.head[i], arr.mid[i], arr.tail[i]]
+		col_evals.append(HandEvaluator3.evaluate(col_cards))
+	animation_handler.current_play_data["col_evals"] = col_evals
 	NinKingGameState._transition_to(NinKingGameState.State.SCORING)
 
 
@@ -224,7 +228,7 @@ func _on_ai_rearrange_pressed() -> void:
 	if NinKingGameState.current_state != NinKingGameState.State.PLAYING:
 		return
 	NinKingGameState.auto_arrange()
-	ui.refresh_hand(NinKingGameState.hand)
+	# auto_arrange() emits hand_updated — UI refresh bound via signal
 
 
 func _on_retry_pressed() -> void:

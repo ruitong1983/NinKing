@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://b27dfr3pmqqn"]
 
-[ext_resource type="Script" uid="uid://py2jsudkqhq" path="res://scripts/ninking/ui/shop_ui.gd" id="1_shop"]
+[ext_resource type="Script" uid="uid://dlrutxdiac0k8" path="res://scripts/ninking/ui/shop_ui.gd" id="1_shop"]
 [ext_resource type="Theme" uid="uid://bqb2i07k0v8jt" path="res://assets/themes/manga_theme.tres" id="2_theme"]
 
 [node name="Shop" type="Control" unique_id=1001952410]
@@ -29,31 +29,6 @@ offset_left = 200.0
 offset_top = 60.0
 offset_right = 1720.0
 offset_bottom = 1020.0
-
-[node name="TitleBar" type="ColorRect" parent="ShopPanel" unique_id=266761403]
-layout_mode = 0
-offset_right = 1520.0
-offset_bottom = 90.0
-color = Color(0.12, 0.12, 0.2, 1)
-
-[node name="TitleFocusLines" type="ColorRect" parent="ShopPanel/TitleBar" unique_id=2000000001]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 460.0
-offset_top = -15.0
-offset_right = 1060.0
-offset_bottom = 105.0
-mouse_filter = 2
-
-[node name="ShopTitle" type="Label" parent="ShopPanel" unique_id=1746807318]
-layout_mode = 0
-offset_left = 560.0
-offset_top = 8.0
-offset_right = 960.0
-offset_bottom = 56.0
-text = "商  店"
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="ShopSubtitle" type="Label" parent="ShopPanel" unique_id=2000000002]
 unique_name_in_owner = true
@@ -185,22 +160,6 @@ offset_bottom = 1025.0
 theme_override_constants/separation = 36
 alignment = 1
 
-[node name="BottomBar" type="ColorRect" parent="ShopPanel" unique_id=480946267]
-layout_mode = 0
-offset_top = 880.0
-offset_right = 1520.0
-offset_bottom = 960.0
-color = Color(0.12, 0.12, 0.2, 1)
-
-[node name="BottomFocusLines" type="ColorRect" parent="ShopPanel/BottomBar" unique_id=2000000006]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 460.0
-offset_top = -15.0
-offset_right = 1060.0
-offset_bottom = 95.0
-mouse_filter = 2
-
 [node name="Separator" type="ColorRect" parent="ShopPanel" unique_id=1974193999]
 layout_mode = 0
 offset_left = 30.0
@@ -212,10 +171,9 @@ color = Color(0.831, 0.659, 0.263, 0.25)
 [node name="ContinueBtn" type="Button" parent="ShopPanel" unique_id=2139562772]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 590.0
-offset_top = 895.0
-offset_right = 930.0
-offset_bottom = 951.0
+offset_top = 880.0
+offset_right = 1520.0
+offset_bottom = 960.0
 theme_type_variation = &"ImpactButton"
 text = "討伐へ  ▶"
 
@@ -237,5 +195,14 @@ offset_top = 24.0
 offset_right = 1110.0
 offset_bottom = 72.0
 text = "忍者 0/5"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TitleBar" type="Label" parent="ShopPanel" unique_id=485206302]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 1520.0
+offset_bottom = 90.0
+text = "商  店"
 horizontal_alignment = 1
 vertical_alignment = 1

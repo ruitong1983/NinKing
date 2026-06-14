@@ -2,8 +2,8 @@ class_name CardDetailPopup
 extends Control
 ## Unified Balatro-style zoom-in card detail popup.
 ##
-## Used by NinjaBar (left-click), ShopAbilityCard (right-click),
-## and ShopItemCard (right-click) for consistent card info display everywhere.
+## Shows a large framed card with rarity border and cropped art (KEEP_ASPECT_COVERED),
+## matching the slot's DisplayCardBase visual style.
 ##
 ## Usage:
 ##   var popup = CardDetailPopup.open({
@@ -14,7 +14,6 @@ extends Control
 ##       rarity = "rare",
 ##       extra_desc = "Lv.3",
 ##   })
-##   popup.tree_exited.connect(func(): _detail_popup = null)  # optional guard
 
 const RARITY_COLORS: Dictionary = {
 	"common": Color("#888888"),
@@ -23,14 +22,14 @@ const RARITY_COLORS: Dictionary = {
 	"legendary": Color("#FFD700"),
 }
 
+const COLOR_INK: Color = Color(0.102, 0.102, 0.102)  # #1A1A1A
+const CARD_SIZE: Vector2 = Vector2(320, 448)
 const SB = preload("res://scripts/config/sound_bank.gd")
 
 var _is_dismissing: bool = false
 
 
 static func open(config: Dictionary) -> CardDetailPopup:
-	## Build and display a zoom-in detail popup.
-	## Config fields: viewport, texture, name, desc, rarity, extra_desc
 	var popup := CardDetailPopup.new()
 	popup._build(config)
 	return popup
@@ -54,7 +53,7 @@ func _build(config: Dictionary) -> void:
 	# Setup self
 	size = viewport_size
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	z_index = 100
+	z_index = 1200
 	name = "CardDetailPopup"
 	viewport.get_tree().current_scene.add_child(self)
 
@@ -68,25 +67,26 @@ func _build(config: Dictionary) -> void:
 	add_child(overlay)
 	GlobalTweens.fade_in(overlay, 0.1)
 
-	# ── Card art (520x680, ~4x slot size) ──
-	var card_art: TextureRect = TextureRect.new()
-	card_art.name = "DetailCardArt"
-	card_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	if tex != null:
-		card_art.texture = tex
-	card_art.size = Vector2(520, 680)
-	card_art.position = viewport_size / 2 - card_art.size / 2
-	card_art.position.y -= 40  # Shift up to leave room for text below
-	add_child(card_art)
+	# ── Card frame (matching DisplayCardBase: StyleBoxFlat + KEEP_ASPECT_COVERED) ──
+	var card_pos: Vector2 = viewport_size / 2 - CARD_SIZE / 2
+	card_pos.y -= 60  # Shift up for text below
 
-	# ── Rarity border ──
-	if rarity != "common" and RARITY_COLORS.has(rarity):
-		var border: ColorRect = ColorRect.new()
-		border.color = RARITY_COLORS[rarity]
-		border.size = card_art.size + Vector2(8, 8)
-		border.position = card_art.position - Vector2(4, 4)
-		border.z_index = -1
-		add_child(border)
+	# Build StyleBoxFlat
+	var card_style := _build_card_style(rarity)
+	var card_panel := Panel.new()
+	card_panel.name = "DetailCardPanel"
+	card_panel.size = CARD_SIZE
+	card_panel.position = card_pos
+	card_panel.add_theme_stylebox_override("panel", card_style)
+	add_child(card_panel)
+
+	# Content — draw texture KEEP_ASPECT_COVERED (same as DisplayCardBase._add_content_texture)
+	if tex != null:
+		var content := Control.new()
+		content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		content.draw.connect(_make_card_draw(content, tex))
+		card_panel.add_child(content)
 
 	# ── Name label (32px, rarity-colored if non-common) ──
 	var name_label: Label = Label.new()
@@ -97,7 +97,7 @@ func _build(config: Dictionary) -> void:
 		name_label.add_theme_color_override("font_color", RARITY_COLORS[rarity])
 	name_label.position = Vector2(
 		viewport_size.x / 2 - 200,
-		card_art.position.y + card_art.size.y + 12
+		card_pos.y + CARD_SIZE.y + 12
 	)
 	name_label.size = Vector2(400, 40)
 	add_child(name_label)
@@ -130,7 +130,6 @@ func _build(config: Dictionary) -> void:
 			extra_label.size = Vector2(400, 28)
 			add_child(extra_label)
 	elif extra_desc != "":
-		# No desc, show extra_desc in desc position (e.g. items with level only)
 		var extra_label: Label = Label.new()
 		extra_label.text = extra_desc
 		extra_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -147,21 +146,71 @@ func _build(config: Dictionary) -> void:
 	GlobalTweens.play_sfx(SB.SELECT)
 
 	# ── Pop-in animation ──
-	card_art.scale = Vector2(0.1, 0.1)
+	card_panel.scale = Vector2(0.1, 0.1)
 	var tw: Tween = get_tree().create_tween()
-	tw.tween_property(card_art, "scale", Vector2.ONE, 0.25) \
+	tw.tween_property(card_panel, "scale", Vector2.ONE, 0.25) \
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
+func _build_card_style(rarity: String) -> StyleBoxFlat:
+	## Build StyleBoxFlat matching DisplayCardBase + NinjaSlot rarity mapping.
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.1, 0.1, 0.18, 0.92)
+	style.set_corner_radius_all(6)
+
+	var width: int = 2
+	var border_color: Color = COLOR_INK
+	var shadow: int = 4
+	var shadow_color: Color = Color(0, 0, 0, 0.12)
+
+	match rarity:
+		"uncommon":
+			border_color = Color(0.831, 0.659, 0.263)
+			shadow = 6
+		"rare":
+			width = 3
+			border_color = Color(0.878, 0.251, 0.251)
+			shadow = 10
+		"legendary":
+			width = 3
+			border_color = Color(1.0, 0.843, 0.0)
+			shadow = 14
+
+	if shadow > 4:
+		shadow_color = Color(border_color, 0.18 if rarity == "legendary" else 0.25)
+
+	style.border_width_left = width
+	style.border_width_right = width
+	style.border_width_top = width
+	style.border_width_bottom = width
+	style.border_color = border_color
+	style.shadow_size = shadow
+	style.shadow_color = shadow_color
+	return style
+
+
+func _make_card_draw(control: Control, tex: Texture2D) -> Callable:
+	## Return a callable that draws tex KEEP_ASPECT_COVERED inside control.
+	return func():
+		if not is_instance_valid(tex):
+			return
+		var draw_size: Vector2 = control.get_size()
+		if draw_size.x <= 0 or draw_size.y <= 0:
+			return
+		var tex_size: Vector2 = tex.get_size()
+		var s: float = max(draw_size.x / tex_size.x, draw_size.y / tex_size.y)
+		var scaled: Vector2 = tex_size * s
+		var offset: Vector2 = (draw_size - scaled) * 0.5
+		control.draw_texture_rect_region(tex, Rect2(offset, scaled), Rect2(Vector2.ZERO, tex_size))
+
+
 func _on_overlay_clicked(event: InputEvent) -> void:
-	## Click anywhere on the overlay → dismiss.
 	if event is InputEventMouseButton and event.pressed \
 			and event.button_index == MOUSE_BUTTON_LEFT:
 		dismiss()
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	## ESC key → dismiss.
 	if event is InputEventKey and event.pressed \
 			and event.keycode == KEY_ESCAPE:
 		get_viewport().set_input_as_handled()
@@ -169,7 +218,6 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func dismiss() -> void:
-	## Animate out and remove the popup.
 	if _is_dismissing:
 		return
 	_is_dismissing = true

@@ -120,9 +120,10 @@ const HAND_TYPE3_BASE_VALUES: Dictionary = {
 	HandType3.THREE_OF_KIND_3: {"chips": 100, "mult": 8},
 }
 
-# COLUMN_HAND_TYPE3_BASE_VALUES removed in v4.0 — columns now use ×mult (2/4/8/16/32)
+# COLUMN_HAND_TYPE3_BASE_VALUES removed in v4.0 — columns used ×mult (2/4/8/16/32)
+# COL_X_MULT_VALUES deprecated in v5.0 — columns now use same chips×mult formula as rows
 
-## Column ×mult values (v4.0: fixed, not affected by star chart)
+## [DEPRECATED v5.0] Column ×mult values — columns now use HAND_TYPE3_BASE_VALUES directly
 const COL_X_MULT_VALUES: Dictionary = {
 	HandType3.HIGH_CARD_3: 1,
 	HandType3.ONE_PAIR_3: 2,

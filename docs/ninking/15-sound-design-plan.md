@@ -134,7 +134,7 @@
 | **描述** | 短促清脆 tap/tick 音，可加速重复播放 |
 | **关键词** | `tick`, `tap`, `coin count`, `wood hit light`, `anime tap`, `cartoon tick` |
 | **时长** | ~0.05s |
-| **接线** | `game_manager._run_scoring_animation()` → CountUp 驱动时每 N 点调用一次 `GlobalTweens.play_sfx(SB.COUNT_TICK)` |
+| **接线** | `animation_handler._sfx_tick(pitch)` → `GlobalTweens.play_sfx(SB.COUNT_TICK, 0.0, pitch)`，由 CountUp.play_multi milestone 检测驱动，pitch 递升(0.88→1.22, +0.05/tick) |
 | **价值** | 分数跳动的满足感，数字每跳一下有一个听觉反馈 |
 
 #### S4. 喜触发 — 单喜 / 双喜+

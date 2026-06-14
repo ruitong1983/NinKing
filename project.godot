@@ -46,6 +46,10 @@ custom_bind_ip=""
 port_override_enabled=false
 port_override=6550
 
+[gui]
+
+theme/custom="res://assets/themes/manga_theme.tres"
+
 [rendering]
 
 rendering_device/driver.windows="opengl3"

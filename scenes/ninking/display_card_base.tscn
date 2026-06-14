@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://b4wd5mplcb50m"]
 
-[ext_resource type="Script" uid="uid://qw5kchvieb8h" path="res://scripts/ninking/ui/display_card_base.gd" id="1_mra0x"]
+[ext_resource type="Script" uid="uid://bqwu25incmaoe" path="res://scripts/ninking/ui/display_card_base.gd" id="1_mra0x"]
 
 [node name="DisplayCardBase" type="Control" unique_id=92712522]
-custom_minimum_size = Vector2(120, 160)
+custom_minimum_size = Vector2(125, 175)
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_mra0x")
@@ -12,7 +12,7 @@ script = ExtResource("1_mra0x")
 anchors_preset = 0
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="FrontFace"]
+[node name="TextureRect" type="TextureRect" parent="FrontFace" unique_id=1327729593]
 visible = false
 layout_mode = 0
 
@@ -20,7 +20,7 @@ layout_mode = 0
 anchors_preset = 0
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="BackFace"]
+[node name="TextureRect" type="TextureRect" parent="BackFace" unique_id=5419947]
 visible = false
 layout_mode = 0
 

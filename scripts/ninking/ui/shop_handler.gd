@@ -42,7 +42,7 @@ func go_shop_pressed() -> void:
 	# Keep LeftPanel + NinjaBar visible — only dim hand/dun play area
 	# Shop panel starts at x:420, left column stays uncovered.
 	if _ui.game_layout.has_node("CenterColumn/HandArea"):
-		_ui.game_layout.get_node("CenterColumn/HandArea").modulate.a = 0.0
+		_ui.game_layout.get_node("CenterColumn/HandArea").modulate = Color(1, 1, 1, 0.35)
 
 	# Transition to SHOP
 	SealController.go_to_shop(NinKingGameState)
@@ -68,14 +68,7 @@ func on_purchase_requested(ability: Dictionary) -> void:
 		GlobalTweens.play_sfx(SB.ITEM_PURCHASE)
 		GlobalTweens.play_sfx(SB.UI_COIN)
 		_ui.shop_panel_update_gold(NinKingGameState.gold)
-		# Find the actual ninja slot node (filter out NinjaBarNode which is a plain Node)
-		var all_children := _ui.ninja_bar_container.get_children()
-		var ninja_slots: Array[Node] = []
-		for c: Node in all_children:
-			if c is NinjaSlotNode:
-				ninja_slots.append(c)
-		if ninja_slots.size() > 0:
-			NinKingTween.play_ninja_pop_in(ninja_slots[-1] as CanvasItem)
+		_ui.refresh_ninjas(NinKingGameState.owned_ninjas, NinKingGameState.max_ninja_slots)
 		ToastManager.show("获得: %s!" % ability.get("name", "???"), 1.5)
 	else:
 		ToastManager.show("金币不足!", 1.5)

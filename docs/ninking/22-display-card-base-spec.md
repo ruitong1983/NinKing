@@ -1,7 +1,7 @@
 # DisplayCardBase — 非扑克牌统一展示卡规格
 
 > **实施状态：✅ 已实现 (2026-06-12)**
-> **最后更新：2026-06-12 — Balatro 风大重构：纯卡面 120×160 + ShopSlot 容器**
+> **最后更新：2026-06-12 — Balatro 风大重构：纯卡面 125×175 + ShopSlot 容器**
 >
 > 目标：游戏内所有非 52 张扑克牌的卡牌（忍者能力、星图、道具、牌组预览等）**卡牌本身视觉统一**。
 > 卡上无文字、无按钮 — 纯卡面 + 上下文容器提供额外 UI。
@@ -15,7 +15,7 @@ Control
   └── DraggableObject (card-framework)
        └── Card (card-framework)
             ├── NinKingCard              ← 扑克牌（不动，纹理体系+手牌拖拽）
-            └── DisplayCardBase          ← ⭐ 纯卡面基类 120×160
+            └── DisplayCardBase          ← ⭐ 纯卡面基类 125×175
                  └── (无子类 Scene)
                      所有上下文由外部容器提供：
                      ├── ShopSlot        ← 商店：DisplayCard + 购买UI
@@ -30,10 +30,10 @@ Control
 
 ## 二、场景结构
 
-### DisplayCardBase.tscn (120×160)
+### DisplayCardBase.tscn (125×175)
 
 ```
-DisplayCardBase.tscn (Control, 120×160)
+DisplayCardBase.tscn (Control, 125×175)
   inherits: Card
 
   # Card 带来的节点（隐藏不使用）
@@ -41,7 +41,7 @@ DisplayCardBase.tscn (Control, 120×160)
   BackFace (TextureRect, visible=false)
 
   # 统一外框
-  card_panel (Panel, 120×160)
+  card_panel (Panel, 125×175)
     StyleBoxFlat:
       bg_color = #1A1A2E (默认暗底，结界染色覆盖)
       corner_radius_all = 6 (小卡用 6px)
@@ -61,7 +61,7 @@ DisplayCardBase.tscn (Control, 120×160)
 
 ```
 ShopSlot.tscn (Control, 300×370)
-  ├── DisplayCard (实例化)      ← 120×160，居中于上部 (offset: 90, 10)
+  ├── DisplayCard (实例化)      ← 125×175，居中于上部 (offset: 90, 10)
   ├── name_label (Label)        ← L0.04 T0.52 R0.96 B0.62 — 卡名
   ├── effect_label (Label)      ← L0.04 T0.63 R0.96 B0.74 — 效果文本
   ├── condition_label (Label)   ← L0.04 T0.75 R0.96 B0.83 — 条件文本（ability 专属）
@@ -144,5 +144,5 @@ slot.apply_barrier_theme(colors)
 2. **上下文容器** — 额外 UI（名称/效果/价格/按钮）由父容器提供
 3. **容器数据驱动** — ShopSlot 根据 data 中是否有 `hand_type` 分 ability/item 显示
 4. **稀有度 = 边框 + 辉光** — 不额外加文字浮标
-5. **像素完美** — DisplayCard 120×160 对齐扑克牌 3:4 比例
+5. **像素完美** — DisplayCard 125×175 对齐标准扑克 5:7 比例
 6. **容器可换** — 牌组预览、图鉴、收藏用不同容器，DisplayCard 保持不变

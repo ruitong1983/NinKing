@@ -37,17 +37,36 @@ const BOSS_PORTRAITS: Dictionary = {
 # ═══ Left panel ═══
 @onready var left_panel: Control = %LeftPanel
 @onready var panel_bg: ColorRect = %PanelBg
-@onready var score_card: Panel = %ScoreCard
 @onready var col_xi_label: Label = %ColXiLabel
+
+func update_xi_display(text: String) -> void:
+	col_xi_label.text = text
+	col_xi_label.visible = (text != "" and text != "喜: -")
+
 @onready var shadow_type_label: Label = %ShadowType
 @onready var flash_type_label: Label = %FlashType
 @onready var destroy_type_label: Label = %DestroyType
-@onready var shadow_score_label: Label = %ShadowScore
-@onready var flash_score_label: Label = %FlashScore
-@onready var destroy_score_label: Label = %DestroyScore
+@onready var shadow_score_label: RichTextLabel = %ShadowScore
+@onready var flash_score_label: RichTextLabel = %FlashScore
+@onready var destroy_score_label: RichTextLabel = %DestroyScore
 @onready var shadow_lv_label: Label = %ShadowLv
 @onready var flash_lv_label: Label = %FlashLv
 @onready var destroy_lv_label: Label = %DestroyLv
+
+# ═══ Column row labels ═══
+@onready var left_col_label: Label = %LeftColLabel
+@onready var left_col_type: Label = %LeftColType
+@onready var left_col_score: RichTextLabel = %LeftColScore
+@onready var left_col_lv: Label = %LeftColLv
+@onready var mid_col_label: Label = %MidColLabel
+@onready var mid_col_type: Label = %MidColType
+@onready var mid_col_score: RichTextLabel = %MidColScore
+@onready var mid_col_lv: Label = %MidColLv
+@onready var right_col_label: Label = %RightColLabel
+@onready var right_col_type: Label = %RightColType
+@onready var right_col_score: RichTextLabel = %RightColScore
+@onready var right_col_lv: Label = %RightColLv
+
 @onready var score_label: Label = %ScoreLabel
 @onready var target_score_label: Label = %TargetScoreLabel
 @onready var progress_bar: ProgressBar = %ProgressBar
@@ -57,18 +76,13 @@ const BOSS_PORTRAITS: Dictionary = {
 @onready var round_label: Label = %RoundLabel
 
 # ═══ Ninja bar ═══
-@onready var ninja_bar_container: HBoxContainer = %NinjaBar
+@onready var ninja_bar_wrapper: Control = %NinjaBar
 
 # ═══ Center ═══
 @onready var status_label: Label = %StatusLabel
 @onready var deck_btn: Button = %DeckBtn
 @onready var hand_area: HBoxContainer = %HandArea
-@onready var dun_head: Panel = %DunHead
-@onready var dun_middle: Panel = %DunMiddle
-@onready var dun_tail: Panel = %DunTail
-@onready var head_cards: Hand = %HeadCards
-@onready var middle_cards: Hand = %MiddleCards
-@onready var tail_cards: Hand = %TailCards
+@onready var card_grid: HandCardContainer = %CardGrid
 @onready var head_label: Label = %HeadLabel
 @onready var middle_label: Label = %MiddleLabel
 @onready var tail_label: Label = %TailLabel
@@ -108,39 +122,43 @@ var hand_interaction: RefCounted  # HandInteraction
 var deck_viewer_ctrl: DeckViewerController
 var dun_highlighter: DunHighlighter
 var result_screen: ResultScreenDisplay
-var ninja_bar
+var ninja_bar: NinjaBarNode
 
 
 func _ready() -> void:
 	# Hand display (rendering)
 	hand_display = HandDisplay.new()
 	hand_display.setup(
-		head_cards, middle_cards, tail_cards,
+		card_grid,
 		head_type_label, middle_type_label, tail_type_label,
 		col0_label, col1_label, col2_label, col_xi_label,
 		shadow_type_label, flash_type_label, destroy_type_label,
 		shadow_score_label, flash_score_label, destroy_score_label,
 		shadow_lv_label, flash_lv_label, destroy_lv_label,
+		left_col_label, mid_col_label, right_col_label,
+		left_col_type, mid_col_type, right_col_type,
+		left_col_score, mid_col_score, right_col_score,
+		left_col_lv, mid_col_lv, right_col_lv,
 		play_btn, status_label
 	)
 
 	# Hand interaction (swap state machine)
 	hand_interaction = HandInteraction.new()
-	hand_interaction.setup(hand_display)
+	hand_interaction.setup(hand_display, _on_ninking_card_clicked, _on_ninking_card_dragged)
 
 	# Deck viewer
 	deck_viewer_ctrl = DeckViewerController.new()
 	deck_viewer_ctrl.setup(
 		%DeckBtn, %DeckViewer, %CloseBtn,
 		%DrawCountLabel, %DiscardCountLabel,
-		%CardGrid, %ViewerBg
+		%DeckCardGrid, %ViewerBg
 	)
 
 	# Dun highlighter (constraint visualization + card flash)
 	dun_highlighter = DunHighlighter.new()
 	dun_highlighter.setup(
 		head_label, middle_label, tail_label, status_label,
-		head_cards, middle_cards, tail_cards
+		card_grid
 	)
 
 	# Result screen display (scoring / victory / gameover / xi)
@@ -151,9 +169,12 @@ func _ready() -> void:
 		hand_name_label, score_value_label, score_breakdown
 	)
 
-	# Ninja bar — attached as Node child of the HBoxContainer
-	ninja_bar = load("res://scripts/ninking/ui/ninja_bar_node.gd").new()
-	ninja_bar_container.add_child(ninja_bar)
+	# Ninja bar — CardContainer + manager Node
+	var bar_container := NinjaBarContainer.new()
+	ninja_bar_wrapper.add_child(bar_container)
+	ninja_bar = NinjaBarNode.new()
+	ninja_bar.set_container(bar_container)
+	ninja_bar_wrapper.add_child(ninja_bar)
 
 	# ── Three-Dun title progressive outline (V20) ──
 	head_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.3))
@@ -164,6 +185,9 @@ func _ready() -> void:
 	tail_label.add_theme_constant_override("font_outline_size", 3)
 
 	status_label.text = ""
+
+
+
 
 
 # ══════════════════════════════════════════
@@ -290,6 +314,7 @@ func _on_shop_continue_requested() -> void:
 # ══════════════════════════════════════════
 
 func on_seal_start(barrier: int, seal_idx: int, target: int, seal_lord_name: String) -> void:
+	clear_score_formula()
 	var seal_names: Array = ["修羅ノ封印", "明王ノ封印", "夜叉ノ封印"]
 	var seal_str: String = seal_names[seal_idx] if seal_idx < 3 else "?"
 	intro_level_label.text = "結界%d · %s" % [barrier, seal_str]
@@ -309,11 +334,38 @@ func on_seal_start(barrier: int, seal_idx: int, target: int, seal_lord_name: Str
 
 
 # ══════════════════════════════════════════
-# Left panel
+# Left panel — formula display
 # ══════════════════════════════════════════
 
+var _score_subtotal: int = 0
+var _score_xi: int = 0
+
+
+func set_score_formula(subtotal: int, xi_val: int) -> void:
+	_score_subtotal = subtotal
+	_score_xi = xi_val
+	_refresh_score_label()
+
+
+func clear_score_formula() -> void:
+	_score_subtotal = 0
+	_score_xi = 0
+	_refresh_score_label()
+
+
+func _refresh_score_label() -> void:
+	var displayed_total: int = _score_subtotal * _score_xi if _score_xi > 0 else _score_subtotal
+	if _score_xi > 0:
+		score_label.text = "%d x %d = %d" % [_score_subtotal, _score_xi, displayed_total]
+	else:
+		score_label.text = "%d" % displayed_total
+
+
 func update_score(current: int, target: int) -> void:
-	score_label.text = "忍気 %d" % current
+	# If formula hasn't been set by animation yet, init subtotal from current score
+	if _score_subtotal == 0 and _score_xi == 0:
+		_score_subtotal = current
+	_refresh_score_label()
 	progress_bar.max_value = float(target)
 	progress_bar.value = float(current)
 
@@ -337,6 +389,7 @@ func update_target(target: int) -> void:
 func _refresh_internal(hand: Array[CardData.PlayingCard]) -> void:
 	hand_interaction.set_hand(hand)
 	hand_display.refresh(hand, hand_interaction.swap_source_idx, _on_ninking_card_clicked, _on_ninking_card_dragged)
+	hand_display.update_labels(hand)
 	dun_highlighter.update(NinKingGameState.current_arrangement)
 	play_btn.disabled = not NinKingGameState.is_constraint_satisfied()
 
@@ -345,13 +398,14 @@ func refresh_hand(hand: Array[CardData.PlayingCard]) -> void:
 	_refresh_internal(hand)
 
 
-func refresh_groups(head_cards_arr: Array[CardData.PlayingCard], mid_cards_arr: Array[CardData.PlayingCard], tail_cards_arr: Array[CardData.PlayingCard], constraint_ok: bool) -> void:
-	var combined: Array[CardData.PlayingCard] = []
-	combined.append_array(head_cards_arr)
-	combined.append_array(mid_cards_arr)
-	combined.append_array(tail_cards_arr)
-	_refresh_internal(combined)
-	play_btn.disabled = not constraint_ok  # B10: 约束不满足时禁止出牌
+## Called after two cards swap — animate in-place, no full rebuild.
+func on_cards_swapped(src: int, tgt: int) -> void:
+	hand_interaction.set_hand(NinKingGameState.hand)
+	hand_interaction.swap_source_idx = -1
+	card_grid.swap_two_cards(src, tgt)
+	hand_display.update_labels(NinKingGameState.hand)
+	dun_highlighter.update(NinKingGameState.current_arrangement)
+	play_btn.disabled = not NinKingGameState.is_constraint_satisfied()
 
 
 # ══════════════════════════════════════════
@@ -402,8 +456,8 @@ func flash_all_hand_cards() -> void:
 	dun_highlighter.flash_all_hands()
 
 
-func flash_hand(hand: Hand) -> void:
-	dun_highlighter.flash_hand(hand)
+func flash_row(row: int) -> void:
+	dun_highlighter.flash_row(row)
 
 
 # ══════════════════════════════════════════

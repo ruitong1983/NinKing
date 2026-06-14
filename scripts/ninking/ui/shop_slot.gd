@@ -1,24 +1,25 @@
 class_name ShopSlot
 extends Control
-## Shop card container — horizontal layout.
+## Shop card container — ink-wash (水墨) card + seal button.
 ##
-## Card art (DisplayCardBase, 120x160) on the left, text info on the right.
-## Name -> effect (2-line wrap) -> buy button showing price "$N".
+## DisplayCard (card art + embedded name/desc) + buy button showing "$N".
 ## Single unified scene for both ability and item cards.
-## Color scheme follows left panel: cream text, gray-olive desc, dark+accent buttons.
+## Ink-wash palette: paper-white card, cinnabar seal buy button.
 
 # ═══ Signals ═══
 signal purchase_requested(data: Dictionary)
 
-# ═══ Constants ═══
-const COLOR_INK: Color = Color(0.102, 0.102, 0.102)  # #1A1A1A
-const COLOR_CREAM: Color = Color(0.941, 0.929, 0.894)  # Left panel primary text
-const COLOR_GRAY_OLIVE: Color = Color(0.478, 0.478, 0.416)  # Left panel secondary
+# ═══ Ink-wash palette ═══
+const COLOR_SUMI       := Color(0.169, 0.118, 0.063)  # 焦墨 #2B1E10
+
+const COLOR_PAPER      := Color(0.961, 0.941, 0.910)  # 和纸白 #F5F0E8
+const COLOR_CINNABAR   := Color(0.722, 0.227, 0.165)  # 朱砂 #B83A2A
+const COLOR_BLUE_ZAN   := Color(0.180, 0.361, 0.541)  # 蓝锖 #2E5C8A
+const COLOR_GOLD_MUD   := Color(0.769, 0.639, 0.353)  # 金泥 #C4A35A
+const COLOR_CARD_SHADOW := Color(0, 0, 0, 0.08)  # 纸片投影
 
 # ═══ @onready references ═══
 @onready var display_card: DisplayCardBase = $DisplayCard
-@onready var name_label: Label = $name_label
-@onready var effect_label: Label = $effect_label
 @onready var buy_button: Button = $buy_button
 
 # ═══ State ═══
@@ -41,17 +42,7 @@ func setup(data: Dictionary) -> void:
 	# 2. Load illustration into the card
 	_load_illustration(data)
 
-	# 3. Text labels (right of card)
-	name_label.text = data.get("name", "???")
-
-	if _is_item:
-		var ht: int = data.get("hand_type", 0)
-		var level: int = NinKingGameState.star_chart_levels.get(ht, 0)
-		effect_label.text = data.get("desc", "") + "  Lv.%d" % level
-	else:
-		effect_label.text = data.get("desc", "")
-
-	# 4. Buy button shows price directly
+	# 3. Buy button shows price directly
 	var cost: int = data.get("cost", 0)
 	buy_button.text = "$%d" % cost
 	if buy_button.pressed.is_connected(_on_buy_pressed):
@@ -63,60 +54,29 @@ func setup(data: Dictionary) -> void:
 	visible = true
 
 
-func apply_barrier_theme(colors: Dictionary) -> void:
-	## Apply barrier-specific colors to slot elements (left-panel style).
+func apply_barrier_theme(_colors: Dictionary) -> void:
+	## Backwards-compatible entry point (used by card_preview.gd).
+	## Delegates to ink-wash theme — ignores `colors` since shop uses its own palette.
+	apply_ink_wash_theme()
 
-	# Card frame
-	display_card.apply_barrier_theme(colors)
 
-	# Name label — cream white (like left panel primary text)
-	name_label.add_theme_color_override("font_color", COLOR_CREAM)
-	name_label.add_theme_font_size_override("font_size", 16)
+func apply_ink_wash_theme() -> void:
+	## Apply ink-wash (水墨) styling: paper card + sumi text + cinnabar seal button.
 
-	# Effect label — gray olive (like left panel secondary)
-	effect_label.add_theme_color_override("font_color", COLOR_GRAY_OLIVE)
-	effect_label.add_theme_font_size_override("font_size", 13)
+	# ── Card frame: paper white + ink border + soft shadow ──
+	display_card.set_card_border(2, COLOR_SUMI, 4, COLOR_CARD_SHADOW)
+	# Override the card's internal bg to paper white via its existing method
+	if display_card.has_method("apply_barrier_theme"):
+		# Hijack: pass paper as "panel" color — works because method sets bg_color = panel
+		display_card.apply_barrier_theme({"panel": COLOR_PAPER, "accent": COLOR_SUMI})
 
-	# Buy button — dark bg + accent border (matching left panel button style)
-	var bg_dark: Color = Color(colors.panel).darkened(0.50)
+	# ── Buy button: cinnabar seal (朱砂印章) ──
+	_apply_seal_button_style(buy_button, COLOR_CINNABAR)
 
-	var btn_normal := StyleBoxFlat.new()
-	btn_normal.bg_color = bg_dark
-	btn_normal.border_color = colors.accent
-	btn_normal.border_width_left = 2
-	btn_normal.border_width_right = 2
-	btn_normal.border_width_top = 2
-	btn_normal.border_width_bottom = 2
-	btn_normal.set_corner_radius_all(6)
-	btn_normal.content_margin_left = 8
-	btn_normal.content_margin_top = 2
-	btn_normal.content_margin_right = 8
-	btn_normal.content_margin_bottom = 2
-	buy_button.add_theme_stylebox_override("normal", btn_normal)
-	buy_button.add_theme_color_override("font_color", COLOR_CREAM)
-	buy_button.add_theme_font_size_override("font_size", 14)
-
-	var btn_hover := btn_normal.duplicate() as StyleBoxFlat
-	btn_hover.bg_color = Color(bg_dark).lightened(0.12)
-	btn_hover.border_color = Color(colors.accent).lightened(0.15)
-	btn_hover.border_width_left = 3
-	btn_hover.border_width_right = 3
-	btn_hover.border_width_top = 3
-	btn_hover.border_width_bottom = 3
-	buy_button.add_theme_stylebox_override("hover", btn_hover)
-	buy_button.add_theme_color_override("font_hover_color", Color.WHITE)
-
-	var btn_pressed := btn_normal.duplicate() as StyleBoxFlat
-	btn_pressed.bg_color = Color(bg_dark).darkened(0.15)
-	btn_pressed.content_margin_top = 4
-	btn_pressed.content_margin_bottom = 0
-	buy_button.add_theme_stylebox_override("pressed", btn_pressed)
-	buy_button.add_theme_color_override("font_pressed_color", Color(COLOR_CREAM).darkened(0.2))
-
-	# Rarity border for ability cards
+	# ── Rarity border for ability cards ──
 	if not _is_item:
 		var r: String = _data.get("rarity", "common")
-		_apply_rarity_border(r, colors)
+		_apply_rarity_border(r)
 
 
 func set_purchased() -> void:
@@ -130,33 +90,71 @@ func get_card_id() -> String:
 
 
 # ══════════════════════════════════════════
-# Rarity — card border
+# Seal button style
 # ══════════════════════════════════════════
 
-func _apply_rarity_border(rarity: String, colors: Dictionary) -> void:
+func _apply_seal_button_style(btn: Button, seal_color: Color) -> void:
+	## Seal (印章) button: solid mineral-pigment bg + ink border + white text.
+	var bg := seal_color
+
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = bg
+	normal.border_color = COLOR_SUMI
+	normal.border_width_left = 2
+	normal.border_width_right = 2
+	normal.border_width_top = 2
+	normal.border_width_bottom = 2
+	normal.set_corner_radius_all(4)
+	normal.content_margin_left = 8
+	normal.content_margin_top = 2
+	normal.content_margin_right = 8
+	normal.content_margin_bottom = 2
+	btn.add_theme_stylebox_override("normal", normal)
+	btn.add_theme_color_override("font_color", Color.WHITE)
+	btn.add_theme_font_size_override("font_size", 14)
+
+	var hovered := normal.duplicate() as StyleBoxFlat
+	hovered.bg_color = Color(bg).lightened(0.10)
+	hovered.border_width_left = 3
+	hovered.border_width_right = 3
+	hovered.border_width_top = 3
+	hovered.border_width_bottom = 3
+	btn.add_theme_stylebox_override("hover", hovered)
+	btn.add_theme_color_override("font_hover_color", Color.WHITE)
+
+	var pressed := normal.duplicate() as StyleBoxFlat
+	pressed.bg_color = Color(bg).darkened(0.15)
+	pressed.content_margin_top = 4
+	pressed.content_margin_bottom = 0
+	btn.add_theme_stylebox_override("pressed", pressed)
+	btn.add_theme_color_override("font_pressed_color", Color(1, 1, 1, 0.85))
+
+
+# ══════════════════════════════════════════
+# Rarity — card border (ink-wash palette)
+# ══════════════════════════════════════════
+
+func _apply_rarity_border(rarity: String) -> void:
 	var width: int = 2
-	var border_color: Color = COLOR_INK
+	var border_color: Color = COLOR_SUMI
 	var shadow_size: int = 4
-	var shadow_color: Color = Color(0, 0, 0, 0.12)
+	var shadow_color: Color = COLOR_CARD_SHADOW
 
 	match rarity:
 		"uncommon":
-			border_color = colors.get("accent", Color(0.831, 0.659, 0.263))
+			border_color = COLOR_BLUE_ZAN
 			shadow_size = 6
-			shadow_color = Color(border_color)
-			shadow_color.a = 0.15
+			shadow_color = Color(COLOR_BLUE_ZAN, 0.12)
 		"rare":
 			width = 3
-			border_color = Color(0.878, 0.251, 0.251)  # #E04040
-			shadow_size = 10
-			shadow_color = Color(0.878, 0.251, 0.251)
-			shadow_color.a = 0.25
+			border_color = COLOR_CINNABAR
+			shadow_size = 8
+			shadow_color = Color(COLOR_CINNABAR, 0.18)
 		"legendary":
 			width = 3
-			border_color = Color(1.0, 0.843, 0.0)  # #FFD700
-			shadow_size = 14
-			shadow_color = Color(1.0, 0.843, 0.0)
-			shadow_color.a = 0.30
+			border_color = COLOR_GOLD_MUD
+			shadow_size = 12
+			shadow_color = Color(COLOR_GOLD_MUD, 0.22)
 
 	display_card.set_card_border(width, border_color, shadow_size, shadow_color)
 

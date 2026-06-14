@@ -14,6 +14,10 @@
 
 > 每次会话开始先读取。完成任务后更新状态。
 
+# 🔧 疑难问题 → `docs/ninking/90-troubleshooting.md`
+
+> 遇到非显而易见的报错/异常行为/Godot 编辑器问题，先查此手册是否已有记录。
+
 # 🧪 Godot MCP Pro 测试 → 先读 `docs/ninking/testing-guide.md`
 
 > **调用 `mcp__godot-mcp-pro__play_scene` / `execute_game_script` / `find_ui_elements` / `simulate_mouse_click` / `get_game_screenshot` 做游戏测试前，必须先读此指南。**
@@ -31,6 +35,12 @@
 | 改UI / 调整界面 / 布局 / 按钮 / 配色/字体/间距 | `ui-modify-plan` | 方案 → Figma同步 → 实现 |
 | 代码审查 / review | `review-plan` | 对照检查项逐条 |
 | 游戏机制/数值/布局变更 | `update-docs` | 判断是否同步 docs/ |
+
+## 素材替换
+
+> **铁律：替换图片/音频等导入资源必须在 Godot 编辑器的 FileSystem dock 中拖入覆盖，禁止用外部工具直接替换文件。**
+>
+> 疑难问题 → `docs/ninking/90-troubleshooting.md`
 
 # Claude Code 开发规范 · Godot 4.6.2 纯2D
 
@@ -58,9 +68,17 @@ API 速查 → `docs/card-framework-usage-guide.md`。扩展类：`NinKingCard` 
 
 API 速查 → `docs/tween-library-reference.md`。
 
+## 主场景与 Debug 场景同步
+
+> **铁律：修改主场景（`ninking_main.tscn` / `ninking_launcher.tscn`）时，若 Debug 场景（`debug_ninking_main.tscn`）中存在相同节点/脚本/布局/信号绑定，必须同步修改 Debug 场景，保持两者一致。**
+>
+> **对照细则 → `docs/ninking/20-debug-scene-design.md` §4.1**（完全对齐 / 同名不同型 / 独占 + 修改决策速查）
+
 ## 设计文档同步
 
 > **铁律：** 涉及游戏机制/数值/UI布局/关卡/经济的设计变更时，同步更新 `docs/ninking/`。
+
+**设计文档索引 → `docs/ninking/README.md`**
 
 **设计文档索引 → `docs/ninking/README.md`**
 

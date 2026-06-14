@@ -2,7 +2,7 @@ class_name DisplayCardBase
 extends Card
 ## Base class for all non-poker display cards (ability, item, deck preview, collection).
 ##
-## Pure card face at 120×160 — no text overlay, no buttons.
+## Pure card face at 125×175 — no text overlay, no buttons.
 ## All contextual UI (name, effect, price, buy button) lives in the parent container
 ## (e.g. ShopSlot), not on this card itself.
 ##
@@ -126,8 +126,8 @@ func _add_content_texture(texture: Texture2D) -> Control:
 			return
 		# KEEP_ASPECT_COVERED: scale to fill, center-crop
 		var tex_size: Vector2 = texture.get_size()
-		var scale: float = max(draw_size.x / tex_size.x, draw_size.y / tex_size.y)
-		var scaled: Vector2 = tex_size * scale
+		var s: float = max(draw_size.x / tex_size.x, draw_size.y / tex_size.y)
+		var scaled: Vector2 = tex_size * s
 		var offset: Vector2 = (draw_size - scaled) * 0.5
 		var src_rect := Rect2(Vector2.ZERO, tex_size)
 		var dst_rect := Rect2(offset, scaled)

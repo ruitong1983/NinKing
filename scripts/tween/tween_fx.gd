@@ -69,16 +69,22 @@ static func pop_out(node: Node, duration: float = 0.2, auto_kill: bool = true) -
 
 # ─── 弹性冲入 ───
 
-## 从当前 scale 弹性过冲到 peak_scale 再回弹到 1.0。不修改起始 scale。
+## 从当前 scale 弹性过冲到 peak_scale 再回弹到 1.0。pivot_offset 居中，不碰 position。
 static func punch_in(node: Node, duration: float = 0.4, peak_scale: float = 1.5, auto_kill: bool = true) -> Tween:
 	if not is_instance_valid(node):
 		return null
 	if auto_kill:
 		_kill_tracked(node, "scale")
+	var ctrl: Control = node as Control if node is Control else null
+	var saved_pivot: Vector2 = ctrl.pivot_offset if ctrl else Vector2.ZERO
+	if ctrl:
+		ctrl.pivot_offset = ctrl.size * 0.5
 	var tw := node.create_tween()
 	tw.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_ELASTIC)
 	tw.tween_property(node, "scale", Vector2(peak_scale, peak_scale), duration * 0.6)
 	tw.tween_property(node, "scale", Vector2.ONE, duration * 0.4)
+	if ctrl:
+		tw.tween_callback(func(): ctrl.pivot_offset = saved_pivot)
 	if auto_kill:
 		_track(node, tw, "scale")
 	return tw
@@ -200,15 +206,32 @@ static func pulse(node: Node, scale_to: Vector2 = Vector2(1.1, 1.1), duration: f
 
 # ─── 一次性缩放弹跳 ───
 
+## pivot_offset 控制缩放原点，不碰 position，不破坏 Container 布局。
 static func scale_pop(node: Node, factor: float = 1.2, duration: float = 0.2, auto_kill: bool = true) -> Tween:
 	if not is_instance_valid(node):
 		return null
 	if auto_kill:
 		_kill_tracked(node, "scale")
+
+	var ctrl: Control = node as Control if node is Control else null
+	var saved_pivot: Vector2 = Vector2.ZERO
+	if ctrl != null:
+		saved_pivot = ctrl.pivot_offset
+		var is_right_aligned: bool = node is Label and (node as Label).horizontal_alignment == HORIZONTAL_ALIGNMENT_RIGHT
+		if is_right_aligned:
+			ctrl.pivot_offset = Vector2(ctrl.size.x, ctrl.size.y * 0.5)
+		else:
+			ctrl.pivot_offset = ctrl.size * 0.5
+
 	var tw := node.create_tween()
 	tw.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 	tw.tween_property(node, "scale", Vector2(factor, factor), duration * 0.6)
+	tw.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 	tw.tween_property(node, "scale", Vector2.ONE, duration * 0.4)
+
+	if ctrl != null:
+		tw.tween_callback(func(): ctrl.pivot_offset = saved_pivot)
+
 	if auto_kill:
 		_track(node, tw, "scale")
 	return tw

@@ -78,7 +78,10 @@ NinKingMain (Control) [game_manager.gd]
     │   │           └── RoundLabel (28px "回合 N")
     │   │
     │   └── CenterColumn (VBoxContainer)
-    │       ├── NinjaBar (HBox)        ← 忍者牌栏（差值刷新/stagger pop-in/拖拽排序/zoom-in详情）
+    │       ├── NinjaBar (Control)     ← 忍者牌栏容器
+│       │   ├── NinjaBarContainer (CardContainer)  ← 水平线性布局 / DropZone 分区 / 拖拽重排
+│       │   │   └── NinjaInventoryCard ×N (Card, 125×175)  ← 差值刷新 / stagger pop-in / zoom-in 详情
+│       │   └── NinjaBarNode (Node) ← 生命周期管理
     │       ├── StatusLabel (24px 绿)   ← "影 <= 瞬 <= 滅 -- 可以出牌"
     │       ├── HandArea (HBox 1138×728)
     │       │   ├── PlayBtn (84×116)    ← 「討伐」

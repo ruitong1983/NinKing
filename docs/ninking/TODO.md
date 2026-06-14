@@ -1,6 +1,6 @@
 # NinKing 工作清单
 
-> **最后更新:** 2026-06-12 | **当前 Phase:** D（扩展）
+> **最后更新:** 2026-06-14 | **当前 Phase:** F1（忍者牌补齐）+ 测试管道
 > **使用方式:** AI 每次会话开始时读取此文件。完成任务后更新状态。
 > **状态图例:** ⬜ 待做 | 🔵 进行中 | ✅ 已完成 | 🔒 暂缓 | ⛔ 已废弃
 
@@ -17,6 +17,7 @@
 | B5 | SVG 卡牌尺寸错误 — Godot 4 TextureRect KEEP_SIZE + non-SCALE stretch 每帧覆盖 size 为纹理原始尺寸(240×334)，卡牌显示过大 | `ninking_card.gd:87-107` | **P0** | ✅ |
 | B6 | **商店入场动画竞态守卫** — `_play_entrance()` 加入口 `_entrance_active` 标志位 + `NinKingTween.play_shop_entrance()` 每个 `await` 后 `is_instance_valid(panel)` 守卫，防场景切换时访问已 free 节点崩溃 | `shop_ui.gd` + `nin_king_tween.gd` | **P0** | ✅ |
 | B7 | **商店入场 shake 改用 `shake_node(panel)`** — `screen_shake()` 依赖 Camera2D，商店场景(Control)无 Camera2D 会静默失败。改用 `GlobalTweens.shake_node(panel, 6.0, 0.15)` 震动面板 | `nin_king_tween.gd` | **P0** | ✅ |
+| B14 | **忍者栏拖拽失效** ✅ — 原手工拖拽 `get_global_rect().has_point()` 在 HBoxContainer 内误检 + TextureRect EXPAND_KEEP_SIZE 展示原始尺寸。整栏迁移至 card-framework：新建 `NinjaInventoryCard`(Card 子类) + `NinjaBarContainer`(CardContainer 子类，DropZone 垂直分区检测落点) + `ninja_bar_node.gd` 重写。删 `ninja_slot.gd`/`ninja_slot.tscn`。`ninja_bar_display.gd` 改用 NinjaInventoryCard。| `ninja_inventory_card.gd`(新) + `ninja_bar_container.gd`(新) + `ninja_bar_node.gd` + `ui_manager.gd` + `ninking_main.tscn` + `debug_ninking_main.tscn` + `debug_controller.gd` + `ninja_bar_display.gd` | **P0** | ✅ |
 
 ---
 
@@ -184,6 +185,7 @@
 | C25 | **文档同步：NinjaBar 描述更新** ✅ — `06-ui-layout-reference.md` §3.3.3.a + §5 + §7；`10-main-ui-design.md` 场景树；`11-ninja-cards.md` 文件引用 | `docs/ninking/06-ui-layout-reference.md` + `10-main-ui-design.md` + `11-ninja-cards.md` | P1 | ✅ |
 | C26 | **梳理 ninja_data.gd 卡牌文字描述** — 确保 desc 字段适合横排 Slot（~180px 宽，14px 字，2 行内）。精简 20+ 字长描述，统一用语 | `scripts/ninking/ninja_data.gd` | P1 | ✅ |
 | D9 | **设计文档同步 计分公式重构 (3 文件)** ✅ — 06-complete-redesign §3 重写(公式+列+喜整数表)；13-blinds-and-bosses 散牌王列描述更新；03-technical-design 类图 ScoreResult/AutoArranger/XiResult 更新 | `docs/ninking/06-complete-redesign.md` + `13-blinds-and-bosses.md` + `03-technical-design.md` | **P0** | ✅ |
+| D10 | **计分公式 v5.0 列加法化** ✅ — 列从 ×mult栈(×2~×32768) 改为 chips×mult 加法项和行平级。score_calculator.gd 重写(新增 _collect_ninja_for_column + _compute_group_score 复用)；animation_handler/debug_controller/hand_type_labeler 列显示更新；13-blinds 封印值全量重标(200~550k)；06-redesign §3 公式重写；03-technical-design/README 同步。Grill 16 轮 + review-plan 审阅通过 | `score_calculator.gd` + `animation_handler.gd` + `debug_controller.gd` + `hand_type_labeler.gd` + `card_data.gd` + 3 文档 | **P0** | ✅ |
 
 ---
 
@@ -206,6 +208,71 @@
 
 ---
 
+## 🃏 Phase F1 — 忍者牌基础补齐 (15新卡 + 3降级)
+
+> **方案文档:** `23-ninja-card-expansion-plan.md`
+> **目标:** 普通 9→20, 稀有度倒挂修复, 衰减/×mult成长空白填补
+> **新增卡牌:** 11 普通 + 3 衰减 + 2 ×mult成长 = 16 张新卡定义
+
+### F1.0 — 稀有度降级 (3 张)
+
+| # | 任务 | 说明 | 优先级 | 状态 |
+|---|------|------|--------|------|
+| F1.0a | **铁索连环 (n_c02) 史诗→稀有** | rarity: "rare"→"uncommon", cost: 8→6, 效果不变 | **P0** | ⬜ |
+| F1.0b | **王牌侍从 (n_f02) 史诗→稀有** | rarity: "rare"→"uncommon", cost: 8→5, 效果不变 | **P0** | ⬜ |
+| F1.0c | **清一色 (n_x03) 史诗→稀有** | rarity: "rare"→"uncommon", cost: 7→5, 效果不变 | **P0** | ⬜ |
+
+### F1.1 — 普通卡扩池 (11 张)
+
+| # | 任务 | 说明 | 优先级 | 状态 |
+|---|------|------|--------|------|
+| F1.1a | **通用加成 3 张** — n_007(修行短刀/顺子+30chips) + n_008(影足轻/偶数+3mult) + n_009(火遁·初/首手+10mult) | ninja_data.gd 新增定义 + AssetRegistry 图标 | **P0** | ⬜ |
+| F1.1b | **组别定向 3 张** — n_g07(断影/影对子+40chips) + n_g08(流瞬/瞬同花+8mult) + n_g09(滅火/滅三条+12mult) | 条件检测: hand_type 精确匹配(已有逻辑, 纯数据) | **P0** | ⬜ |
+| F1.1c | **人牌/点数 3 张** — n_f03(鬼面/滅组人头+5mult/张) + n_f04(奇数手里剑/奇数+20chips) + n_f05(影之加护/手牌7→+7mult) | 新条件类型: `rank_odd`, `mult_per_hand_rank` | **P0** | ⬜ |
+| F1.1d | **经济 2 张** — n_e07(猫忍/$2回合) + n_e08(弃财/弃人头$1/张) | 新 effect: `gold_per_turn`, `gold_per_discarded_face` | **P0** | ⬜ |
+
+### F1.2 — 衰减型卡牌 (3 张)
+
+| # | 任务 | 说明 | 优先级 | 状态 |
+|---|------|------|--------|------|
+| F1.2a | **DecayTracker 实现** | 新文件 `scripts/ninking/decay_tracker.gd`(class_name DecayTracker): 追踪衰减卡牌的当前 chips/mult/x_mult 值, on_play/on_seal_start 扣减, 归零检测, 信号 `decayed_to_zero(ninja_id)` | **P0** | ⬜ |
+| F1.2b | **score_calculator.gd 衰减对接** | `collect_ninja_per_group()` 对衰减卡读 DecayTracker 当前值而非 effect 定义值 | **P0** | ⬜ |
+| F1.2c | **衰减卡定义 3 张** — n_d03(雷遁之术/+40mult-8/手) + n_d04(冰封之印/×2-×0.5/封印) + n_d05(燃烧查克拉/+100chips+20mult-双衰减) | ninja_data.gd 新增, effect 含 `decay_per_play`/`x_decay_per_seal`/`destroy_on_zero` | **P0** | ⬜ |
+| F1.2d | **归零自毁 + VFX** | decayed_to_zero 信号接线: ShopManager 移除卡牌 + manga_burst 粒子 + 空槽动画 | P1 | ⬜ |
+
+### F1.3 — 成长型 ×mult (2 张)
+
+| # | 任务 | 说明 | 优先级 | 状态 |
+|---|------|------|--------|------|
+| F1.3a | **NinjaScaling 扩展 ×mult 成长** | 新增 `x_growth`/`x_cap` 字段支持, `on_ritual_use`/`on_boss_clear` 新 trigger, float 累积→int `round()` 输出 | **P0** | ⬜ |
+| F1.3b | **score_calculator.gd ×mult 成长接入** | `collect_ninja_per_group()` 从 NinjaScaling 读当前 ×mult 值, 追加到 x_stack | **P0** | ⬜ |
+| F1.3c | **×mult 成长卡定义 2 张** — n_s07(星见/秘仪→+0.25上限×4) + n_s08(试炼之印/Boss→+0.5上限×3) | ninja_data.gd 新增, scaling 含 `x_growth`/`x_cap` | **P0** | ⬜ |
+| F1.3d | **秘仪/Boss trigger 接线** | shop_handler 秘仪使用 → NinjaScaling.on_ritual_use; game_manager Boss 过关 → NinjaScaling.on_boss_clear | P1 | ⬜ |
+
+### F1.4 — 收尾
+
+| # | 任务 | 说明 | 优先级 | 状态 |
+|---|------|------|--------|------|
+| F1.4a | **AssetRegistry 新卡图标注册** | 16 张新卡按 id 前缀分类, 无专属 PNG 则 fallback 到类别默认图标 | P1 | ⬜ |
+| F1.4b | **文档同步** | `11-ninja-cards.md` 更新总卡牌数/稀有度分布/新维度说明 | P1 | ⬜ |
+| F1.4c | **商店刷新池验证** | 确认 NinjaPool 按新稀有度权重出卡, 普通卡出现率显著提升 | P1 | ⬜ |
+
+---
+
+## 🧪 Phase T — 计分交叉验证管道
+
+> **Python↔GDScript 端到端公式验证，确保两套计分引擎输出一致。**
+
+| # | 任务 | 说明 | 优先级 | 状态 |
+|---|------|------|--------|------|
+| T1 | **Phase 1: 管道搭建** | calc_engine.py (Python 计分引擎) + gen_test_v2.py (156 测试定义) + diff.py (字段级对比) | **P0** | ✅ |
+| T2 | **Phase 2: P0 交叉验证** | test_runner.gd 调 ScoreCalculator.calculate() 输出 actual.json。基准 156 全过 → 4 轮修复（xi_bonus/组代码翻译/x_stack 多值/xi_override）→ 312/312 零差异 | **P0** | ✅ |
+| T3 | **Phase 3: Seal Lord 测试** | 4 对（skip_head / scatter_king / hungry_ghost / tail_x2），Python 定义 + Godot 验证 | **P1** | ⬜ |
+| T4 | **Phase 4: 多忍者测试** | 24 对（4 层 stack × 6 组合 + 2 经济），叠加顺序+取舍验证 | **P1** | ⬜ |
+| T5 | **Phase 5: 集成** | review_test_data.py 同时处理 CSV + JSON，统一回归入口 | P2 | ⬜ |
+
+---
+
 ## 🔒 Phase D-E — 远期（暂缓）
 
 | # | 任务 | 说明 | 状态 |
@@ -218,22 +285,27 @@
 | D6 | 商店 BGM | → 已提升至 V22 (P1) | ✅ |
 | D7 | 数值平衡调优 | 完整验证难度曲线 + 价格平衡 | 🔒 |
 | D8 | 音频替换为扑克风格 | → 已拆分为 V23(素材) + B11(BGM变奏) + C8(重命名)，详见 `15-sound-design-plan.md` | ✅ |
-| D10 | **Debug 计分测试场景** ✅ | Grill 20 轮 + review-plan 审阅通过。独立于主场景，零侵入。Launch 右下角 Debug 按钮进入。底栏 52 牌四排 ♠♣♥♦ 点选放入 9 格。右手面板忍者多选+星図等级+1。「討伐」调用 ScoreCalculator 刷新 LeftPanel。文件: `ninking_debug.tscn` / `debug_controller.gd` / `debug_card_tray.gd` / `debug_ninja_selector.gd` + `ninking_launcher.tscn` 改一行。修复排查：`ninja_bar_node.gd` 语法错误、`card_factory_scene` 导出缺失 | **P1** | ✅ |
-| D11 | **DisplayCardBase + ShopSlot Balatro 风重构** ✅ | 新建 DisplayCardBase 120×160 纯卡面。删 shop_ability_card/shop_item_card (2 tscn + 2 gd)。ShopSlot 数据驱动容器。稀有度=边框+辉光无浮标。规格书见 `22-display-card-base-spec.md` | **P1** | ✅ |
+| D10 | **Debug 计分测试场景** ✅ | Grill 20 轮 + review-plan 审阅通过。独立于主场景，零侵入。Launch 右下角 Debug 按钮进入。底栏 52 牌四排 ♠♣♥♦ 点选放入 9 格。右手面板忍者多选+星図等级+1。「討伐」调用 ScoreCalculator 刷新 LeftPanel。文件: `debug_ninking_main.tscn` / `debug_controller.gd` / `debug_card_tray.gd` / `debug_ninja_selector.gd` + `ninking_launcher.tscn` 改一行。修复排查：`ninja_bar_node.gd` 语法错误、`card_factory_scene` 导出缺失 | **P1** | ✅ |
+| D11 | **DisplayCardBase + ShopSlot Balatro 风重构** ✅ | 新建 DisplayCardBase 125×175 纯卡面。删 shop_ability_card/shop_item_card (2 tscn + 2 gd)。ShopSlot 数据驱动容器。稀有度=边框+辉光无浮标。规格书见 `22-display-card-base-spec.md` | **P1** | ✅ |
 
 ---
 
 ## 🗺️ 实施路线图速查
 
 ```
-Phase A (当前) ──→ Phase B ──→ Phase C ──→ Phase D ──→ Phase E
- 核心可玩            系统完善       Boss深度      扩展          发布
+Phase A ──→ Phase B ──→ Phase C ──→ Phase E ──→ Phase F1
+ 核心可玩    系统完善    Boss深度    发布就绪    忍者牌补齐
+
+Phase F1 ──→ Phase F2 ──→ Phase F3
+ 基础补齐     机制扩展     深度打磨
+ (15新+3降)   (12售出/重触发/Boss/牌组)  (10喜/三组/资源)
 
  A1-A8 完成 = 可玩原型
  B4-B8 完成 = 完整体验
- C(10 Boss) = 策略深度
- D = 重玩性
- E = 发布就绪
+ C(Phase C) = 沉浸流程
+ F1 = 70 张卡池 + 衰减/×mult 成长
+ F2 = 10 维度全覆盖
+ F3 = 差异化打磨
 ```
 
 ---
@@ -242,9 +314,12 @@ Phase A (当前) ──→ Phase B ──→ Phase C ──→ Phase D ──→
 
 | 日期 | 变更 |
 |------|------|
-| 2026-06-12 | ♠️ **Balatro 风大重构 — DisplayCardBase 纯卡面 + ShopSlot 容器**: DisplayCardBase 缩至 120×160 纯卡面(删 info_overlay/name_label)。删 shop_ability_card/shop_item_card(4 文件)。新建 ShopSlot 数据驱动容器(ability/item 统一场景)。稀有度=边框色+辉光无浮标。文档 03/06/07/11/22 同步更新。|
+| 2026-06-14 | 🧪 **Phase 2 交叉验证完成**: Python↔GDScript 312/312 全匹配。4 轮修复 — test_runner 传 xi_bonus+xi_override + 组代码翻译(h/m/t→head/mid/tail) + x_stack 多值支持 + score_calculator xi_override 参数。Phase 3-5 排入后续。 |
+| 2026-06-14 | 🃏 **忍者牌扩展方案 Phase F1 启动**: 新增 `23-ninja-card-expansion-plan.md`。F1 目标 43→58 张。16 项任务入 TODO。README 文档索引更新。 |
+| 2026-06-12 | 🐛 **LeftPanel v2.1 修复 — 列积分接续 + 行分数初始空置**: `game_manager.gd` 新增 col_evals 计算(Phase 2 列动画数据源)；animation_handler 删除开篇 "0×0" 重置块，改为每行动画起始动态设 "0×0" 再渐入终值；6 个 score label `text="0×0"` 从场景文件+debug_controller 移除，统一为空字符串初始态。|
+| 2026-06-12 | ♠️ **Balatro 风大重构 — DisplayCardBase 纯卡面 + ShopSlot 容器**: DisplayCardBase 缩至 125×175 纯卡面(删 info_overlay/name_label)。删 shop_ability_card/shop_item_card(4 文件)。新建 ShopSlot 数据驱动容器(ability/item 统一场景)。稀有度=边框色+辉光无浮标。文档 03/06/07/11/22 同步更新。|
 | 2026-06-12 | 🏪 **商店底部舞台化 v6 — 漫画「下一格」转型**: Grill→review-plan 审阅通过。shop_panel.tscn 全底 1500×700, x:420 起, StageBg 纸色+网点+属性染色三层替代纯色 Overlay, 4px 直角漫画格分割线, AbilityGrid 4列, ItemColumn 2列居中。shop_ui.gd `_apply_barrier_theme()` 重写。nin_king_tween.gd 新增 `play_shop_entrance_manga()` (墨线画出→背景刷出→卡片 stagger_pop_in), `play_shop_exit()` 更新。tween_fx.gd + global_tweens.gd 新增 `stagger_pop_in()`。ui_manager.gd hide_shop overlay 删除。screentone.png 代码生成。16-art-direction-principles.md §3.1 加漫画格例外。07-shop-ui-design.md v6 全篇同步。|
-| 2026-06-12 | 🃏 **D11 DisplayCardBase 非扑克牌统一展示卡实现**: Grill 16 轮设计确认 → 新建 `DisplayCardBase` (extends Card)，统一外框/阴影/结界染色/content_slot/name_plate/入场动效/悬停光效(scale 1.03)/右键详情。ShopAbilityCard/ShopItemCard 重写为子类。删 CardButton。规格书 `22-display-card-base-spec.md`。 |: D10 ✅。新文件: `ninking_debug.tscn` / `debug_controller.gd` / `debug_card_tray.gd` / `debug_ninja_selector.gd`。改文件: `ninking_launcher.tscn` + `main_menu.gd`(右下角按钮)。修复: `ninja_bar_node.gd` line203 语法错误(t#→#)、CardManager `card_factory_scene` 导出缺失。运行验证：Launch→Debug 按钮→全场景加载通过。 |
+| 2026-06-12 | 🃏 **D11 DisplayCardBase 非扑克牌统一展示卡实现**: Grill 16 轮设计确认 → 新建 `DisplayCardBase` (extends Card)，统一外框/阴影/结界染色/content_slot/name_plate/入场动效/悬停光效(scale 1.03)/右键详情。ShopAbilityCard/ShopItemCard 重写为子类。删 CardButton。规格书 `22-display-card-base-spec.md`。 |: D10 ✅。新文件: `debug_ninking_main.tscn` / `debug_controller.gd` / `debug_card_tray.gd` / `debug_ninja_selector.gd`。改文件: `ninking_launcher.tscn` + `main_menu.gd`(右下角按钮)。修复: `ninja_bar_node.gd` line203 语法错误(t#→#)、CardManager `card_factory_scene` 导出缺失。运行验证：Launch→Debug 按钮→全场景加载通过。 |
 | 2026-06-12 | 🏪 **Phase D 商店布局重设 — 左右分栏极简化**: Grill 12 轮确认 → 左 6:4 右 / 2x2 忍者 Grid + 2 道具 VBox / 固定 4+2 / 顶底栏 60px 对称 / 去所有装饰 / 遮罩 45% / 弱化主题。shop_panel.tscn 重写 / shop_ui.gd 重写 / shop_manager.gd 固定库存+assert / ui_manager.gd 去死参。07-shop-ui-design.md 场景树+布局同步。 |
 | 2026-06-11 | 🐛 **C24 商店忍者槽位数修正**: `shop_ui.gd._update_ninja_slot_label()` 从读库存数改为接收参数 `_owned_ninja_count` + `_max_ninja_slots`。`init()` 和 `update_gold()` 由 `ui_manager.gd` 传入 `NinKingGameState.owned_ninjas.size()`。运行时验证: 购买前"忍者 0/5"→购买后"忍者 1/5" ✅ |
 | 2026-06-11 | 🗂️ **V48 AssetRegistry 统一素材注册表**: 新建 `asset_registry.gd`，合并 `ninja_data.gd`(CATEGORY_ICONS+get_icon_path) 和 `consumable_data.gd`(ITEM_CATEGORY_MAP+get_item_xx_path)。3 调用文件改为直接引用 `AssetRegistry`。旧文件保留 delegation stub ✅ |
@@ -319,3 +394,10 @@ Phase A (当前) ──→ Phase B ──→ Phase C ──→ Phase D ──→
 | 2026-06-11 | 🎴 **A20-A28 全部完成: LeftPanel 展示调整**: 场景节点替换(CMC→ColXiLabel) + ui_manager/hand_display/hand_type_labeler 接口更新 + BounceScore 删参 + animation_handler Phase 1 分数动效 + card_data 列×mult 字典 + 3 文档同步。9 项全部 ✅ |
 | 2026-06-12 | 💰 **方案审阅+Grill: 移除 LevelComplete 中间页 — 金币飞入左面板 + 自动进 Shop**: Grill 8 轮决策确认（移除独立页/自动进Shop但要过渡呼吸/金币飞入左面板/~1.5s/画面定格/数值滚动+飘字/可跳过）。review-plan 3 维度审阅通过，2 个待确认项落地（金币动画与 punch_in 重叠、保留 0.3s cross-fade）。E1-E10 共 10 项加入 TODO Phase E。 |
 | 2026-06-12 | ⚡ **Phase E 实装完成 — E1-E10 全部 ✅**: animation_handler.gd 捕获旧值 → game_manager.gd SEAL_COMPLETE 分支重写(_play_gold_settlement + _create_shop_skip_overlay + _do_shop_transition) → ui_manager.gd + result_screen_display.gd 清理旧引用 → ninking_main.tscn 移除 LevelComplete 子树 → 文档同步。5 脚本 + 1 场景 + 2 文档修改。 |
+| 2026-06-12 | 🔢 **计分公式 v5.0 列加法化**: Grill 16 轮决策 + review-plan 审阅。列从 ×mult栈(×2~×32768) 改为 chips×mult 加法和行平级。score_calculator.gd 重写(_collect_ninja_for_column + _compute_group_score 复用) + animation_handler/debug_controller/hand_type_labeler 列显示更新 + card_data deprecated。封印值 300~380k → 200~550k。文档 06/13/03/README 全部同步。D10 加入 TODO。 |
+| 2026-06-12 | 🃏 **B14 忍者栏拖拽 card-framework 迁移**: 主界面忍者栏整栏迁移至 card-framework。新建 `NinjaInventoryCard`(Card 子类，125×175，hover_scale 1.15) + `NinjaBarContainer`(CardContainer 子类，DropZone 垂直分区拖拽排序)。`ninja_bar_node.gd` 重写（删 ~110 行手工拖拽代码，_make_slot 改用 NinjaInventoryCard.new()）。删 `ninja_slot.gd`/`ninja_slot.tscn`。`ninja_bar_display.gd` 改用 NinjaInventoryCard。z_index 覆盖层提升至 1100（Card drag = stored_z + 1000）。`ninking_main.tscn`/`debug_ninking_main.tscn` %NinjaBar type HBoxContainer→Control。`ui_manager.gd`/`debug_controller.gd` 引用更新。|
+| 2026-06-12 | 📊 **LeftPanel v2 — 列积分+公式展示**: Grill 14 轮决策。ScoreCard 新增 ColumnTypeRow(左列/中列/右列)镜像 HandTypeRow、ScoreLabel 内嵌公式 "{subtotal}×{xi}={total} 忍気}"、ColXiLabel 纯喜。LeftPanel 420→480px 宽度。动画重排 Phase 行→列→喜→结局。5 脚本 + 2 场景 + 1 文档同步。BounceScore 解耦。 |
+| 2026-06-12 | 🐛 **NinjaBar 长距离拖拽交换修复**: `ninja_bar_container.gd` 新增 `get_partition_index()` 重写，直接读取 `get_global_mouse_position().x` 与 `drop_zone.vertical_partition` 分区线对比，绕过 DropZone 内部 `check_mouse_is_in_drop_zone()` 传感器门控。配合已有的 `check_card_can_be_dropped` 重写（已持有卡牌直接返回 true），实现任意距离拖拽重排。|
+| 2026-06-13 | 🎬 **计分动画渐进式累加 + 进度条分段变色**: Phase 1/2 每行每列计分后总分逐步累加上去(set_score_formula+scale_pop)，进度条同步推进(_tween_progress)。Phase 3 跳过无意义的 ×1 展示(仅 xi_product>1 时显示公式+金色闪烁)。`score_calculator.gd` 修复 col_scores 散牌列索引错位(散牌列追加 0 保持 3 元素对齐)。进度条按百分比自动变色: <50%白→50%淡黄(α0.65)→80%橙黄(α0.75)→100%红(α0.85)，常驻不闪。计分开始自动重置为白色。 | `animation_handler.gd` + `score_calculator.gd` |
+| 2026-06-14 | 📝 **Debug 场景文档同步**: `20-debug-scene-design.md` §4 场景树更新 — CardGrid 命名、ColumnLabelRow 补全、AiRearrangeBtn/DeckBtn 位置修正为与主场景对齐，§8 已知限制 #2 标记已修复 |
+| 2026-06-13 | 🖌️ **商店水墨风改造 — 第一阶段**: Grill 19 轮决策。风格方向→日式水墨、配色降饱和、字体站酷妙典体+思源黑体、按钮印章化。shop_panel.tscn 和纸底色+删网点层、shop_ui.gd 水墨色板+`_apply_ink_wash_theme()`+印章按钮三态、shop_slot.gd 纸片卡框+朱砂购买按钮+稀有度水墨色系。不改任何全局文件(BarrierTheme/manga_theme/display_card_base/NinKingTween)。4 文件修改 + spec 文档。详见 [`specs/shop-ink-wash-redesign.md`](specs/shop-ink-wash-redesign.md)。|

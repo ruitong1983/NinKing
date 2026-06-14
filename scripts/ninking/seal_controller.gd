@@ -187,6 +187,7 @@ static func swap_cards(gs: NinKingGameState, idx1: int, idx2: int) -> void:
 	gs.hand[idx1] = gs.hand[idx2]
 	gs.hand[idx2] = temp
 	gs.re_evaluate_arrangement()
+	gs.hand_swapped.emit(idx1, idx2)
 
 
 # ══════════════════════════════════════════

@@ -1,43 +1,27 @@
 [gd_scene format=3 uid="uid://ptvq6q660kr6"]
 
-[ext_resource type="Script" uid="uid://m5jqnpwp2kmi" path="res://scripts/ninking/ui/shop_slot.gd" id="1_d08xc"]
+[ext_resource type="Script" uid="uid://3ktn7dwc3htx" path="res://scripts/ninking/ui/shop_slot.gd" id="1_d08xc"]
 [ext_resource type="PackedScene" uid="uid://b4wd5mplcb50m" path="res://scenes/ninking/display_card_base.tscn" id="2_ste6h"]
 
 [node name="ShopSlot" type="Control" unique_id=1676553544]
-custom_minimum_size = Vector2(330, 190)
+custom_minimum_size = Vector2(155, 225)
 layout_mode = 3
 anchors_preset = 0
+offset_right = 155.0
+offset_bottom = 225.0
 script = ExtResource("1_d08xc")
 
 [node name="DisplayCard" parent="." unique_id=1333408669 instance=ExtResource("2_ste6h")]
 layout_mode = 0
-offset_left = 8.0
-offset_top = 15.0
-offset_right = 128.0
-offset_bottom = 175.0
-
-[node name="name_label" type="Label" parent="." unique_id=272041651]
-layout_mode = 0
-offset_left = 140.0
-offset_top = 15.0
-offset_right = 320.0
-offset_bottom = 41.0
-vertical_alignment = 1
-
-[node name="effect_label" type="Label" parent="." unique_id=392158136]
-layout_mode = 0
-offset_left = 140.0
-offset_top = 47.0
-offset_right = 320.0
-offset_bottom = 91.0
-vertical_alignment = 1
-autowrap_mode = 2
-max_lines_visible = 2
+offset_left = 15.0
+offset_top = 7.0
+offset_right = 140.0
+offset_bottom = 182.0
 
 [node name="buy_button" type="Button" parent="." unique_id=1630024005]
 layout_mode = 0
-offset_left = 242.0
-offset_top = 148.0
-offset_right = 322.0
-offset_bottom = 182.0
-text = "$0"
+offset_left = 35.0
+offset_top = 184.0
+offset_right = 115.0
+offset_bottom = 218.0
+text = "0"

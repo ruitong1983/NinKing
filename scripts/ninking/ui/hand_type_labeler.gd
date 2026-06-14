@@ -7,6 +7,12 @@ extends RefCounted
 ##   Lv.1-2 gray | Lv.3-4 blue | Lv.5-6 gold
 ## Hover over Lv badge shows detail tooltip (hand type name + level + chips/mult).
 ## Phase 1 scoring animation also flashes the Lv badge via animation_handler.
+##
+## v2: ColumnTypeRow added — three vertical column rows mirroring HandTypeRow.
+##     ColXiLabel simplified to xi-only preview.
+
+
+## v3: Column rows hidden entirely when no hand type triggers (HIGH_CARD_3).
 
 var _head_type_label: Label
 var _mid_type_label: Label
@@ -15,9 +21,9 @@ var _col_xi_label: Label
 var _shadow_type_label: Label
 var _flash_type_label: Label
 var _destroy_type_label: Label
-var _shadow_score_label: Label
-var _flash_score_label: Label
-var _destroy_score_label: Label
+var _shadow_score_label: RichTextLabel
+var _flash_score_label: RichTextLabel
+var _destroy_score_label: RichTextLabel
 var _shadow_lv_label: Label
 var _flash_lv_label: Label
 var _destroy_lv_label: Label
@@ -25,6 +31,20 @@ var _col0_label: Label
 var _col1_label: Label
 var _col2_label: Label
 var _play_btn: Button
+
+# Column row labels (v2)
+var _left_col_label: Label
+var _mid_col_label: Label
+var _right_col_label: Label
+var _left_col_type: Label
+var _mid_col_type: Label
+var _right_col_type: Label
+var _left_col_score: RichTextLabel
+var _mid_col_score: RichTextLabel
+var _right_col_score: RichTextLabel
+var _left_col_lv: Label
+var _mid_col_lv: Label
+var _right_col_lv: Label
 
 # Lv badge color tiers (matches ScoreCard existing palette)
 const LV_COLORS: Dictionary = {
@@ -40,6 +60,11 @@ const LV_COLORS: Dictionary = {
 var _current_head_ht: int = -1
 var _current_mid_ht: int = -1
 var _current_tail_ht: int = -1
+
+# Current column hand types (v2)
+var _current_left_col_ht: int = -1
+var _current_mid_col_ht: int = -1
+var _current_right_col_ht: int = -1
 
 # Hover tooltip
 var _active_tooltip: Control = null
@@ -57,12 +82,24 @@ func setup(
 	shadow_type: Label,
 	flash_type: Label,
 	destroy_type: Label,
-	shadow_score: Label,
-	flash_score: Label,
-	destroy_score: Label,
+	shadow_score: RichTextLabel,
+	flash_score: RichTextLabel,
+	destroy_score: RichTextLabel,
 	shadow_lv: Label,
 	flash_lv: Label,
 	destroy_lv: Label,
+	left_col_label: Label,
+	mid_col_label: Label,
+	right_col_label: Label,
+	left_col_type: Label,
+	mid_col_type: Label,
+	right_col_type: Label,
+	left_col_score: RichTextLabel,
+	mid_col_score: RichTextLabel,
+	right_col_score: RichTextLabel,
+	left_col_lv: Label,
+	mid_col_lv: Label,
+	right_col_lv: Label,
 	play: Button,
 ) -> void:
 	_head_type_label = head_type
@@ -81,12 +118,27 @@ func setup(
 	_shadow_lv_label = shadow_lv
 	_flash_lv_label = flash_lv
 	_destroy_lv_label = destroy_lv
+	_left_col_label = left_col_label
+	_mid_col_label = mid_col_label
+	_right_col_label = right_col_label
+	_left_col_type = left_col_type
+	_mid_col_type = mid_col_type
+	_right_col_type = right_col_type
+	_left_col_score = left_col_score
+	_mid_col_score = mid_col_score
+	_right_col_score = right_col_score
+	_left_col_lv = left_col_lv
+	_mid_col_lv = mid_col_lv
+	_right_col_lv = right_col_lv
 	_play_btn = play
 
 	# Wire hover signals for Lv badges (one-time setup)
 	_setup_lv_hover(shadow_lv, 0)
 	_setup_lv_hover(flash_lv, 1)
 	_setup_lv_hover(destroy_lv, 2)
+	_setup_lv_hover(left_col_lv, 3)
+	_setup_lv_hover(mid_col_lv, 4)
+	_setup_lv_hover(right_col_lv, 5)
 
 
 ## Clear all labels to default state.
@@ -94,7 +146,8 @@ func reset_labels() -> void:
 	_head_type_label.text = ""
 	_mid_type_label.text = ""
 	_tail_type_label.text = ""
-	_col_xi_label.text = ""
+	_col_xi_label.text = "喜: -"
+	_col_xi_label.visible = false
 	_shadow_type_label.text = "-"
 	_flash_type_label.text = "-"
 	_destroy_type_label.text = "-"
@@ -107,19 +160,47 @@ func reset_labels() -> void:
 	_flash_lv_label.visible = false
 	_destroy_lv_label.text = ""
 	_destroy_lv_label.visible = false
+	# Column rows — hide entire row when no hand type
+	_left_col_label.visible = false
+	_left_col_type.text = "-"
+	_left_col_type.visible = false
+	_left_col_score.text = ""
+	_left_col_score.visible = false
+	_left_col_lv.text = ""
+	_left_col_lv.visible = false
+	_mid_col_label.visible = false
+	_mid_col_type.text = "-"
+	_mid_col_type.visible = false
+	_mid_col_score.text = ""
+	_mid_col_score.visible = false
+	_mid_col_lv.text = ""
+	_mid_col_lv.visible = false
+	_right_col_label.visible = false
+	_right_col_type.text = "-"
+	_right_col_type.visible = false
+	_right_col_score.text = ""
+	_right_col_score.visible = false
+	_right_col_lv.text = ""
+	_right_col_lv.visible = false
 	_col0_label.text = ""
-	_col0_label.visible = false
+	_col0_label.visible = true
 	_col1_label.text = ""
-	_col1_label.visible = false
+	_col1_label.visible = true
 	_col2_label.text = ""
-	_col2_label.visible = false
+	_col2_label.visible = true
 
 
 ## Update all labels for the current 9-card hand.
+
+## Signal handler for card_grid.layout_changed — reads hand from game_state.
+func update_from_signal() -> void:
+	update_all(NinKingGameState.hand)
+
 func update_all(hand: Array[CardData.PlayingCard]) -> void:
 	if hand.size() < 9:
 		return
 	_update_dun_types(hand)
+	_update_column_rows(hand)
 	_update_column_types(hand)
 	_update_col_xi_preview(hand)
 
@@ -148,37 +229,37 @@ func _update_dun_types(hand: Array[CardData.PlayingCard]) -> void:
 	_current_mid_ht = mid_eval.hand_type
 	_current_tail_ht = tail_eval.hand_type
 
-	# Per-dun score preview: (card_chips + hand_chips) × hand_mult
+	# Per-dun score preview: (card_chips + hand_chips) x hand_mult
 	var levels: Dictionary = NinKingGameState.star_chart_levels
-	var head_chips: int = CardData.get_hand_type3_leveled_chips(head_eval.hand_type, levels)
-	var mid_chips: int = CardData.get_hand_type3_leveled_chips(mid_eval.hand_type, levels)
-	var tail_chips: int = CardData.get_hand_type3_leveled_chips(tail_eval.hand_type, levels)
-	var head_mult: int = CardData.get_hand_type3_leveled_mult(head_eval.hand_type, levels)
-	var mid_mult: int = CardData.get_hand_type3_leveled_mult(mid_eval.hand_type, levels)
-	var tail_mult: int = CardData.get_hand_type3_leveled_mult(tail_eval.hand_type, levels)
-	var head_card_chips := 0
-	var mid_card_chips := 0
-	var tail_card_chips := 0
+	var _head_chips: int = CardData.get_hand_type3_leveled_chips(head_eval.hand_type, levels)
+	var _mid_chips: int = CardData.get_hand_type3_leveled_chips(mid_eval.hand_type, levels)
+	var _tail_chips: int = CardData.get_hand_type3_leveled_chips(tail_eval.hand_type, levels)
+	var _head_mult: int = CardData.get_hand_type3_leveled_mult(head_eval.hand_type, levels)
+	var _mid_mult: int = CardData.get_hand_type3_leveled_mult(mid_eval.hand_type, levels)
+	var _tail_mult: int = CardData.get_hand_type3_leveled_mult(tail_eval.hand_type, levels)
+	var _head_card_chips := 0
+	var _mid_card_chips := 0
+	var _tail_card_chips := 0
 	for c: CardData.PlayingCard in head_cards:
-		head_card_chips += c.get_chip_value()
+		_head_card_chips += c.get_chip_value()
 	for c: CardData.PlayingCard in mid_cards:
-		mid_card_chips += c.get_chip_value()
+		_mid_card_chips += c.get_chip_value()
 	for c: CardData.PlayingCard in tail_cards:
-		tail_card_chips += c.get_chip_value()
+		_tail_card_chips += c.get_chip_value()
 
 	# Row 1: 影
 	_shadow_type_label.text = head_name
-	_shadow_score_label.text = "%d×%d" % [head_card_chips + head_chips, head_mult]
+	_shadow_score_label.text = ""
 	_update_lv_badge(_shadow_lv_label, _current_head_ht, levels)
 
 	# Row 2: 瞬
 	_flash_type_label.text = mid_name
-	_flash_score_label.text = "%d×%d" % [mid_card_chips + mid_chips, mid_mult]
+	_flash_score_label.text = ""
 	_update_lv_badge(_flash_lv_label, _current_mid_ht, levels)
 
 	# Row 3: 滅
 	_destroy_type_label.text = tail_name
-	_destroy_score_label.text = "%d×%d" % [tail_card_chips + tail_chips, tail_mult]
+	_destroy_score_label.text = ""
 	_update_lv_badge(_destroy_lv_label, _current_tail_ht, levels)
 
 
@@ -194,6 +275,58 @@ func _update_lv_badge(lv_label: Label, hand_type: int, levels: Dictionary) -> vo
 	lv_label.visible = true
 	var color: Color = LV_COLORS.get(lvl, Color(0.7, 0.7, 0.7))
 	lv_label.add_theme_color_override("font_color", color)
+
+
+# ══════════════════════════════════════════
+# Column type rows — 左列 / 中列 / 右列 (v2)
+# ══════════════════════════════════════════
+
+## Update per-column type names, score preview, and Lv badges.
+## v3: Entire row hidden when no hand type triggers (HIGH_CARD_3).
+func _update_column_rows(hand: Array[CardData.PlayingCard]) -> void:
+	var levels: Dictionary = NinKingGameState.star_chart_levels
+	var row_labels: Array[Label] = [_left_col_label, _mid_col_label, _right_col_label]
+	var col_labels: Array[Label] = [_left_col_type, _mid_col_type, _right_col_type]
+	var score_labels: Array[RichTextLabel] = [_left_col_score, _mid_col_score, _right_col_score]
+	var lv_labels: Array[Label] = [_left_col_lv, _mid_col_lv, _right_col_lv]
+	var _ht_stores: Array = [_current_left_col_ht, _current_mid_col_ht, _current_right_col_ht]
+
+	for i: int in range(3):
+		var col_cards: Array[CardData.PlayingCard] = [
+			hand[i],
+			hand[i + 3],
+			hand[i + 6]
+		]
+		var eval_result: HandEvaluator3.EvalResult = HandEvaluator3.evaluate(col_cards)
+		var ht: int = eval_result.hand_type
+
+		# Store current hand type for hover tooltip lookup
+		match i:
+			0: _current_left_col_ht = ht
+			1: _current_mid_col_ht = ht
+			2: _current_right_col_ht = ht
+
+		if ht == CardData.HandType3.HIGH_CARD_3:
+			row_labels[i].visible = false
+			col_labels[i].text = "-"
+			col_labels[i].visible = false
+			score_labels[i].text = ""
+			score_labels[i].visible = false
+			lv_labels[i].text = ""
+			lv_labels[i].visible = false
+			continue
+
+		row_labels[i].visible = true
+		col_labels[i].visible = true
+		score_labels[i].visible = true
+		col_labels[i].text = CardData.get_hand_type3_name(ht)
+		var _col_chips: int = CardData.get_hand_type3_leveled_chips(ht, levels)
+		var _col_mult: int = CardData.get_hand_type3_leveled_mult(ht, levels)
+		var _col_card_chips := 0
+		for c: CardData.PlayingCard in col_cards:
+			_col_card_chips += c.get_chip_value()
+		score_labels[i].text = ""
+		_update_lv_badge(lv_labels[i], ht, levels)
 
 
 # ══════════════════════════════════════════
@@ -238,9 +371,18 @@ func _show_lv_tooltip(row_idx: int) -> void:
 		1:
 			hand_type = _current_mid_ht
 			lv_label = _flash_lv_label
-		_:
+		2:
 			hand_type = _current_tail_ht
 			lv_label = _destroy_lv_label
+		3:
+			hand_type = _current_left_col_ht
+			lv_label = _left_col_lv
+		4:
+			hand_type = _current_mid_col_ht
+			lv_label = _mid_col_lv
+		_:
+			hand_type = _current_right_col_ht
+			lv_label = _right_col_lv
 
 	if hand_type < 0 or not is_instance_valid(lv_label):
 		return
@@ -318,10 +460,12 @@ func _dismiss_tooltip() -> void:
 
 
 # ══════════════════════════════════════════
-# Column type labels — A9 列牌型名
+# Column type labels — A9 列牌型名 (center DunArea)
 # ══════════════════════════════════════════
 
 ## Update column type name labels below each column in DunArea.
+## Labels stay visible (empty text for HIGH_CARD_3) to preserve
+## HBoxContainer column alignment when some columns have no hand type.
 func _update_column_types(hand: Array[CardData.PlayingCard]) -> void:
 	var col_labels: Array[Label] = [_col0_label, _col1_label, _col2_label]
 	for i: int in range(3):
@@ -332,70 +476,54 @@ func _update_column_types(hand: Array[CardData.PlayingCard]) -> void:
 		]
 		var eval_result: HandEvaluator3.EvalResult = HandEvaluator3.evaluate(col_cards)
 		var lbl: Label = col_labels[i]
+		lbl.visible = true
 		if int(eval_result.hand_type) >= int(CardData.HandType3.ONE_PAIR_3):
 			lbl.text = CardData.get_hand_type3_name(eval_result.hand_type)
-			lbl.visible = true
 		else:
 			lbl.text = ""
-			lbl.visible = false
 
 
 # ══════════════════════════════════════════
-# Column + Xi preview
+# ColXiLabel — xi preview only (v2: column info moved to rows)
 # ══════════════════════════════════════════
 
-## Update top preview: 列: ×N  喜: 名×N  (or 列: ×N  喜: -).
+## Update top preview: 喜: 名×N  (or empty).
 func _update_col_xi_preview(hand: Array[CardData.PlayingCard]) -> void:
 	if hand.size() < 9:
 		if _col_xi_label and is_instance_valid(_col_xi_label):
-			_col_xi_label.text = ""
+			_col_xi_label.text = "喜: -"
+			_col_xi_label.visible = false
 		return
 
-	# ── Column ×mult preview ──
-	var col_x_product: int = 1
-	for i: int in range(3):
-		var col_cards: Array[CardData.PlayingCard] = [
-			hand[i],
-			hand[i + 3],
-			hand[i + 6]
-		]
-		var col_eval: HandEvaluator3.EvalResult = HandEvaluator3.evaluate(col_cards)
-		var x_val: int = CardData.COL_X_MULT_VALUES.get(col_eval.hand_type, 1)
-		if x_val > 1:
-			col_x_product *= x_val
+	if NinKingGameState.current_arrangement == null:
+		if _col_xi_label and is_instance_valid(_col_xi_label):
+			_col_xi_label.text = "喜: -"
+			_col_xi_label.visible = false
+		return
 
-	# ── Xi preview ──
-	var xi_text: String = "-"
-	if NinKingGameState.current_arrangement != null:
-		var xi_hc: Array = hand.slice(0, 3)
-		var xi_mc: Array = hand.slice(3, 6)
-		var xi_tc: Array = hand.slice(6, 9)
-		var xi_he = HandEvaluator3.evaluate(xi_hc)
-		var xi_me = HandEvaluator3.evaluate(xi_mc)
-		var xi_te = HandEvaluator3.evaluate(xi_tc)
-		var xi_result: XiDetector.XiResult = XiDetector.detect(xi_hc, xi_mc, xi_tc, xi_he, xi_me, xi_te)
-		if xi_result != null and xi_result.has_any():
-			var xi_parts: Array[String] = []
-			for xi_name: String in xi_result.triggered:
-				var is_global: bool = xi_name in ["全黑", "全红", "全顺", "全同花", "四张", "全三条"]
-				if is_global:
-					var x_val: int = 1
-					for defn: Dictionary in XiDetector.XI_DEFINITIONS:
-						if defn["name"] == xi_name:
-							x_val = defn["x_mult"]
-							break
-					xi_parts.append("%s×%d" % [xi_name, x_val])
-			if xi_parts.size() > 0:
-				xi_text = "  ".join(xi_parts)
+	var xi_hc: Array = hand.slice(0, 3)
+	var xi_mc: Array = hand.slice(3, 6)
+	var xi_tc: Array = hand.slice(6, 9)
+	var xi_he = HandEvaluator3.evaluate(xi_hc)
+	var xi_me = HandEvaluator3.evaluate(xi_mc)
+	var xi_te = HandEvaluator3.evaluate(xi_tc)
+	var xi_result: XiDetector.XiResult = XiDetector.detect(xi_hc, xi_mc, xi_tc, xi_he, xi_me, xi_te)
 
-	# ── Format ──
-	var col_str: String = "列: ×%d" % col_x_product if col_x_product > 1 else ""
-	if col_str == "":
-		if xi_text == "-":
-			_col_xi_label.text = ""
-			return
-		else:
-			_col_xi_label.text = xi_text
-			return
+	var xi_parts: Array[String] = []
+	if xi_result != null and xi_result.has_any():
+		for xi_name: String in xi_result.triggered:
+			var is_global: bool = xi_name in ["全黑", "全红", "全顺", "全同花", "四张", "全三条"]
+			if is_global:
+				var x_val: int = 1
+				for defn: Dictionary in XiDetector.XI_DEFINITIONS:
+					if defn["name"] == xi_name:
+						x_val = defn["x_mult"]
+						break
+				xi_parts.append("%s×%d" % [xi_name, x_val])
 
-	_col_xi_label.text = "%s  喜: %s" % [col_str, xi_text]
+	if xi_parts.size() > 0:
+		_col_xi_label.text = "喜: " + "  ".join(xi_parts)
+		_col_xi_label.visible = true
+	elif _col_xi_label and is_instance_valid(_col_xi_label):
+		_col_xi_label.text = "喜: -"
+		_col_xi_label.visible = false

@@ -27,7 +27,8 @@ func emit_plays_changed() -> void:
 @warning_ignore("unused_signal")
 signal gold_changed(amount: int)
 signal hand_updated(hand: Array)           # 9 cards, arranged: [0-2]=head, [3-5]=mid, [6-8]=tail
-signal arrangement_changed(arrangement: AutoArranger.Arrangement)
+@warning_ignore("unused_signal")
+signal hand_swapped(src: int, tgt: int)     # two cards exchanged in-place — light UI refresh
 signal seal_started(barrier: int, seal_idx: int, target: int, seal_lord_name: String)
 signal xi_triggered(xis: Array[String])
 
@@ -127,7 +128,6 @@ func _start_seal() -> void:
 func auto_arrange() -> void:
 	ArrangeController.auto_arrange(self)
 	_recompute_col_evals()
-	arrangement_changed.emit(current_arrangement)
 	hand_updated.emit(hand)
 
 
@@ -148,8 +148,6 @@ func re_evaluate_arrangement() -> void:
 	var te: HandEvaluator3.EvalResult = HandEvaluator3.evaluate(tail_cards)
 	current_arrangement = AutoArranger.Arrangement.new(head_cards, mid_cards, tail_cards, he, me, te)
 	_recompute_col_evals()
-	arrangement_changed.emit(current_arrangement)
-	hand_updated.emit(hand)
 
 
 ## Recompute column evaluations from current arrangement.

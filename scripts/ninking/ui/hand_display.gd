@@ -3,31 +3,30 @@ extends RefCounted
 
 ## Renders the 9-card 3-group (比鸡) hand display — card placement and layout only.
 ## Label updates delegated to HandTypeLabeler.
+## v2: Single HandCardContainer replaces 3 Hand nodes.
 
-var _head_hand: Hand
-var _mid_hand: Hand
-var _tail_hand: Hand
-var _status_label: Label  # reserved, currently unused
+var _card_grid: HandCardContainer
+var _status_label: Label
 
 var _labeler: HandTypeLabeler
 var _current_hand: Array[CardData.PlayingCard] = []
 
 
 func setup(
-	head: Hand, mid: Hand, tail: Hand,
+	card_grid: HandCardContainer,
 	head_type: Label, mid_type: Label, tail_type: Label,
 	col0: Label, col1: Label, col2: Label, col_xi: Label,
 	shadow_type: Label, flash_type: Label, destroy_type: Label,
-	shadow_score: Label, flash_score: Label, destroy_score: Label,
+	shadow_score: RichTextLabel, flash_score: RichTextLabel, destroy_score: RichTextLabel,
 	shadow_lv: Label, flash_lv: Label, destroy_lv: Label,
+	left_col_label: Label, mid_col_label: Label, right_col_label: Label,
+	left_col_type: Label, mid_col_type: Label, right_col_type: Label,
+	left_col_score: RichTextLabel, mid_col_score: RichTextLabel, right_col_score: RichTextLabel,
+	left_col_lv: Label, mid_col_lv: Label, right_col_lv: Label,
 	play: Button, status: Label
 ) -> void:
-	assert(head != null, "HandDisplay.setup: head must not be null")
-	assert(mid != null, "HandDisplay.setup: mid must not be null")
-	assert(tail != null, "HandDisplay.setup: tail must not be null")
-	_head_hand = head
-	_mid_hand = mid
-	_tail_hand = tail
+	assert(card_grid != null, "HandDisplay.setup: card_grid must not be null")
+	_card_grid = card_grid
 	_status_label = status
 
 	_labeler = HandTypeLabeler.new()
@@ -37,20 +36,22 @@ func setup(
 		shadow_type, flash_type, destroy_type,
 		shadow_score, flash_score, destroy_score,
 		shadow_lv, flash_lv, destroy_lv,
+		left_col_label, mid_col_label, right_col_label,
+		left_col_type, mid_col_type, right_col_type,
+		left_col_score, mid_col_score, right_col_score,
+		left_col_lv, mid_col_lv, right_col_lv,
 		play
 	)
 
 
+
+
 func _clear_all() -> void:
-	if _head_hand != null:
-		_head_hand.clear_cards()
-	if _mid_hand != null:
-		_mid_hand.clear_cards()
-	if _tail_hand != null:
-		_tail_hand.clear_cards()
+	if _card_grid != null:
+		_card_grid.clear_cards()
 
 
-func _add_card(hand: Hand, card_data: CardData.PlayingCard, idx: int,
+func _add_card(card_data: CardData.PlayingCard, idx: int,
 		swap_idx: int,
 		on_card_clicked: Callable = Callable(),
 		on_card_dragged: Callable = Callable()) -> void:
@@ -65,7 +66,7 @@ func _add_card(hand: Hand, card_data: CardData.PlayingCard, idx: int,
 		pc.ninking_card_dragged.connect(on_card_dragged)
 	if idx == swap_idx:
 		pc.set_visual_state(NinKingCard.VisualState.SWAP_SOURCE)
-	hand.add_card(pc)
+	_card_grid.add_card(pc)
 	pc.update_display()
 	GlobalTweens.pop_in(pc, 0.25)
 
@@ -76,53 +77,25 @@ func refresh(hand: Array[CardData.PlayingCard], swap_idx: int, on_card_clicked: 
 	if hand.size() < 9:
 		_labeler.reset_labels()
 		return
-	for i: int in range(3):
-		_add_card(_head_hand, hand[i], i, swap_idx, on_card_clicked, on_card_dragged)
-	for i: int in range(3, 6):
-		_add_card(_mid_hand, hand[i], i, swap_idx, on_card_clicked, on_card_dragged)
-	for i: int in range(6, 9):
-		_add_card(_tail_hand, hand[i], i, swap_idx, on_card_clicked, on_card_dragged)
-	_labeler.update_all(hand)
-
-	# Card Framework move-tween race fix: rapid sequential add_card cycles
-	# (kill→move→kill→deferred reapply) leave cards at intermediate positions.
-	# We fix this in two stages:
-	#   1. Timer fires → update_card_ui() (fixes child order, z-index, states)
-	#      → force card positions (overrides stale tween targets)
-	#   2. force positions once more after a short delay to catch any straggler
-	#      tweens that may have been queued after our first pass.
-	if _head_hand and _head_hand.is_inside_tree():
-		var timer := _head_hand.get_tree().create_timer(0.3)
-		timer.timeout.connect(_fixup_layout.bind(_head_hand, _mid_hand, _tail_hand), CONNECT_ONE_SHOT)
+	for i: int in range(9):
+		_add_card(hand[i], i, swap_idx, on_card_clicked, on_card_dragged)
+	if _card_grid and _card_grid.is_inside_tree():
+		var timer := _card_grid.get_tree().create_timer(0.3)
+		timer.timeout.connect(_fixup_layout, CONNECT_ONE_SHOT)
 
 
-## Find which hand container and card index corresponds to a global drop position.
-## Returns { "hand": Hand, "hand_offset": int, "target_idx": int } or empty dict if outside all hands.
-## hand_offset: 0=head, 3=mid, 6=tail — used to compute absolute index in 9-card hand.
+## Find target card index from a global drop position.
+## Returns { "target_idx": int } or empty dict if outside grid.
 func find_drop_target(global_pos: Vector2) -> Dictionary:
-	for pair in [{h = _head_hand, off = 0}, {h = _mid_hand, off = 3}, {h = _tail_hand, off = 6}]:
-		var hand: Hand = pair.h
-		var rect: Rect2 = hand.get_global_rect()
-		if rect.has_point(global_pos):
-			# Find which card in this hand is closest to the drop point
-			var best_idx: int = -1
-			var best_dist: float = INF
-			var cards_node: Node = hand.get_node_or_null("Cards")
-			if cards_node:
-				for i: int in range(cards_node.get_child_count()):
-					var child: Node = cards_node.get_child(i)
-					if child is Card:
-						var d: float = child.global_position.distance_squared_to(global_pos)
-						if d < best_dist:
-							best_dist = d
-							best_idx = i
-			return {"hand": hand, "hand_offset": pair.off, "target_idx": pair.off + max(best_idx, 0)}
-	return {}
+	var idx := _card_grid.grid_index_at(global_pos)
+	if idx < 0 or idx >= _current_hand.size():
+		return {}
+	return {"target_idx": idx}
 
 
-func add_card_to_hand(target: Hand, card_data: CardData.PlayingCard, idx: int,
-		swap_idx: int = -1) -> void:
-	_add_card(target, card_data, idx, swap_idx)
+func update_labels(hand: Array[CardData.PlayingCard]) -> void:
+	if _labeler:
+		_labeler.update_all(hand)
 
 
 func clear() -> void:
@@ -130,32 +103,7 @@ func clear() -> void:
 	_current_hand.clear()
 
 
-# ══════════════════════════════════════════
-# Card Framework tween race fix
-# ══════════════════════════════════════════
-
-func _fixup_layout(head: Hand, mid: Hand, tail: Hand) -> void:
-	for hand: Hand in [head, mid, tail]:
-		if not is_instance_valid(hand):
-			continue
-		hand.update_card_ui()
-		_force_card_positions(hand)
-
-
-func _force_card_positions(hand: Hand) -> void:
-	# Iterate by _held_cards order (matching _compute_pose indices),
-	# NOT by Cards child order — the two may differ before _reorder.
-	var held_cards: Array = hand.get("_held_cards")
-	if held_cards == null or held_cards.is_empty():
+func _fixup_layout() -> void:
+	if not is_instance_valid(_card_grid):
 		return
-	var card_count: int = held_cards.size()
-	var _w: float = 140.0  # NinKing card width
-	var spacing: float = float(hand.max_hand_spread) / float(card_count + 1)
-	var anchor: float = (hand.max_hand_spread + _w) / 2.0
-	for i: int in range(card_count):
-		var card: Card = held_cards[i]
-		var target: Vector2 = hand.global_position
-		target.x += (i + 1) * spacing - anchor
-		# Flat curves → no rotation, no vertical offset.
-		card.global_position = target
-		card.rotation = 0.0
+	_card_grid.update_card_ui()

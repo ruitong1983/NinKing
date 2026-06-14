@@ -78,8 +78,9 @@ func _build_ui() -> void:
 	add_child(_overlay)
 
 	# Delegates
-	_deck_select = DeckSelectPanel.new()
-	_deck_select.setup(self, _theme, _overlay, _on_deck_confirmed, _on_deck_cancelled, _play_click_sfx)
+	_deck_select = preload("res://scenes/ninking/deck_select_panel.tscn").instantiate()
+	add_child(_deck_select)
+	_deck_select.setup(_theme, _on_deck_confirmed, _on_deck_cancelled, _play_click_sfx)
 
 	# Continue panel (stays inline — 104 lines)
 	_build_continue_panel(self)
@@ -121,6 +122,8 @@ func _on_start_pressed() -> void:
 	if _panel_open:
 		return
 	_panel_open = true
+	_overlay.show()
+	GlobalTweens.fade_in(_overlay, 0.25)
 	_deck_select.show_panel()
 
 
@@ -140,7 +143,7 @@ func _on_quit_pressed() -> void:
 
 func _on_debug_pressed() -> void:
 	## Launch the Debug scoring scene (independent of main game).
-	get_tree().change_scene_to_file("res://scenes/ninking/ninking_debug.tscn")
+	get_tree().change_scene_to_file("res://scenes/ninking/debug_ninking_main.tscn")
 
 
 # ══════════════════════════════════════════
@@ -155,6 +158,7 @@ func _on_deck_confirmed(deck_key: String) -> void:
 
 func _on_deck_cancelled() -> void:
 	_panel_open = false
+	_overlay.hide()
 	_update_continue_button()
 
 
@@ -296,7 +300,7 @@ func _on_overlay_gui_input(event: InputEvent) -> void:
 		return
 	var mb := event as InputEventMouseButton
 	if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
-		if _deck_select.is_visible():
+		if _deck_select.visible:
 			_deck_select.hide_panel()
 		elif _continue_panel.visible:
 			_hide_continue_panel()
