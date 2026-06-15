@@ -4,7 +4,7 @@
 > 引擎：Godot 4.6.2 / 纯 2D
 > 设计日期：2026-06-06
 > 实现日期：2026-06-06
-> 最后更新：2026-06-06 (7轮 Tween/VFX 集成完成)
+> 最后更新：2026-06-15 (Fake3D VFX Phase 1-4 完成)
 > 状态：✅ 框架已实现 + 上层对接完成
 
 ---
@@ -25,28 +25,36 @@
 
 ```
 scripts/tween/                            # 动效子系统（全部 class_name，可移植）
-├── global_tweens.gd     (147 行) ❌ 不可移植：本项目 Autoload 胶水层
-├── tween_fx.gd          (339 行) ✅ 纯静态 Tween 动效工具 (Autoload: TweenFX)
+├── global_tweens.gd     (172 行) ❌ 不可移植：本项目 Autoload 胶水层
+├── tween_fx.gd          (577 行) ✅ 纯静态 Tween 动效工具 (Autoload: TweenFX) — 含 move_arc / dissolve_out
 ├── screen_shake.gd      ( 78 行) ✅ 屏幕震动系统 (class_name: ScreenShake)
 ├── hit_stop.gd          ( 57 行) ✅ 顿帧/冻结帧 (class_name: HitStop)
-├── card_tilt.gd         ( 84 行) ✅ 卡牌倾斜/物理摊开感 (class_name: CardTilt)
-├── count_up.gd          (292 行) ✅ 数字滚动 (class_name: CountUp) — 支持 play_multi / play_score 7-tier 顺序计分
-├── particle_pool.gd     ( 96 行) ✅ 粒子池 (class_name: ParticlePool)
-└── audio_coupler.gd     ( 55 行) ✅ 音效耦合 (class_name: AudioCoupler)
-
-scripts/system/
-└── crt_filter.gd        ( 56 行) ✅ CRT 全屏滤镜控制器 (class_name: CRTFilter)
+├── card_tilt.gd         ( 83 行) ✅ 卡牌倾斜/物理摊开感 (class_name: CardTilt)
+├── count_up.gd          (305 行) ✅ 数字滚动 (class_name: CountUp) — 支持 play_multi / play_score 7-tier 顺序计分
+├── particle_pool.gd     (119 行) ✅ 粒子池 (class_name: ParticlePool)
+└── audio_coupler.gd     ( 56 行) ✅ 音效耦合 (class_name: AudioCoupler)
 
 resources/shaders/
-├── crt_filter.gdshader  ( 40 行) ✅ CRT 着色器（扫描线+色差+暗角+曲面）
-└── card_glow.gdshader   ( 31 行) ✅ 卡牌边缘发光着色器
+├── panel_edge_fade.gdshader  ( 30 行) ✅ 面板边缘渐隐着色器
+└── fake3d/                          # ⛔ CRT filter 已移除 (V24)
+    ├── fake3d.gdshader       ( 85 行) ✅ MIT Hei — 透视变形着色器
+    ├── fake3d_flash.gdshader (120 行) ✅ MIT Hei — 辉光/闪光着色器 (替代 card_glow)
+    ├── fake3d_shadow.gdshader( 50 行) ✅ MIT Hei — 3D 阴影着色器 (未接入)
+    └── dissolve2d.gdshader   ( 60 行) ✅ MIT Hei — 溶解消散着色器
+
+resources/materials/
+├── fake3d.tres               ✅ 默认透视材质
+├── fake3d_flash.tres         ✅ 辉光材质
+├── fake3d_shadow.tres        ✅ 阴影材质 (未接入)
+├── dissolve2d.tres           ✅ 溶解材质
+└── dissolve_noise.tres       ✅ 噪声纹理 (FastNoiseLite)
 
 scenes/dev/
 ├── vfx_test.tscn        ✅ 独立测试场景（9 个按钮）
 └── vfx_test.gd          ( 83 行) ✅ 测试脚本
 ```
 
-**总计：~875 行脚本 + 71 行 shader**
+**总计：~1447 行脚本 + 295 行 shader (CRT 已移除)**
 
 ---
 
@@ -63,12 +71,12 @@ scenes/dev/
 │ (Autoload│ (实例)    │ (实例)    │  (实例)        │
 │  纯静态) │          │          │                │
 ├──────────┼──────────┼──────────┼────────────────┤
-│ CountUp  │ParticlePool│AudioCoupler│ CRTFilter   │
-│ (纯静态) │ (实例)   │ (纯静态)   │  (实例)       │
+│ CountUp  │ParticlePool│AudioCoupler│ Fake3D     │
+│ (纯静态) │ (实例)   │ (纯静态)   │  shaders      │
 ├──────────┴──────────┴──────────┴────────────────┤
-│              resources/shaders/                  │
-│         crt_filter.gdshader                      │
-│         card_glow.gdshader                       │
+│              resources/shaders/fake3d/           │
+│         fake3d / fake3d_flash / dissolve2d        │
+│         (panel_edge_fade.gdshader 仍在)           │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -88,11 +96,11 @@ TweenFX="*res://scripts/tween/tween_fx.gd"
 
 ### 1. TweenFX（纯静态 Tween 动效工具）
 
-**文件**：`scripts/tween/tween_fx.gd` · Autoload 名 `TweenFX` · 161 行
+**文件**：`scripts/tween/tween_fx.gd` · Autoload 名 `TweenFX` · 577 行
 **class_name**：无（Autoload 已全局可访问）
 **状态**：纯静态方法，零实例化
 
-#### API（18 个静态函数，全部返回 Tween 且内置 auto_kill）
+#### API（20 个静态函数 + 内部辅助，全部返回 Tween 且内置 auto_kill）
 
 | 方法 | 效果 | 适用场景 |
 |------|------|---------|
@@ -112,6 +120,8 @@ TweenFX="*res://scripts/tween/tween_fx.gd"
 | `slide_in(node, from_dir?, dur?)` | 从指定方向滑入 | UI 面板进入 |
 | `slide_out(node, to_dir?, dur?)` | 滑出 + queue_free | UI 面板退出 |
 | `color_flash(node, color?, dur?)` | 闪指定颜色后恢复 | 受击/得分瞬间 |
+| `move_arc(node, end_pos?, control_offset?, dur?)` | 贝塞尔弧线 + 弹性归位 | 卡牌弧线位移 (Fake3D) |
+| `dissolve_out(node, dur?, burn_border?, burn_color?)` | 噪声溶解 + 燃烧边缘 → queue_free | 仪式性退场 (Fake3D, 需预先挂 dissolve2d) |
 | `card_hover(node, scale_to?, offset_y?, dur?)` | 悬浮放大+上移 | 鼠标悬浮（接受 CanvasItem） |
 | `card_unhover(node, original_scale?, original_y?, dur?)` | 悬浮还原 | 鼠标离开（接受 CanvasItem） |
 
@@ -218,36 +228,27 @@ TweenFX="*res://scripts/tween/tween_fx.gd"
 
 ---
 
-### 8. CRTFilter（全屏滤镜）
+### 8. CRTFilter（全屏滤镜）⛔ 已移除 (V24)
 
-**文件**：`scripts/system/crt_filter.gd` · `class_name CRTFilter` · 56 行
-**Shader**：`resources/shaders/crt_filter.gdshader` · 40 行
+**文件**：~~`scripts/system/crt_filter.gd` · `class_name CRTFilter`~~ ❌ 已删除
+**Shader**：~~`resources/shaders/crt_filter.gdshader`~~ ❌ 已删除
 
-| 参数 | 默认 | 说明 |
-|------|------|------|
-| enabled | false | 总开关（切换 ColorRect.visible） |
-| scanline_intensity | 0.15 | 扫描线深浅 |
-| aberration_amount | 0.5 | 色差强度 |
-| vignette_amount | 0.3 | 暗角强度 |
-| warp_amount | 0.02 | 曲面程度 |
-| brightness | 1.1 | 亮度补偿 |
+CRT 扫描线/色差/暗角效果已在 V24 中移除，漫画风不再需要。所有 `GlobalTweens.set_crt_enabled()` 调用已清除。
 
-- CanvasLayer 层级 128，覆盖所有 UI
-- 场景加载后延迟挂载（`child_entered_tree` 触发）
+**替代方案：** 无。漫画风不需要扫描线效果。
 
 ---
 
 ### 9. GlobalTweens（Autoload 胶水层）
 
-**文件**：`scripts/tween/global_tweens.gd` · Autoload 名 `GlobalTweens` · 147 行
+**文件**：`scripts/tween/global_tweens.gd` · Autoload 名 `GlobalTweens` · 172 行
 **不可移植**：本项目专属胶水层
 **类型通知**：`card_hover`/`card_unhover`/`enable_card_tilt`/`disable_card_tilt` 接受 `CanvasItem`（兼容 Node2D 和 Control）
 
 #### 核心 API（调用方只接触 GlobalTweens）
 
 ```gdscript
-# CRT
-GlobalTweens.set_crt_enabled(true)
+# ⛔ CRT 已移除 (V24) — 无替代
 
 # 入场/退场
 GlobalTweens.pop_in(node) / pop_out(node)
@@ -268,6 +269,10 @@ GlobalTweens.wobble(node, angle_deg?)
 # 漂浮/闪色
 GlobalTweens.float_up(node, offset_y?)
 GlobalTweens.color_flash(node, color?)
+
+# 弧线 & 溶解 (Fake3D)
+GlobalTweens.move_arc(node, end_pos, control_offset?)  # 贝塞尔弧线 + 弹性归位
+GlobalTweens.dissolve_out(node, dur?, burn_border?, burn_color?)  # 噪声溶解 + 燃烧边缘
 
 # 卡牌交互
 GlobalTweens.card_hover(node) / card_unhover(node)
@@ -293,21 +298,22 @@ GlobalTweens.play_sfx(stream, volume_db?)
 ## 子系统依赖图
 
 ```
-GlobalTweens ──┬── TweenFX         (Autoload, 纯静态)
+GlobalTweens ──┬── TweenFX         (Autoload, 纯静态) — 含 move_arc / dissolve_out
                ├── ScreenShake     (依赖 Camera2D, 延迟绑定)
                ├── HitStop         (操作 Engine.time_scale)
                ├── CardTilt        (操作 CanvasItem.position/rotation)
                ├── CountUp         (依赖 TweenFX.color_flash)
                ├── ParticlePool    (依赖 CPUParticles2D)
                ├── AudioCoupler    (自建 AudioStreamPlayer)
-               └── CRTFilter       (依赖 CanvasLayer + ShaderMaterial)
+               └── Fake3D shaders  (shaders/fake3d/ — fake3d / fake3d_flash / dissolve2d)
+                     ⛔ CRTFilter 已移除 (V24)
 ```
 
 ---
 
 ## 测试场景
 
-`scenes/dev/vfx_test.tscn` — 在 Godot 编辑器中按 F6 运行，9 个按钮逐项验证：
+`scenes/dev/vfx_test.tscn` — 在 Godot 编辑器中按 F6 运行，8 个按钮逐项验证：
 
 | 按钮 | 触发 |
 |------|------|
@@ -317,7 +323,7 @@ GlobalTweens ──┬── TweenFX         (Autoload, 纯静态)
 | Card Tilt | 生成 5 张卡，扇开 + 鼠标跟随倾斜 |
 | Count Up | 数字从 0 滚动到随机值 |
 | Sparkle | 鼠标位置金色粒子爆发 |
-| CRT Toggle | 开关 CRT 滤镜 |
+| ⛔ CRT Toggle (已移除) | — |
 | All Combo | 弹入 + 震动 + 冻结 + 粒子 |
 
 ---
@@ -326,15 +332,16 @@ GlobalTweens ──┬── TweenFX         (Autoload, 纯静态)
 
 | 子系统 | 状态 | 提交 |
 |--------|------|------|
-| TweenFX | ✅ | `35d7323` |
+| TweenFX | ✅ | `35d7323` | ✅ move_arc + dissolve_out (Fake3D Phase 2) |
 | ScreenShake | ✅ | `5c232ea` |
 | HitStop | ✅ | `dedc7d0` |
-| CRT Filter + Shaders | ✅ | `5351b12` |
+| ⛔ CRT Filter + Shaders (已移除 V24) | ✅ → ❌ | `5351b12` → 已删除 |
 | CountUp | ✅ | `1592536` |
 | CardTilt | ✅ | `4d25fa8` |
 | ParticlePool | ✅ | `bd4b7aa` |
 | AudioCoupler | ✅ | `05c58e7` |
-| GlobalTweens | ✅ | `7c317d2` |
+| GlobalTweens | ✅ | `7c317d2` | ✅ move_arc + dissolve_out (Fake3D Phase 2) |
+| Fake3D shaders (fake3d/flash/dissolve2d) | ✅ Phase 1-4 | 2026-06-15 |
 | 测试场景 | ✅ | `e6d1c3c` |
 | scoring_animation 对接 | ✅ | `1565625` |
 | tscn 格式修复 | ✅ | `1cb3c8e` |
@@ -345,21 +352,22 @@ GlobalTweens ──┬── TweenFX         (Autoload, 纯静态)
 
 以下对接点框架已就绪，需在后续开发中逐步接入：
 
-### ✅ 高优先级 — 已完成 2026-06-06
+### ✅ 已完成
 
 | 事项 | 位置 | 说明 |
 |------|------|------|
-| ✅ 卡牌入场动效 | `hand_area.gd:animate_deal()` | scale+alpha 错峰弹出（手写 tween，避免与 HBoxContainer 布局冲突） |
+| ✅ 卡牌入场动效 | `hand_area.gd:animate_deal()` | scale+alpha 错峰弹出 |
 | ✅ 手牌悬停效果 | `hand_area.gd` | `card_hover()`/`card_unhover()` |
-
-### ✅ 中优先级 — 已完成 2026-06-06
-
-| 事项 | 位置 | 说明 |
-|------|------|------|
 | ✅ 结算数字滚动 | `animation_handler.gd` → `count_up.gd` | `play_score()` 7-tier 顺序滚动 + pitch 递升音效 |
 | ✅ 按钮动效 | `main_menu.gd`, `shop_ui.gd` | `card_hover()`/`card_unhover()` + `pulse()` |
 | ✅ 宝牌链式 VFX | `scoring_animation.gd:Phase 2` | 每步 `fade_in()`+`punch_in()`，大幅跳跃震屏 |
-| 🔲 手牌摊开+倾斜 | `hand_area.gd` | 需自由布局（非 Container），卡牌倾斜类型已拓宽 |
+| ✅ Fake3D shader 集成 | Phase 1-4 | fake3d 透视 / fake3d_flash 辉光 / dissolve2d 溶解 |
+| ✅ NinKingCard fake3d 材质 | `ninking_card.gd` | 默认透视 + 交换红蓝闪光 |
+| ✅ NinjaInventoryCard fake3d 材质 | `ninja_inventory_card.gd` | 默认透视 + dissolve 出售退场 |
+| ✅ dissolve 接入忍槽 | `ninja_bar_node.gd` | `use_dissolve` 参数向上贯穿 |
+| ✅ 弧线补间 move_arc | `tween_fx.gd` | 贝塞尔弧线+弹性归位 |
+| ✅ 溶解消散 dissolve_out | `tween_fx.gd` | 噪声溶解+燃烧边缘 |
+| ✅ CRT 移除 (V24) | 全项目 | 扫描线/色差/暗角已删除 |
 
 ### 🔲 低优先级
 
@@ -367,5 +375,7 @@ GlobalTweens ──┬── TweenFX         (Autoload, 纯静态)
 |------|------|------|
 | 粒子素材替换 | `assets/images/effect/particles/` | 美术资源准备好后替换占位纹理 |
 | 音效素材接入 | `assets/audio/sound/` | 各动效关键帧绑定实际音效文件 |
-| CRT 滤镜开关 | 设置界面 | 提供玩家可选的 CRT 开关选项 |
-| 动效强度配置 | 设置界面 | 玩家可调震动/粒子/CRT 强度 |
+| 动效强度配置 | 设置界面 | 玩家可调震动/粒子强度 |
+| Fake3D 动态阴影 | `fake3d_shadow` shader | 光源跟随 + 阴影子节点 (Phase 3 未完成) |
+| Fake3D 悬停 3D 视差 | `ninking_card.gd` | hover 时 `y_rot` 微调 (待叠加 CardTilt) |
+| move_arc 接入游戏流程 | 出牌/忍者登场 | 弧线补间已注册但未被默认流程调用 |

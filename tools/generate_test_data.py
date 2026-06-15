@@ -372,12 +372,12 @@ add_baseline_and_ninja('n_002','苦无','T2','头豹中顺尾豹列混+4mult',
     ['♠J','♥J','♦J'], ['♠5','♥6','♣7'], ['♠Q','♥Q','♦Q'],
     ninja_mult_effect(4))
 
-# n_003 风魔手里剑 +15chips +2mult
-add_baseline_and_ninja('n_003','风魔手里剑','T1','全散牌无列+15c+2m',
+# n_003 忍刀 +15chips +2mult
+add_baseline_and_ninja('n_003','忍刀','T1','全散牌无列+15c+2m',
     ['♠2','♥5','♦9'], ['♣4','♠7','♥10'], ['♣3','♠6','♥8'],
     {'h':{'chips':15,'mult':2,'x':[]}, 'm':{'chips':15,'mult':2,'x':[]}, 't':{'chips':15,'mult':2,'x':[]}})
 
-add_baseline_and_ninja('n_003','风魔手里剑','T2','头散中顺尾豹列混+15c+2m',
+add_baseline_and_ninja('n_003','忍刀','T2','头散中顺尾豹列混+15c+2m',
     ['♠2','♥5','♦9'], ['♠5','♥6','♣7'], ['♠J','♥Q','♦K'],
     {'h':{'chips':15,'mult':2,'x':[]}, 'm':{'chips':15,'mult':2,'x':[]}, 't':{'chips':15,'mult':2,'x':[]}})
 

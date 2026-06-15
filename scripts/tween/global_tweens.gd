@@ -82,7 +82,7 @@ func wobble(node: Node2D, angle_deg: float = 5.0, duration: float = 0.3, auto_ki
 func pulse(node: Node, scale_to: Vector2 = Vector2(1.1, 1.1), duration: float = 0.6, auto_kill: bool = true) -> Tween:
 	return FX.pulse(node, scale_to, duration, auto_kill)
 
-func float_up(node: Node2D, offset_y: float = -40.0, duration: float = 0.8, auto_kill: bool = true) -> Tween:
+func float_up(node: CanvasItem, offset_y: float = -40.0, duration: float = 0.8, auto_kill: bool = true) -> Tween:
 	return FX.float_up(node, offset_y, duration, auto_kill)
 
 func slide_in(node: Control, from_dir: TweenFX.SlideDir = TweenFX.SlideDir.UP, duration: float = 0.3, auto_kill: bool = true) -> Tween:
@@ -109,6 +109,20 @@ func disable_card_tilt(node: CanvasItem) -> void:
 func set_hand_spread(cards: Array, center_pos: Vector2 = Vector2.ZERO) -> void:
 	tilt.apply_spread(cards, center_pos)
 
+# ── 新增：Fake3D 弧线弹性补间 & 溶解消散 ──
+
+func move_arc(node: CanvasItem, end_global_pos: Vector2, control_offset: float = 0.5, duration: float = 0.5, auto_kill: bool = true) -> Tween:
+	return FX.move_arc(node, end_global_pos, control_offset, duration, auto_kill)
+
+func dissolve_out(node: CanvasItem, duration: float = 1.0, burn_border_size: float = 0.2, burn_color: Color = Color(1.0, 0.4, 0.1, 1.0)) -> Tween:
+	return FX.dissolve_out(node, duration, burn_border_size, burn_color)
+
+# ── 忍者触发动效 ──
+
+## 忍者触发组合动画：弹起 → 停顿 → squash 落回 + 金框闪烁。
+## 返回 Tween 可 await，auto_kill domain "ninja"。
+func ninja_trigger(node: Node, duration: float = 0.6, auto_kill: bool = true) -> Tween:
+	return FX.ninja_pop_trigger(node, duration, auto_kill)
 
 # ── 震动 & 顿帧 ──
 

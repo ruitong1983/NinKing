@@ -1,11 +1,12 @@
 # NinKing 设计文档索引
 
-> **最后更新:** 2026-06-12 | **关联:** [`TODO.md`](TODO.md)
+> **最后更新:** 2026-06-15 | **关联:** [`TODO.md`](TODO.md)
 
 ## 活跃文档
 
 | 文档 | 内容 |
 |------|------|
+| [`24-scoring-ninja-animation.md`](24-scoring-ninja-animation.md) | **计分忍者触发动画设计:** 三幕式计分动画（Phase G）、忍者触发视觉反馈、跳过机制、时序总表与维护指南 |
 | [`06-complete-redesign.md`](06-complete-redesign.md) | **核心玩法主文档 (v5.0):** 核心循环、AI排列、计分公式(行+列双维度加总)、喜系统、存档格式 |
 | [`11-ninja-cards.md`](11-ninja-cards.md) | **忍者牌完整参考（视觉设计+技术实现+游戏数据）:** 拼装系统、场景结构、数据流、素材清单、45 张忍者牌定义 |
 | [`12-consumable-cards.md`](12-consumable-cards.md) | **消耗品独立参考:** 15 附魔 + 6 星图 + 4 秘仪 |
@@ -24,7 +25,7 @@
 | [`10-main-ui-design.md`](10-main-ui-design.md) | Main Game UI 设计 — 游戏主界面完整布局 |
 | [`11-main-overlay-design.md`](11-main-overlay-design.md) | Main Overlay 设计 — 入场/计分/过关/失败覆盖层 |
 | [`20-debug-scene-design.md`](20-debug-scene-design.md) | **Debug 计分测试场景** — 独立于主场景，52牌选择+忍者/星图测试 |
-| [`22-display-card-base-spec.md`](22-display-card-base-spec.md) | **DisplayCardBase 规格书** — 非扑克牌统一展示卡基类 |
+| [`22-display-card-base-spec.md`](22-display-card-base-spec.md) | **NinjaCard 规格书** — 统一忍者卡场景 (忍者栏+商店) |
 | [`23-ninja-card-expansion-plan.md`](23-ninja-card-expansion-plan.md) | **忍者牌扩展方案** — 45→80 张三阶段补齐计划 |
 | [`90-troubleshooting.md`](90-troubleshooting.md) | **疑难问题解决手册** — 非显而易见的坑及解决方案 |
 | [`TODO.md`](TODO.md) | **工作清单:** Bug / 待实现 / 优化 / 素材缺口 |

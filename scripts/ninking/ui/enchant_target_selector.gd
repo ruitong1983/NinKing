@@ -77,11 +77,20 @@ func open(hand: Array[CardData.PlayingCard], callback: Callable) -> void:
 		btn.add_theme_stylebox_override("pressed", empty_style)
 		btn.add_theme_stylebox_override("disabled", empty_style)
 
-		# ── Card face (SVG texture) ──
+		# ── Card face (SVG texture, scaled to card_size) ──
 		var svg_path: String = _get_card_svg_path(card_data)
+		var face_tex: Texture2D = null
+		if not svg_path.is_empty():
+			face_tex = load(svg_path)
+			# Scale to CARD_WÃCARD_H to avoid EXPAND_IGNORE_SIZE overflow
+			if face_tex:
+				var img: Image = face_tex.get_image()
+				if img and (img.get_width() != int(CARD_W) or img.get_height() != int(CARD_H)):
+					img.resize(int(CARD_W), int(CARD_H), Image.INTERPOLATE_LANCZOS)
+					face_tex = ImageTexture.create_from_image(img)
 		var tex_rect := TextureRect.new()
 		tex_rect.name = "Face"
-		tex_rect.texture = load(svg_path) if not svg_path.is_empty() else null
+		tex_rect.texture = face_tex
 		tex_rect.size = Vector2(CARD_W, CARD_H)
 		tex_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED

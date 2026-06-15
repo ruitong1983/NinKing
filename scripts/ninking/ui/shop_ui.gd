@@ -100,7 +100,7 @@ func play_entrance_animation() -> void:
 	var impact_sfx = preload("res://scripts/config/sound_bank.gd").BOSS_REVEAL
 
 	await NinKingTween.play_shop_entrance_manga({
-		top_border = $TopBorder,
+		top_border = get_node_or_null("TopBorder"),
 		stage_bg = stage_bg,
 		title_bar = $TitleBar,
 		panel = self,
@@ -214,6 +214,8 @@ func _render_items() -> void:
 func _clear_ability_grid() -> void:
 	for card in ability_cards:
 		if is_instance_valid(card):
+			if card.get_parent() == ability_grid:
+				ability_grid.remove_child(card)
 			card.queue_free()
 	ability_cards.clear()
 
@@ -221,6 +223,8 @@ func _clear_ability_grid() -> void:
 func _clear_item_column() -> void:
 	for card in item_cards:
 		if is_instance_valid(card):
+			if card.get_parent() == item_column:
+				item_column.remove_child(card)
 			card.queue_free()
 	item_cards.clear()
 

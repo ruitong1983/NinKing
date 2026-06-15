@@ -1,6 +1,6 @@
 [gd_resource type="Theme" format=3 uid="uid://ddvno1bm21p8c"]
 
-[ext_resource type="FontFile" uid="uid://3qo0ylcohy02" path="res://assets/fonts/vonwaon_bitmap_16px.ttf" id="1_qss3m"]
+[ext_resource type="FontFile" path="res://assets/fonts/vonwaon_bitmap_16px.ttf" id="1_qss3m"]
 
 [sub_resource type="StyleBoxFlat" id="slot_frame"]
 content_margin_left = 6.0

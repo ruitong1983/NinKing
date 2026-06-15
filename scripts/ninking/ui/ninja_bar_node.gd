@@ -15,6 +15,9 @@ var _detail_popup: CardDetailPopup = null
 const SB = preload("res://scripts/config/sound_bank.gd")
 
 
+const NINJA_CARD_SCENE = preload("res://scenes/ninking/ninja_card.tscn")
+
+
 func set_container(container: NinjaBarContainer) -> void:
 	_container = container
 	_container.reorder_requested.connect(_on_reorder_requested)
@@ -32,9 +35,10 @@ func _unhandled_input(event: InputEvent) -> void:
 #  Diff-based refresh()
 # ════════════════════════════════════════════════════════════════
 
-func refresh(owned_ninjas: Array, _max_slots: int) -> void:
+func refresh(owned_ninjas: Array, _max_slots: int, use_dissolve: bool = false) -> void:
 	## Diff-based update: animate out removed ninjas, animate in new ones,
 	## keep existing cards in place. Container handles spacing automatically.
+	## use_dissolve: use ceremonial dissolve_out instead of quick fade+shrink.
 	if _detail_popup != null:
 		_detail_popup.dismiss()
 		_detail_popup = null
@@ -53,7 +57,7 @@ func refresh(owned_ninjas: Array, _max_slots: int) -> void:
 			cards_to_remove.append(card)
 
 	for card: NinjaInventoryCard in cards_to_remove:
-		_animate_out(card)
+		_animate_out(card, use_dissolve)
 
 	# Phase 2: collect surviving card ids
 	var existing_ids: Dictionary = {}
@@ -73,25 +77,29 @@ func refresh(owned_ninjas: Array, _max_slots: int) -> void:
 	_apply_stagger_pop_in()
 
 
-func _animate_out(card: NinjaInventoryCard) -> void:
-	## Fade out + shrink, then queue_free.
+func _animate_out(card: NinjaInventoryCard, use_dissolve: bool = false) -> void:
+	## Animate card out — quick fade+shrink (default) or ceremonial dissolve.
 	if not is_instance_valid(card):
 		return
 	_container.remove_card(card)
-	var tween: Tween = create_tween()
-	tween.set_parallel(true)
-	tween.tween_property(card, "modulate", Color(1, 1, 1, 0), 0.2)
-	tween.tween_property(card, "scale", Vector2(0.5, 0.5), 0.2)
-	tween.chain()
-	tween.tween_callback(func():
-		GlobalTweens.play_sfx(SB.SEAL_FAIL)
-	)
-	tween.tween_callback(card.queue_free)
+
+	if use_dissolve:
+		card.dissolve_out()
+	else:
+		var tween: Tween = create_tween()
+		tween.set_parallel(true)
+		tween.tween_property(card, "modulate", Color(1, 1, 1, 0), 0.2)
+		tween.tween_property(card, "scale", Vector2(0.5, 0.5), 0.2)
+		tween.chain()
+		tween.tween_callback(func():
+			GlobalTweens.play_sfx(SB.SEAL_FAIL)
+		)
+		tween.tween_callback(card.queue_free)
 
 
 func _make_slot(ninja_data: Dictionary, index: int = -1) -> NinjaInventoryCard:
 	## Create a NinjaInventoryCard and add it to the container.
-	var card := NinjaInventoryCard.new()
+	var card := NINJA_CARD_SCENE.instantiate() as NinjaInventoryCard
 	if index < 0:
 		index = _container.get_card_count()
 	card.setup(ninja_data["name"], ninja_data)
@@ -215,6 +223,7 @@ func _on_detail_requested(ninja_data: Dictionary) -> void:
 		desc = ninja_data.get("desc", ""),
 		rarity = ninja_data.get("rarity", "common"),
 		extra_desc = "",
+		effect = ninja_data.get("effect", {}),
 	})
 	_detail_popup.tree_exited.connect(func():
 		_detail_popup = null
@@ -229,5 +238,11 @@ func add_ninja(_ninja_data: Dictionary, _index: int = -1) -> void:
 	pass
 
 
-func remove_ninja(_index: int) -> void:
-	pass
+## Remove ninja at index with dissolve effect, updating GameState.
+func remove_ninja(index: int) -> void:
+	var gs = NinKingGameState
+	if index < 0 or index >= gs.owned_ninjas.size():
+		return
+	gs.owned_ninjas.remove_at(index)
+	refresh(gs.owned_ninjas, gs.max_ninja_slots, true)
+	gs.gold_changed.emit(gs.gold)

@@ -461,7 +461,7 @@ cel-shading 块面，高对比简洁有力，居中构图，纯平面2D，俯视
 | 21 | `icon_seal.png` | 封印符 | 崩山/流水 + 禁術 + 风险效果 (6) |
 | 22 | `icon_crown.png` | 王冠 | 传说 3 + 点数/人牌相关 (5) |
 | 23 | `icon_heart.png` | 红心 | 回复/血量类（预留） |
-| 24 | `icon_shield.png` | 盾牌 | 保护/忍具类（预留） |
+| 24 | `icon_shield.png` | 盾牌 | 保护/忍法类（预留） |
 
 > **砍掉的 5 张**（eye/dice/swap/clover/skull）：效果过于细碎（仅 1-2 张牌使用），用文字描述或复用相近图标覆盖（swap→icon_card, skull→icon_seal）。
 

@@ -8,7 +8,7 @@ extends RefCounted
 
 # ─── BGM ───
 const MENU_BGM: AudioStream = preload("res://assets/audio/music/start_menu_bgm.wav")
-const GAME_BGM: AudioStream = preload("res://assets/audio/music/main_game_bgm.wav")
+const GAME_BGM: AudioStream = null  ## @deprecated 旧 FanKing 占位 (main_game_bgm.wav)，MusicManager 已改用 game_bgm_light/medium/heavy.mp3
 const GAME_BGM_LIGHT: AudioStream = preload("res://assets/audio/music/game_bgm_light.mp3")
 const GAME_BGM_MEDIUM: AudioStream = preload("res://assets/audio/music/game_bgm_medium.mp3")
 const GAME_BGM_HEAVY: AudioStream = preload("res://assets/audio/music/game_bgm_heavy.mp3")
@@ -25,8 +25,8 @@ const BOSS_FINAL_LAYER: AudioStream = preload("res://assets/audio/sound/game/bos
 
 # ── 卡牌操作 ──
 const SWAP: AudioStream          = preload("res://assets/audio/sound/game/swap.ogg")
-const DISCARD: AudioStream       = preload("res://assets/audio/sound/game/discard.ogg")
-const REDRAW_POP: AudioStream    = preload("res://assets/audio/sound/game/redraw_pop.ogg")
+# DISCARD: removed — 手替え机制已废弃 (A5)
+# REDRAW_POP: removed — 手替え机制已废弃 (A5)
 
 # ── 计分/喜/结算 ──
 const COUNT_TICK: AudioStream    = preload("res://assets/audio/sound/game/count_tick.ogg")
@@ -47,6 +47,16 @@ const UI_CLICK: AudioStream  = preload("res://assets/audio/sound/ui/ui_click.ogg
 const UI_COIN: AudioStream   = preload("res://assets/audio/sound/ui/ui_coin.ogg")
 const UI_ERROR: AudioStream  = preload("res://assets/audio/sound/ui/ui_error.ogg")
 const HOVER: AudioStream     = preload("res://assets/audio/sound/game/hover.ogg")
+
+# ─── P2 SFX (素材已就绪，接线待功能实装) ───
+const ENCHANT_CAST: AudioStream   = preload("res://assets/audio/sound/game/enchant_cast.ogg")   ## @pending 附魔使用
+const STAR_UPGRADE: AudioStream   = preload("res://assets/audio/sound/game/star_upgrade.ogg")   ## @pending 星图升级
+const RITUAL_PULSE: AudioStream   = preload("res://assets/audio/sound/game/ritual_pulse.ogg")   ## @pending 秘仪生效
+const GROWTH_TICK: AudioStream    = preload("res://assets/audio/sound/game/growth_tick.ogg")    ## @pending 修炼成长
+const NINJA_GEAR: AudioStream     = preload("res://assets/audio/sound/game/ninja_gear.ogg")     ## @pending 忍法使用
+const GLASS_BREAK: AudioStream    = preload("res://assets/audio/sound/game/glass_break.ogg")    ## @pending 琉璃碎裂
+const LUCKY_JINGLE: AudioStream   = preload("res://assets/audio/sound/game/lucky_jingle.ogg")   ## @pending 鸿运触发
+const BANISH_FIRE: AudioStream    = preload("res://assets/audio/sound/game/banish_fire.ogg")    ## @pending 放逐销毁
 
 # ─── 旧名 alias (FanKing 遗留，deprecated) ───
 # 待所有引用迁移后删除

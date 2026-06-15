@@ -239,7 +239,7 @@ static func scale_pop(node: Node, factor: float = 1.2, duration: float = 0.2, au
 
 # ─── 漂浮 ───
 
-static func float_up(node: Node2D, offset_y: float = -40.0, duration: float = 0.8, auto_kill: bool = true) -> Tween:
+static func float_up(node: CanvasItem, offset_y: float = -40.0, duration: float = 0.8, auto_kill: bool = true) -> Tween:
 	if not is_instance_valid(node):
 		return null
 	if auto_kill:
@@ -443,4 +443,190 @@ static func card_unhover(node: CanvasItem, original_scale: Vector2 = Vector2.ONE
 	, CONNECT_ONE_SHOT)
 	if auto_kill:
 		_track(node, tw, "hover")
+	return tw
+
+
+# ─── 弧线弹性补间（借鉴 Fake3D demo to_pos() type 4）───
+
+## 弧线弹性补间：前 73% 沿贝塞尔弧线线性运动，后 27% 弹性归位。
+## 接受 CanvasItem（兼容 Node2D 和 Control），使用 global_position 计算。
+## control_offset: 控制点垂直偏移系数，越大弧线弧度越大。0 = 直线。
+## auto_kill: 在 "position" domain 上防冲突（与 slide_in/shake_node 共享）。
+static func move_arc(
+	node: CanvasItem,
+	end_global_pos: Vector2,
+	control_offset: float = 0.5,
+	duration: float = 0.5,
+	auto_kill: bool = true
+) -> Tween:
+	if not is_instance_valid(node):
+		return null
+	if auto_kill:
+		_kill_tracked(node, "position")
+
+	var start_pos: Vector2 = node.global_position
+	var parent_pos: Vector2 = node.get_parent().global_position if node.get_parent() else Vector2.ZERO
+	var final_pos: Vector2 = end_global_pos - parent_pos
+
+	# 计算贝塞尔控制点
+	var cps: Array[Vector2] = _calculate_control_points(start_pos, end_global_pos, control_offset)
+	var cp1 := cps[0] - parent_pos
+	var cp2 := cps[1] - parent_pos
+
+	var tw := node.create_tween()
+	tw.set_trans(Tween.TRANS_LINEAR)
+
+	# Phase 1: 贝塞尔弧线（73% 时长，LINEAR）
+	tw.tween_method(
+		_method_bezier.bind(node, start_pos - parent_pos, cp1, cp2, final_pos),
+		0.0, 0.73, duration * 0.3
+	)
+	# Phase 2: 弹性归位（27% 时长，ELASTIC EASE_OUT）
+	tw.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_ELASTIC)
+	tw.tween_method(
+		_method_bezier.bind(node, start_pos - parent_pos, cp1, cp2, final_pos),
+		0.73, 1.0, duration * 0.7
+	)
+
+	if auto_kill:
+		_track(node, tw, "position")
+	return tw
+
+
+## 三次贝塞尔曲线计算
+static func _bezier_cubic(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2, t: float) -> Vector2:
+	var u := 1.0 - t
+	var tt := t * t
+	var uu := u * u
+	var uuu := uu * u
+	var ttt := tt * t
+	var p := uuu * p0          # (1-t)^3 * p0
+	p += 3.0 * uu * t * p1     # 3*(1-t)^2*t * p1
+	p += 3.0 * u * tt * p2     # 3*(1-t)*t^2 * p2
+	p += ttt * p3              # t^3 * p3
+	return p
+
+
+## 计算贝塞尔控制点（垂直偏移）
+static func _calculate_control_points(start: Vector2, end: Vector2, intensity: float) -> Array[Vector2]:
+	var direction := (end - start).normalized()
+	var distance := start.distance_to(end)
+	var perpendicular := Vector2(-direction.y, direction.x) * intensity
+	var c1 := start + direction * (distance * 0.3) + perpendicular * (distance * 0.5)
+	var c2 := start + direction * (distance * 0.7) + perpendicular * (distance * 0.3)
+	return [c1, c2]
+
+
+## tween_method 回调：更新节点 position 到贝塞尔曲线上的 t 位置
+static func _method_bezier(
+	_t: float,
+	node: CanvasItem,
+	p0: Vector2,
+	p1: Vector2,
+	p2: Vector2,
+	p3: Vector2
+) -> void:
+	if not is_instance_valid(node):
+		return
+	node.position = _bezier_cubic(p0, p1, p2, p3, _t)
+
+
+# ─── 忍者触发动效（弹起 + 金框 + squash 落回）───
+
+## 忍者触发组合动画：弹起 → 停顿 → squash 落回。
+## Phase 1 (0-0.15s): scale 1.0→1.2 + y -10px（EASE_OUT QUAD）
+## Phase 2 (0.15-0.35s): 保持峰值
+## Phase 3 (0.35-0.60s): squash 压缩(0.92) → 弹簧归位 1.0 + y 归位
+##
+## auto_kill domain: "ninja"（与 scale/position/modulate 隔离）
+static func ninja_pop_trigger(node: Node, _duration: float = 0.6, auto_kill: bool = true) -> Tween:
+	if not is_instance_valid(node):
+		return null
+	if auto_kill:
+		_kill_tracked(node, "ninja")
+
+	var ctrl: Control = node as Control if node is Control else null
+	var saved_pivot: Vector2 = ctrl.pivot_offset if ctrl else Vector2.ZERO
+	if ctrl:
+		ctrl.pivot_offset = ctrl.size * 0.5
+	var orig_y: float = node.position.y
+
+	var tw := node.create_tween()
+
+	# Phase 1: bounce up — scale 1.0→1.2, y -10px (parallel)
+	tw.set_parallel(true)
+	tw.tween_property(node, "scale", Vector2(1.2, 1.2), 0.15) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
+	tw.tween_property(node, "position:y", -10.0, 0.15) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD).as_relative()
+
+	# Phase 2: hold at peak (sequential after Phase 1 group)
+	tw.set_parallel(false)
+	tw.tween_interval(0.2)
+
+	# Phase 3: squash compress → spring back (sequential)
+	# 3a: quick squash down
+	tw.tween_property(node, "scale", Vector2(0.92, 0.92), 0.08) \
+		.set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_SINE)
+	# 3b: spring back to 1.0 + y restore (parallel with each other)
+	tw.set_parallel(true)
+	tw.tween_property(node, "scale", Vector2.ONE, 0.17) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	tw.tween_property(node, "position:y", orig_y, 0.25) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SPRING)
+
+	# Cleanup
+	tw.tween_callback(func():
+		if ctrl and is_instance_valid(ctrl):
+			ctrl.pivot_offset = saved_pivot
+	)
+
+	if auto_kill:
+		_track(node, tw, "ninja")
+	return tw
+
+
+# ─── 溶解消散（独立 API，不替代 pop_out）───
+
+## 溶解消散：需要节点材质已挂载 dissolve2d.gdshader。
+## 自动随机化噪声种子，tween dissolve_value 1.0→0.0，完成后 queue_free。
+## 不参与 auto_kill（消散过程不打断）。
+static func dissolve_out(
+	node: CanvasItem,
+	duration: float = 1.0,
+	burn_border_size: float = 0.2,
+	burn_color: Color = Color(1.0, 0.4, 0.1, 1.0)
+) -> Tween:
+	if not is_instance_valid(node):
+		return null
+
+	# 配置燃烧参数
+	if node.material is ShaderMaterial:
+		var mat: ShaderMaterial = node.material
+		mat.set_shader_parameter("burn_border_size", burn_border_size)
+		mat.set_shader_parameter("burn_color", burn_color)
+
+		# 随机化噪声种子
+		var noise_tex = mat.get_shader_parameter("dissolve_texture")
+		if noise_tex is NoiseTexture2D and noise_tex.noise:
+			noise_tex.noise.seed = randi()
+
+	# 启用子节点材质继承（保证 FrontFace/BackFace 同时溶解）
+	var tex_rects: Array[TextureRect] = []
+	for child in node.find_children("*", "TextureRect", false, false):
+		if child is TextureRect:
+			child.use_parent_material = true
+			tex_rects.append(child)
+
+	var tw := node.create_tween()
+	tw.set_trans(Tween.TRANS_CUBIC)
+	tw.tween_property(node.material, "shader_parameter/dissolve_value", 0.0, duration).from(1.0)
+	tw.tween_callback(func():
+		# 恢复 use_parent_material
+		for tex_rect: TextureRect in tex_rects:
+			if is_instance_valid(tex_rect):
+				tex_rect.use_parent_material = false
+		if is_instance_valid(node):
+			node.queue_free()
+	)
 	return tw

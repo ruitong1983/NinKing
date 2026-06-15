@@ -234,6 +234,7 @@ func show_shop(shop_mgr: ShopManager, gold: int, colors: Dictionary) -> void:
 	panel.continue_requested.connect(_on_shop_continue_requested)
 
 	show_view("shop")
+	MusicManager.play_shop_bgm()
 	panel.play_entrance_animation()
 
 
@@ -354,11 +355,11 @@ func clear_score_formula() -> void:
 
 
 func _refresh_score_label() -> void:
-	var displayed_total: int = _score_subtotal * _score_xi if _score_xi > 0 else _score_subtotal
-	if _score_xi > 0:
+	if _score_xi > 1:
+		var displayed_total: int = _score_subtotal * _score_xi
 		score_label.text = "%d x %d = %d" % [_score_subtotal, _score_xi, displayed_total]
 	else:
-		score_label.text = "%d" % displayed_total
+		score_label.text = "%d" % _score_subtotal
 
 
 func update_score(current: int, target: int) -> void:
@@ -424,8 +425,8 @@ func _on_ninking_card_dragged(idx: int, drop_position: Vector2) -> void:
 # Ninja bar — delegated to NinjaBarDisplay
 # ══════════════════════════════════════════
 
-func refresh_ninjas(owned_ninjas: Array, max_slots: int) -> void:
-	ninja_bar.refresh(owned_ninjas, max_slots)
+func refresh_ninjas(owned_ninjas: Array, max_slots: int, use_dissolve: bool = false) -> void:
+	ninja_bar.refresh(owned_ninjas, max_slots, use_dissolve)
 
 
 # ══════════════════════════════════════════

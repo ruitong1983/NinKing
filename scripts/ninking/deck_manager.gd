@@ -3,8 +3,6 @@ extends RefCounted
 
 ## Manages the draw pile and discard pile for a run.
 
-signal deck_shuffled
-
 var draw_pile: Array[CardData.PlayingCard] = []
 var discard_pile: Array[CardData.PlayingCard] = []
 
@@ -21,7 +19,7 @@ func reset() -> void:
 
 func shuffle() -> void:
 	draw_pile.shuffle()
-	deck_shuffled.emit()
+	# deck_shuffled signal removed — orphaned (no listeners)
 
 
 func draw(count: int) -> Array[CardData.PlayingCard]:

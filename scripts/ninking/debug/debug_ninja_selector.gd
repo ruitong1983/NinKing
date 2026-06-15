@@ -20,7 +20,7 @@ const CATEGORY_NAMES: Dictionary = {
 	"xi_enhance": "喜之强化",
 	"scaling": "成长修炼",
 	"economy": "经济",
-	"tools": "忍具",
+	"tools": "忍法",
 	"legendary": "传说",
 	"redraw": "手替激励",
 	"cross_link": "跨组联动",
@@ -274,6 +274,13 @@ func _on_ninja_gui_input(event: InputEvent, nid: String, name_str: String, rarit
 	if viewport == null:
 		return
 
+	# Look up effect data for Balatro-style rendering
+	var effect: Dictionary = {}
+	for ninja: Dictionary in _all_ninjas:
+		if ninja.get("id", "") == nid:
+			effect = ninja.get("effect", {})
+			break
+
 	var tex: Texture2D = null
 	var card_path: String = AssetRegistry.get_ninja_card_path(nid)
 	if ResourceLoader.exists(card_path):
@@ -285,6 +292,7 @@ func _on_ninja_gui_input(event: InputEvent, nid: String, name_str: String, rarit
 		name = name_str,
 		desc = desc,
 		rarity = rarity,
+		effect = effect,
 	})
 
 

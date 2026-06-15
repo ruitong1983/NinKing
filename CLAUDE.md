@@ -55,6 +55,7 @@
 - ⚠️ 文件操作必须用 Read/Write/Edit 工具，禁止 PowerShell/Bash 做文件内容读写
 - ⚠️ Edit 失败一次 → 立刻改用 Write 重写整个文件。禁止 shell 脚本做字符串替换（会引入 BOM/UTF-16 LE/中文乱码）
 - ⚠️ PowerShell: `Set-Content -Encoding UTF8` 会加 BOM; `>` / `Out-File` 默认 UTF-16 LE
+- ⚠️ **TextureRect 必须显式设 `expand_mode`**：禁止依赖默认值 `EXPAND_KEEP_SIZE`（会让 `minimum_size` 锁定为纹理原生尺寸，溢出布局）。程序化创建的 TextureRect 必须紧跟 `.expand_mode = TextureRect.EXPAND_IGNORE_SIZE`。已在 `card_detail_popup.gd` / `ninja_inventory_card.gd` 踩坑两次。→ `docs/ninking/90-troubleshooting.md §4`
 
 ## Card-Framework 卡牌框架
 

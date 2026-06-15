@@ -71,7 +71,7 @@ static func prepare_play(gs) -> Dictionary:
 			head_eval, mid_eval, tail_eval)
 
 	# Score calculation
-	var score_result: ScoreCalculator.ScoreResult = ScoreCalculator.calculate(
+	var score_result: ScoreResult = ScoreCalculator.calculate(
 		head_cards, mid_cards, tail_cards,
 		head_eval, mid_eval, tail_eval,
 		col_evals,
@@ -87,6 +87,22 @@ static func prepare_play(gs) -> Dictionary:
 		"xi_result": xi_result,
 		"seal_effects": seal_lord_effects,
 		"col_evals": col_evals,
+		# NinKingGameState snapshot — used by AnimationHandler (Phase G refactor)
+		"current_score": gs.current_score,
+		"target_score": gs.target_score,
+		"plays_remaining": gs.plays_remaining,
+		"barrier_num": gs.barrier_num,
+		"owned_ninjas": gs.owned_ninjas,
+		"gold": gs.gold,
+		"star_chart_levels": gs.star_chart_levels,
+		"current_arrangement": {
+			"head": gs.current_arrangement.head,
+			"mid": gs.current_arrangement.mid,
+			"tail": gs.current_arrangement.tail,
+			"head_eval": gs.current_arrangement.head_eval,
+			"mid_eval": gs.current_arrangement.mid_eval,
+			"tail_eval": gs.current_arrangement.tail_eval,
+		},
 	}
 
 
@@ -94,7 +110,7 @@ static func prepare_play(gs) -> Dictionary:
 ## Handles: decrement plays, add score, discard cards, emit signals,
 ## then win/lose/continue branching with state transitions.
 static func finalize_play(gs, play_data: Dictionary) -> void:
-	var score_result: ScoreCalculator.ScoreResult = play_data["score_result"]
+	var score_result: ScoreResult = play_data["score_result"]
 	var xi_result: XiDetector.XiResult = play_data["xi_result"]
 
 	gs.plays_remaining -= 1

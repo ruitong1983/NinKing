@@ -6,6 +6,8 @@ extends RefCounted
 ##
 ## v5: Balatro-style multi-segment count-up via CountUp.play_score.
 ##     All score labels count from 0 to final values with eased animation.
+## v6: Enhanced VFX — pop_in on score labels, punch_in for product reveal,
+##     panel_bg glow pulse on cumulative updates (2026-06-15).
 
 const FX = preload("res://scripts/tween/tween_fx.gd")
 const SB = preload("res://scripts/config/sound_bank.gd")
@@ -13,7 +15,7 @@ const SB = preload("res://scripts/config/sound_bank.gd")
 const GLOW_DUR: float = 0.45
 const PROGRESS_DUR: float = 0.60
 
-var _ui: UIManager
+var _ui  # duck-typed — accepts UIManager or DebugUiProxy
 
 ## Set by game_manager before each scoring round (includes head/mid/tail eval).
 var current_play_data: Dictionary = {}
@@ -27,7 +29,7 @@ var _active_toast: Label = null
 var _sfx_tick: Callable = func(pitch: float = 1.0): GlobalTweens.play_sfx(SB.COUNT_TICK, 0.0, pitch)
 
 
-func setup(ui: UIManager, mark_auto_shop_cb: Callable) -> void:
+func setup(ui, mark_auto_shop_cb: Callable) -> void:  # ui: duck-typed (UIManager | DebugUiProxy)
 	_ui = ui
 	_mark_auto_shop = mark_auto_shop_cb
 
@@ -38,7 +40,7 @@ func run_scoring() -> void:
 
 func _run_scoring_animation() -> void:
 	var play_data: Dictionary = current_play_data
-	var score_result: ScoreCalculator.ScoreResult = play_data["score_result"]
+	var score_result: ScoreResult = play_data["score_result"]
 	var xi_result: XiDetector.XiResult = play_data["xi_result"]
 
 	var gs: NinKingGameState = NinKingGameState
@@ -89,7 +91,9 @@ func _run_scoring_animation() -> void:
 			# -- Score fade-in: show "0 × 0 = 0" at low alpha --
 			sl.text = "0 × 0 = 0"
 			sl.modulate.a = 0.0
+			sl.scale = Vector2(0.1, 0.1)
 			GlobalTweens.fade_in(sl, 0.15)
+			GlobalTweens.pop_in(sl, 0.25)
 			await tree.create_timer(0.15).timeout
 
 			# -- Per-card stagger flash --
@@ -132,15 +136,13 @@ func _run_scoring_animation() -> void:
 			if is_instance_valid(ll) and ll.visible:
 				GlobalTweens.color_flash(ll, Color.GOLD, 0.4)
 
-			# -- scale_pop at ~95% result completion --
-			var pop_delay: float = 1.2 * 1.2 * 0.95
-			await tree.create_timer(pop_delay).timeout
-			if is_instance_valid(sl):
-				GlobalTweens.scale_pop(sl, 1.2, 0.15)
-
-			# -- Wait for score tween to finish --
+			# -- Wait for score tween to finish FIRST --
 			if score_tw != null:
 				await score_tw.finished
+
+			# -- punch_in AFTER score completes (emphasis) --
+			if is_instance_valid(sl):
+				GlobalTweens.punch_in(sl, 0.25, 1.5)
 
 			# -- Cumulative total update after this row --
 			var _row_cum: int = score_result.head_score
@@ -149,7 +151,8 @@ func _run_scoring_animation() -> void:
 				2: _row_cum = score_result.head_score + score_result.mid_score + score_result.tail_score
 			await tree.create_timer(0.15).timeout
 			_ui.set_score_formula(_row_cum, 0)
-			GlobalTweens.scale_pop(_ui.score_label, 1.15, 0.3)
+			GlobalTweens.punch_in(_ui.score_label, 0.35, 2.0)
+			GlobalTweens.color_flash(_ui.panel_bg, barrier_color, 0.3)
 			_tween_progress(_ui.progress_bar, float(old_score + _row_cum), 0.35)
 			await tree.create_timer(0.3).timeout
 
@@ -211,25 +214,24 @@ func _run_scoring_animation() -> void:
 					csl, cc, cm, cr, 0.75, _sfx_tick
 				)
 
-				# -- scale_pop at ~95% result completion --
-				var pop_delay: float = 0.75 * 1.2 * 0.95
-				await tree.create_timer(pop_delay).timeout
-				if is_instance_valid(csl):
-					GlobalTweens.scale_pop(csl, 1.15, 0.2)
-
 				# Lv badge flash
 				var cll: Label = col_lv_labels[i]
 				if is_instance_valid(cll) and cll.visible:
 					GlobalTweens.color_flash(cll, Color.GOLD, 0.4)
 
-				# Wait for column score tween to finish
+				# Wait for column score tween to finish FIRST
 				if col_tw != null:
 					await col_tw.finished
+
+				# -- punch_in AFTER score completes (emphasis) --
+				if is_instance_valid(csl):
+					GlobalTweens.punch_in(csl, 0.25, 1.4)
 
 				# -- Cumulative total update after this column --
 				await tree.create_timer(0.1).timeout
 				_ui.set_score_formula(col_cumulative, 0)
-				GlobalTweens.scale_pop(_ui.score_label, 1.12, 0.25)
+				GlobalTweens.punch_in(_ui.score_label, 0.3, 1.8)
+				GlobalTweens.color_flash(_ui.panel_bg, barrier_color, 0.25)
 				_tween_progress(_ui.progress_bar, float(old_score + col_cumulative), 0.25)
 				await tree.create_timer(0.2).timeout
 

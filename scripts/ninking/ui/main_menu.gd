@@ -16,7 +16,7 @@ const BUTTON_SLIDE_OFFSET: float = 80.0
 var _buttons: Array[Button] = []
 
 var _overlay: ColorRect
-var _continue_panel: Control
+var _continue_panel_scene: Control
 var _panel_open: bool = false
 
 # Delegates
@@ -82,25 +82,18 @@ func _build_ui() -> void:
 	add_child(_deck_select)
 	_deck_select.setup(_theme, _on_deck_confirmed, _on_deck_cancelled, _play_click_sfx)
 
-	# Continue panel (stays inline — 104 lines)
-	_build_continue_panel(self)
+	# Continue panel (scene-based)
+	_continue_panel_scene = preload("res://scenes/ninking/continue_panel.tscn").instantiate()
+	add_child(_continue_panel_scene)
+	_continue_panel_scene.continue_confirmed.connect(_on_continue_confirm)
+	_continue_panel_scene.dismissed.connect(_hide_continue_panel)
 
 
 func _update_continue_button() -> void:
 	_btn_continue.disabled = not NinKingGameState.has_saved_run()
 
 
-## Set a Control's anchors to center and place it at the screen center.
-func _center_control(ctrl: Control) -> void:
-	var half: Vector2 = ctrl.size * 0.5
-	ctrl.anchor_left = 0.5
-	ctrl.anchor_top = 0.5
-	ctrl.anchor_right = 0.5
-	ctrl.anchor_bottom = 0.5
-	ctrl.offset_left = -half.x
-	ctrl.offset_top = -half.y
-	ctrl.offset_right = half.x
-	ctrl.offset_bottom = half.y
+
 
 
 # ══════════════════════════════════════════
@@ -186,66 +179,8 @@ func _play_click_sfx() -> void:
 
 
 # ══════════════════════════════════════════
-# Continue Panel
+# Continue Panel (scene-based)
 # ══════════════════════════════════════════
-
-func _build_continue_panel(parent: Node) -> void:
-	_continue_panel = Control.new()
-	_continue_panel.name = "ContinuePanel"
-	_continue_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_continue_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_continue_panel.hide()
-	parent.add_child(_continue_panel)
-
-	var panel_bg := PanelContainer.new()
-	panel_bg.name = "ContinuePanelBg"
-	panel_bg.theme = _theme
-	panel_bg.size = Vector2(560, 400)
-	_continue_panel.add_child(panel_bg)
-	_center_control(panel_bg)
-
-	var vbox := VBoxContainer.new()
-	vbox.name = "ContinueVBox"
-	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	vbox.add_theme_constant_override("separation", 24)
-	panel_bg.add_child(vbox)
-
-	var title := Label.new()
-	title.name = "ContinueTitle"
-	title.text = "继续冒险"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 32)
-	title.add_theme_color_override("font_color", Color(0.91, 0.77, 0.27))
-	vbox.add_child(title)
-
-	var info := Label.new()
-	info.name = "ContinueInfo"
-	info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	info.add_theme_font_size_override("font_size", 24)
-	info.add_theme_color_override("font_color", Color(0.78, 0.78, 0.82))
-	vbox.add_child(info)
-
-	var btn_row := HBoxContainer.new()
-	btn_row.name = "ContinueBtnRow"
-	btn_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	btn_row.add_theme_constant_override("separation", 24)
-	vbox.add_child(btn_row)
-
-	var go_btn := Button.new()
-	go_btn.text = "继续冒险"
-	go_btn.custom_minimum_size = Vector2(180, 48)
-	go_btn.theme = _theme
-	go_btn.add_theme_font_size_override("font_size", 24)
-	go_btn.pressed.connect(_on_continue_confirm)
-	btn_row.add_child(go_btn)
-
-	var back_btn := Button.new()
-	back_btn.text = "返回"
-	back_btn.custom_minimum_size = Vector2(160, 48)
-	back_btn.theme = _theme
-	back_btn.add_theme_font_size_override("font_size", 24)
-	back_btn.pressed.connect(_hide_continue_panel)
-	btn_row.add_child(back_btn)
 
 
 func _show_continue_panel() -> void:
@@ -255,33 +190,21 @@ func _show_continue_panel() -> void:
 		return
 	_panel_open = true
 
-	var info: Label = _continue_panel.get_node("ContinuePanelBg/ContinueVBox/ContinueInfo")
-	var barrier: int = data.get("barrier_num", 1)
-	var seal_names: Array[String] = ["修羅", "明王", "夜叉"]
-	var seal_idx: int = data.get("seal_idx", 0)
-	var seal_name: String = seal_names[seal_idx] if seal_idx < seal_names.size() else "?"
-	var gold: int = data.get("gold", 0)
-	var ninja_count: int = (data.get("owned_ninjas", []) as Array).size()
-	var score: int = data.get("current_score", 0)
-	var target: int = data.get("target_score", 0)
-
-	info.text = "结界 %d · %s封印\n当前忍気: %d / %d\n金币: $%d · 忍者: %d 人" % [
-		barrier, seal_name, score, target, gold, ninja_count
-	]
+	_continue_panel_scene.show_panel(data)
 
 	_overlay.show()
 	GlobalTweens.fade_in(_overlay, 0.25)
-	_continue_panel.show()
-	GlobalTweens.pop_in(_continue_panel, 0.25)
+	_continue_panel_scene.show()
+	GlobalTweens.pop_in(_continue_panel_scene, 0.25)
 
 
 func _hide_continue_panel() -> void:
 	_panel_open = false
 	GlobalTweens.fade_out(_overlay, 0.2)
-	GlobalTweens.fade_out(_continue_panel, 0.2)
+	GlobalTweens.fade_out(_continue_panel_scene, 0.2)
 	await get_tree().create_timer(0.2).timeout
 	_overlay.hide()
-	_continue_panel.hide()
+	_continue_panel_scene.hide()
 	_update_continue_button()
 
 
@@ -302,5 +225,5 @@ func _on_overlay_gui_input(event: InputEvent) -> void:
 	if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
 		if _deck_select.visible:
 			_deck_select.hide_panel()
-		elif _continue_panel.visible:
+		elif _continue_panel_scene.visible:
 			_hide_continue_panel()

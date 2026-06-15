@@ -51,7 +51,7 @@ var gold: int = 8
 
 # Hand & deck
 var hand: Array[CardData.PlayingCard] = []             # 9 cards, arranged
-var current_arrangement: AutoArranger.Arrangement = null
+var current_arrangement: Arrangement = null
 var current_col_evals: Array = []  # Array[HandEvaluator3.EvalResult], 3 elements or empty
 var deck_manager: DeckManager = null
 var current_deck_name: String = "standard"
@@ -146,7 +146,7 @@ func re_evaluate_arrangement() -> void:
 	var he: HandEvaluator3.EvalResult = HandEvaluator3.evaluate(head_cards)
 	var me: HandEvaluator3.EvalResult = HandEvaluator3.evaluate(mid_cards)
 	var te: HandEvaluator3.EvalResult = HandEvaluator3.evaluate(tail_cards)
-	current_arrangement = AutoArranger.Arrangement.new(head_cards, mid_cards, tail_cards, he, me, te)
+	current_arrangement = Arrangement.new(head_cards, mid_cards, tail_cards, he, me, te)
 	_recompute_col_evals()
 
 

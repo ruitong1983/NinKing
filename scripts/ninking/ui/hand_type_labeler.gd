@@ -229,23 +229,8 @@ func _update_dun_types(hand: Array[CardData.PlayingCard]) -> void:
 	_current_mid_ht = mid_eval.hand_type
 	_current_tail_ht = tail_eval.hand_type
 
-	# Per-dun score preview: (card_chips + hand_chips) x hand_mult
+	# Star chart levels for Lv badges
 	var levels: Dictionary = NinKingGameState.star_chart_levels
-	var _head_chips: int = CardData.get_hand_type3_leveled_chips(head_eval.hand_type, levels)
-	var _mid_chips: int = CardData.get_hand_type3_leveled_chips(mid_eval.hand_type, levels)
-	var _tail_chips: int = CardData.get_hand_type3_leveled_chips(tail_eval.hand_type, levels)
-	var _head_mult: int = CardData.get_hand_type3_leveled_mult(head_eval.hand_type, levels)
-	var _mid_mult: int = CardData.get_hand_type3_leveled_mult(mid_eval.hand_type, levels)
-	var _tail_mult: int = CardData.get_hand_type3_leveled_mult(tail_eval.hand_type, levels)
-	var _head_card_chips := 0
-	var _mid_card_chips := 0
-	var _tail_card_chips := 0
-	for c: CardData.PlayingCard in head_cards:
-		_head_card_chips += c.get_chip_value()
-	for c: CardData.PlayingCard in mid_cards:
-		_mid_card_chips += c.get_chip_value()
-	for c: CardData.PlayingCard in tail_cards:
-		_tail_card_chips += c.get_chip_value()
 
 	# Row 1: 影
 	_shadow_type_label.text = head_name
@@ -289,7 +274,6 @@ func _update_column_rows(hand: Array[CardData.PlayingCard]) -> void:
 	var col_labels: Array[Label] = [_left_col_type, _mid_col_type, _right_col_type]
 	var score_labels: Array[RichTextLabel] = [_left_col_score, _mid_col_score, _right_col_score]
 	var lv_labels: Array[Label] = [_left_col_lv, _mid_col_lv, _right_col_lv]
-	var _ht_stores: Array = [_current_left_col_ht, _current_mid_col_ht, _current_right_col_ht]
 
 	for i: int in range(3):
 		var col_cards: Array[CardData.PlayingCard] = [
@@ -320,11 +304,6 @@ func _update_column_rows(hand: Array[CardData.PlayingCard]) -> void:
 		col_labels[i].visible = true
 		score_labels[i].visible = true
 		col_labels[i].text = CardData.get_hand_type3_name(ht)
-		var _col_chips: int = CardData.get_hand_type3_leveled_chips(ht, levels)
-		var _col_mult: int = CardData.get_hand_type3_leveled_mult(ht, levels)
-		var _col_card_chips := 0
-		for c: CardData.PlayingCard in col_cards:
-			_col_card_chips += c.get_chip_value()
 		score_labels[i].text = ""
 		_update_lv_badge(lv_labels[i], ht, levels)
 
@@ -402,18 +381,9 @@ func _show_lv_tooltip(row_idx: int) -> void:
 	tooltip.name = "LvTooltip"
 	tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	# Panel background
+	# Panel background (shared style via CardVisualComposer)
 	var panel_bg := Panel.new()
-	var bg_style := StyleBoxFlat.new()
-	bg_style.bg_color = Color(0.05, 0.05, 0.1, 0.92)
-	bg_style.set_corner_radius_all(4)
-	bg_style.border_width_left = 1
-	bg_style.border_width_right = 1
-	bg_style.border_width_top = 1
-	bg_style.border_width_bottom = 1
-	bg_style.border_color = tier_color
-	bg_style.border_color.a = 0.4
-	panel_bg.add_theme_stylebox_override("panel", bg_style)
+	panel_bg.add_theme_stylebox_override("panel", CardVisualComposer.create_tooltip_stylebox(tier_color))
 	panel_bg.size = Vector2(180, 52)
 	tooltip.add_child(panel_bg)
 

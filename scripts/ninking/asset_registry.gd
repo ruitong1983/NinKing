@@ -6,12 +6,36 @@ extends RefCounted
 ## 新代码应直接引用 AssetRegistry，不再分别引用 NinjaData / ConsumableData 的图标方法。
 
 
+# ═══ Rarity color constants ── single source of truth ═══
+## Border/glow colors for StyleBoxFlat fallback when frame texture is not available.
+const RARITY_BORDER_COLORS: Dictionary = {
+	"common": Color(0.102, 0.102, 0.102),    # dark ink
+	"uncommon": Color(0.831, 0.659, 0.263),   # gold
+	"rare": Color(0.878, 0.251, 0.251),       # red
+	"legendary": Color(1.0, 0.843, 0.0),      # gold bright
+}
+## Name/title colors for rarity text labels.
+const RARITY_NAME_COLORS: Dictionary = {
+	"common": Color("#888888"),
+	"uncommon": Color("#4CAF50"),
+	"rare": Color("#F44336"),
+	"legendary": Color("#FFD700"),
+}
+
+
 # ═══ Ninja frame path ── rarity → frame file name ═══
 const NINJA_FRAME_PATH: String = "res://assets/images/ninjas/frames/"
 
 ## Get the card frame texture path for a given rarity tier.
 static func get_frame_path(rarity: String) -> String:
 	return NINJA_FRAME_PATH + "ninja_frame_" + rarity + ".png"
+
+## Load a frame texture for the given rarity, returns null on failure.
+static func load_frame_texture(rarity: String) -> Texture2D:
+	var path := get_frame_path(rarity)
+	if ResourceLoader.exists(path):
+		return load(path) as Texture2D
+	return null
 
 
 # ═══ Ninja card path ── full card illustration ═══
@@ -32,7 +56,7 @@ const CATEGORY_ICONS: Dictionary = {
 	"n_x": "icon_star",   # 喜之强化
 	"n_s": "icon_scroll", # 成长修炼
 	"n_e": "icon_coin",   # 经济
-	"n_t": "icon_shield", # 忍具
+	"n_t": "icon_shield", # 忍法
 	"n_l": "icon_crown",  # 传说
 	"n_d": "icon_fire",   # 手替え激励
 	"n_c": "icon_heart",  # 跨组联动

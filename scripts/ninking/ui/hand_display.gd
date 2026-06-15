@@ -30,6 +30,7 @@ func setup(
 	_status_label = status
 
 	_labeler = HandTypeLabeler.new()
+	_card_grid.layout_changed.connect(_labeler.update_from_signal)
 	_labeler.setup(
 		head_type, mid_type, tail_type,
 		col0, col1, col2, col_xi,
@@ -56,7 +57,7 @@ func _add_card(card_data: CardData.PlayingCard, idx: int,
 		on_card_clicked: Callable = Callable(),
 		on_card_dragged: Callable = Callable()) -> void:
 	var pc: NinKingCard = NinKingCard.new()
-	pc.card_size = Vector2(140, 196)
+	pc.card_size = Vector2(125, 175)
 	pc.name = "CardBtn_%d" % idx
 	pc.playing_card_data = card_data
 	pc.card_index = idx

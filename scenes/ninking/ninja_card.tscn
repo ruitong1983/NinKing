@@ -1,0 +1,40 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://c6whnkguadvou" path="res://scripts/ninking/ui/ninja_inventory_card.gd" id="1_abc"]
+
+[node name="NinjaCard" type="Control"]
+custom_minimum_size = Vector2(125, 175)
+script = ExtResource("1_abc")
+
+[node name="FrontFace" type="Control" parent="."]
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="FrontFace"]
+expand_mode = 1
+stretch_mode = 4
+mouse_filter = 2
+
+[node name="BackFace" type="Control" parent="."]
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="BackFace"]
+visible = false
+expand_mode = 1
+stretch_mode = 4
+mouse_filter = 2
+
+[node name="FrameOverlay" type="TextureRect" parent="."]
+visible = false
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NameLabel" type="Label" parent="."]
+visible = true
+position = Vector2(0, 177)
+size = Vector2(125, 20)
+horizontal_alignment = 1
+mouse_filter = 2

@@ -27,7 +27,7 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"desc": "+4 倍率"
 	},
 	{
-		"id": "n_003", "category": "universal", "name": "风魔手里剑",
+		"id": "n_003", "category": "universal", "name": "忍刀",
 		"effect": {"add_chips": 15, "add_mult": 2},
 		"cost": 5, "rarity": "common",
 		"desc": "+15 筹码, +2 倍率"
@@ -150,7 +150,7 @@ const ALL_NINJAS: Array[Dictionary] = [
 	{
 		"id": "n_x03", "category": "xi_enhance", "name": "清一色",
 		"effect": {"xi_override": {"三清": 3}},
-		"cost": 7, "rarity": "rare",
+		"cost": 5, "rarity": "uncommon",
 		"desc": "三清时 ×3（替代默认×2）"
 	},
 	{
@@ -261,15 +261,15 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"desc": "每$15持有×2（最多触发3次）"
 	},
 
-	# ─── 忍具 (4) ───
+	# ─── 忍法 (4) ───
 	{
-		"id": "n_t01", "category": "tools", "name": "分身之术",
+		"id": "n_t01", "category": "tools", "name": "火遁",
 		"effect": {"extra_plays": 1},
 		"cost": 8, "rarity": "uncommon",
 		"desc": "+1 出牌次数"
 	},
 	{
-		"id": "n_t02", "category": "tools", "name": "替身之术",
+		"id": "n_t02", "category": "tools", "name": "水遁",
 		"effect": {"extra_redraws": 1},
 		"cost": 6, "rarity": "uncommon",
 		"desc": "+1 手替え次数"
@@ -281,7 +281,7 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"desc": "首回合出牌得分×2"
 	},
 	{
-		"id": "n_t06", "category": "tools", "name": "烟幕",
+		"id": "n_t06", "category": "tools", "name": "土遁",
 		"effect": {"death_save": true},
 		"cost": 10, "rarity": "rare",
 		"desc": "战败保留金币重开本结界（1局1次）"
@@ -344,7 +344,7 @@ const ALL_NINJAS: Array[Dictionary] = [
 			"add_chips": 15, "add_mult": 3,
 			"condition": {"any_two_groups_same_type": true}
 		},
-		"cost": 8, "rarity": "rare",
+		"cost": 6, "rarity": "uncommon",
 		"desc": "两组同牌型→全组+15筹码+3倍率"
 	},
 
@@ -358,7 +358,7 @@ const ALL_NINJAS: Array[Dictionary] = [
 	{
 		"id": "n_f02", "category": "face_card", "name": "王牌侍从",
 		"effect": {"add_mult_per_ace": 5, "ace_mult_cap": 20},
-		"cost": 8, "rarity": "rare",
+		"cost": 5, "rarity": "uncommon",
 		"desc": "手中每张 Ace +5 倍率（上限 +20）"
 	},
 ]

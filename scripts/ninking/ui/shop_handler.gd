@@ -7,13 +7,13 @@ extends RefCounted
 
 const SB = preload("res://scripts/config/sound_bank.gd")
 
-var _ui: UIManager
+var _ui  # duck-typed — accepts UIManager or DebugUiProxy
 var _transition_guard: bool = false
 var _shop_cache: Dictionary = {}
 var _reroll_count: int = 0  # B4: 本趟商店已刷新次数，每次打开新商店时重置
 
 
-func setup(ui: UIManager) -> void:
+func setup(ui) -> void:  # ui: duck-typed (UIManager | DebugUiProxy)
 	_ui = ui
 
 
@@ -59,6 +59,7 @@ func on_enter_shop() -> void:
 
 func on_purchase_requested(ability: Dictionary) -> void:
 	if NinKingGameState.owned_ninjas.size() >= NinKingGameState.max_ninja_slots:
+		GlobalTweens.play_sfx(SB.UI_ERROR)
 		ToastManager.show(
 			"忍者牌槽位已满 (%d/%d)!" % [NinKingGameState.max_ninja_slots, NinKingGameState.max_ninja_slots],
 			2.0
@@ -71,6 +72,7 @@ func on_purchase_requested(ability: Dictionary) -> void:
 		_ui.refresh_ninjas(NinKingGameState.owned_ninjas, NinKingGameState.max_ninja_slots)
 		ToastManager.show("获得: %s!" % ability.get("name", "???"), 1.5)
 	else:
+		GlobalTweens.play_sfx(SB.UI_ERROR)
 		ToastManager.show("金币不足!", 1.5)
 
 
@@ -86,6 +88,7 @@ func on_item_purchase_requested(item: Dictionary) -> void:
 		_ui.shop_panel_update_gold(NinKingGameState.gold)
 		ToastManager.show("获得: %s!" % item.get("name", "???"), 1.5)
 	else:
+		GlobalTweens.play_sfx(SB.UI_ERROR)
 		ToastManager.show("金币不足!", 1.5)
 
 
@@ -94,6 +97,7 @@ func on_item_purchase_requested(item: Dictionary) -> void:
 func _purchase_star_chart(item: Dictionary) -> void:
 	var cost: int = item.get("cost", 3)
 	if NinKingGameState.gold < cost:
+		GlobalTweens.play_sfx(SB.UI_ERROR)
 		ToastManager.show("金币不足!", 1.5)
 		return
 
@@ -128,6 +132,7 @@ func on_reroll_requested() -> void:
 	## B4: 递进式费用 $3 + _reroll_count。不够钱时给 Toast 提示。
 	var cost: int = _get_reroll_cost()
 	if NinKingGameState.gold < cost:
+		GlobalTweens.play_sfx(SB.UI_ERROR)
 		ToastManager.show("需要 $%d 才能刷新!" % cost, 1.5)
 		return
 	NinKingGameState.gold -= cost
@@ -140,7 +145,7 @@ func on_reroll_requested() -> void:
 	_ui.shop_panel_update_gold(NinKingGameState.gold)
 	_ui.shop_panel_update_reroll_cost(_get_reroll_cost())  # B4: 更新 UI 显示新价格
 
-	var panel := _ui.get_current_shop_panel()
+	var panel = _ui.get_current_shop_panel()
 	if panel and is_instance_valid(panel):
 		var old_cards: Array = panel.get_all_cards()
 		var shop_mgr: ShopManager = _shop_cache.get("mgr")
@@ -148,8 +153,22 @@ func on_reroll_requested() -> void:
 			shop_mgr.generate_stock()
 		await NinKingTween.play_reroll_vfx(old_cards, func():
 			_ui.shop_panel_refresh_stock()
-			return panel.get_all_cards() if is_instance_valid(panel) else []
+			var new_cards = panel.get_all_cards() if is_instance_valid(panel) else []
+			return new_cards
 		)
+
+
+func on_sell_requested(index: int) -> void:
+	## Sell a ninja at the given index with dissolve exit effect.
+	if index < 0 or index >= NinKingGameState.owned_ninjas.size():
+		GlobalTweens.play_sfx(SB.UI_ERROR)
+		return
+	var ninja_name: String = NinKingGameState.owned_ninjas[index].get("name", "???")
+	ShopManager.sell_ninja(NinKingGameState, index)
+	GlobalTweens.play_sfx(SB.ITEM_PURCHASE)
+	_ui.refresh_ninjas(NinKingGameState.owned_ninjas, NinKingGameState.max_ninja_slots, true)
+	_ui.shop_panel_update_gold(NinKingGameState.gold)
+	ToastManager.show("出售: %s" % ninja_name, 1.5)
 
 
 func on_continue_requested() -> void:

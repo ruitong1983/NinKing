@@ -496,7 +496,7 @@ NinKingGameState (autoload)
   │   └── game_manager._on_gold_changed()
   ├── signal hand_updated(hand: Array)
   │   └── game_manager._on_hand_updated()
-  ├── signal arrangement_changed(arrangement: AutoArranger.Arrangement)
+  ├── signal arrangement_changed(arrangement: Arrangement)
   │   └── game_manager._on_arrangement_changed()
   ├── signal seal_started(barrier: int, seal_idx: int, target: int, seal_lord_name: String)
   │   └── game_manager._on_seal_started()
@@ -567,14 +567,17 @@ NinKingGameState (autoload)
 | `scripts/ninking/ui/deck_viewer_controller.gd` | 牌库查看器 |
 | `scripts/ninking/ui/ninking_card.gd` | 忍者卡牌显示 (Card Framework 扩展) |
 | `scripts/ninking/ui/shop_ui.gd` | 商店 UI 控制 (ShopPanel) |
-| `scripts/ninking/ui/display_card_base.gd` | 非扑克牌展示基类 125×175 纯卡面 (5:7 对齐标准扑克) |
-| `scripts/ninking/ui/shop_slot.gd` | 🆕 商店展示容器 (DisplayCard + 购买UI) |
+| `scripts/ninking/ui/ninja_inventory_card.gd` | 统一忍者卡 (忍者栏+商店, 替代旧 DisplayCardBase) |
+| `scripts/ninking/ui/shop_slot.gd` | 🆕 商店展示容器 (NinjaCard + 购买UI) |
 | `scripts/ninking/game_state.gd` | 游戏状态 autoload |
 | `scripts/ninking/seal_controller.gd` | 出牌/封印逻辑 |
 | `scripts/ninking/arrange_controller.gd` | 排列/规则收集 |
-| `scripts/ninking/auto_arranger.gd` | 排列求解器 |
-| `scripts/ninking/hand_evaluator.gd` | 牌型评估 |
-| `scripts/ninking/score_calculator.gd` | 计分计算 |
+| `scripts/ninking/auto_arranger.gd` | 排列求解器 (AutoArranger) |
+| `scripts/ninking/arrangement.gd` | 排列结果类 (Arrangement) |
+| `scripts/ninking/hand_evaluator.gd` | 牌型评估 (HandEvaluator3) |
+| `scripts/ninking/score_calculator.gd` | 计分引擎 (ScoreCalculator) |
+| `scripts/ninking/score_result.gd` | 计分结果类 (ScoreResult) |
+| `scripts/ninking/score_helpers.gd` | 计分/排列共享辅助函数 |
 | `scripts/ninking/xi_detector.gd` | 喜检测器 |
 | `scripts/ninking/barrier_config.gd` | 关卡/結界配置 |
 | `scripts/ninking/barrier_theme.gd` | 8 属性亮色色板 BarrierTheme |

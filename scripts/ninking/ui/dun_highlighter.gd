@@ -45,7 +45,7 @@ func setup(
 # Constraint highlight (V21)
 # ══════════════════════════════════════════
 
-func update(arrangement: AutoArranger.Arrangement) -> void:
+func update(arrangement: Arrangement) -> void:
 
 	if arrangement == null:
 		reset()

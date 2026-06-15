@@ -3,7 +3,9 @@ extends RefCounted
 
 ## Manages the ninja bar — clear, populate, empty slots.
 ## Used by the debug test scene. Main game uses NinjaBarNode + NinjaBarContainer.
-## Uses NinjaInventoryCard (card-framework based) instead of ninja_slot.tscn.
+## Instantiates ninja_card.tscn for consistent framed display.
+
+const NINJA_CARD_SCENE = preload("res://scenes/ninking/ninja_card.tscn")
 
 var _ninja_bar: Control
 
@@ -16,7 +18,7 @@ func refresh(owned_ninjas: Array, max_slots: int) -> void:
 	for child: Node in _ninja_bar.get_children():
 		child.queue_free()
 	for ninja: Dictionary in owned_ninjas:
-		var card := NinjaInventoryCard.new()
+		var card := NINJA_CARD_SCENE.instantiate() as NinjaInventoryCard
 		card.setup(ninja["name"], ninja)
 		_ninja_bar.add_child(card)
 	var empty: int = max_slots - owned_ninjas.size()

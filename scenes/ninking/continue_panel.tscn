@@ -1,0 +1,67 @@
+[gd_scene format=3 uid="uid://c8l3t6vmb3y5p"]
+
+[ext_resource type="Script" uid="uid://bcjkf6bwrvt4d" path="res://scripts/ninking/ui/continue_panel.gd" id="1_script"]
+[ext_resource type="Theme" uid="uid://c3b7s6bxa3aoq" path="res://assets/themes/manga_theme.tres" id="2_theme"]
+
+[node name="ContinuePanel" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+mouse_filter = 2
+script = ExtResource("1_script")
+
+[node name="ContinuePanelBg" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(560, 400)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -200.0
+offset_right = 280.0
+offset_bottom = 200.0
+mouse_filter = 1
+theme = ExtResource("2_theme")
+
+[node name="ContinueVBox" type="VBoxContainer" parent="ContinuePanelBg"]
+layout_mode = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="ContinueTitle" type="Label" parent="ContinuePanelBg/ContinueVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+theme_override_colors/font_color = Color(0.91, 0.77, 0.27, 1)
+horizontal_alignment = 1
+
+[node name="ContinueInfo" type="Label" parent="ContinuePanelBg/ContinueVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(0.78, 0.78, 0.82, 1)
+horizontal_alignment = 1
+
+[node name="ContinueBtnRow" type="HBoxContainer" parent="ContinuePanelBg/ContinueVBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="GoBtn" type="Button" parent="ContinuePanelBg/ContinueVBox/ContinueBtnRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 48)
+layout_mode = 2
+theme = ExtResource("2_theme")
+theme_override_font_sizes/font_size = 24
+text = "继续冒险"
+
+[node name="BackBtn" type="Button" parent="ContinuePanelBg/ContinueVBox/ContinueBtnRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 48)
+layout_mode = 2
+theme = ExtResource("2_theme")
+theme_override_font_sizes/font_size = 24
+text = "返回"

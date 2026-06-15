@@ -316,7 +316,7 @@
 | S20 | 星图升级 | `star_upgrade.ogg` | 购买→选牌型→升级 | `star chart`, `upgrade chime`, `constellation` | `shop_ui` → star chart flow (Phase B) | 升级成功确认 |
 | S21 | 秘仪生效 | `ritual_pulse.ogg` | 购买即全局生效 | `arcane pulse`, `ritual low`, `global effect` | `shop_ui` → ritual flow (Phase C) | 全局效果的震撼感 |
 | S22 | 修炼成长 | `growth_tick.ogg` | 出牌/换牌后累积触发 | `level up light`, `growth tick`, `progress` | `seal_controller` → scaling (B10) | 长期成长的积累反馈 |
-| S23 | 忍具使用 | `ninja_gear.ogg` | 改变资源/规则 | `tool equip`, `ninja gear`, `equip click` | Phase B | 规则变更的操作确认 |
+| S23 | 忍法使用 | `ninja_gear.ogg` | 改变资源/规则 | `tool equip`, `ninja gear`, `equip click` | Phase B | 规则变更的操作确认 |
 | S24 | 琉璃碎裂 | `glass_break.ogg` | 琉璃牌 1/4 销毁 | `glass shatter`, `crack`, `break` | `score_calculator` Phase B | 高风险高回报的听觉刺激 |
 | S25 | 鸿运触发 | `lucky_jingle.ogg` | Lucky 20% +mult / 6.7% +gold | `lucky chime`, `jackpot`, `slot win` | `score_calculator` Phase B | 鸿运是"中奖"，听觉应有过山车感 |
 | S26 | 放逐销毁 | `banish_fire.ogg` | 放逐令销毁牌 | `fire vanish`, `burn`, `disappear` | Phase B | 销毁操作有重量感 |
@@ -338,11 +338,11 @@
 
 | # | 用途 | 文件 | 描述 | 关键词 | 优先级 | 备注 |
 |----|------|------|------|--------|--------|------|
-| BGM1 | **主菜单** | `start_menu_bgm.ogg` | 氛围忍者主题，动画风慢节奏 OST，有旋律性，~60-90s 循环 | `ninja theme`, `anime ambience`, `japanese menu ost` | **P0** | 替换 FanKing 占位 |
-| BGM2a | **游戏 軽 (属性 火/水/風)** | `game_bgm_light.ogg` | 动画 OST 中速驱动，配器稀疏：轻打击 + 太鼓 + 偶尔筝装饰 | `anime game light`, `taiko rhythm sparse`, `action ost` | **P0** | 替换 FanKing 占位 |
-| BGM2b | **游戏 中 (属性 雷/土/光)** | `game_bgm_mid.ogg` | 同主题，动画 OST 加密：完整弦乐 + 太鼓频繁 + 尺八旋律线 | `anime game mid`, `taiko driving`, `shakuhachi`, `dramatic ost` | **P0** | BGM2a 的密度增强版 |
-| BGM2c | **游戏 重 (属性 暗/无)** | `game_bgm_heavy.ogg` | 同主题，动画 OST 全配器：史诗弦乐 + 太鼓连打 + 尺八 + 筝，压迫感 | `anime game intense`, `taiko frenzy`, `tension`, `epic ost` | **P1** | BGM2a 的最强变奏 |
-| BGM3 | **商店** | `shop_bgm.ogg` | 轻松明亮，动画日常风短循环 ~30s，筝旋律 + 轻打击 | `shop relaxed`, `merchant jingle`, `anime daily` | **P1** | 新增，原 D6 缺失 |
+| BGM1 | **主菜单** | `start_menu_bgm.wav` (Ogg→替换中) | 氛围忍者主题，动画风慢节奏 OST，有旋律性，~60-90s 循环 | `ninja theme`, `anime ambience`, `japanese menu ost` | **P0** | 替换 FanKing 占位（当前为旧 26s WAV） |
+| BGM2a | **游戏 軽 (属性 火/水/風)** | `game_bgm_light.mp3` | 动画 OST 中速驱动，配器稀疏：轻打击 + 太鼓 + 偶尔筝装饰 | `anime game light`, `taiko rhythm sparse`, `action ost` | **P0** | DOVA-SYNDROME ✅ |
+| BGM2b | **游戏 中 (属性 雷/土/光)** | `game_bgm_medium.mp3` | 同主题，动画 OST 加密：完整弦乐 + 太鼓频繁 + 尺八旋律线 | `anime game mid`, `taiko driving`, `shakuhachi`, `dramatic ost` | **P0** | DOVA-SYNDROME ✅ |
+| BGM2c | **游戏 重 (属性 暗/无)** | `game_bgm_heavy.mp3` | 同主题，动画 OST 全配器：史诗弦乐 + 太鼓连打 + 尺八 + 筝，压迫感 | `anime game intense`, `taiko frenzy`, `tension`, `epic ost` | **P1** | DOVA-SYNDROME ✅ |
+| BGM3 | **商店** | `dova_Cooler Ninjari Ninjarous miaster.mp3` | 轻松明亮，动画日常风短循环 ~30s，筝旋律 + 轻打击 | `shop relaxed`, `merchant jingle`, `anime daily` | **P1** | DOVA-SYNDROME ✅ |
 
 ### BGM 实现要点
 
@@ -358,13 +358,13 @@
 
 ## §6 分阶段计划
 
-### Phase 1 — 核心体验 (P0) 🎯 目标：玩家第一耳就能感受到动画漫画风格
+### Phase 1 — 核心体验 (P0) ✅ 全部完成 (2026-06-14)
 
 ```
 ✅ 素材替换: S1-S10 + S11-S18 (20 个音效) — 已完成 (2026-06-10)
-⬜ 代码接线: game_manager.gd + seal_controller.gd + shop_ui.gd + hand_interaction.gd
-⬜ BGM 素材: BGM1 + BGM2a + BGM2b 待寻找
-⬜ SoundBank 更新: C8 常量重命名 + L2 preload 更新
+✅ 代码接线: animation_handler.gd + game_manager.gd + shop_handler.gd + hand_interaction.gd
+✅ BGM 素材: DOVA-SYNDROME 4 首 (game light/medium/heavy + shop) — 已完成 (B11)
+✅ SoundBank 更新: C8 常量重命名 + C16 商店常量 + C17-C20 补充 — 已完成
 ```
 
 | 步骤 | 内容 | 状态 |
@@ -372,42 +372,77 @@
 | 1.1 | ~~BOOTH 采购~~ → 实际使用 Epic Stock Media「Anime Game」Pack (itch.io, $69, 1,433 WAV) | ✅ |
 | 1.2 | 自动匹配 S1-S18 + UIE 共 20 需求 → 全部匹配成功 (详见 §10) | ✅ |
 | 1.3 | ffmpeg WAV→OGG 转换 (`libvorbis -q:a 6` ~192kbps) → 复制到 `assets/audio/sound/` | ✅ |
-| 1.4 | BGM 素材寻找 (効果音ラボ / Dova-Syndrome) | ⬜ |
-| 1.5 | 替换 sound_bank.gd 中 17 个旧 preload + 新增 10 个常量 (C8) | ⬜ |
-| 1.6 | 接线：`game_manager._run_scoring_animation()` / `_on_xi_triggered()` / `_intro_timer()` | ⬜ |
-| 1.7 | 接线：`seal_controller.finalize_play()` / `_complete_seal()` / `execute_redraw()` | ⬜ |
-| 1.8 | 接线：`hand_interaction.gd` 交换完成 + `shop_ui.gd` 商店全流程 | ⬜ |
-| 1.9 | 测试：完整一局听全部音效 | ⬜ |
+| 1.4 | BGM 素材寻找 — DOVA-SYNDROME 3 首战忍BGM + 1 首商店BGM | ✅ |
+| 1.5 | C8 SoundBank 常量忍者主题重命名 + C16 新增商店常量 | ✅ |
+| 1.6 | 接线 → `animation_handler.gd`(GROUP_REVEAL/COUNT_TICK/NINJA_ACTIVATE/XI_TRIGGER/XI_FANFARE/SEAL_CLEAR/SEAL_FAIL) + `game_manager.gd`(DEAL/BOSS_REVEAL/BOSS_FINAL_LAYER/XI_FANFARE) | ✅ |
+| 1.7 | 接线 → `shop_handler.gd`(SHOP_EXIT/ITEM_PURCHASE/UI_COIN/SHOP_REROLL/UI_ERROR) + `ui_manager.gd`(MusicManager.play_shop_bgm) | ✅ |
+| 1.8 | 接线 → `hand_interaction.gd`(SELECT/SWAP×2) + `ninja_bar_node.gd`(DEAL/SWAP/SEAL_FAIL) + `card_detail_popup.gd`(SELECT) | ✅ |
+| 1.9 | B11 MusicManager `set_game_variation(barrier)` BGM 3 段变奏自动切换 | ✅ |
 
-### Phase 2 — 关卡节点 (P1)
-
-```
-素材寻找: S11-S18 (8 个音效) + BGM2c + BGM3
-代码接线: shop_ui.gd + MusicManager 扩展
-预计工时: 素材 2 天 + 接线 0.5 天
-```
-
-| 步骤 | 内容 |
-|------|------|
-| 2.1 | B11: MusicManager 扩展 `set_game_variation()` (~15 行) |
-| 2.2 | BGM3 商店 BGM: Dova-Syndrome 筛选 |
-| 2.3 | S11-S18 素材筛选 |
-| 2.4 | 接线：`shop_ui` 购买/刷新/进入/离开 |
-| 2.5 | 接线：`game_manager._on_seal_started()` Boss 揭晓 + 終焉层 |
-| 2.6 | SoundBank 常量重命名（C8），旧常量保留 alias |
-| 2.7 | 测试：商店 + Boss 揭晓听全部 P1 音效 |
-
-### Phase 3 — 润色 (P2-P3)
+### Phase 2 — 关卡节点 (P1) ✅ 全部完成 (2026-06-14)
 
 ```
-素材寻找: S19-S26 + S27-S30 (可选)
-代码接线: Phase B-C 功能实装时一起接
-预计工时: 分散到 Phase B-C 开发中
+素材寻找: S11-S18 (8 个音效) + BGM2c + BGM3 — 全部从 Anime Game Pack 匹配完成
+代码接线: shop_handler.gd + ui_manager.gd + game_manager.gd + MusicManager
 ```
+
+| 步骤 | 内容 | 状态 |
+|------|------|------|
+| 2.1 | B11: MusicManager 扩展 `set_game_variation()` + `play_shop_bgm()` + `play_menu_bgm()` | ✅ |
+| 2.2 | BGM3 商店 BGM: DOVA-SYNDROME "Cooler Ninjari Ninjarous miaster" | ✅ |
+| 2.3 | S11-S18 素材筛选 + V23 匹配 + WAV→OGG 转换 | ✅ |
+| 2.4 | 接线：`shop_handler.gd` 购买/刷新/进入/离开 + `ui_manager.gd` show_shop BGM | ✅ |
+| 2.5 | 接线：`game_manager._on_seal_started()` Boss 揭晓 + 終焉层 + BGM变奏 | ✅ |
+| 2.6 | C8 SoundBank 常量重命名 + 旧 alias 保留 | ✅ |
+| 2.7 | 全流程音效测试通过 | ✅ |
+
+### Phase 3 — P2 SFX 素材匹配与接线 (正在进行)
+
+```
+素材来源: Anime Game Pack (剩余 1,413 未用 WAV) — 优先自匹配
+代码接线: 随 Phase B-C 功能实装时一起接
+```
+
+| 步骤 | 内容 | 状态 |
+|------|------|------|
+| 3.1 | S19 enchant_cast — Magic General Buff Positive 01 (1.35s) | ✅ |
+| 3.2 | S20 star_upgrade — Power Up Bright Successful Crash Shimmer 01 (1.05s) | ✅ |
+| 3.3 | S21 ritual_pulse — Magic Buff Negative Debuff 01 (2.06s) | ✅ |
+| 3.4 | S22 growth_tick — UI Cute Success Emote Sine Blip 01 (0.82s) | ✅ |
+| 3.5 | S23 ninja_gear — Effect Eureka Moment 01 (0.73s) | ✅ |
+| 3.6 | S24 glass_break — Effect Glassy Thin Pops 03 (1.69s) | ✅ |
+| 3.7 | S25 lucky_jingle — Power Up Positive Successful Deep Crisp Wobble 01 (1.07s) | ✅ |
+| 3.8 | S26 banish_fire — Magic Fire Beam Burning Blast 01 (2.25s) | ✅ |
+
+### Phase 4 — 菜单 BGM 替换 (P1)
+
+```
+BGM1 主菜单: start_menu_bgm.wav (26s) 仍是旧 FanKing 占位，需替换为 DOVA-SYNDROME 或同类免费素材
+```
+
+| 步骤 | 内容 | 状态 |
+|------|------|------|
+| 4.1 | DOVA-SYNDROME 搜索"和風 メニュー" / "japanese menu" 候选 | ⬜ |
+| 4.2 | 候选试听确认 → WAV/MP3 下载 | ⬜ |
+| 4.3 | 替换 `assets/audio/music/start_menu_bgm.wav` + music_manager.gd load 路径 | ⬜ |
+
+### Phase 5 — P3 润色 (远期)
+
+```
+素材寻找: S27-S30 (可选)
+预计工时: 分散到 Phase E-F 开发中
+```
+
+| 步骤 | 内容 | 状态 |
+|------|------|------|
+| 5.1 | S27 环境氛围音 — 太鼓余韵/风声/叶响循环 | ⬜ |
+| 5.2 | S28 稀有牌出现 — 商店 rare 牌 jingle | ⬜ |
+| 5.3 | S29 結界过渡 — Ante 变化过渡音 | ⬜ |
+| 5.4 | S30 UI hover 细化 — 多 pitch 变体 | ⬜ |
 
 ---
 
-## §7 接线速查表
+## §7 接线速查表 (2026-06-15 同步)
 
 > 统一接线模式：
 > ```gdscript
@@ -416,29 +451,60 @@
 > GlobalTweens.bind_sfx(tween, SB.XXX, 0) # 动效绑定
 > ```
 
-| 优先级 | 脚本 | 函数 | 音效 | 备注 |
-|--------|------|------|------|------|
-| P0 | `game_manager.gd` | `_intro_timer()` | `SB.DEAL` | 用 `bind_sfx` 绑在 stagger_spread tween 上 |
-| P0 | `game_manager.gd` | `_run_scoring_animation()` | `SB.GROUP_REVEAL` ×3 | 影(低) / 瞬(中) / 滅(高)，音量递升 |
-| P0 | `game_manager.gd` | `_run_scoring_animation()` | `SB.COUNT_TICK` | CountUp 每次递增调用 |
-| P0 | `game_manager.gd` | `_on_xi_triggered(xis)` | `SB.XI_FANFARE` / `SB.XI_TRIGGER` | `xis.size() >= 2` → fanfare |
-| P0 | `game_manager.gd` | `_on_play_pressed()` | `SB.UI_CLICK` | 出牌确认 |
-| P0 | `game_manager.gd` | `_on_redraw_pressed()` | `SB.UI_CLICK` | 换牌模式进入 |
-| P0 | `seal_controller.gd` | `execute_redraw()` | `SB.DISCARD` + `SB.REDRAW_POP` | 弃牌时 + 新牌 pop_in 时 |
-| P0 | `seal_controller.gd` | `_complete_seal()` (成功) | `SB.SEAL_CLEAR` | 过关 |
-| P0 | `seal_controller.gd` | `_complete_seal()` (失败) | `SB.SEAL_FAIL` | 失败 |
-| P0 | `score_calculator.gd` | 忍者牌效果触发 | `SB.NINJA_ACTIVATE` | 每张忍者牌触发 |
-| P0 | `ui_manager.gd` / `hand_interaction.gd` | 交换完成 | `SB.SWAP` | ~0.1s 极短 |
-| P1 | `game_manager.gd` | `_on_seal_started()` | `SB.BOSS_REVEAL` | Boss 名浮现同帧 |
-| P1 | `game_manager.gd` | `_on_seal_started()` | `SB.BOSS_FINAL_LAYER` | 仅 `barrier_num == 8` |
-| P1 | `game_manager.gd` | `_on_seal_started()` | MusicManager BGM 变奏切换 | `MusicManager.set_game_variation(barrier_num)` |
-| P1 | `shop_ui.gd` | `_play_entrance()` | `SB.SHOP_ENTER` + `MusicManager.play_shop_bgm()` | 进入商店 |
-| P1 | `shop_ui.gd` | `_on_ability_purchase()` | `SB.UI_COIN` | 购买忍者 |
-| P1 | `shop_ui.gd` | `_on_item_purchase()` | `SB.ITEM_PURCHASE` | 购买消耗品 |
-| P1 | `shop_ui.gd` | `_on_reroll_pressed()` | `SB.SHOP_REROLL` | 刷新 |
-| P1 | `shop_ui.gd` | `_on_continue_pressed()` | `SB.SHOP_EXIT` | 离开商店 |
-| P1 | 经济系统 | `gold_changed` delta > 0 | `SB.UI_COIN` | 产金反馈 |
-| P2 | Phase B-C 实装时补充 | TBD | S19-S26 | 消耗品/成长/特殊牌 |
+### P0 — 核心体验（全部接线完成 ✅）
+
+| 脚本 | 函数 | 音效 | 备注 |
+|------|------|------|------|
+| `game_manager.gd` | `_intro_timer()` → PLAYING | `SB.DEAL` | C17 |
+| `animation_handler.gd` | Phase 1 逐卡揭示 | `SB.GROUP_REVEAL` ×3 | 影/瞬/滅，音高递升 |
+| `animation_handler.gd` | `_sfx_tick(pitch)` | `SB.COUNT_TICK` | BounceScore milestone 驱动，pitch 递升 |
+| `animation_handler.gd` | 喜弹出 | `SB.XI_TRIGGER` / `SB.XI_FANFARE` | 单喜 trigger，双喜+ fanfare |
+| `animation_handler.gd` | 胜败判定 | `SB.SEAL_CLEAR` / `SB.SEAL_FAIL` | 过关/失败 |
+| `animation_handler.gd` | 忍者牌激活 | `SB.NINJA_ACTIVATE` | C18 |
+| `hand_interaction.gd` | 卡牌选中 | `SB.SELECT` | C20 |
+| `hand_interaction.gd` | 交换完成(点击+拖拽) | `SB.SWAP` | ~0.1s 极短 |
+| `ninja_bar_node.gd` | 忍者弹入/移除 | `SB.DEAL` / `SB.SEAL_FAIL` / `SB.SWAP` | 弹入/移除/重排 |
+| `card_detail_popup.gd` | 右键详情打开 | `SB.SELECT` | |
+| `nin_king_tween.gd` | 商店入口墨线画 | `SHOP_ENTER`(whoosh_sfx 参数) | 通过参数传入，非直接 SB 常量 |
+
+### P1 — 关卡节点 + 商店（全部接线完成 ✅）
+
+| 脚本 | 函数 | 音效 | 备注 |
+|------|------|------|------|
+| `game_manager.gd` | `_on_seal_started()` | `SB.BOSS_REVEAL` + `SB.BOSS_FINAL_LAYER` | barrier≥8 时叠加最终层 |
+| `game_manager.gd` | `_on_seal_started()` | `MusicManager.set_game_variation(barrier)` | B11 BGM 三变奏 |
+| `game_manager.gd` | `_play_gold_settlement()` | `SB.UI_COIN` | 金币飞入结算 |
+| `ui_manager.gd` | `show_shop()` | `MusicManager.play_shop_bgm()` | R1 修复 |
+| `shop_handler.gd` | `on_purchase_requested()` — 成功 | `SB.ITEM_PURCHASE` + `SB.UI_COIN` | |
+| `shop_handler.gd` | `on_purchase_requested()` — 失败 | `SB.UI_ERROR` | 槽位满 / 金币不足 |
+| `shop_handler.gd` | `on_item_purchase_requested()` — 成功 | `SB.ITEM_PURCHASE` + `SB.UI_COIN` | |
+| `shop_handler.gd` | `on_item_purchase_requested()` — 失败 | `SB.UI_ERROR` | 金币不足 |
+| `shop_handler.gd` | `_purchase_star_chart()` — 成功 | `SB.ITEM_PURCHASE` + `SB.UI_COIN` | |
+| `shop_handler.gd` | `_purchase_star_chart()` — 失败 | `SB.UI_ERROR` | 金币不足 |
+| `shop_handler.gd` | `on_reroll_requested()` — 失败 | `SB.UI_ERROR` | 金币不足刷新 |
+| `shop_handler.gd` | `on_reroll_requested()` — 成功 | `SB.SHOP_REROLL` | |
+| `shop_handler.gd` | `on_continue_requested()` | `MusicManager.set_game_variation(barrier)` | 恢复游戏 BGM |
+| `nin_king_tween.gd` | `play_shop_exit()` | `SB.SHOP_EXIT` | 退场时序 Phase 2 开头 |
+
+### P2 — 待匹配 + 接线（8 个空缺 ⬜）
+
+| # | 名称 | 文件 | 触发 | 来源目录 |
+|---|------|------|------|---------|
+| S19 | 附魔使用 | `enchant_cast.ogg` | 附魔使用 | Magic/Buff + Magic/General |
+| S20 | 星图升级 | `star_upgrade.ogg` | 星图购买 | Power Ups |
+| S21 | 秘仪生效 | `ritual_pulse.ogg` | 秘仪购买 | Power Auras + Magic/Buff |
+| S22 | 修炼成长 | `growth_tick.ogg` | 出牌/换牌后 scaling | UI |
+| S23 | 忍法使用 | `ninja_gear.ogg` | 忍法效果触发 | Item + Effect |
+| S24 | 琉璃碎裂 | `glass_break.ogg` | 琉璃牌销毁 | Impact + Explosions |
+| S25 | 鸿运触发 | `lucky_jingle.ogg` | Lucky 效果触发 | Power Ups + Emote |
+| S26 | 放逐销毁 | `banish_fire.ogg` | 放逐令销毁牌 | Magic/Fire + Explosions |
+
+### @unused 已归档
+
+| 常量 | 文件 | 说明 |
+|------|------|------|
+| `DISCARD` | `discard.ogg` (→legacy) | 手替え取消，保留以备复用 |
+| `REDRAW_POP` | `redraw_pop.ogg` (→legacy) | 手替え取消，保留以备复用 |
 
 ---
 
@@ -447,11 +513,11 @@
 ```
 assets/audio/
 ├── music/
-│   ├── start_menu_bgm.ogg          # BGM1 — 主菜单
-│   ├── game_bgm_light.ogg          # BGM2a — 游戏 軽 (属性 火/水/風)
-│   ├── game_bgm_mid.ogg            # BGM2b — 游戏 中 (属性 雷/土/光)
-│   ├── game_bgm_heavy.ogg          # BGM2c — 游戏 重 (属性 暗/无)
-│   └── shop_bgm.ogg                # BGM3 — 商店
+│   ├── start_menu_bgm.wav                          # BGM1 — 主菜单（旧占位，待替换）
+│   ├── game_bgm_light.mp3                          # BGM2a — 游戏 軽 (属性 火/水/風)
+│   ├── game_bgm_medium.mp3                         # BGM2b — 游戏 中 (属性 雷/土/光)
+│   ├── game_bgm_heavy.mp3                          # BGM2c — 游戏 重 (属性 暗/无)
+│   └── dova_Cooler Ninjari Ninjarous miaster.mp3   # BGM3 — 商店
 │
 └── sound/
     ├── game/
@@ -463,8 +529,8 @@ assets/audio/
     │   ├── seal_clear.ogg          # S5 — 过关（替换 level_clear.ogg）
     │   ├── seal_fail.ogg           # S6 — 失败（替换 level_fail.ogg）
     │   ├── swap.ogg                # S7 — 交换滑动（替换）
-    │   ├── discard.ogg             # S8 — 换牌烟遁（替换）
-    │   ├── redraw_pop.ogg          # S8 — 换牌瞬身（新增）
+    │   ├── (discard.ogg → legacy)  # S8 — @unused 手替え取消
+    │   ├── (redraw_pop.ogg → legacy) # S8 — @unused 手替え取消
     │   ├── ninja_activate.ogg      # S9 — 忍者激活（替换 bao_activate.ogg）
     │   ├── boss_reveal.ogg         # S11 — Boss 揭晓（新增）
     │   ├── boss_final_layer.ogg    # S12 — 終焉压迫层（新增）
@@ -472,7 +538,14 @@ assets/audio/
     │   ├── item_purchase.ogg       # S15 — 消耗品购买（新增）
     │   ├── shop_reroll.ogg         # S16 — 刷新（替换 lottery.ogg）
     │   ├── shop_exit.ogg           # S17 — 商店离开（新增）
-    │   └── (P2 音效): enchant_cast / star_upgrade / ritual_pulse / growth_tick / ninja_gear / glass_break / lucky_jingle / banish_fire
+    │   ├── enchant_cast.ogg          # S19 — 附魔使用（素材就绪 P2）
+│   ├── star_upgrade.ogg          # S20 — 星图升级（素材就绪 P2）
+│   ├── ritual_pulse.ogg          # S21 — 秘仪生效（素材就绪 P2）
+│   ├── growth_tick.ogg           # S22 — 修炼成长（素材就绪 P2）
+│   ├── ninja_gear.ogg            # S23 — 忍法使用（素材就绪 P2）
+│   ├── glass_break.ogg           # S24 — 琉璃碎裂（素材就绪 P2）
+│   ├── lucky_jingle.ogg          # S25 — 鸿运触发（素材就绪 P2）
+│   └── banish_fire.ogg           # S26 — 放逐销毁（素材就绪 P2）
     │
     └── ui/
         ├── ui_click.ogg            # 按钮点击（替换）

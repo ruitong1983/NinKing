@@ -84,7 +84,7 @@ static func build_expected_entry(case_id: String, head_cards: Array, mid_cards: 
 	for eff in effects:
 		ninjas.append({"effect": eff})
 
-	var result: ScoreCalculator.ScoreResult = ScoreCalculator.calculate(
+	var result: ScoreResult = ScoreCalculator.calculate(
 		head_cards, mid_cards, tail_cards,
 		he, me, te,
 		col_evals,

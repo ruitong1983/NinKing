@@ -30,7 +30,7 @@
 
 ```
 ✅ 改: shop_panel.tscn / shop_ui.gd / shop_slot.gd / 字体文件
-❌ 不改: manga_theme.tres / BarrierTheme / display_card_base.gd / NinKingTween
+❌ 不改: manga_theme.tres / BarrierTheme / ninja_card.tscn(NinjaInventoryCard) / NinKingTween
          / LeftPanel / NinjaBar / Launcher / HandArea / DunArea / GameOver
 ```
 
@@ -225,7 +225,7 @@ shop_handler.gd
 | 文件/组件 | 原因 |
 |-----------|------|
 | `manga_theme.tres` | 全局 Theme，改默认字体会影响 Launcher/GameOver/所有按钮 |
-| `display_card_base.gd:_init_card_style()` | NinjaBar/Preview/Debug 场景复用 |
+| `ninja_card.tscn / NinjaInventoryCard.gd` | 统一忍者卡 (忍者栏+商店复用) |
 | `barrier_theme.gd` | LeftPanel/GameBg 等全局组件依赖 |
 | `nin_king_tween.gd` | 入口动画不改 |
 | `ui_manager.gd` | shop 入口/出口流程不变 |

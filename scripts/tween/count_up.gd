@@ -183,11 +183,12 @@ static func play_score(label: Control, chips: int, mult: int, result: int,
 	var mult_dur: float = maxf(0.28, mult_ticks * dt)
 	var result_dur: float = maxf(0.40, result_ticks * dt)
 
-	# Sequential timing with widening gaps for higher tiers
+	# Parallel chips+mult, then sequential result
 	var gap1: float = 0.05 + t.get("gap_bonus", 0.0)
-	var gap2: float = 0.06 + t.get("gap_bonus", 0.0) * 1.2
-	var mult_delay: float = chips_dur + gap1
-	var result_delay: float = mult_delay + mult_dur + gap2
+	var _gap2: float = 0.06 + t.get("gap_bonus", 0.0) * 1.2
+	var mult_delay: float = 0.0  # 0 = starts with chips (parallel roll)
+	var parallel_dur: float = maxf(chips_dur, mult_dur)
+	var result_delay: float = parallel_dur + gap1
 
 	var tw: Tween = play_multi(label, [
 		{"value": chips,  "duration": chips_dur,  "delay": 0.0,           "ticks": chips_ticks,  "ease": Tween.EASE_OUT, "trans": Tween.TRANS_CUBIC, "color": CHIPS_COLOR},

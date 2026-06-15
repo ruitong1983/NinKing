@@ -22,7 +22,7 @@ var _full_deck: Array[CardData.PlayingCard] = []
 var _selected_ninjas: Array[Dictionary] = []
 var _star_chart_levels: Dictionary = {}
 var _selected_queue: Array[CardData.PlayingCard] = []
-var _ninja_bar_display: NinjaBarDisplay
+var _ninja_bar_node: NinjaBarNode
 var _deck_visible: bool = false
 var _star_tooltip: Control = null
 
@@ -43,6 +43,9 @@ var _slot_data: Array = []
 @onready var _barrier_label: Label = %BarrierLabel
 @onready var _ninja_status: Label = %NinjaStatusLabel
 @onready var _ninja_bar: Control = %NinjaBar
+
+var _anim_handler: AnimationHandler
+var _ui_proxy: DebugUiProxy
 @onready var _star_chart_container: VBoxContainer = %StarChartContainer
 
 
@@ -53,14 +56,13 @@ func _ready() -> void:
 	for i: int in range(9):
 		_slot_data[i] = null
 
-	# Setup NinjaBar with an HBoxContainer for proper layout
-	var bar_container := HBoxContainer.new()
-	bar_container.name = "BarContainer"
-	bar_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	bar_container.add_theme_constant_override("separation", 8)
-	_ninja_bar.add_child(bar_container)
-	_ninja_bar_display = NinjaBarDisplay.new()
-	_ninja_bar_display.setup(bar_container)
+	# Setup NinjaBar with NinjaBarContainer + NinjaBarNode (matching main scene)
+	var ninja_bar_container := NinjaBarContainer.new()
+	ninja_bar_container.name = "BarContainer"
+	_ninja_bar.add_child(ninja_bar_container)
+	_ninja_bar_node = NinjaBarNode.new()
+	_ninja_bar.add_child(_ninja_bar_node)
+	_ninja_bar_node.set_container(ninja_bar_container)
 
 	# Card tray
 	%CardTray.setup(_full_deck)
@@ -82,6 +84,39 @@ func _ready() -> void:
 
 	# Star chart UI
 	_rebuild_star_chart()
+
+	# ── Scoring animation proxy & handler ──
+	_ui_proxy = DebugUiProxy.new(self)
+	_ui_proxy.score_label = _score_label
+	_ui_proxy.progress_bar = _progress
+	_ui_proxy.card_grid = _card_grid
+	_ui_proxy.head_type_label = %HeadTypeLabel
+	_ui_proxy.middle_type_label = %MiddleTypeLabel
+	_ui_proxy.tail_type_label = %TailTypeLabel
+	_ui_proxy.shadow_lv_label = %ShadowLv
+	_ui_proxy.flash_lv_label = %FlashLv
+	_ui_proxy.destroy_lv_label = %DestroyLv
+	_ui_proxy.shadow_score_label = %ShadowScore
+	_ui_proxy.flash_score_label = %FlashScore
+	_ui_proxy.destroy_score_label = %DestroyScore
+	_ui_proxy.left_col_type = %LeftColType
+	_ui_proxy.mid_col_type = %MidColType
+	_ui_proxy.right_col_type = %RightColType
+	_ui_proxy.left_col_score = %LeftColScore
+	_ui_proxy.mid_col_score = %MidColScore
+	_ui_proxy.right_col_score = %RightColScore
+	_ui_proxy.left_col_lv = %LeftColLv
+	_ui_proxy.mid_col_lv = %MidColLv
+	_ui_proxy.right_col_lv = %RightColLv
+	_ui_proxy.col0_label = %Col0Label
+	_ui_proxy.col1_label = %Col1Label
+	_ui_proxy.col2_label = %Col2Label
+	_ui_proxy.ninja_bar = _ninja_bar_node
+	_ui_proxy.panel_bg = $MainVBox/ContentRow/LeftPanel/PanelBg
+	_ui_proxy.game_bg = $GameBg
+
+	_anim_handler = AnimationHandler.new()
+	_anim_handler.setup(_ui_proxy, func(): pass)
 
 	_reset_ui()
 	_update_button_states()
@@ -150,16 +185,7 @@ func _show_star_tooltip(ht_int: int, lvl: int, label: Label) -> void:
 	tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	var panel := Panel.new()
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.05, 0.05, 0.1, 0.92)
-	style.set_corner_radius_all(4)
-	style.border_width_left = 1
-	style.border_width_right = 1
-	style.border_width_top = 1
-	style.border_width_bottom = 1
-	style.border_color = tier_color
-	style.border_color.a = 0.4
-	panel.add_theme_stylebox_override("panel", style)
+	panel.add_theme_stylebox_override("panel", CardVisualComposer.create_tooltip_stylebox(tier_color))
 	panel.size = Vector2(190, 68)
 	tooltip.add_child(panel)
 
@@ -303,7 +329,7 @@ func _rebuild_grid_display() -> void:
 
 func _create_card(cd: CardData.PlayingCard) -> NinKingCard:
 	var card := NinKingCard.new()
-	card.card_size = Vector2(140, 196)
+	card.card_size = Vector2(125, 175)
 	card.playing_card_data = cd
 	card.name = "DebugCard_%d_%d" % [cd.suit, cd.rank]
 	card.show_front = true
@@ -337,15 +363,42 @@ func _on_play_pressed() -> void:
 
 	var xi_result := XiDetector.detect(head_cards, mid_cards, tail_cards, head_eval, mid_eval, tail_eval)
 
-	var result: ScoreCalculator.ScoreResult = ScoreCalculator.calculate(
+	var result: ScoreResult = ScoreCalculator.calculate(
 		head_cards, mid_cards, tail_cards,
 		head_eval, mid_eval, tail_eval,
 		col_evals, _selected_ninjas, _star_chart_levels, xi_result, {}, 0
 	)
 
-	_update_score_display(result, head_eval, mid_eval, tail_eval, col_evals, xi_result)
-	_update_hand_type_labels(result, head_eval, mid_eval, tail_eval, col_evals)
-	_set_status("总分: %d" % result.total_score)
+	# ── Build play_data and trigger scoring animation ──
+	var play_data: Dictionary = {
+		"score_result": result,
+		"xi_result": xi_result,
+		"col_evals": col_evals,
+		"head_eval": head_eval,
+		"mid_eval": mid_eval,
+		"tail_eval": tail_eval,
+		"current_score": 0,
+		"target_score": 99999,
+		"plays_remaining": 3,
+		"barrier_num": 1,
+		"owned_ninjas": _selected_ninjas,
+		"gold": 0,
+		"star_chart_levels": _star_chart_levels,
+		"current_arrangement": {
+			"head": head_cards,
+			"mid": mid_cards,
+			"tail": tail_cards,
+			"head_eval": head_eval,
+			"mid_eval": mid_eval,
+			"tail_eval": tail_eval,
+		},
+	}
+	NinKingGameState.current_arrangement = Arrangement.new(
+		head_cards, mid_cards, tail_cards, head_eval, mid_eval, tail_eval
+	)
+	_anim_handler.current_play_data = play_data
+	await _anim_handler.run_scoring()
+	_set_status("动画完成 — 总分: %d" % result.total_score)
 
 
 func _eval_column(idx: int, head: Array, mid: Array, tail: Array) -> HandEvaluator3.EvalResult:
@@ -375,7 +428,7 @@ func _cards_on_table() -> int:
 # ══════════════════════════════════════════
 
 func _update_score_display(
-	result: ScoreCalculator.ScoreResult,
+	result: ScoreResult,
 	head_eval: HandEvaluator3.EvalResult,
 	mid_eval: HandEvaluator3.EvalResult,
 	tail_eval: HandEvaluator3.EvalResult,
@@ -401,7 +454,7 @@ func _update_score_display(
 
 
 func _update_hand_type_labels(
-	result: ScoreCalculator.ScoreResult,
+	result: ScoreResult,
 	head_eval: HandEvaluator3.EvalResult,
 	mid_eval: HandEvaluator3.EvalResult,
 	tail_eval: HandEvaluator3.EvalResult,
@@ -575,7 +628,7 @@ func _on_ninja_select_pressed() -> void:
 func _on_ninjas_selected(selected: Array[Dictionary]) -> void:
 	_selected_ninjas = selected.duplicate()
 	_ninja_status.text = "已選: %d/%d" % [_selected_ninjas.size(), MAX_NINJAS]
-	_ninja_bar_display.refresh(_selected_ninjas, MAX_NINJAS)
+	_ninja_bar_node.refresh(_selected_ninjas, MAX_NINJAS)
 
 
 # ══════════════════════════════════════════

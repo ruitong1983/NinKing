@@ -2,12 +2,12 @@
 
 [ext_resource type="Theme" uid="uid://bqb2i07k0v8jt" path="res://assets/themes/manga_theme.tres" id="1_pgq0x"]
 [ext_resource type="PackedScene" uid="uid://c7u8hryloq7hy" path="res://addons/card-framework/card_manager.tscn" id="2_ff38i"]
-[ext_resource type="Script" uid="uid://bs0iqxh63utdk" path="res://scripts/ninking/ui/game_manager.gd" id="2_pgq0x"]
-[ext_resource type="Script" uid="uid://csla30fhhqlyj" path="res://scripts/ninking/ui/ui_manager.gd" id="2_ui_mgr"]
-[ext_resource type="Texture2D" uid="uid://deelue8r4tqif" path="res://assets/images/background/table_bg.png" id="3_tblbg"]
+[ext_resource type="Script" uid="uid://ba3r5kv3bxlmg" path="res://scripts/ninking/ui/game_manager.gd" id="2_pgq0x"]
+[ext_resource type="Script" uid="uid://dgk1vdi44nj6m" path="res://scripts/ninking/ui/ui_manager.gd" id="2_ui_mgr"]
+[ext_resource type="Texture2D" uid="uid://cmh6fgxip28j3" path="res://assets/images/background/table_bg.png" id="3_tblbg"]
 [ext_resource type="PackedScene" uid="uid://4jkp5mgq3d6t" path="res://scenes/ninking/ninking_card_factory.tscn" id="4_ensa0"]
 [ext_resource type="Shader" uid="uid://v8sl5wp6qlqi" path="res://scripts/ninking/ui/panel_edge_fade.gdshader" id="5_shader_fade"]
-[ext_resource type="Script" uid="uid://btor5q756bk78" path="res://scripts/ninking/ui/hand_card_container.gd" id="8_pgq0x"]
+[ext_resource type="Script" uid="uid://dkduntlls22m2" path="res://scripts/ninking/ui/hand_card_container.gd" id="8_pgq0x"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_match_fade"]
 shader = ExtResource("5_shader_fade")
@@ -198,7 +198,7 @@ script = ExtResource("2_pgq0x")
 
 [node name="CardManager" parent="." unique_id=1003667550 instance=ExtResource("2_ff38i")]
 layout_mode = 0
-card_size = Vector2(140, 196)
+card_size = Vector2(125, 175)
 card_factory_scene = ExtResource("4_ensa0")
 
 [node name="GameBg" type="TextureRect" parent="." unique_id=83510205]
@@ -383,7 +383,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 8.0
 offset_top = 12.0
-offset_right = -200.0
+offset_right = -130.0
 grow_vertical = 2
 theme_override_constants/separation = 8
 
@@ -399,7 +399,7 @@ theme_override_constants/separation = 8
 custom_minimum_size = Vector2(40, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
 text = "影"
 
 [node name="ShadowType" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow/Row影" unique_id=2100000007]
@@ -407,21 +407,22 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
 text = "-"
 
 [node name="ShadowLv" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow/Row影" unique_id=1676807902]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 18
 
 [node name="ShadowScore" type="RichTextLabel" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow/Row影" unique_id=2100000090]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(130, 0)
+custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
 bbcode_enabled = true
 scroll_active = false
-horizontal_alignment = 2
+horizontal_alignment = 0
+theme_override_font_sizes/normal_font_size = 20
 
 [node name="Row瞬" type="HBoxContainer" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow" unique_id=1057916796]
 layout_mode = 2
@@ -432,7 +433,7 @@ theme_override_constants/separation = 8
 custom_minimum_size = Vector2(40, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
 text = "瞬"
 
 [node name="FlashType" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow/Row瞬" unique_id=2100000008]
@@ -440,21 +441,22 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
 text = "-"
 
 [node name="FlashLv" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow/Row瞬" unique_id=1506506505]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 18
 
 [node name="FlashScore" type="RichTextLabel" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow/Row瞬" unique_id=204413155]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(130, 0)
+custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
 bbcode_enabled = true
 scroll_active = false
-horizontal_alignment = 2
+horizontal_alignment = 0
+theme_override_font_sizes/normal_font_size = 20
 
 [node name="Row滅" type="HBoxContainer" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow" unique_id=576148200]
 layout_mode = 2
@@ -465,7 +467,7 @@ theme_override_constants/separation = 8
 custom_minimum_size = Vector2(40, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
 text = "滅"
 
 [node name="DestroyType" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow/Row滅" unique_id=2100000009]
@@ -473,21 +475,22 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
 text = "-"
 
 [node name="DestroyLv" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow/Row滅" unique_id=623945523]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 18
 
 [node name="DestroyScore" type="RichTextLabel" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow/Row滅" unique_id=102999569]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(130, 0)
+custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
 bbcode_enabled = true
 scroll_active = false
-horizontal_alignment = 2
+horizontal_alignment = 0
+theme_override_font_sizes/normal_font_size = 20
 
 [node name="ColumnSpacer" type="Control" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox" unique_id=1867054622]
 custom_minimum_size = Vector2(0, 4)
@@ -507,7 +510,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(40, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.627, 0.627, 0.627, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
 text = "左"
 
 [node name="LeftColType" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow/Row左列" unique_id=2017182209]
@@ -515,21 +518,22 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
 text = "-"
 
 [node name="LeftColLv" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow/Row左列" unique_id=959797222]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 18
 
 [node name="LeftColScore" type="RichTextLabel" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow/Row左列" unique_id=1679740097]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(130, 0)
+custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
 bbcode_enabled = true
 scroll_active = false
-horizontal_alignment = 2
+horizontal_alignment = 0
+theme_override_font_sizes/normal_font_size = 20
 
 [node name="Row中列" type="HBoxContainer" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow" unique_id=1761356067]
 layout_mode = 2
@@ -541,7 +545,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(40, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.627, 0.627, 0.627, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
 text = "中"
 
 [node name="MidColType" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow/Row中列" unique_id=2122532094]
@@ -549,21 +553,22 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
 text = "-"
 
 [node name="MidColLv" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow/Row中列" unique_id=365468244]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 18
 
 [node name="MidColScore" type="RichTextLabel" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow/Row中列" unique_id=1381910367]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(130, 0)
+custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
 bbcode_enabled = true
 scroll_active = false
-horizontal_alignment = 2
+horizontal_alignment = 0
+theme_override_font_sizes/normal_font_size = 20
 
 [node name="Row右列" type="HBoxContainer" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow" unique_id=1598580117]
 layout_mode = 2
@@ -575,7 +580,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(40, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.627, 0.627, 0.627, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
 text = "右"
 
 [node name="RightColType" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow/Row右列" unique_id=1275736371]
@@ -583,21 +588,22 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
 text = "-"
 
 [node name="RightColLv" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow/Row右列" unique_id=454047796]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 18
 
 [node name="RightColScore" type="RichTextLabel" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow/Row右列" unique_id=1188808210]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(130, 0)
+custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
 bbcode_enabled = true
 scroll_active = false
-horizontal_alignment = 2
+horizontal_alignment = 0
+theme_override_font_sizes/normal_font_size = 20
 
 [node name="ScorePanel" type="Panel" parent="UIManager/GameLayout/LeftPanel" unique_id=2100000091]
 material = SubResource("ShaderMaterial_score_fade")
@@ -667,6 +673,7 @@ offset_left = -720.0
 offset_top = 10.0
 offset_right = 720.0
 offset_bottom = 200.0
+grow_horizontal = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
 
@@ -679,18 +686,21 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -569.0
-offset_top = -364.0
-offset_right = 569.0
-offset_bottom = 364.0
+offset_left = -559.0
+offset_top = -294.0
+offset_right = 579.0
+offset_bottom = 434.0
+grow_horizontal = 2
+grow_vertical = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
-theme_override_constants/separation = 175
+theme_override_constants/separation = 80
 
 [node name="PlayBtn" type="Button" parent="UIManager/GameLayout/CenterColumn/HandArea" unique_id=774580215]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(84, 116)
 layout_mode = 2
+size_flags_horizontal = 0
 size_flags_vertical = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(1, 1, 1, 0.85)
@@ -703,27 +713,29 @@ disabled = true
 text = "討
 伐"
 
-[node name="DunArea" type="Panel" parent="UIManager/GameLayout/CenterColumn/HandArea" unique_id=248658335]
-custom_minimum_size = Vector2(620, 728)
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 3
+[node name="DunArea" type="Panel" parent="UIManager/GameLayout/CenterColumn" unique_id=248658335]
+layout_mode = 0
+offset_left = 270.0
+offset_top = 298.0
+offset_right = 970.0
+offset_bottom = 969.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_dun_area")
 
-[node name="ColumnLabelRow" type="HBoxContainer" parent="UIManager/GameLayout/CenterColumn/HandArea/DunArea" unique_id=1076051941]
+[node name="ColumnLabelRow" type="HBoxContainer" parent="UIManager/GameLayout/CenterColumn/DunArea" unique_id=1076051941]
+z_index = 11
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 66.0
-offset_top = -727.0
-offset_right = -104.0
-offset_bottom = -693.0
+offset_left = 112.0
+offset_top = -643.0
+offset_right = -216.0
+offset_bottom = -609.0
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="Col0Label" type="Label" parent="UIManager/GameLayout/CenterColumn/HandArea/DunArea/ColumnLabelRow" unique_id=1076051942]
+[node name="Col0Label" type="Label" parent="UIManager/GameLayout/CenterColumn/DunArea/ColumnLabelRow" unique_id=1076051942]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -733,7 +745,7 @@ theme_override_constants/outline_size = 1
 theme_override_font_sizes/font_size = 24
 horizontal_alignment = 1
 
-[node name="Col1Label" type="Label" parent="UIManager/GameLayout/CenterColumn/HandArea/DunArea/ColumnLabelRow" unique_id=1076051943]
+[node name="Col1Label" type="Label" parent="UIManager/GameLayout/CenterColumn/DunArea/ColumnLabelRow" unique_id=1076051943]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -743,7 +755,7 @@ theme_override_constants/outline_size = 1
 theme_override_font_sizes/font_size = 24
 horizontal_alignment = 1
 
-[node name="Col2Label" type="Label" parent="UIManager/GameLayout/CenterColumn/HandArea/DunArea/ColumnLabelRow" unique_id=1076051944]
+[node name="Col2Label" type="Label" parent="UIManager/GameLayout/CenterColumn/DunArea/ColumnLabelRow" unique_id=1076051944]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -753,13 +765,14 @@ theme_override_constants/outline_size = 1
 theme_override_font_sizes/font_size = 24
 horizontal_alignment = 1
 
-[node name="HeadLabel" type="Label" parent="UIManager/GameLayout/CenterColumn/HandArea/DunArea" unique_id=531337321]
+[node name="HeadLabel" type="Label" parent="UIManager/GameLayout/CenterColumn/DunArea" unique_id=531337321]
 unique_name_in_owner = true
+z_index = 11
 layout_mode = 0
-offset_left = 12.0
-offset_top = 116.0
-offset_right = 52.0
-offset_bottom = 151.0
+offset_left = 15.0
+offset_top = 130.0
+offset_right = 55.0
+offset_bottom = 165.0
 theme_override_colors/font_color = Color(0.6, 0.4, 0.1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.5)
 theme_override_constants/outline_size = 1
@@ -767,13 +780,14 @@ theme_override_font_sizes/font_size = 24
 text = "影"
 horizontal_alignment = 1
 
-[node name="HeadTypeLabel" type="Label" parent="UIManager/GameLayout/CenterColumn/HandArea/DunArea" unique_id=1035301798]
+[node name="HeadTypeLabel" type="Label" parent="UIManager/GameLayout/CenterColumn/DunArea" unique_id=1035301798]
 unique_name_in_owner = true
+z_index = 11
 layout_mode = 0
-offset_left = 520.0
-offset_top = 120.0
-offset_right = 606.0
-offset_bottom = 155.0
+offset_left = 540.0
+offset_top = 130.0
+offset_right = 626.0
+offset_bottom = 165.0
 theme_override_colors/font_color = Color(0.6, 0.4, 0.1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.5)
 theme_override_constants/outline_size = 1
@@ -781,13 +795,14 @@ theme_override_font_sizes/font_size = 24
 text = "散牌"
 horizontal_alignment = 1
 
-[node name="MiddleLabel" type="Label" parent="UIManager/GameLayout/CenterColumn/HandArea/DunArea" unique_id=768681900]
+[node name="MiddleLabel" type="Label" parent="UIManager/GameLayout/CenterColumn/DunArea" unique_id=768681900]
 unique_name_in_owner = true
+z_index = 11
 layout_mode = 0
-offset_left = 12.0
-offset_top = 348.0
-offset_right = 52.0
-offset_bottom = 383.0
+offset_left = 15.0
+offset_top = 324.0
+offset_right = 55.0
+offset_bottom = 359.0
 theme_override_colors/font_color = Color(0.6, 0.4, 0.1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.5)
 theme_override_constants/outline_size = 1
@@ -795,13 +810,14 @@ theme_override_font_sizes/font_size = 24
 text = "瞬"
 horizontal_alignment = 1
 
-[node name="MiddleTypeLabel" type="Label" parent="UIManager/GameLayout/CenterColumn/HandArea/DunArea" unique_id=258355686]
+[node name="MiddleTypeLabel" type="Label" parent="UIManager/GameLayout/CenterColumn/DunArea" unique_id=258355686]
 unique_name_in_owner = true
+z_index = 11
 layout_mode = 0
-offset_left = 520.0
-offset_top = 352.0
-offset_right = 606.0
-offset_bottom = 387.0
+offset_left = 540.0
+offset_top = 324.0
+offset_right = 626.0
+offset_bottom = 359.0
 theme_override_colors/font_color = Color(0.6, 0.4, 0.1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.5)
 theme_override_constants/outline_size = 1
@@ -809,13 +825,14 @@ theme_override_font_sizes/font_size = 24
 text = "对子"
 horizontal_alignment = 1
 
-[node name="TailLabel" type="Label" parent="UIManager/GameLayout/CenterColumn/HandArea/DunArea" unique_id=97828241]
+[node name="TailLabel" type="Label" parent="UIManager/GameLayout/CenterColumn/DunArea" unique_id=97828241]
 unique_name_in_owner = true
+z_index = 11
 layout_mode = 0
-offset_left = 12.0
-offset_top = 580.0
-offset_right = 52.0
-offset_bottom = 615.0
+offset_left = 15.0
+offset_top = 516.0
+offset_right = 55.0
+offset_bottom = 551.0
 theme_override_colors/font_color = Color(0.6, 0.4, 0.1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.5)
 theme_override_constants/outline_size = 1
@@ -823,13 +840,14 @@ theme_override_font_sizes/font_size = 24
 text = "滅"
 horizontal_alignment = 1
 
-[node name="TailTypeLabel" type="Label" parent="UIManager/GameLayout/CenterColumn/HandArea/DunArea" unique_id=123388918]
+[node name="TailTypeLabel" type="Label" parent="UIManager/GameLayout/CenterColumn/DunArea" unique_id=123388918]
 unique_name_in_owner = true
+z_index = 11
 layout_mode = 0
-offset_left = 520.0
-offset_top = 584.0
-offset_right = 606.0
-offset_bottom = 619.0
+offset_left = 540.0
+offset_top = 516.0
+offset_right = 626.0
+offset_bottom = 551.0
 theme_override_colors/font_color = Color(0.6, 0.4, 0.1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.5)
 theme_override_constants/outline_size = 1
@@ -837,17 +855,17 @@ theme_override_font_sizes/font_size = 24
 text = "同花"
 horizontal_alignment = 1
 
-[node name="CardGrid" type="Control" parent="UIManager/GameLayout/CenterColumn/HandArea/DunArea" unique_id=1184411948]
+[node name="CardGrid" type="Control" parent="UIManager/GameLayout/CenterColumn/DunArea" unique_id=1184411948]
 unique_name_in_owner = true
 z_index = 10
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -15.0
-offset_top = 1.0
-offset_right = -27.0
-offset_bottom = 1.0
+offset_left = 111.0
+offset_top = 69.0
+offset_right = -209.0
+offset_bottom = -52.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
@@ -867,6 +885,8 @@ offset_left = -100.0
 offset_top = -68.0
 offset_right = 100.0
 offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
 size_flags_horizontal = 0
 size_flags_vertical = 0
 theme_override_colors/font_color = Color(0.95, 0.95, 0.9, 1)

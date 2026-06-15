@@ -5,31 +5,9 @@ extends RefCounted
 ## Enumerates C(9,3) × C(6,3) = 1680 arrangements, filters by constraint,
 ## scores each, returns the best.
 ## v4.0 — per-group scoring model (跟组走).
-
-class Arrangement:
-	var head: Array[CardData.PlayingCard]   # 影 (weakest)
-	var mid: Array[CardData.PlayingCard]    # 瞬
-	var tail: Array[CardData.PlayingCard]   # 滅 (strongest)
-	var head_eval: HandEvaluator3.EvalResult
-	var mid_eval: HandEvaluator3.EvalResult
-	var tail_eval: HandEvaluator3.EvalResult
-
-	func _init(h: Array, m: Array, t: Array,
-			   he: HandEvaluator3.EvalResult, me: HandEvaluator3.EvalResult,
-			   te: HandEvaluator3.EvalResult) -> void:
-		head = _to_typed(h)
-		mid = _to_typed(m)
-		tail = _to_typed(t)
-		head_eval = he; mid_eval = me; tail_eval = te
-
-	func is_legal() -> bool:
-		return head_eval.strength <= mid_eval.strength and mid_eval.strength <= tail_eval.strength
-
-	static func _to_typed(arr: Array) -> Array[CardData.PlayingCard]:
-		var result: Array[CardData.PlayingCard] = []
-		for item in arr:
-			result.append(item as CardData.PlayingCard)
-		return result
+##
+## Arrangement class is defined in arrangement.gd (class_name Arrangement).
+## Shared helpers in score_helpers.gd (class_name ScoreHelpers).
 
 
 ## Main entry point. Returns the best legal arrangement (or null if none).
@@ -247,32 +225,18 @@ static func _estimate_column_waste_penalty(
 	return penalty
 
 
-## Card chips for a group, with optional hungry_ghost filter.
+## Delegated to ScoreHelpers (kept as private wrapper for backward compat).
+## include_seal=false — AI estimation path (no seal ×2).
 static func _group_card_chips(cards: Array[CardData.PlayingCard], hungry_ghost: bool) -> int:
-	var total: int = 0
-	for c: CardData.PlayingCard in cards:
-		if hungry_ghost:
-			if c.rank == CardData.Rank.ACE or c.rank == CardData.Rank.KING:
-				total += c.get_chip_value()
-		else:
-			total += c.get_chip_value()
-	return total
+	return ScoreHelpers.group_card_chips(cards, hungry_ghost, false)
 
 
 static func _group_ench_chips(cards: Array) -> int:
-	var total: int = 0
-	for c: CardData.PlayingCard in cards:
-		total += c.get_enhancement_chips()
-		total += c.get_edition_chips()
-	return total
+	return ScoreHelpers.group_ench_chips(cards)
 
 
 static func _group_ench_mult(cards: Array) -> int:
-	var total: int = 0
-	for c: CardData.PlayingCard in cards:
-		total += c.get_enhancement_mult()
-		total += c.get_edition_mult()
-	return total
+	return ScoreHelpers.group_ench_mult(cards)
 
 
 # ──────────────────────────── Combinatorics ────────────────────────────

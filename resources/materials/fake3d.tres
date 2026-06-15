@@ -1,0 +1,13 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://dud48nu4p4ixm"]
+
+[ext_resource type="Shader" path="res://shaders/fake3d/fake3d.gdshader" id="1_3wnw1"]
+
+[resource]
+shader = ExtResource("1_3wnw1")
+shader_parameter/fov = 90.0
+shader_parameter/cull_back = true
+shader_parameter/y_rot = 0.0
+shader_parameter/x_rot = 0.0
+shader_parameter/inset = 0.0
+shader_parameter/delete_color = Color(0, 0.5, 0.5, 1)
+shader_parameter/delete_tolerance = 0.2

@@ -267,10 +267,10 @@ total_delta += tc('n_002','苦无','T7','豹+顺+同花顺+8列+4m', *SET_X, ne_
 total_delta += tc('n_002','苦无','T8','三同花+列16+三清+全黑+4m', *SET_Y, ne_all(m=4))
 total_delta += tc('n_002','苦无','T9','全对子+256列+4m', *SET_Z, ne_all(m=4))
 
-# n_003 风魔手里剑 +15c +2m
-total_delta += tc('n_003','风魔手里剑','T7','豹+顺+同花顺+8列+15c+2m', *SET_X, ne_all(c=15,m=2))
-total_delta += tc('n_003','风魔手里剑','T8','三同花+列16+三清+全黑+15c+2m', *SET_Y, ne_all(c=15,m=2))
-total_delta += tc('n_003','风魔手里剑','T9','全对子+256列+15c+2m', *SET_Z, ne_all(c=15,m=2))
+# n_003 忍刀 +15c +2m
+total_delta += tc('n_003','忍刀','T7','豹+顺+同花顺+8列+15c+2m', *SET_X, ne_all(c=15,m=2))
+total_delta += tc('n_003','忍刀','T8','三同花+列16+三清+全黑+15c+2m', *SET_Y, ne_all(c=15,m=2))
+total_delta += tc('n_003','忍刀','T9','全对子+256列+15c+2m', *SET_Z, ne_all(c=15,m=2))
 
 # n_004 重刃 +20 chips
 total_delta += tc('n_004','重刃','T7','豹+顺+同花顺+8列+20c', *SET_X, ne_all(c=20))

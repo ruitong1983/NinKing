@@ -143,11 +143,11 @@ res://
 │   ├── ninking_main.tscn           ← 主游戏场景（含 ShopOverlay Phase C）
 │   ├── debug_ninking_main.tscn          ← Debug 计分测试场景 (2026-06-12)
 │   ├── shop_panel.tscn             ← 🆕 商店面板场景片段 (替代旧 shop.tscn)
-│   ├── display_card_base.tscn      ← 非扑克牌展示基类 125×175 纯卡面 (5:7 对齐标准扑克)
+│   ├── ninja_card.tscn               ← 🆕 统一忍者卡场景 (替代旧 display_card_base.tscn)
 │   ├── ninking_card.tscn           ← 卡牌组件 (NinKingCard)
 │   ├── ninking_card_factory.tscn   ← 卡牌工厂 (Card-Framework)
 │   ├── ability_slot.tscn           ← 忍者牌槽位组件 (已重命名)
-│   ├── shop_slot.tscn              ← 🆕 商店展示容器 (DisplayCard + 购买UI)
+│   ├── shop_slot.tscn              ← 🆕 商店展示容器 (NinjaCard + 购买UI)
 ```
 
 ### ninking_launcher.tscn
@@ -382,14 +382,17 @@ res://
 │   │   │   ├── hand_display.gd           ← 手牌渲染器
 │   │   │   ├── hand_interaction.gd       ← 交互状态机
 │   │   │   ├── deck_viewer_controller.gd ← 牌库查看器
-│   │   │   ├── display_card_base.gd      ← 非扑克牌展示基类 125×175 (5:7)
-│   │   │   ├── shop_slot.gd              ← 🆕 商店展示容器 (DisplayCard + 购买UI)
+│   │   │   ├── ninja_inventory_card.gd     ← 统一忍者卡 (忍者栏 + 商店, 替代旧 DisplayCardBase)
+│   │   │   ├── shop_slot.gd              ← 🆕 商店展示容器 (NinjaCard + 购买UI)
 │   │   │   ├── ability_slot.gd           ← 忍者牌槽位
 │   │   ├── card_data.gd                  ← 扑克牌数据 (CardData)
 │   │   ├── deck_manager.gd               ← 牌库管理 (DeckManager)
 │   │   ├── hand_evaluator.gd             ← 牌型评估 (HandEvaluator3)
 │   │   ├── auto_arranger.gd              ← 排列求解器 (AutoArranger)
+│   │   ├── arrangement.gd                ← 排列结果类 (Arrangement)
 │   │   ├── score_calculator.gd           ← 计分引擎 (ScoreCalculator)
+│   │   ├── score_result.gd               ← 计分结果类 (ScoreResult)
+│   │   ├── score_helpers.gd              ← 计分/排列共享辅助函数
 │   │   ├── xi_detector.gd                ← 喜检测器 (XiDetector)
 │   │   ├── game_state.gd                 ← 游戏状态机 (NinKingGameState, Autoload)
 │   │   ├── seal_controller.gd            ← 出牌/封印逻辑 (SealController)
@@ -487,19 +490,33 @@ HandEvaluator3 (RefCounted)
 ├── class EvalResult (hand_type, base_chips, base_mult, strength)
 └── static: evaluate(cards: Array[PlayingCard]) → EvalResult
 
+Arrangement (RefCounted, arrangement.gd)
+├── head, mid, tail: Array[PlayingCard]
+├── head_eval, mid_eval, tail_eval: EvalResult
+└── is_legal() — checks head ≤ mid ≤ tail constraint
+
+ScoreHelpers (RefCounted, score_helpers.gd)
+├── group_card_chips(cards, hungry_ghost, include_seal) — 含封印×2参数
+├── group_ench_chips(cards)
+└── group_ench_mult(cards)
+
 AutoArranger (RefCounted)
 └── static: find_best(hand, head_ninja, mid_ninja, tail_ninja, star_chart_levels, rules) → Arrangement
     └── _fast_score() v4.0: per-group评分 + 列近似奖励 + 同点数量散惩罚
 
+ScoreResult (RefCounted, score_result.gd)
+├── total_score, head_score, mid_score, tail_score
+├── col_scores, col_total, global_xi_x_stack, chips_sum, mult_sum, breakdown
+└── Per-group breakdown: head/mid/tail card_chips, hand_chips, ench_chips, ninja_chips, etc.
+
 ScoreCalculator (RefCounted)
-├── class ScoreResult (total_score, head_score, mid_score, tail_score,
-│                      col_scores, col_total, global_xi_x_stack, chips_sum, mult_sum, breakdown)
 ├── static: calculate(head, mid, tail, evals, col_evals, ninjas, star_charts,
 │                    xi_result, seal_effects, gold) → ScoreResult
 ├── static: collect_ninja_per_group() — 忍效果→行三组分账
 ├── static: _collect_ninja_for_column() — 忍效果→列分账 (v5.0)
 ├── static: ninja_affected_groups() — 条件→命中行组
-└── static: _compute_group_score() — 行/列通用评分公式 (v5.0: 列复用此方法)
+├── static: _compute_group_score() — 行/列通用评分公式 (v5.0: 列复用此方法)
+└── (helpers delegated to ScoreHelpers)
 
 XiDetector (RefCounted)
 ├── class XiResult (triggered, chips_add, mult_x_stack)

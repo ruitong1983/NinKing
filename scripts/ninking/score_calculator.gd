@@ -13,54 +13,9 @@ extends RefCounted
 ##
 ## All ×mult effects are commutative — order in the stack doesn't matter.
 ## All values are integers.
-
-class ScoreResult:
-	var total_score: int = 0
-	var head_score: int = 0
-	var mid_score: int = 0
-	var tail_score: int = 0
-	var col_scores: Array[int] = []          # v5.0: per-column chip×mult scores (non-散牌 only)
-	var col_total: int = 0                   # v5.0: sum of all column scores
-	var global_xi_x_stack: Array[int] = []   # global xi ×mult
-	# Per-group chips and mult (base + ench + ninja, before ×stack)
-	var head_chips: int = 0
-	var head_mult: int = 0
-	var mid_chips: int = 0
-	var mid_mult: int = 0
-	var tail_chips: int = 0
-	var tail_mult: int = 0
-	var chips_sum: int = 0
-	var mult_sum: int = 0
-	var breakdown: Dictionary = {}
-	# ── Per-group component breakdown (for test cross-validation) ──
-	var head_card_chips: int = 0
-	var head_hand_chips: int = 0
-	var head_ench_chips: int = 0
-	var head_ninja_chips: int = 0
-	var head_hand_mult: int = 0
-	var head_ench_mult: int = 0
-	var head_ninja_mult: int = 0
-	var head_ninja_x_stack: Array = []
-	var mid_card_chips: int = 0
-	var mid_hand_chips: int = 0
-	var mid_ench_chips: int = 0
-	var mid_ninja_chips: int = 0
-	var mid_hand_mult: int = 0
-	var mid_ench_mult: int = 0
-	var mid_ninja_mult: int = 0
-	var mid_ninja_x_stack: Array = []
-	var tail_card_chips: int = 0
-	var tail_hand_chips: int = 0
-	var tail_ench_chips: int = 0
-	var tail_ninja_chips: int = 0
-	var tail_hand_mult: int = 0
-	var tail_ench_mult: int = 0
-	var tail_ninja_mult: int = 0
-	var tail_ninja_x_stack: Array = []
-
-	func _init() -> void:
-		pass
-
+##
+## ScoreResult is defined in score_result.gd (class_name ScoreResult).
+## Shared helpers in score_helpers.gd (class_name ScoreHelpers).
 
 ## Main entry: score a complete 3-group arrangement (v5.0 rows + columns additive).
 ##
@@ -356,16 +311,14 @@ static func _collect_ninja_for_column(
 	if effect.get("mult_per_gold", 0) > 0:
 		var step: int = effect.get("mult_gold_step", 5)
 		var cap: int = effect.get("mult_gold_cap", 10)
-		@warning_ignore("integer_division")
-		var bonus: int = mini(gold / step, cap) * effect["mult_per_gold"]
+		var bonus: int = mini(floori(float(gold) / step), cap) * effect["mult_per_gold"]
 		if bonus > 0:
 			col_ninja.mult += bonus
 
 	if effect.get("x_per_gold", 1) > 1:
 		var step_x: int = effect.get("x_gold_step", 15)
 		var cap_x: int = effect.get("x_gold_cap", 3)
-		@warning_ignore("integer_division")
-		var count_x: int = mini(gold / step_x, cap_x)
+		var count_x: int = mini(floori(float(gold) / step_x), cap_x)
 		for _i: int in range(count_x):
 			col_ninja.x_stack.append(effect["x_per_gold"])
 
@@ -473,8 +426,7 @@ static func collect_ninja_per_group(
 		has_economy = true
 		var step: int = effect.get("mult_gold_step", 5)
 		var cap: int = effect.get("mult_gold_cap", 10)
-		@warning_ignore("integer_division")
-		var bonus: int = mini(gold / step, cap) * effect["mult_per_gold"]
+		var bonus: int = mini(floori(float(gold) / step), cap) * effect["mult_per_gold"]
 		if bonus > 0:
 			head_ninja.mult += bonus
 			mid_ninja.mult += bonus
@@ -484,8 +436,7 @@ static func collect_ninja_per_group(
 		has_economy = true
 		var step_x: int = effect.get("x_gold_step", 15)
 		var cap_x: int = effect.get("x_gold_cap", 3)
-		@warning_ignore("integer_division")
-		var count_x: int = mini(gold / step_x, cap_x)
+		var count_x: int = mini(floori(float(gold) / step_x), cap_x)
 		for _i: int in range(count_x):
 			var x_val: int = effect["x_per_gold"]
 			head_ninja.x_stack.append(x_val)
@@ -549,6 +500,15 @@ static func ninja_affected_groups(
 
 	var group: String = cond.get("group", "")
 	if group != "":
+		# Multi-group condition: head_or_mid
+		if group == "head_or_mid":
+			var hm_result: Array[String] = []
+			if _check_cond_for_type(cond, head_type):
+				hm_result.append("head")
+			if _check_cond_for_type(cond, mid_type):
+				hm_result.append("mid")
+			return hm_result
+
 		# Single-group condition
 		if _check_cond_for_type(cond, head_type) and group == "head":
 			return ["head"]
@@ -591,29 +551,14 @@ static func _check_cond_for_type(cond: Dictionary, hand_type: CardData.HandType3
 
 # ──────────────────────────── Helpers ────────────────────────────
 
+## Delegated to ScoreHelpers (kept as private wrapper for backward compat).
 static func _group_card_chips(cards: Array, hungry_ghost: bool) -> int:
-	var total: int = 0
-	for c: CardData.PlayingCard in cards:
-		if hungry_ghost:
-			if not (c.rank == CardData.Rank.ACE or c.rank == CardData.Rank.KING):
-				continue
-		var base: int = c.get_chip_value()
-		base *= c.get_seal_x_chips()
-		total += base
-	return total
+	return ScoreHelpers.group_card_chips(cards, hungry_ghost, true)
 
 
 static func _group_ench_chips(cards: Array) -> int:
-	var total: int = 0
-	for c: CardData.PlayingCard in cards:
-		total += c.get_enhancement_chips()
-		total += c.get_edition_chips()
-	return total
+	return ScoreHelpers.group_ench_chips(cards)
 
 
 static func _group_ench_mult(cards: Array) -> int:
-	var total: int = 0
-	for c: CardData.PlayingCard in cards:
-		total += c.get_enhancement_mult()
-		total += c.get_edition_mult()
-	return total
+	return ScoreHelpers.group_ench_mult(cards)

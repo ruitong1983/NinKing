@@ -127,7 +127,7 @@
 
 ## 四、卡片组件结构 (不变)
 
-同 v5。ShopSlot (横排 355×190) + DisplayCardBase (125×175) 在左，名称/效果/购买按钮在右。
+同 v5。ShopSlot (横排 355×190) + NinjaCard (125×175, ninja_card.tscn) 在左，名称/效果/购买按钮在右。
 
 ---
 

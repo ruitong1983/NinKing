@@ -154,7 +154,7 @@ static func play_reroll_vfx(old_cards: Array, new_cards_callback: Callable) -> v
 	await Engine.get_main_loop().create_timer(0.35).timeout
 
 	# ── Phase 2: Generate new cards via callback ──
-	var new_cards: Array = new_cards_callback.call()
+	var new_cards: Variant = new_cards_callback.call()
 
 	# ── Phase 3: New cards slide in from above (0.3s stagger) ──
 	if not new_cards.is_empty():

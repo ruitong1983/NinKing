@@ -1,6 +1,6 @@
 # Tween & VFX 库参考手册
 
-> 最后更新：2026-06-12 | 源码：`scripts/tween/` + `scripts/system/crt_filter.gd`
+> 最后更新：2026-06-15 | 源码：`scripts/tween/`
 >
 > **铁律：实现任何 Tween/VFX 前，必须先查本文档。确认已有 API 是否覆盖需求，避免手写 `create_tween()`。**
 >
@@ -53,6 +53,9 @@ GlobalTweens (autoload, 胶水层)
 | 弹性冲入（大 overshoot） | `GlobalTweens.punch_in(node, 0.4, 1.5)` | ELASTIC scale 过冲回弹 |
 | Toast 通知 | `GlobalTweens.toast(label, 1.5)` | 淡入→停留→淡出→释放 |
 | 列表逐项错峰入场 | `GlobalTweens.stagger_slide_in(nodes, 0.12, 0.3)` | 淡入+左滑，每项间隔 stagger |
+| 弧线弹性补间 | `GlobalTweens.move_arc(node, target_pos, 0.5, 0.5)` | 贝塞尔弧线+弹性归位 |
+| 溶解消散 | `GlobalTweens.dissolve_out(node, 1.0, 0.2, Color.ORANGE)` | 需预先挂载 dissolve2d shader |
+| 忍者触发 | `GlobalTweens.ninja_trigger(node, 0.6)` | 弹起→金框→squash 落回，auto_kill domain "ninja" |
 | 卡牌 hover 放大 | `GlobalTweens.card_hover(node, Vector2(1.05,1.05), -4.0)` | scale+上浮 |
 | 卡牌 unhover 还原 | `GlobalTweens.card_unhover(node, Vector2.ONE, 0.0)` | scale+位置归位 |
 | 卡牌倾斜追踪鼠标 | `GlobalTweens.enable_card_tilt(node)` | 每帧跟随鼠标旋转 |
@@ -62,7 +65,7 @@ GlobalTweens (autoload, 胶水层)
 | 数字滚动（计数） | `GlobalTweens.count_up(label, to_val, 0.5)` | 线性递增 |
 | 数字滚动（金币） | `GlobalTweens.count_up_gold(label, amount, 0.6)` | 缓出+金色闪烁 |
 | 多段数字滚动（通用） | `GlobalTweens.play_multi(label, segments, per_tick)` | 多段独立 easing，tick 合并 |
-| 计分行滚动 | `GlobalTweens.play_score(label, chips, mult, result, 0.5, per_tick)` | "chips × mult = result" 顺序滚动，7-tier 分值驱动，pitch 递升(0.88→1.22) |
+| 计分行滚动 | `GlobalTweens.play_score(label, chips, mult, result, 0.5, per_tick)` | "chips × mult = result" chips+mult 并行滚动 → 再滚 result，7-tier 分值驱动，pitch 递升(0.88→1.22) |
 
 ### 战斗反馈
 
@@ -78,7 +81,7 @@ GlobalTweens (autoload, 胶水层)
 
 | 场景 | 调用 | 说明 |
 |------|------|------|
-| 开关 CRT 滤镜 | `GlobalTweens.set_crt_enabled(true)` | 扫描线+色差+暗角 |
+| ⛔ ~~开关 CRT 滤镜~~ (已移除) | — | V24 移除，漫画风不再需要 |
 
 ---
 
@@ -163,7 +166,7 @@ GlobalTweens.play_score(label: Label, chips: int, mult: int, result: int, durati
 - `{"value": int, "duration": float, "delay": float?, "ticks": int?, "ease": int?, "trans": int?}` — 从 0 滚到 value，延迟 delay 后启动，独立 easing（默认 EASE_OUT CUBIC），ticks 为音效里程碑数
 - `{"text": String}` — 静态分隔符文本，始终渲染
 
-**`play_score`** — 计分行快捷包装。格式 `"chips × mult = result"`，**顺序滚动**（chips→mult→result 依次延迟启动），7-tier 分值驱动（阈值 20/100/200/400/800/1600），tick 沿 cubic-out 曲线 milestone 分布（稀疏→密集），pitch 递升(0.88→1.22, +0.05/tick)。result 到达时自动 `FX.color_flash(label, Color.GOLD, 0.15)`。
+**`play_score`** — 计分行快捷包装。格式 `"chips × mult = result"`，**chips+mult 并行滚动**（同时启动，duration 取两者较大值），然后顺序滚动 result，7-tier 分值驱动（阈值 20/100/200/400/800/1600），tick 沿 cubic-out 曲线 milestone 分布（稀疏→密集），pitch 递升(0.88→1.22, +0.05/tick)。result 到达时自动 `FX.color_flash(label, Color.GOLD, 0.15)`。
 
 **CountUp 额外能力**（如需直接使用）：
 - `CountUp.play(label, from_value, to_value, duration, prefix, suffix, per_tick)` — 线性递增
@@ -208,18 +211,9 @@ GlobalTweens.play_sfx(stream: AudioStream, volume_db: float = 0.0) -> void
 
 **注意：** `bind_sfx` 需要 tween 的 parent 节点在场景树中。`play_sfx` 自动挂到 root 播放，finished 后自动 queue_free。
 
-### 1.6 CRT 滤镜
+### 1.6 ⛔ CRT 滤镜（已移除 V24）
 
-```gdscript
-GlobalTweens.set_crt_enabled(enabled: bool) -> void
-```
-
-CRTFilter 支持微调（直接操作 GlobalTweens.crt）：
-- `GlobalTweens.crt.set_scanline(v: float)` — 扫描线强度
-- `GlobalTweens.crt.set_aberration(v: float)` — 色差强度
-- `GlobalTweens.crt.set_vignette(v: float)` — 暗角强度
-- `GlobalTweens.crt.set_warp(v: float)` — 扭曲强度
-- `GlobalTweens.crt.set_brightness(v: float)` — 亮度
+CRT 扫描线/色差/暗角效果已在 V24 中移除，漫画风不再需要。
 
 ---
 
@@ -334,6 +328,21 @@ TweenFX.card_unhover(node: CanvasItem, original_scale: Vector2 = Vector2.ONE, or
 - 接受 `CanvasItem`（兼容 `Node2D` 和 `Control`），Button/Label 等 UI 节点直接可用
 - 通常通过 `GlobalTweens.card_hover/card_unhover` 调用，与 CardTilt 配合
 
+### 2.8 忍者触发
+
+```gdscript
+TweenFX.ninja_pop_trigger(node: Node, duration: float = 0.6) -> Tween
+```
+
+忍者触发组合动画：弹起 → 停顿 → squash 落回。
+- Phase 1 (0-0.15s): scale 1.0→1.2 + y -10px（EASE_OUT QUAD，并行）
+- Phase 2 (0.15-0.35s): 保持峰值
+- Phase 3 (0.35-0.60s): squash 压缩 0.92 → 弹簧归位 1.0 + y 归位（SPRING EASE_OUT）
+- 内部管理 pivot_offset，自动恢复
+- auto_kill domain: `"ninja"`（与 scale/position/modulate 隔离）
+- 配合 `GlobalTweens.color_flash(node, Color.GOLD, 0.3)` 使用可获得金框闪烁效果
+- 通常通过 `GlobalTweens.ninja_trigger(node)` 调用
+
 ---
 
 ## 3. VFX 子系统参考
@@ -437,7 +446,7 @@ CountUp.play_gold(label, amount, duration, prefix, suffix, per_tick) -> Tween
 # 多段滚动 — 一条 tween 驱动多段数值，各段独立 delay/easing/ticks
 CountUp.play_multi(label, segments: Array[Dictionary], per_tick: Callable) -> Tween
 
-# 计分行快捷包装 — 7-tier 分值驱动顺序滚动
+# 计分行快捷包装 — 7-tier 分值驱动 chips+mult 并行→顺序 result
 CountUp.play_score(label, chips: int, mult: int, result: int, _duration_unused: float = 0.5, per_tick: Callable) -> Tween
 ```
 
@@ -467,7 +476,7 @@ segment 结构：
 
 **`play_score` 详解：**
 
-7-tier 分值驱动计分行。内部按 result 值查表确定各段 ticks 数 + dt + gap_bonus，构建 5 段 `[chips, " × ", mult, " = ", result]` 顺序启动。
+7-tier 分值驱动计分行。内部按 result 值查表确定各段 ticks 数 + dt + gap_bonus，构建 5 段 `[chips, " × ", mult, " = ", result]`。chips 和 mult 同时启动（`mult_delay=0.0`），duration 取两者较大值 `maxf(chips_dur, mult_dur)`，然后 result 顺序启动。
 
 | Tier | result | chips ticks | mult ticks | result ticks | 总 tick 数 | 总时长 |
 |------|--------|-------------|------------|--------------|-----------|--------|
@@ -479,7 +488,7 @@ segment 结构：
 | T5 | 800-1599 | 10 | 7 | 12 | 29 | ~5.5s |
 | T6 | 1600+ | 11 | 8 | 14 | 33 | ~6.6s |
 
-Tick 分布在 cubic-out 曲线上，稀疏→密集 + pitch 递升(0.88→1.22, +0.05/tick)，gap_bonus 随 tier 递增(0.00→0.10)拉大段间停顿。result 到达目标时链式追加 `FX.color_flash(label, Color.GOLD, 0.15)` 金色闪烁。
+Tick 分布在 cubic-out 曲线上，稀疏→密集 + pitch 递升(0.88→1.22, +0.05/tick)。chips 和 mult 并行滚动（同 delay=0 启动），result 在两者中较长的 duration 结束后 + gap1 延迟启动。gap_bonus 随 tier 递增(0.00→0.10)拉大 chips+mult → result 的停顿。result 到达目标时链式追加 `FX.color_flash(label, Color.GOLD, 0.15)` 金色闪烁。
 
 ### 3.7 BounceScore — 计分弹性着陆
 
@@ -550,7 +559,6 @@ await GlobalTweens.count_up(label, 100, 0.5).finished
 # GlobalTweens.burst_particles
 # GlobalTweens.enable_card_tilt / disable_card_tilt / set_hand_spread
 # GlobalTweens.bind_sfx / play_sfx
-# GlobalTweens.set_crt_enabled
 ```
 
 ### 4.3 防冲突（auto_kill）

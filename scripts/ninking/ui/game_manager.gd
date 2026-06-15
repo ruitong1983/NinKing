@@ -210,7 +210,7 @@ func _on_play_pressed() -> void:
 		return
 
 	# Capture per-dun evals for A7 sequential reveal
-	var arr: AutoArranger.Arrangement = NinKingGameState.current_arrangement
+	var arr: Arrangement = NinKingGameState.current_arrangement
 	animation_handler.current_play_data = play_data
 	animation_handler.current_play_data["head_eval"] = arr.head_eval
 	animation_handler.current_play_data["mid_eval"] = arr.mid_eval

@@ -19,7 +19,7 @@ const COLOR_GOLD_MUD   := Color(0.769, 0.639, 0.353)  # 金泥 #C4A35A
 const COLOR_CARD_SHADOW := Color(0, 0, 0, 0.08)  # 纸片投影
 
 # ═══ @onready references ═══
-@onready var display_card: DisplayCardBase = $DisplayCard
+@onready var ninja_card: NinjaInventoryCard = $NinjaCard
 @onready var buy_button: Button = $buy_button
 
 # ═══ State ═══
@@ -37,7 +37,7 @@ func setup(data: Dictionary) -> void:
 	_is_item = data.has("hand_type") or data.get("type") == "item"
 
 	# 1. Init DisplayCard (pure card face)
-	display_card.setup(data)
+	ninja_card.setup_shop(data)
 
 	# 2. Load illustration into the card
 	_load_illustration(data)
@@ -64,11 +64,10 @@ func apply_ink_wash_theme() -> void:
 	## Apply ink-wash (水墨) styling: paper card + sumi text + cinnabar seal button.
 
 	# ── Card frame: paper white + ink border + soft shadow ──
-	display_card.set_card_border(2, COLOR_SUMI, 4, COLOR_CARD_SHADOW)
 	# Override the card's internal bg to paper white via its existing method
-	if display_card.has_method("apply_barrier_theme"):
+	if ninja_card.has_method("apply_barrier_theme"):
 		# Hijack: pass paper as "panel" color — works because method sets bg_color = panel
-		display_card.apply_barrier_theme({"panel": COLOR_PAPER, "accent": COLOR_SUMI})
+		ninja_card.apply_barrier_theme({"panel": COLOR_PAPER, "accent": COLOR_SUMI})
 
 	# ── Buy button: cinnabar seal (朱砂印章) ──
 	_apply_seal_button_style(buy_button, COLOR_CINNABAR)
@@ -76,7 +75,7 @@ func apply_ink_wash_theme() -> void:
 	# ── Rarity border for ability cards ──
 	if not _is_item:
 		var r: String = _data.get("rarity", "common")
-		_apply_rarity_border(r)
+		ninja_card.set_frame(r)
 
 
 func set_purchased() -> void:
@@ -134,29 +133,7 @@ func _apply_seal_button_style(btn: Button, seal_color: Color) -> void:
 # Rarity — card border (ink-wash palette)
 # ══════════════════════════════════════════
 
-func _apply_rarity_border(rarity: String) -> void:
-	var width: int = 2
-	var border_color: Color = COLOR_SUMI
-	var shadow_size: int = 4
-	var shadow_color: Color = COLOR_CARD_SHADOW
-
-	match rarity:
-		"uncommon":
-			border_color = COLOR_BLUE_ZAN
-			shadow_size = 6
-			shadow_color = Color(COLOR_BLUE_ZAN, 0.12)
-		"rare":
-			width = 3
-			border_color = COLOR_CINNABAR
-			shadow_size = 8
-			shadow_color = Color(COLOR_CINNABAR, 0.18)
-		"legendary":
-			width = 3
-			border_color = COLOR_GOLD_MUD
-			shadow_size = 12
-			shadow_color = Color(COLOR_GOLD_MUD, 0.22)
-
-	display_card.set_card_border(width, border_color, shadow_size, shadow_color)
+# Rarity frame — handled by ninja_card.set_frame(rarity) via apply_ink_wash_theme().
 
 
 # ══════════════════════════════════════════
@@ -177,11 +154,12 @@ func _load_illustration(data: Dictionary) -> void:
 
 	var tex: Texture2D = _load_texture_safe(path)
 	if tex:
-		display_card.set_content_texture(tex)
-		display_card.set_detail_data(
+		ninja_card.set_content_texture(tex)
+		ninja_card.set_detail_data(
 			data.get("name", "???"),
 			data.get("desc", ""),
-			tex
+			tex,
+			data.get("effect", {})
 		)
 
 
