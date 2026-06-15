@@ -1,6 +1,6 @@
 # 计分忍者触发动画设计（Phase G — 三幕式）
 
-> **最后更新:** 2026-06-15 | **实现文件:** `scripts/ninking/ui/animation_handler.gd` (~780 行)
+> **最后更新:** 2026-06-15 (Balatro 打击感强化) | **实现文件:** `scripts/ninking/ui/animation_handler.gd` (~579 行)
 > **基础设施:** `scripts/tween/tween_fx.gd` → `scripts/tween/global_tweens.gd`
 > **数据源:** `scripts/ninking/score_calculator.gd` — `ninja_affected_groups()`
 > **决策溯源:** 记忆 `scoring-ninja-trigger-animation-2026-06-15.md`（Grill 12 轮）+ review-plan 审阅
@@ -458,35 +458,44 @@ if xi_cond != "":
 
 ## 8. 视觉反馈设计
 
-### 8.1 ninja_pop_trigger 动效曲线
+### 8.1 ninja_pop_trigger 动效曲线（Balatro 风格打击感强化）
 
-**代码位置:** `tween_fx.gd:542-586`
+**代码位置:** `tween_fx.gd:542-593`
 
 ```
-Phase 1 (0.00-0.15s): 弹起
-  scale: 1.0 → 1.2（EASE_OUT QUAD）
-  position.y: 0 → -10（EASE_OUT QUAD，as_relative）
-  └─ 并行，0.15s
+Phase 1 (0.00-0.10s): 弹起（snappy pop）
+  scale: 1.0 → 1.35（EASE_OUT QUAD）
+  position.y: 0 → -18（EASE_OUT QUAD，as_relative）
+  rotation: 0 → +3°（EASE_OUT QUAD）
+  └─ 并行，0.10s — 比旧版快 33%，幅度更大
 
-Phase 2 (0.15-0.35s): 停顿保持
-  └─ 0.2s interval，峰值停留，让玩家看清金框闪烁
+Phase 2 (0.10-0.18s): 停顿 + 反向 wobble
+  └─ 0.08s interval → rotation +3°→-2°（EASE_IN_OUT SINE, 0.07s）
 
-Phase 3 (0.35-0.60s): 落回
-  3a (0.35-0.43s): squash 压缩 scale 1.2→0.92（EASE_IN SINE, 0.08s）
-  3b (0.43-0.60s): 弹簧归位 scale 0.92→1.0（EASE_OUT BACK, 0.17s）
-                    + y 归位（EASE_OUT SPRING, 0.25s）
+Phase 3 (0.18-0.48s): 落回
+  3a (0.18-0.26s): squash 压缩 scale 1.35→0.85（EASE_IN SINE, 0.08s）
+  3b (0.26-0.48s): ELASTIC 弹性归位 scale 0.85→1.0（EASE_OUT ELASTIC, 0.22s）
+                    + y 归位（EASE_OUT BACK, 0.22s）
+                    + rotation 归零（EASE_OUT SINE, 0.18s）
   └─ 3a/3b 串行，3b 内部并行
 ```
 
+**打击感强化要点：**
+- 弹起幅度：scale +35%（原+20%），Y偏移 +80%（-18px vs -10px）
+- 新增 rotation wobble ±3° 模拟卡牌被"打"了一下的冲击感
+- squash 压缩更深 0.85（原0.92），回弹用 ELASTIC 替代 BACK 获得更Q弹的归位感
+- 触发顺序：白闪(0.06s) → 金闪(0.35s) → ninja_trigger → screen_shake(0.04) → sparkle粒子 → 音效 → 飘字
+
 **auto_kill domain:**
-- domain: `"ninja"`（与 `"scale"`/`"position"`/`"modulate"` 隔离）
+- domain: `"ninja"`（与 `"scale"`/`"position"`/`"modulate"`/`"rotation"` 隔离）
 - 不会影响其他子系统（card_hover、pulse 等）对 node 的补间
 
-### 8.2 金框闪烁
+### 8.2 白闪→金框闪烁（Balatro 风 hi█████）
 
-- 在 `ninja_pop_trigger` 之前或同时调用 `color_flash(ninja_card, Color.GOLD, 0.3)`
-- 0.3s 从金色渐变回原始 modulate，与 Phase 1（弹起 0.15s）重叠
-- 玩家先看到金框闪烁（0-0.15s），此时卡牌正在弹起，然后金闪渐退（0.15-0.3s），卡牌进入停顿阶段
+- **白闪 (0.06s):** `color_flash(ninja_card, Color.WHITE, 0.06)` — 极短白闪模拟"打中"瞬间
+- **间隔 0.04s** 后接金闪：`color_flash(ninja_card, Color.GOLD, 0.35)` — 金色渐退
+- 白闪与 Phase 1 弹起重叠，玩家先看到白闪（0-0.06s）→ 卡牌已弹到峰值 → 金闪渐退（0.1-0.45s）
+- 配合 `screen_shake(0.04, 0.02)` + `burst_particles("sparkle")` 形成完整打击反馈
 
 ### 8.3 浮动数字文本
 

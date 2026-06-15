@@ -56,6 +56,10 @@ func _run_scoring_animation() -> void:
 	_ui.progress_bar.modulate = Color.WHITE
 	await tree.create_timer(1.2).timeout
 
+	# Pre-compute ninja contributions for Stage 2 injection
+	var ninja_contribs: Array[Dictionary] = _compute_ninja_contributions(play_data)
+
+
 	# ═══ Phase 1: Per-dun sequential reveal ═══
 	var dun_evals: Array = [
 		play_data.get("head_eval"),
@@ -102,6 +106,24 @@ func _run_scoring_animation() -> void:
 				if card_node is CanvasItem:
 					GlobalTweens.color_flash(card_node, Color.GOLD, card_stagger)
 				await tree.create_timer(card_stagger).timeout
+
+			# -- Stage 2: Ninja bar card trigger animations (Balatro-style impact) --
+			var row_ninjas: Array = _contribs_for_row(ninja_contribs, i)
+			for nc: Dictionary in row_ninjas:
+				var ninja_card: NinjaInventoryCard = _find_ninja_card(nc.id)
+				if ninja_card != null:
+					# Bright white flash → gold flash (hit impact)
+					GlobalTweens.color_flash(ninja_card, Color.WHITE, 0.06)
+					await tree.create_timer(0.04).timeout
+					GlobalTweens.color_flash(ninja_card, Color.GOLD, 0.35)
+					# Snappy bounce + screen shake + sparkle particles
+					GlobalTweens.ninja_trigger(ninja_card)
+					GlobalTweens.screen_shake(0.04, 0.02)
+					GlobalTweens.burst_particles(ninja_card.global_position + ninja_card.size * 0.5, "sparkle")
+					GlobalTweens.play_sfx(SB.NINJA_ACTIVATE)
+					await tree.create_timer(0.05).timeout
+					_float_ninja_text(ninja_card, nc.chips, nc.mult)
+				await tree.create_timer(0.22).timeout
 
 			# -- Type label reveal --
 			type_label.text = hand_name
@@ -204,6 +226,19 @@ func _run_scoring_animation() -> void:
 				ctl.text = col_hand_names[i]
 				GlobalTweens.color_flash(ctl, Color(0.627, 0.627, 0.627, 1.0), 0.35)
 				await tree.create_timer(0.05).timeout
+
+				# -- Column ninja replay (global/economy ninjas only, Balatro-style) --
+				var col_ninjas: Array = _contribs_for_column(ninja_contribs)
+				for nc: Dictionary in col_ninjas:
+					var ninja_card: NinjaInventoryCard = _find_ninja_card(nc.id)
+					if ninja_card != null:
+						GlobalTweens.color_flash(ninja_card, Color.WHITE, 0.05)
+						await tree.create_timer(0.03).timeout
+						GlobalTweens.color_flash(ninja_card, Color.GOLD, 0.3)
+						GlobalTweens.ninja_trigger(ninja_card, 0.45)
+						GlobalTweens.screen_shake(0.03, 0.02)
+						GlobalTweens.burst_particles(ninja_card.global_position + ninja_card.size * 0.5, "sparkle")
+					await tree.create_timer(0.12).timeout
 
 				# -- play_score: 3-segment column count-up (faster than rows) --
 				var csl: RichTextLabel = col_score_labels[i]
@@ -409,3 +444,132 @@ func _show_breakdown_toast(text: String, _color: Color) -> void:
 	tw.tween_callback(toast.queue_free)
 
 	_active_toast = toast
+
+
+# ════════════════════════════════════════════════════════════════
+#  Ninja contribution helpers (Stage 2 injection)
+# ════════════════════════════════════════════════════════════════
+
+func _compute_ninja_contributions(play_data: Dictionary) -> Array[Dictionary]:
+	## Compute which ninjas affect which rows, and their chips/mult values.
+	## Returns Array of {id, chips, mult, groups: Array[int], is_economy}.
+	var gs: NinKingGameState = NinKingGameState
+	var arr: Arrangement = gs.current_arrangement
+	if arr == null:
+		return []
+
+	var dun_evals: Array = [
+		play_data.get("head_eval"),
+		play_data.get("mid_eval"),
+		play_data.get("tail_eval"),
+	]
+	var xi_result: XiDetector.XiResult = play_data.get("xi_result")
+
+	var head_type: int = dun_evals[0].hand_type if dun_evals[0] != null else CardData.HandType3.HIGH_CARD_3
+	var mid_type: int = dun_evals[1].hand_type if dun_evals[1] != null else CardData.HandType3.HIGH_CARD_3
+	var tail_type: int = dun_evals[2].hand_type if dun_evals[2] != null else CardData.HandType3.HIGH_CARD_3
+
+	var head_cards: Array = arr.head
+	var mid_cards: Array = arr.mid
+	var tail_cards: Array = arr.tail
+
+	var result: Array[Dictionary] = []
+	for ninja: Dictionary in gs.owned_ninjas:
+		var effect: Dictionary = ninja.get("effect", {})
+		var chips: int = effect.get("add_chips", 0)
+		var mult: int = effect.get("add_mult", 0)
+		var has_raw: bool = chips > 0 or mult > 0
+		var has_economy: bool = effect.get("mult_per_gold", 0) > 0 or effect.get("x_per_gold", 1) > 1
+
+		if not has_raw and not has_economy:
+			continue
+
+		# Skip xi-conditional ninjas whose xi isn't triggered
+		var xi_cond: String = effect.get("condition", {}).get("xi", "")
+		if xi_cond != "":
+			if xi_result == null or not xi_result.has_any() or xi_cond not in xi_result.triggered:
+				continue
+
+		var groups: Array[String] = ScoreCalculator.ninja_affected_groups(
+			effect, head_type, mid_type, tail_type,
+			head_cards, mid_cards, tail_cards,
+			dun_evals[0], dun_evals[1], dun_evals[2]
+		)
+
+		var row_indices: Array[int] = []
+		for g: String in groups:
+			match g:
+				"head": row_indices.append(0)
+				"mid": row_indices.append(1)
+				"tail": row_indices.append(2)
+
+		# Empty groups means no specific condition → affects all rows
+		if groups.is_empty():
+			row_indices = [0, 1, 2]
+
+		result.append({
+			"id": ninja.get("id", ""),
+			"chips": chips,
+			"mult": mult,
+			"groups": row_indices,
+			"is_economy": not has_raw and has_economy,
+		})
+
+	return result
+
+
+func _contribs_for_row(contribs: Array, row_idx: int) -> Array:
+	## Filter contributions for a specific row (0=head, 1=mid, 2=tail).
+	var result: Array = []
+	for c: Dictionary in contribs:
+		if row_idx in c.groups:
+			result.append(c)
+	return result
+
+
+func _contribs_for_column(contribs: Array) -> Array:
+	## Filter contributions for column replay — global ninjas (all 3 rows) and economy ninjas.
+	var result: Array = []
+	for c: Dictionary in contribs:
+		if c.is_economy or c.groups.size() >= 3:
+			result.append(c)
+	return result
+
+
+func _find_ninja_card(ninja_id: String) -> NinjaInventoryCard:
+	## Find a NinjaInventoryCard in the ninja bar by ninja ID.
+	if ninja_id == "" or _ui == null or _ui.ninja_bar == null:
+		return null
+	var bar: NinjaBarNode = _ui.ninja_bar
+	for card in bar.get_held_cards():
+		if card is NinjaInventoryCard and card.ninja_data.get("id", "") == ninja_id:
+			return card
+	return null
+
+
+func _float_ninja_text(ninja_card: NinjaInventoryCard, chips: int, mult: int) -> void:
+	## Create floating "+N筹码  +M倍率" text above a triggered ninja card.
+	var text: String = ""
+	if chips > 0 and mult > 0:
+		text = "+%d筹码  +%d倍率" % [chips, mult]
+	elif chips > 0:
+		text = "+%d筹码" % chips
+	elif mult > 0:
+		text = "+%d倍率" % mult
+	else:
+		text = "触发!"
+
+	var floater := Label.new()
+	floater.text = text
+	floater.add_theme_font_size_override("font_size", 14)
+	floater.add_theme_color_override("font_color", Color(1.0, 0.84, 0.0))
+	floater.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_ui.panel_bg.add_child(floater)
+	floater.global_position = ninja_card.global_position + Vector2(ninja_card.card_size.x * 0.5 - 60, -30)
+	floater.size = Vector2(120, 30)
+
+	var tw := floater.create_tween()
+	tw.set_ignore_time_scale(true)
+	tw.tween_property(floater, "position:y", floater.position.y - 40, 0.8).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(floater, "modulate:a", 0.0, 0.6).set_delay(0.2)
+	tw.tween_callback(floater.queue_free)

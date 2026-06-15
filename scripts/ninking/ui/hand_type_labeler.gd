@@ -1,18 +1,15 @@
 class_name HandTypeLabeler
 extends RefCounted
 
-## Updates all hand-type text labels + Lv badges.
+## Updates all hand-type text labels + score formulas.
 ##
-## Lv badges show star chart level per hand type with color tiers:
+## v4: Dun rows show "牌型 × Lv = 筹码" formula in RichTextLabel.
+##     Column rows show only hand type names (no scores, no Lv, no 左/中/右 labels).
+##     Hover tooltip (on formula / type labels) shows detail popup.
+##
+## Lv badge color tiers (used for formula text and tooltip):
 ##   Lv.1-2 gray | Lv.3-4 blue | Lv.5-6 gold
-## Hover over Lv badge shows detail tooltip (hand type name + level + chips/mult).
-## Phase 1 scoring animation also flashes the Lv badge via animation_handler.
-##
-## v2: ColumnTypeRow added — three vertical column rows mirroring HandTypeRow.
-##     ColXiLabel simplified to xi-only preview.
 
-
-## v3: Column rows hidden entirely when no hand type triggers (HIGH_CARD_3).
 
 var _head_type_label: Label
 var _mid_type_label: Label
@@ -46,7 +43,7 @@ var _left_col_lv: Label
 var _mid_col_lv: Label
 var _right_col_lv: Label
 
-# Lv badge color tiers (matches ScoreCard existing palette)
+# Lv color tiers (matches ScoreCard existing palette)
 const LV_COLORS: Dictionary = {
 	1: Color("#7A7A7A"),  # Lv.1-2: gray (TargetScoreLabel)
 	2: Color("#7A7A7A"),
@@ -132,13 +129,13 @@ func setup(
 	_right_col_lv = right_col_lv
 	_play_btn = play
 
-	# Wire hover signals for Lv badges (one-time setup)
-	_setup_lv_hover(shadow_lv, 0)
-	_setup_lv_hover(flash_lv, 1)
-	_setup_lv_hover(destroy_lv, 2)
-	_setup_lv_hover(left_col_lv, 3)
-	_setup_lv_hover(mid_col_lv, 4)
-	_setup_lv_hover(right_col_lv, 5)
+	# Wire hover signals for formula labels (dun rows) / type labels (column rows)
+	_setup_score_hover(shadow_score, 0)
+	_setup_score_hover(flash_score, 1)
+	_setup_score_hover(destroy_score, 2)
+	_setup_score_hover(left_col_type, 3)
+	_setup_score_hover(mid_col_type, 4)
+	_setup_score_hover(right_col_type, 5)
 
 
 ## Clear all labels to default state.
@@ -160,27 +157,21 @@ func reset_labels() -> void:
 	_flash_lv_label.visible = false
 	_destroy_lv_label.text = ""
 	_destroy_lv_label.visible = false
-	# Column rows — hide entire row when no hand type
+	# Column rows — only type labels shown when hand type exists
 	_left_col_label.visible = false
-	_left_col_type.text = "-"
+	_left_col_type.text = ""
 	_left_col_type.visible = false
-	_left_col_score.text = ""
 	_left_col_score.visible = false
-	_left_col_lv.text = ""
 	_left_col_lv.visible = false
 	_mid_col_label.visible = false
-	_mid_col_type.text = "-"
+	_mid_col_type.text = ""
 	_mid_col_type.visible = false
-	_mid_col_score.text = ""
 	_mid_col_score.visible = false
-	_mid_col_lv.text = ""
 	_mid_col_lv.visible = false
 	_right_col_label.visible = false
-	_right_col_type.text = "-"
+	_right_col_type.text = ""
 	_right_col_type.visible = false
-	_right_col_score.text = ""
 	_right_col_score.visible = false
-	_right_col_lv.text = ""
 	_right_col_lv.visible = false
 	_col0_label.text = ""
 	_col0_label.visible = true
@@ -209,7 +200,7 @@ func update_all(hand: Array[CardData.PlayingCard]) -> void:
 # Dun type labels — 影 / 瞬 / 滅
 # ══════════════════════════════════════════
 
-## Update per-dun type names, base score preview, and Lv badges.
+## Update per-dun type names and score formula: "牌型 × Lv = 筹码".
 func _update_dun_types(hand: Array[CardData.PlayingCard]) -> void:
 	var head_cards := hand.slice(0, 3)
 	var mid_cards := hand.slice(3, 6)
@@ -229,51 +220,42 @@ func _update_dun_types(hand: Array[CardData.PlayingCard]) -> void:
 	_current_mid_ht = mid_eval.hand_type
 	_current_tail_ht = tail_eval.hand_type
 
-	# Star chart levels for Lv badges
+	# Star chart levels
 	var levels: Dictionary = NinKingGameState.star_chart_levels
 
 	# Row 1: 影
 	_shadow_type_label.text = head_name
-	_shadow_score_label.text = ""
-	_update_lv_badge(_shadow_lv_label, _current_head_ht, levels)
+	_write_dun_formula(_shadow_score_label, head_eval.hand_type, levels)
 
 	# Row 2: 瞬
 	_flash_type_label.text = mid_name
-	_flash_score_label.text = ""
-	_update_lv_badge(_flash_lv_label, _current_mid_ht, levels)
+	_write_dun_formula(_flash_score_label, mid_eval.hand_type, levels)
 
 	# Row 3: 滅
 	_destroy_type_label.text = tail_name
-	_destroy_score_label.text = ""
-	_update_lv_badge(_destroy_lv_label, _current_tail_ht, levels)
+	_write_dun_formula(_destroy_score_label, tail_eval.hand_type, levels)
 
 
-## Update a single Lv badge label: text, color tier, and visibility.
-func _update_lv_badge(lv_label: Label, hand_type: int, levels: Dictionary) -> void:
+## Write "牌型 × Lv = 筹码" formula to a RichTextLabel using bbcode color.
+func _write_dun_formula(score_label: RichTextLabel, hand_type: int, levels: Dictionary) -> void:
 	var lvl: int = levels.get(hand_type, 0)
 	if lvl <= 0:
-		lv_label.text = ""
-		lv_label.visible = false
+		score_label.text = ""
 		return
-
-	lv_label.text = "Lv.%d" % lvl
-	lv_label.visible = true
+	var type_name: String = CardData.get_hand_type3_name(hand_type as CardData.HandType3)
+	var chips: int = CardData.get_hand_type3_leveled_chips(hand_type, levels)
 	var color: Color = LV_COLORS.get(lvl, Color(0.7, 0.7, 0.7))
-	lv_label.add_theme_color_override("font_color", color)
+	var color_hex: String = "#%02x%02x%02x" % [int(color.r * 255), int(color.g * 255), int(color.b * 255)]
+	score_label.text = "[color=%s]%s × %d = %d[/color]" % [color_hex, type_name, lvl, chips]
 
 
 # ══════════════════════════════════════════
-# Column type rows — 左列 / 中列 / 右列 (v2)
+# Column type rows — 左列 / 中列 / 右列 (v4: types only, no scores / Lv)
 # ══════════════════════════════════════════
 
-## Update per-column type names, score preview, and Lv badges.
-## v3: Entire row hidden when no hand type triggers (HIGH_CARD_3).
+## Update per-column hand type labels only. Hides labels with no hand type (HIGH_CARD_3).
 func _update_column_rows(hand: Array[CardData.PlayingCard]) -> void:
-	var levels: Dictionary = NinKingGameState.star_chart_levels
-	var row_labels: Array[Label] = [_left_col_label, _mid_col_label, _right_col_label]
 	var col_labels: Array[Label] = [_left_col_type, _mid_col_type, _right_col_type]
-	var score_labels: Array[RichTextLabel] = [_left_col_score, _mid_col_score, _right_col_score]
-	var lv_labels: Array[Label] = [_left_col_lv, _mid_col_lv, _right_col_lv]
 
 	for i: int in range(3):
 		var col_cards: Array[CardData.PlayingCard] = [
@@ -291,31 +273,21 @@ func _update_column_rows(hand: Array[CardData.PlayingCard]) -> void:
 			2: _current_right_col_ht = ht
 
 		if ht == CardData.HandType3.HIGH_CARD_3:
-			row_labels[i].visible = false
-			col_labels[i].text = "-"
+			col_labels[i].text = ""
 			col_labels[i].visible = false
-			score_labels[i].text = ""
-			score_labels[i].visible = false
-			lv_labels[i].text = ""
-			lv_labels[i].visible = false
-			continue
-
-		row_labels[i].visible = true
-		col_labels[i].visible = true
-		score_labels[i].visible = true
-		col_labels[i].text = CardData.get_hand_type3_name(ht)
-		score_labels[i].text = ""
-		_update_lv_badge(lv_labels[i], ht, levels)
+		else:
+			col_labels[i].text = CardData.get_hand_type3_name(ht)
+			col_labels[i].visible = true
 
 
 # ══════════════════════════════════════════
-# Lv badge hover tooltip
+# Hover tooltip (on formula / type labels)
 # ══════════════════════════════════════════
 
-## Wire hover signals for one Lv badge (called once per badge in setup).
-func _setup_lv_hover(lv_label: Label, row_idx: int) -> void:
-	lv_label.mouse_entered.connect(_on_lv_hover_enter.bind(row_idx))
-	lv_label.mouse_exited.connect(_on_lv_hover_exit)
+## Wire hover signals for one score/type label (called once per label in setup).
+func _setup_score_hover(target: Control, row_idx: int) -> void:
+	target.mouse_entered.connect(_on_lv_hover_enter.bind(row_idx))
+	target.mouse_exited.connect(_on_lv_hover_exit)
 
 
 func _on_lv_hover_enter(row_idx: int) -> void:
@@ -342,28 +314,28 @@ func _on_hover_delay_ended(row_idx: int) -> void:
 ## Build and show the tooltip for a given row's hand type.
 func _show_lv_tooltip(row_idx: int) -> void:
 	var hand_type: int
-	var lv_label: Label
+	var anchor: Control
 	match row_idx:
 		0:
 			hand_type = _current_head_ht
-			lv_label = _shadow_lv_label
+			anchor = _shadow_score_label
 		1:
 			hand_type = _current_mid_ht
-			lv_label = _flash_lv_label
+			anchor = _flash_score_label
 		2:
 			hand_type = _current_tail_ht
-			lv_label = _destroy_lv_label
+			anchor = _destroy_score_label
 		3:
 			hand_type = _current_left_col_ht
-			lv_label = _left_col_lv
+			anchor = _left_col_type
 		4:
 			hand_type = _current_mid_col_ht
-			lv_label = _mid_col_lv
+			anchor = _mid_col_type
 		_:
 			hand_type = _current_right_col_ht
-			lv_label = _right_col_lv
+			anchor = _right_col_type
 
-	if hand_type < 0 or not is_instance_valid(lv_label):
+	if hand_type < 0 or not is_instance_valid(anchor):
 		return
 
 	var levels: Dictionary = NinKingGameState.star_chart_levels
@@ -407,17 +379,17 @@ func _show_lv_tooltip(row_idx: int) -> void:
 
 	tooltip.size = Vector2(180, 52)
 
-	# ── Position above-and-right of the badge ──
+	# ── Position above-and-right of the anchor ──
 	var scene_tree: SceneTree = Engine.get_main_loop() as SceneTree
 	var vp_size: Vector2 = scene_tree.root.get_visible_rect().size
 	var pos: Vector2 = Vector2(
-		min(lv_label.global_position.x + 8, vp_size.x - tooltip.size.x - 8),
-		max(lv_label.global_position.y - tooltip.size.y - 6, 4)
+		min(anchor.global_position.x + 8, vp_size.x - tooltip.size.x - 8),
+		max(anchor.global_position.y - tooltip.size.y - 6, 4)
 	)
 	tooltip.global_position = pos
 
 	# Add to scene tree
-	var scene_root: Node = lv_label.get_tree().current_scene
+	var scene_root: Node = anchor.get_tree().current_scene
 	if scene_root != null:
 		scene_root.add_child(tooltip)
 	_active_tooltip = tooltip

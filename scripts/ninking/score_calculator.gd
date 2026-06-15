@@ -308,19 +308,7 @@ static func _collect_ninja_for_column(
 	var cond: Dictionary = effect.get("condition", {})
 
 	# Economy effects always apply (same as rows)
-	if effect.get("mult_per_gold", 0) > 0:
-		var step: int = effect.get("mult_gold_step", 5)
-		var cap: int = effect.get("mult_gold_cap", 10)
-		var bonus: int = mini(floori(float(gold) / step), cap) * effect["mult_per_gold"]
-		if bonus > 0:
-			col_ninja.mult += bonus
-
-	if effect.get("x_per_gold", 1) > 1:
-		var step_x: int = effect.get("x_gold_step", 15)
-		var cap_x: int = effect.get("x_gold_cap", 3)
-		var count_x: int = mini(floori(float(gold) / step_x), cap_x)
-		for _i: int in range(count_x):
-			col_ninja.x_stack.append(effect["x_per_gold"])
+	_apply_economy_effects(effect, gold, col_ninja)
 
 	# Group condition → skip columns (Q10: group doesn't map to columns)
 	if cond.get("group", "") != "":
@@ -421,27 +409,9 @@ static func collect_ninja_per_group(
 	var x_stack: Array = effect.get("x_stack", [])
 
 	# Economy effects always apply to ALL groups
-	var has_economy: bool = false
-	if effect.get("mult_per_gold", 0) > 0:
-		has_economy = true
-		var step: int = effect.get("mult_gold_step", 5)
-		var cap: int = effect.get("mult_gold_cap", 10)
-		var bonus: int = mini(floori(float(gold) / step), cap) * effect["mult_per_gold"]
-		if bonus > 0:
-			head_ninja.mult += bonus
-			mid_ninja.mult += bonus
-			tail_ninja.mult += bonus
-
-	if effect.get("x_per_gold", 1) > 1:
-		has_economy = true
-		var step_x: int = effect.get("x_gold_step", 15)
-		var cap_x: int = effect.get("x_gold_cap", 3)
-		var count_x: int = mini(floori(float(gold) / step_x), cap_x)
-		for _i: int in range(count_x):
-			var x_val: int = effect["x_per_gold"]
-			head_ninja.x_stack.append(x_val)
-			mid_ninja.x_stack.append(x_val)
-			tail_ninja.x_stack.append(x_val)
+	var has_economy := _apply_economy_effects(effect, gold, head_ninja)
+	has_economy = _apply_economy_effects(effect, gold, mid_ninja) or has_economy
+	has_economy = _apply_economy_effects(effect, gold, tail_ninja) or has_economy
 
 	# Apply chips/mult/x_mult/x_stack to affected groups
 	for group_name: String in groups:
@@ -550,6 +520,27 @@ static func _check_cond_for_type(cond: Dictionary, hand_type: CardData.HandType3
 
 
 # ──────────────────────────── Helpers ────────────────────────────
+
+## Apply economy effects (mult_per_gold, x_per_gold) to a target dict.
+## Returns true if any economy effects were present.
+static func _apply_economy_effects(effect: Dictionary, gold: int, target: Dictionary) -> bool:
+	var has_economy := false
+	if effect.get("mult_per_gold", 0) > 0:
+		has_economy = true
+		var step: int = effect.get("mult_gold_step", 5)
+		var cap: int = effect.get("mult_gold_cap", 10)
+		var bonus: int = mini(floori(float(gold) / step), cap) * effect["mult_per_gold"]
+		if bonus > 0:
+			target.mult += bonus
+	if effect.get("x_per_gold", 1) > 1:
+		has_economy = true
+		var step_x: int = effect.get("x_gold_step", 15)
+		var cap_x: int = effect.get("x_gold_cap", 3)
+		var count_x: int = mini(floori(float(gold) / step_x), cap_x)
+		for _i: int in range(count_x):
+			target.x_stack.append(effect["x_per_gold"])
+	return has_economy
+
 
 ## Delegated to ScoreHelpers (kept as private wrapper for backward compat).
 static func _group_card_chips(cards: Array, hungry_ghost: bool) -> int:

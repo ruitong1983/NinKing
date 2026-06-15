@@ -533,13 +533,14 @@ static func _method_bezier(
 
 # ─── 忍者触发动效（弹起 + 金框 + squash 落回）───
 
-## 忍者触发组合动画：弹起 → 停顿 → squash 落回。
-## Phase 1 (0-0.15s): scale 1.0→1.2 + y -10px（EASE_OUT QUAD）
-## Phase 2 (0.15-0.35s): 保持峰值
-## Phase 3 (0.35-0.60s): squash 压缩(0.92) → 弹簧归位 1.0 + y 归位
+## 忍者触发组合动画：弹起 → 停顿 → squash 落回（Balatro 风格强化打击感）
+## Phase 1: scale 1.0→1.35 + y -18px + rotation ±3°（snappy pop）
+## Phase 2: 短暂峰值停留 + rotation 反向 wobble
+## Phase 3: squash 压缩(0.85) → 弹性归位 1.0
 ##
+## duration: 动画总时长（所有阶段按比例缩放，默认 0.6s，基准 0.55s）
 ## auto_kill domain: "ninja"（与 scale/position/modulate 隔离）
-static func ninja_pop_trigger(node: Node, _duration: float = 0.6, auto_kill: bool = true) -> Tween:
+static func ninja_pop_trigger(node: Node, duration: float = 0.6, auto_kill: bool = true) -> Tween:
 	if not is_instance_valid(node):
 		return null
 	if auto_kill:
@@ -550,30 +551,42 @@ static func ninja_pop_trigger(node: Node, _duration: float = 0.6, auto_kill: boo
 	if ctrl:
 		ctrl.pivot_offset = ctrl.size * 0.5
 	var orig_y: float = node.position.y
+	var orig_rot: float = node.rotation
+
+	# Scale all phase durations proportionally to match requested total duration.
+	# Base total ≈ 0.55s (0.10 + 0.08 + 0.07 + 0.08 + 0.22).
+	const BASE_TOTAL: float = 0.55
+	var s: float = duration / BASE_TOTAL
 
 	var tw := node.create_tween()
 
-	# Phase 1: bounce up — scale 1.0→1.2, y -10px (parallel)
+	# Phase 1: snappy bounce up — scale 1.0→1.35, y -18px, rotation wobble ±3° (parallel)
 	tw.set_parallel(true)
-	tw.tween_property(node, "scale", Vector2(1.2, 1.2), 0.15) \
+	tw.tween_property(node, "scale", Vector2(1.35, 1.35), 0.10 * s) \
 		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
-	tw.tween_property(node, "position:y", -10.0, 0.15) \
+	tw.tween_property(node, "position:y", -18.0, 0.10 * s) \
 		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD).as_relative()
+	tw.tween_property(node, "rotation", deg_to_rad(3.0), 0.10 * s) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
 
-	# Phase 2: hold at peak (sequential after Phase 1 group)
+	# Phase 2: brief hold at peak → rotation reverse wobble
 	tw.set_parallel(false)
-	tw.tween_interval(0.2)
+	tw.tween_interval(0.08 * s)
+	tw.tween_property(node, "rotation", deg_to_rad(-2.0), 0.07 * s) \
+		.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
 
-	# Phase 3: squash compress → spring back (sequential)
+	# Phase 3: squash compress → elastic spring back (sequential)
 	# 3a: quick squash down
-	tw.tween_property(node, "scale", Vector2(0.92, 0.92), 0.08) \
+	tw.tween_property(node, "scale", Vector2(0.85, 0.85), 0.08 * s) \
 		.set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_SINE)
-	# 3b: spring back to 1.0 + y restore (parallel with each other)
+	# 3b: elastic spring back to 1.0 + y restore + rotation reset (parallel)
 	tw.set_parallel(true)
-	tw.tween_property(node, "scale", Vector2.ONE, 0.17) \
+	tw.tween_property(node, "scale", Vector2.ONE, 0.22 * s) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_ELASTIC)
+	tw.tween_property(node, "position:y", orig_y, 0.22 * s) \
 		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
-	tw.tween_property(node, "position:y", orig_y, 0.25) \
-		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SPRING)
+	tw.tween_property(node, "rotation", orig_rot, 0.18 * s) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SINE)
 
 	# Cleanup
 	tw.tween_callback(func():

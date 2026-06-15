@@ -55,7 +55,7 @@ GlobalTweens (autoload, 胶水层)
 | 列表逐项错峰入场 | `GlobalTweens.stagger_slide_in(nodes, 0.12, 0.3)` | 淡入+左滑，每项间隔 stagger |
 | 弧线弹性补间 | `GlobalTweens.move_arc(node, target_pos, 0.5, 0.5)` | 贝塞尔弧线+弹性归位 |
 | 溶解消散 | `GlobalTweens.dissolve_out(node, 1.0, 0.2, Color.ORANGE)` | 需预先挂载 dissolve2d shader |
-| 忍者触发 | `GlobalTweens.ninja_trigger(node, 0.6)` | 弹起→金框→squash 落回，auto_kill domain "ninja" |
+| 忍者触发 | `GlobalTweens.ninja_trigger(node, 0.6)` | Balatro 风弹起→wobble→squash 落回，auto_kill domain "ninja" |
 | 卡牌 hover 放大 | `GlobalTweens.card_hover(node, Vector2(1.05,1.05), -4.0)` | scale+上浮 |
 | 卡牌 unhover 还原 | `GlobalTweens.card_unhover(node, Vector2.ONE, 0.0)` | scale+位置归位 |
 | 卡牌倾斜追踪鼠标 | `GlobalTweens.enable_card_tilt(node)` | 每帧跟随鼠标旋转 |
@@ -328,19 +328,19 @@ TweenFX.card_unhover(node: CanvasItem, original_scale: Vector2 = Vector2.ONE, or
 - 接受 `CanvasItem`（兼容 `Node2D` 和 `Control`），Button/Label 等 UI 节点直接可用
 - 通常通过 `GlobalTweens.card_hover/card_unhover` 调用，与 CardTilt 配合
 
-### 2.8 忍者触发
+### 2.8 忍者触发（Balatro 风格打击感强化）
 
 ```gdscript
 TweenFX.ninja_pop_trigger(node: Node, duration: float = 0.6) -> Tween
 ```
 
-忍者触发组合动画：弹起 → 停顿 → squash 落回。
-- Phase 1 (0-0.15s): scale 1.0→1.2 + y -10px（EASE_OUT QUAD，并行）
-- Phase 2 (0.15-0.35s): 保持峰值
-- Phase 3 (0.35-0.60s): squash 压缩 0.92 → 弹簧归位 1.0 + y 归位（SPRING EASE_OUT）
-- 内部管理 pivot_offset，自动恢复
-- auto_kill domain: `"ninja"`（与 scale/position/modulate 隔离）
-- 配合 `GlobalTweens.color_flash(node, Color.GOLD, 0.3)` 使用可获得金框闪烁效果
+忍者触发组合动画（Balatro 小丑牌风格强化）：弹起 → 停顿 → squash 落回。
+- Phase 1 (0-0.10s): scale 1.0→1.35 + y -18px + rotation ±3° wobble（EASE_OUT QUAD，并行，snappy pop）
+- Phase 2 (0.10-0.18s): 短暂峰值停留 → rotation 反向 -2° wobble
+- Phase 3 (0.18-0.48s): squash 压缩 0.85 → ELASTIC 弹性归位 1.0 + y 归位（BACK EASE_OUT）+ rotation 归零
+- 内部管理 pivot_offset + rotation，自动恢复
+- auto_kill domain: `"ninja"`（与 scale/position/modulate/rotation 隔离）
+- 配合白闪→金闪+屏幕震动+粒子爆发可获得 Balatro 风完整打击感
 - 通常通过 `GlobalTweens.ninja_trigger(node)` 调用
 
 ---

@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://li7lho25u0yb"]
+[gd_scene format=3 uid="uid://c6jrodla1xa3s"]
 
 [node name="JokerSlot" type="Panel" unique_id=1267218274]
 custom_minimum_size = Vector2(100, 140)

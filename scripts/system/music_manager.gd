@@ -38,7 +38,7 @@ func _preload_audio() -> void:
 
 func _ensure_menu_bgm() -> AudioStream:
 	if _menu_bgm == null:
-		_menu_bgm = load("res://assets/audio/music/start_menu_bgm.wav")
+		_menu_bgm = load("res://assets/audio/music/start_menu_bgm.mp3")
 	return _menu_bgm
 
 

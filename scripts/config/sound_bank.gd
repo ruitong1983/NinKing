@@ -7,7 +7,7 @@
 extends RefCounted
 
 # ─── BGM ───
-const MENU_BGM: AudioStream = preload("res://assets/audio/music/start_menu_bgm.wav")
+const MENU_BGM: AudioStream = preload("res://assets/audio/music/start_menu_bgm.mp3")
 const GAME_BGM: AudioStream = null  ## @deprecated 旧 FanKing 占位 (main_game_bgm.wav)，MusicManager 已改用 game_bgm_light/medium/heavy.mp3
 const GAME_BGM_LIGHT: AudioStream = preload("res://assets/audio/music/game_bgm_light.mp3")
 const GAME_BGM_MEDIUM: AudioStream = preload("res://assets/audio/music/game_bgm_medium.mp3")

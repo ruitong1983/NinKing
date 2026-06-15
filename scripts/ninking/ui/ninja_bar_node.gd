@@ -23,6 +23,14 @@ func set_container(container: NinjaBarContainer) -> void:
 	_container.reorder_requested.connect(_on_reorder_requested)
 
 
+func get_held_cards() -> Array:
+	## Returns the currently held NinjaInventoryCard instances.
+	## Public accessor — callers should not reach into _container._held_cards directly.
+	if _container == null:
+		return []
+	return _container._held_cards.duplicate()
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	## ESC dismisses the detail popup.
 	if _detail_popup != null:

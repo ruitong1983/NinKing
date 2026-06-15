@@ -2,14 +2,14 @@
 
 [ext_resource type="Theme" uid="uid://bqb2i07k0v8jt" path="res://assets/themes/manga_theme.tres" id="1_theme"]
 [ext_resource type="PackedScene" uid="uid://c7u8hryloq7hy" path="res://addons/card-framework/card_manager.tscn" id="2_cm"]
-[ext_resource type="Texture2D" uid="uid://cmh6fgxip28j3" path="res://assets/images/background/table_bg.png" id="3_bg"]
+[ext_resource type="Texture2D" uid="uid://deelue8r4tqif" path="res://assets/images/background/table_bg.png" id="3_bg"]
 [ext_resource type="PackedScene" uid="uid://4jkp5mgq3d6t" path="res://scenes/ninking/ninking_card_factory.tscn" id="4_factory"]
 [ext_resource type="Shader" uid="uid://v8sl5wp6qlqi" path="res://scripts/ninking/ui/panel_edge_fade.gdshader" id="5_shader"]
-[ext_resource type="Script" uid="uid://dgug0lj2v2uoh" path="res://scripts/ninking/debug/debug_card_tray.gd" id="7_tray"]
-[ext_resource type="Script" uid="uid://urvcvxvssicb" path="res://scripts/ninking/debug/debug_panel.gd" id="8_rwsde"]
-[ext_resource type="Script" uid="uid://b5wb4af5a6w1a" path="res://scripts/ninking/debug/debug_controller.gd" id="9_ctrl"]
-[ext_resource type="Script" uid="uid://dkduntlls22m2" path="res://scripts/ninking/ui/hand_card_container.gd" id="10_hcc"]
-[ext_resource type="Script" uid="uid://c56l87nvs3gi5" path="res://scripts/ninking/debug/debug_ninja_selector.gd" id="11_sel_script"]
+[ext_resource type="Script" uid="uid://plki4nqvse4n" path="res://scripts/ninking/debug/debug_card_tray.gd" id="7_tray"]
+[ext_resource type="Script" uid="uid://dlyk22r2thr0n" path="res://scripts/ninking/debug/debug_panel.gd" id="8_rwsde"]
+[ext_resource type="Script" uid="uid://bvwoeasc8o6eb" path="res://scripts/ninking/debug/debug_controller.gd" id="9_ctrl"]
+[ext_resource type="Script" uid="uid://btor5q756bk78" path="res://scripts/ninking/ui/hand_card_container.gd" id="10_hcc"]
+[ext_resource type="Script" uid="uid://bhsy8ww8j2k2n" path="res://scripts/ninking/debug/debug_ninja_selector.gd" id="11_sel_script"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_match_fade"]
 shader = ExtResource("5_shader")
@@ -205,9 +205,9 @@ material = SubResource("ShaderMaterial_match_fade")
 custom_minimum_size = Vector2(0, 160)
 layout_mode = 1
 anchors_preset = -1
-anchor_top = 0.5
+anchor_top = 0.65
 anchor_right = 1.0
-anchor_bottom = 0.75
+anchor_bottom = 0.85
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_match_panel")
@@ -238,14 +238,14 @@ text = "討伐 3"
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.941, 0.816, 0.376, 1)
-theme_override_font_sizes/font_size = 28
-text = "$0"
+theme_override_font_sizes/font_size = 48
+text = "0"
 
 [node name="AntePanel" type="Panel" parent="MainVBox/ContentRow/LeftPanel" unique_id=272015046]
 material = SubResource("ShaderMaterial_ante_fade")
 layout_mode = 1
 anchors_preset = -1
-anchor_top = 0.75
+anchor_top = 0.85
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -279,247 +279,262 @@ material = SubResource("ShaderMaterial_score_fade")
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
-anchor_bottom = 0.25
+anchor_bottom = 0.4
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_score_card")
 
 [node name="HandTypeVBox" type="VBoxContainer" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel" unique_id=1115560789]
 layout_mode = 1
-anchors_preset = -1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 8.0
+offset_left = 16.0
 offset_top = 12.0
-offset_right = -130.0
+offset_right = -112.0
+offset_bottom = -12.0
+grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="Row影" type="HBoxContainer" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox" unique_id=2100186756]
+layout_mode = 2
+size_flags_vertical = 3
 theme_override_constants/separation = 8
 
-[node name="HandTypeRow" type="VBoxContainer" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox" unique_id=1413640225]
+[node name="ShadowDun" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/Row影" unique_id=1143188667]
+custom_minimum_size = Vector2(46, 0)
 layout_mode = 2
-
-[node name="Row影" type="HBoxContainer" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow" unique_id=2100186756]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 8
-
-[node name="ShadowDun" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow/Row影" unique_id=1143188667]
-custom_minimum_size = Vector2(40, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.769, 0.294, 0.294, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.6)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 38
 text = "影"
+horizontal_alignment = 1
 
-[node name="ShadowType" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow/Row影" unique_id=1114927813]
+[node name="ShadowType" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/Row影" unique_id=1114927813]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 26
 text = "-"
+vertical_alignment = 1
 
-[node name="ShadowLv" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow/Row影" unique_id=340933214]
+[node name="ShadowLv" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/Row影" unique_id=340933214]
 unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(50, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 20
+vertical_alignment = 1
 
-[node name="ShadowScore" type="RichTextLabel" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow/Row影" unique_id=2023250501]
+[node name="ShadowScore" type="RichTextLabel" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/Row影" unique_id=2023250501]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(170, 0)
+custom_minimum_size = Vector2(70, 0)
 layout_mode = 2
+theme_override_font_sizes/normal_font_size = 24
 bbcode_enabled = true
 scroll_active = false
-horizontal_alignment = 0
-theme_override_font_sizes/normal_font_size = 20
 
-[node name="Row瞬" type="HBoxContainer" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow" unique_id=1057957074]
+[node name="Row瞬" type="HBoxContainer" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox" unique_id=1057957074]
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_vertical = 3
 theme_override_constants/separation = 8
 
-[node name="FlashDun" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow/Row瞬" unique_id=255930282]
-custom_minimum_size = Vector2(40, 0)
+[node name="FlashDun" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/Row瞬" unique_id=255930282]
+custom_minimum_size = Vector2(46, 0)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.769, 0.659, 0.263, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.6)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 38
 text = "瞬"
+horizontal_alignment = 1
 
-[node name="FlashType" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow/Row瞬" unique_id=954720862]
+[node name="FlashType" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/Row瞬" unique_id=954720862]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 26
 text = "-"
+vertical_alignment = 1
 
-[node name="FlashLv" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow/Row瞬" unique_id=1995019362]
+[node name="FlashLv" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/Row瞬" unique_id=1995019362]
 unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(50, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 20
+vertical_alignment = 1
 
-[node name="FlashScore" type="RichTextLabel" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow/Row瞬" unique_id=1719109806]
+[node name="FlashScore" type="RichTextLabel" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/Row瞬" unique_id=1719109806]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(170, 0)
+custom_minimum_size = Vector2(70, 0)
 layout_mode = 2
+theme_override_font_sizes/normal_font_size = 24
 bbcode_enabled = true
 scroll_active = false
-horizontal_alignment = 0
-theme_override_font_sizes/normal_font_size = 20
 
-[node name="Row滅" type="HBoxContainer" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow" unique_id=861865764]
+[node name="Row滅" type="HBoxContainer" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox" unique_id=861865764]
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_vertical = 3
 theme_override_constants/separation = 8
 
-[node name="DestroyDun" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow/Row滅" unique_id=1177254606]
-custom_minimum_size = Vector2(40, 0)
+[node name="DestroyDun" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/Row滅" unique_id=1177254606]
+custom_minimum_size = Vector2(46, 0)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.769, 0.188, 0.118, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.6)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 38
 text = "滅"
+horizontal_alignment = 1
 
-[node name="DestroyType" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow/Row滅" unique_id=1052591895]
+[node name="DestroyType" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/Row滅" unique_id=1052591895]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 26
 text = "-"
+vertical_alignment = 1
 
-[node name="DestroyLv" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow/Row滅" unique_id=719355205]
+[node name="DestroyLv" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/Row滅" unique_id=719355205]
 unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(50, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 20
+vertical_alignment = 1
 
-[node name="DestroyScore" type="RichTextLabel" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/HandTypeRow/Row滅" unique_id=599072801]
+[node name="DestroyScore" type="RichTextLabel" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/Row滅" unique_id=599072801]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(170, 0)
+custom_minimum_size = Vector2(70, 0)
 layout_mode = 2
+theme_override_font_sizes/normal_font_size = 24
 bbcode_enabled = true
 scroll_active = false
-horizontal_alignment = 0
-theme_override_font_sizes/normal_font_size = 20
 
-[node name="ColumnSpacer" type="Control" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox" unique_id=82087868]
-custom_minimum_size = Vector2(0, 4)
+[node name="ColDivider" type="ColorRect" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox" unique_id=82087868]
+custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
+color = Color(0.941, 0.929, 0.894, 0.15)
 
-[node name="ColumnTypeRow" type="VBoxContainer" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox" unique_id=1755077219]
+[node name="ColumnBar" type="HBoxContainer" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox" unique_id=1755077219]
 layout_mode = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 12
 
-[node name="Row左列" type="HBoxContainer" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow" unique_id=90874369]
+[node name="LeftColType" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnBar" unique_id=2040136400]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 8
+theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
+theme_override_font_sizes/font_size = 14
+text = "-"
+horizontal_alignment = 1
 
-[node name="LeftColLabel" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow/Row左列" unique_id=1145575621]
+[node name="MidColType" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnBar" unique_id=1654097371]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
+theme_override_font_sizes/font_size = 14
+text = "-"
+horizontal_alignment = 1
+
+[node name="RightColType" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnBar" unique_id=1922207473]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
+theme_override_font_sizes/font_size = 14
+text = "-"
+horizontal_alignment = 1
+
+[node name="LeftColLabel" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnBar" unique_id=1145575621]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(22, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.627, 0.627, 0.627, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 14
 text = "左"
 
-[node name="LeftColType" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow/Row左列" unique_id=2040136400]
+[node name="LeftColLv" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnBar" unique_id=624070892]
 unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(38, 0)
 layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
-theme_override_font_sizes/font_size = 22
-text = "-"
+theme_override_font_sizes/font_size = 13
 
-[node name="LeftColLv" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow/Row左列" unique_id=624070892]
+[node name="LeftColScore" type="RichTextLabel" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnBar" unique_id=1684887682]
 unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(44, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-
-[node name="LeftColScore" type="RichTextLabel" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow/Row左列" unique_id=1684887682]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(170, 0)
-layout_mode = 2
+theme_override_font_sizes/normal_font_size = 13
 bbcode_enabled = true
 scroll_active = false
-horizontal_alignment = 0
-theme_override_font_sizes/normal_font_size = 20
 
-[node name="Row中列" type="HBoxContainer" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow" unique_id=76564804]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 8
-
-[node name="MidColLabel" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow/Row中列" unique_id=125249321]
+[node name="MidColLabel" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnBar" unique_id=125249321]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(40, 0)
+visible = false
+custom_minimum_size = Vector2(22, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.627, 0.627, 0.627, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 14
 text = "中"
 
-[node name="MidColType" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow/Row中列" unique_id=1654097371]
+[node name="MidColLv" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnBar" unique_id=2059340550]
 unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(38, 0)
 layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
-theme_override_font_sizes/font_size = 22
-text = "-"
+theme_override_font_sizes/font_size = 13
 
-[node name="MidColLv" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow/Row中列" unique_id=2059340550]
+[node name="MidColScore" type="RichTextLabel" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnBar" unique_id=1756762535]
 unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(44, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-
-[node name="MidColScore" type="RichTextLabel" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow/Row中列" unique_id=1756762535]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(170, 0)
-layout_mode = 2
+theme_override_font_sizes/normal_font_size = 13
 bbcode_enabled = true
 scroll_active = false
-horizontal_alignment = 0
-theme_override_font_sizes/normal_font_size = 20
 
-[node name="Row右列" type="HBoxContainer" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow" unique_id=1564609352]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 8
-
-[node name="RightColLabel" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow/Row右列" unique_id=491239089]
+[node name="RightColLabel" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnBar" unique_id=491239089]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(40, 0)
+visible = false
+custom_minimum_size = Vector2(22, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.627, 0.627, 0.627, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 14
 text = "右"
 
-[node name="RightColType" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow/Row右列" unique_id=1922207473]
+[node name="RightColLv" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnBar" unique_id=1677625674]
 unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(38, 0)
 layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
-theme_override_font_sizes/font_size = 22
-text = "-"
+theme_override_font_sizes/font_size = 13
 
-[node name="RightColLv" type="Label" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow/Row右列" unique_id=1677625674]
+[node name="RightColScore" type="RichTextLabel" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnBar" unique_id=1662305638]
 unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(44, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-
-[node name="RightColScore" type="RichTextLabel" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/HandTypeVBox/ColumnTypeRow/Row右列" unique_id=1662305638]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(170, 0)
-layout_mode = 2
+theme_override_font_sizes/normal_font_size = 13
 bbcode_enabled = true
 scroll_active = false
-horizontal_alignment = 0
-theme_override_font_sizes/normal_font_size = 20
 
 [node name="ScorePanel" type="Panel" parent="MainVBox/ContentRow/LeftPanel" unique_id=1050895993]
 material = SubResource("ShaderMaterial_score_fade")
 layout_mode = 1
 anchors_preset = -1
-anchor_top = 0.25
+anchor_top = 0.4
 anchor_right = 1.0
-anchor_bottom = 0.5
+anchor_bottom = 0.65
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_score_card")
@@ -938,6 +953,7 @@ text = "← 返回"
 [node name="NinjaSelector" type="Control" parent="." unique_id=1323689352]
 unique_name_in_owner = true
 visible = false
+z_index = 30
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

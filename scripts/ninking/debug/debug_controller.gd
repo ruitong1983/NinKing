@@ -396,6 +396,7 @@ func _on_play_pressed() -> void:
 	NinKingGameState.current_arrangement = Arrangement.new(
 		head_cards, mid_cards, tail_cards, head_eval, mid_eval, tail_eval
 	)
+	NinKingGameState.owned_ninjas = _selected_ninjas.duplicate()
 	_anim_handler.current_play_data = play_data
 	await _anim_handler.run_scoring()
 	_set_status("动画完成 — 总分: %d" % result.total_score)
@@ -627,6 +628,7 @@ func _on_ninja_select_pressed() -> void:
 
 func _on_ninjas_selected(selected: Array[Dictionary]) -> void:
 	_selected_ninjas = selected.duplicate()
+	NinKingGameState.owned_ninjas = _selected_ninjas.duplicate()
 	_ninja_status.text = "已選: %d/%d" % [_selected_ninjas.size(), MAX_NINJAS]
 	_ninja_bar_node.refresh(_selected_ninjas, MAX_NINJAS)
 
