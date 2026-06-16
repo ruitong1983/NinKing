@@ -56,8 +56,10 @@ func _run_scoring_animation() -> void:
 	_ui.progress_bar.modulate = Color.WHITE
 	await tree.create_timer(1.2).timeout
 
-	# Pre-compute ninja contributions for Stage 2 injection
-	var ninja_contribs: Array[Dictionary] = _compute_ninja_contributions(play_data)
+	# Phase H: use pre-computed ninja contribs from summary; fallback to legacy computation
+	var ninja_contribs: Array[Dictionary] = play_data.get("summary", {}).get("anim_contribs", [])
+	if ninja_contribs.is_empty():
+		ninja_contribs = _compute_ninja_contributions(play_data)
 
 
 	# ═══ Phase 1: Per-dun sequential reveal ═══

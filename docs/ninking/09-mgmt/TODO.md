@@ -331,7 +331,11 @@
 | # | 任务 | 说明 | 优先级 | 状态 |
 |---|------|------|--------|------|
 | H1 | **`ScoreCalculator.analyze_effects()` 单次遍历** — 返回 Dictionary 汇总所有忍者效果（per_group/col/anim_contribs/gold/tools/scaling/constraint）| `scripts/ninking/score_calculator.gd` + `calculate_with_summary()` + `_row_score()`/`_apply_group_xi()` 提取 | **P0** | ✅ |
-| H2 | **SealController 消费 summary** — `prepare_play()` 调用一次 `analyze_effects()`，`_collect_play_gold()` 改用 summary.gold_on_play | `scripts/ninking/seal_controller.gd` | **P1** | ⬜ |
+| H2 | **SealController 消费 summary** — `prepare_play()` 调用一次 `analyze_effects()`，`_collect_play_gold()` 改用 summary.gold_on_play | `scripts/ninking/seal_controller.gd` | **P1** | ✅ |
+| H3 | **AnimationHandler 消费 summary** — 删除 `_compute_ninja_contributions()`（~65 行），改用 `summary.anim_contribs` | `scripts/ninking/ui/animation_handler.gd` | **P1** | 🔵 |
+| H4 | **ArrangeController 消费 summary** — `_compute_per_group_ninja_effects()` 改用 `summary.per_group` | `scripts/ninking/arrange_controller.gd` | **P2** | ⬜ |
+| H5 | **工具效果可见性** — `analyze_effects()` 中收集 extra_plays/extra_redraws/death_save 等悬空效果到 `summary.tools` | `scripts/ninking/score_calculator.gd` | **P2** | ⬜ |
+| H6 | **Phase 2 预研文档** — 最终效果 pipeline（5 阶段）+ `NinjaCardInstance` 运行时类设计文档 | 文档 | **P2** | ⬜ |
 | H3 | **AnimationHandler 消费 summary** — 删除 `_compute_ninja_contributions()`（~65 行），改用 `summary.anim_contribs` | `scripts/ninking/ui/animation_handler.gd` | **P1** | ⬜ |
 | H4 | **ArrangeController 消费 summary** — `_compute_per_group_ninja_effects()` 改用 `summary.per_group` | `scripts/ninking/arrange_controller.gd` | **P2** | ⬜ |
 | H5 | **工具效果可见性** — `analyze_effects()` 中收集 extra_plays/extra_redraws/death_save 等悬空效果到 `summary.tools` | `scripts/ninking/score_calculator.gd` | **P2** | ⬜ |
