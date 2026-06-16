@@ -339,33 +339,41 @@ def _annotate_tree(tree: dict, scene_key: str, prefix: str, notes: dict) -> int:
 # ═══════════════════════════════════════════════════════════
 
 def _tree_to_js(tree: dict, indent: int = 2) -> str:
-    """Render a single tree node as JS object literal (compact, no trailing comma)."""
+    """Render a single tree node as JS object literal (commas between props)."""
     pad = "  " * indent
     inner_pad = "  " * (indent + 1)
     lines: list[str] = []
-    lines.append(f"{{")
-    lines.append(f"{inner_pad}type: '{tree['type']}', name: '{tree['name']}'")
 
+    # Collect all property lines
+    props: list[str] = []
+    props.append(f"type: '{tree['type']}', name: '{tree['name']}'")
     if tree.get("unique"):
-        lines.append(f"{inner_pad}unique: true")
+        props.append("unique: true")
     if tree.get("script"):
-        lines.append(f"{inner_pad}script: '{tree['script']}'")
+        props.append(f"script: '{tree['script']}'")
     if tree.get("instance"):
-        lines.append(f"{inner_pad}instance: '{tree['instance']}'")
+        props.append(f"instance: '{tree['instance']}'")
     if tree.get("note"):
         note = tree["note"].replace("'", "\\'")
-        lines.append(f"{inner_pad}note: '{note}'")
+        props.append(f"note: '{note}'")
 
     children = tree.get("children", [])
+
+    lines.append(f"{{")
+    for p in props:
+        lines.append(f"{inner_pad}{p},")
+
     if children:
         lines.append(f"{inner_pad}children: [")
-        for i, child in enumerate(children):
+        for child in children:
             lines.append(_tree_to_js(child, indent + 2))
-            if i < len(children) - 1:
-                lines[-1] += ","
-        lines.append(f"{inner_pad}]")
+        lines.append(f"{inner_pad}],")
 
-    lines.append(f"{pad}}}")
+    # If trailing comma on last prop line and no children, remove it
+    if not children and lines[-1].endswith(","):
+        lines[-1] = lines[-1][:-1]
+
+    lines.append(f"{pad}}},")
     return "\n".join(lines)
 
 

@@ -19,6 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history for changelog
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -27,6 +29,15 @@ jobs:
 
       - name: Extract ninja data → embed into HTML
         run: python tools/extract_ninja_data.py docs/ninking/ninja_card_viewer.html
+
+      - name: Extract xi data → embed into HTML
+        run: python tools/extract_xi_data.py docs/ninking/ninja_card_viewer.html
+
+      - name: Extract scene tree → embed into HTML
+        run: python tools/tscn_parser.py docs/ninking/ninja_card_viewer.html
+
+      - name: Inject recent commits into HTML
+        run: python tools/inject_recent_updates.py docs/ninking/ninja_card_viewer.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
