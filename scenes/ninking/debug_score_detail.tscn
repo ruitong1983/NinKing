@@ -1,0 +1,95 @@
+[gd_scene format=3 uid="uid://dkdy7pt5uve0"]
+
+[ext_resource type="Script" uid="uid://b4dqfcdlnr03g" path="res://scripts/ninking/debug/debug_score_detail.gd" id="1_4vcu1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel_bg"]
+content_margin_left = 16.0
+content_margin_top = 12.0
+content_margin_right = 16.0
+content_margin_bottom = 12.0
+bg_color = Color(0.08, 0.1, 0.14, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.831, 0.659, 0.263, 0.6)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_close_btn"]
+bg_color = Color(0.3, 0.12, 0.12, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.6, 0.3, 0.3, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="ScoreDetailPanel" type="Control" unique_id=911843213]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1138.0
+offset_bottom = 1075.0
+mouse_filter = 1
+script = ExtResource("1_4vcu1")
+
+[node name="PanelBg" type="Panel" parent="." unique_id=999656429]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel_bg")
+
+[node name="MainVBox" type="VBoxContainer" parent="." unique_id=101747861]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="TitleLabel" type="Label" parent="MainVBox" unique_id=1902679994]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 22
+text = "计分公式详情"
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MainVBox" unique_id=787133649]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="DetailVBox" type="VBoxContainer" parent="MainVBox/ScrollContainer" unique_id=702039777]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="BottomBar" type="HBoxContainer" parent="MainVBox" unique_id=491288387]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="NinjaSummary" type="Label" parent="MainVBox/BottomBar" unique_id=1138845267]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.6, 0.9, 1)
+theme_override_font_sizes/font_size = 14
+
+[node name="CloseBtn" type="Button" parent="MainVBox/BottomBar" unique_id=1931838225]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 36)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_close_btn")
+text = "关闭 ✕"
