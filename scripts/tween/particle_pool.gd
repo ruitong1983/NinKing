@@ -7,7 +7,6 @@
 class_name ParticlePool
 extends Node
 
-
 var _placeholder_tex: ImageTexture = null
 
 # Preloaded manga-style particle textures
@@ -15,8 +14,6 @@ var _manga_burst_tex: Texture2D
 var _manga_ink_tex: Texture2D
 var _shuriken_particle_tex: Texture2D
 var _sakura_particle_tex: Texture2D
-var _speed_line_tex: Texture2D
-
 
 func _init() -> void:
 	_placeholder_tex = _make_radial_texture(Color.WHITE)
@@ -24,8 +21,7 @@ func _init() -> void:
 	_manga_ink_tex = load("res://assets/images/effects/particle_manga_ink.png")
 	_shuriken_particle_tex = load("res://assets/images/effects/shuriken_particle.png")
 	_sakura_particle_tex = load("res://assets/images/effects/sakura_particle.png")
-	_speed_line_tex = load("res://assets/images/effects/particle_speed_line.png")
-
+	
 
 # ─── 预设爆发 ───
 
@@ -33,11 +29,9 @@ func burst(position: Vector2, preset: String = "sparkle") -> void:
 	var cfg := _get_preset(preset)
 	_burst_internal(position, cfg.amount, cfg.lifetime, cfg.color, cfg.spread, cfg.velocity_range, cfg.texture)
 
-
 func burst_custom(position: Vector2, amount: int, lifetime: float, color: Color,
 		texture: Texture2D = null, spread: float = 90.0, velocity_min: float = 40.0, velocity_max: float = 120.0) -> void:
 	_burst_internal(position, amount, lifetime, color, spread, Vector2(velocity_min, velocity_max), texture)
-
 
 # ─── 内部 ───
 
@@ -57,7 +51,6 @@ class PresetConfig:
 		velocity_range = p_vel_range
 		texture = p_texture
 
-
 func _get_preset(preset: String) -> PresetConfig:
 	match preset:
 		"dust":
@@ -74,7 +67,6 @@ func _get_preset(preset: String) -> PresetConfig:
 			return PresetConfig.new(12, 0.6, Color(0.1, 0.1, 0.1, 0.85), 60.0, Vector2(30, 80), _manga_ink_tex)
 		_:  # sparkle (default)
 			return PresetConfig.new(10, 0.4, Color(1.0, 0.843, 0.0, 0.9), 90.0, Vector2(40, 100))
-
 
 func _burst_internal(pos: Vector2, amount: int, lifetime: float, color: Color,
 		spread: float, vel_range: Vector2, tex: Texture2D = null) -> void:
@@ -102,7 +94,6 @@ func _burst_internal(pos: Vector2, amount: int, lifetime: float, color: Color,
 	particles.direction = Vector2(0, -1)
 
 	add_child(particles)
-
 
 # ─── 纹理生成 ───
 
