@@ -1,0 +1,208 @@
+[gd_scene format=3 uid="uid://b27dfr3pmqqn"]
+
+[ext_resource type="Script" uid="uid://py2jsudkqhq" path="res://scripts/ninking/ui/shop_ui.gd" id="1_shop"]
+[ext_resource type="Theme" uid="uid://bqb2i07k0v8jt" path="res://assets/themes/manga_theme.tres" id="2_theme"]
+
+[node name="Shop" type="Control" unique_id=1001952410]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_shop")
+
+[node name="Overlay" type="ColorRect" parent="." unique_id=1991946275]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.65)
+
+[node name="ShopPanel" type="Panel" parent="." unique_id=1739557196]
+unique_name_in_owner = true
+layout_mode = 1
+offset_left = 200.0
+offset_top = 60.0
+offset_right = 1720.0
+offset_bottom = 1020.0
+
+[node name="ShopSubtitle" type="Label" parent="ShopPanel" unique_id=2000000002]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 910.0
+offset_top = 20.0
+offset_right = 1020.0
+offset_bottom = 52.0
+rotation = 0.0872665
+text = "萬屋！"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="GoldPill" type="Panel" parent="ShopPanel" unique_id=1121733264]
+layout_mode = 0
+offset_left = 1120.0
+offset_top = 19.0
+offset_right = 1320.0
+offset_bottom = 71.0
+
+[node name="CoinIcon" type="Label" parent="ShopPanel/GoldPill" unique_id=1908786912]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 6.0
+offset_right = 40.0
+offset_bottom = 46.0
+text = "💰"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="GoldLabel" type="Label" parent="ShopPanel/GoldPill" unique_id=1275817123]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 45.0
+offset_top = 8.0
+offset_right = 185.0
+offset_bottom = 44.0
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RerollBtn" type="Button" parent="ShopPanel" unique_id=1920547601]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 1350.0
+offset_top = 19.0
+offset_right = 1500.0
+offset_bottom = 71.0
+theme_type_variation = &"ImpactButton"
+text = "入替"
+
+[node name="RerollLabel" type="Label" parent="ShopPanel/RerollBtn" unique_id=144345993]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 8.0
+offset_top = 4.0
+offset_right = 82.0
+offset_bottom = 48.0
+text = "$5"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RerollStamp" type="Label" parent="ShopPanel/RerollBtn" unique_id=2000000003]
+layout_mode = 0
+offset_left = -24.0
+offset_top = -14.0
+offset_right = 20.0
+offset_bottom = 14.0
+rotation = -0.0872665
+text = "替！"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AbilityFocusLines" type="ColorRect" parent="ShopPanel" unique_id=2000000004]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 510.0
+offset_top = 96.0
+offset_right = 1010.0
+offset_bottom = 166.0
+mouse_filter = 2
+
+[node name="AbilityLabel" type="Label" parent="ShopPanel" unique_id=1203868350]
+layout_mode = 0
+offset_left = 560.0
+offset_top = 110.0
+offset_right = 960.0
+offset_bottom = 146.0
+text = "忍 者 牌"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AbilityRow" type="HBoxContainer" parent="ShopPanel" unique_id=1915359520]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 210.0
+offset_top = 150.0
+offset_right = 1310.0
+offset_bottom = 620.0
+theme_override_constants/separation = 40
+alignment = 1
+
+[node name="ItemFocusLines" type="ColorRect" parent="ShopPanel" unique_id=2000000005]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 510.0
+offset_top = 631.0
+offset_right = 1010.0
+offset_bottom = 701.0
+mouse_filter = 2
+
+[node name="ItemLabel" type="Label" parent="ShopPanel" unique_id=1857544634]
+layout_mode = 0
+offset_left = 560.0
+offset_top = 645.0
+offset_right = 960.0
+offset_bottom = 681.0
+text = "道 具 卡"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ItemRow" type="HBoxContainer" parent="ShopPanel" unique_id=1859539037]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 226.0
+offset_top = 685.0
+offset_right = 1294.0
+offset_bottom = 1025.0
+theme_override_constants/separation = 36
+alignment = 1
+
+[node name="Separator" type="ColorRect" parent="ShopPanel" unique_id=1974193999]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 880.0
+offset_right = 1490.0
+offset_bottom = 881.0
+color = Color(0.831, 0.659, 0.263, 0.25)
+
+[node name="ContinueBtn" type="Button" parent="ShopPanel" unique_id=2139562772]
+unique_name_in_owner = true
+layout_mode = 0
+offset_top = 880.0
+offset_right = 1520.0
+offset_bottom = 960.0
+theme_type_variation = &"ImpactButton"
+text = "討伐へ  ▶"
+
+[node name="NextLevelHint" type="Label" parent="ShopPanel" unique_id=868989748]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 560.0
+offset_top = 954.0
+offset_right = 960.0
+offset_bottom = 958.0
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NinjaSlotLabel" type="Label" parent="ShopPanel" unique_id=118258860]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 970.0
+offset_top = 24.0
+offset_right = 1110.0
+offset_bottom = 72.0
+text = "忍者 0/5"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TitleBar" type="Label" parent="ShopPanel" unique_id=485206302]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 1520.0
+offset_bottom = 90.0
+text = "商  店"
+horizontal_alignment = 1
+vertical_alignment = 1

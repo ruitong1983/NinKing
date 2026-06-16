@@ -57,7 +57,12 @@ func _run_scoring_animation() -> void:
 	await tree.create_timer(1.2).timeout
 
 	# Phase H: use pre-computed ninja contribs from summary; fallback to legacy computation
-	var ninja_contribs: Array[Dictionary] = play_data.get("summary", {}).get("anim_contribs", []) as Array[Dictionary]
+	var ninja_contribs: Array[Dictionary] = []
+	var _raw_summary: Dictionary = play_data.get("summary", {})
+	var _raw_contribs: Array = _raw_summary.get("anim_contribs", [])
+	for _c in _raw_contribs:
+		if _c is Dictionary:
+			ninja_contribs.append(_c)
 	if ninja_contribs.is_empty():
 		ninja_contribs = _compute_ninja_contributions(play_data)
 

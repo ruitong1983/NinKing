@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://c6jrodla1xa3s"]
+
+[node name="JokerSlot" type="Panel" unique_id=1267218274]
+custom_minimum_size = Vector2(100, 140)
+
+[node name="Label" type="Label" parent="." unique_id=1259650342]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -10.0
+offset_right = 40.0
+offset_bottom = 10.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "空"
+horizontal_alignment = 1
+vertical_alignment = 1
