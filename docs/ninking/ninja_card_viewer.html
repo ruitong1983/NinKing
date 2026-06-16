@@ -477,9 +477,9 @@ footer a:hover { color: var(--gold); }
   <h3>📋 最近更新</h3>
   <!-- RECENT_UPDATES_PLACEHOLDER -->
 <ul>
-  <li><span class="date">2026-06-16</span><span class="tag tag-docs">docs</span>chore: 清理 unused assets（UI/slot_bg/cards.svg，被 git rm 但未跟踪的也在磁盘上删了）</li>
+  <li><span class="date">2026-06-16</span><span class="tag tag-docs">docs</span>chore: 清除 particle_speed_line 死代码引用</li>
 </ul>
-<p style="font-size:11px;color:var(--text-dim);margin-top:6px">最新提交 · 部署于 2026-06-16 19:32</p>
+<p style="font-size:11px;color:var(--text-dim);margin-top:6px">最新提交 · 部署于 2026-06-16 21:19</p>
 </div>
 
 <!-- ═══ Tab Bar ═══ -->
@@ -811,13 +811,10 @@ const NINJAS = [
     "category": "group_target",
     "name": "金字塔",
     "rarity": "rare",
-    "cost": 12,
-    "desc": "影<瞬<滅严格递升×2",
+    "cost": 10,
+    "desc": "各组牌型高于前组时该组×3（影无条件）",
     "effect": {
-      "x_mult": 2,
-      "condition": {
-        "strict_ascending_types": true
-      }
+      "pyramid_x3": true
     }
   },
   {
@@ -1035,13 +1032,16 @@ const NINJAS = [
   },
   {
     "id": "n_e02",
-    "category": "economy",
+    "category": "group_target",
     "name": "金尾",
     "rarity": "uncommon",
-    "cost": 5,
-    "desc": "滅有镀金增强牌时 +$3/张",
+    "cost": 6,
+    "desc": "滅组计分×2",
     "effect": {
-      "gold_per_gold_card_in_tail": 3
+      "x_mult": 2,
+      "condition": {
+        "group": "tail"
+      }
     }
   },
   {
@@ -1131,10 +1131,9 @@ const NINJAS = [
     "name": "天下人",
     "rarity": "legendary",
     "cost": 999,
-    "desc": "排列约束解除 + 三组各×2",
+    "desc": "非散牌列的牌型加成分摊到三行",
     "effect": {
-      "constraint_override": "none",
-      "all_groups_x_mult": 2
+      "share_col_hand_to_rows": true
     }
   },
   {
@@ -1143,11 +1142,10 @@ const NINJAS = [
     "name": "幻术大师",
     "rarity": "legendary",
     "cost": 999,
-    "desc": "出牌时半数手牌视作万能，10%概率损失1张",
+    "desc": "仅1次出牌，滅的牌型加成（筹码+倍率）分摊到影和瞬",
     "effect": {
-      "all_cards_wild": true,
-      "wild_coverage": 0.5,
-      "wild_break_chance": 0.1
+      "only_one_play": true,
+      "share_tail_hand_to_head_mid": true
     }
   },
   {
@@ -1163,25 +1161,28 @@ const NINJAS = [
   },
   {
     "id": "n_d01",
-    "category": "redraw",
-    "name": "忍法·换",
+    "category": "group_target",
+    "name": "成双",
     "rarity": "common",
     "cost": 4,
-    "desc": "每次手替え后本次封印内 +10 筹码（累计）",
+    "desc": "对子牌型时，组内每张偶数数字牌 +8 筹码",
     "effect": {
-      "add_chips_per_redraw_this_seal": 10
+      "pair_even_chips": 8,
+      "condition": {
+        "hand_type": 1
+      }
     }
   },
   {
-    "id": "n_d02",
-    "category": "redraw",
+    "id": "n_t07",
+    "category": "tools",
     "name": "赌命",
     "rarity": "uncommon",
     "cost": 7,
-    "desc": "手替え可多弃1张，但出牌次数-1",
+    "desc": "出牌次数-1，三行三列均×2",
     "effect": {
-      "extra_redraw_card": 1,
-      "plays_minus": 1
+      "extra_plays": -1,
+      "x_mult": 2
     }
   },
   {
@@ -2134,60 +2135,65 @@ const SCENES = {
           note: '调试控制面板',
           children: [
 {
-              type: 'VBoxContainer', name: 'DebugVBox',
+              type: 'ScrollContainer', name: 'ScrollContainer',
               children: [
 {
-                  type: 'Button', name: 'BackBtn',
-                  unique: true
-                },
+                  type: 'VBoxContainer', name: 'DebugVBox',
+                  children: [
 {
-                  type: 'Button', name: 'ClearBtn',
-                  unique: true
-                },
+                      type: 'Button', name: 'BackBtn',
+                      unique: true
+                    },
 {
-                  type: 'Label', name: 'NinjaStatusLabel',
-                  unique: true
-                },
+                      type: 'Button', name: 'ClearBtn',
+                      unique: true
+                    },
 {
-                  type: 'Button', name: 'NinjaSelectBtn',
-                  unique: true
-                },
+                      type: 'Label', name: 'NinjaStatusLabel',
+                      unique: true
+                    },
 {
-                  type: 'VBoxContainer', name: 'StarChartContainer',
-                  unique: true
-                },
+                      type: 'Button', name: 'NinjaSelectBtn',
+                      unique: true
+                    },
 {
-                  type: 'Button', name: 'RandomBtn',
-                  unique: true
-                },
+                      type: 'VBoxContainer', name: 'StarChartContainer',
+                      unique: true
+                    },
 {
-                  type: 'Label', name: 'RightTitle'
-                },
+                      type: 'Button', name: 'RandomBtn',
+                      unique: true
+                    },
 {
-                  type: 'Label', name: 'StarTitle'
-                },
+                      type: 'Label', name: 'RightTitle'
+                    },
 {
-                  type: 'Button', name: 'ToggleBtn'
-                },
+                      type: 'Label', name: 'StarTitle'
+                    },
 {
-                  type: 'Label', name: 'CardTrayLabel'
-                },
+                      type: 'Button', name: 'ToggleBtn'
+                    },
 {
-                  type: 'GridContainer', name: 'CardTray',
-                  unique: true,
-                  script: 'debug_card_tray.gd'
-                },
+                      type: 'Label', name: 'CardTrayLabel'
+                    },
 {
-                  type: 'Label', name: 'CardQueueLabel',
-                  unique: true
-                },
+                      type: 'GridContainer', name: 'CardTray',
+                      unique: true,
+                      script: 'debug_card_tray.gd'
+                    },
 {
-                  type: 'HBoxContainer', name: 'CardQueueContainer',
-                  unique: true
-                },
+                      type: 'Label', name: 'CardQueueLabel',
+                      unique: true
+                    },
 {
-                  type: 'Button', name: 'DealBtn',
-                  unique: true
+                      type: 'HBoxContainer', name: 'CardQueueContainer',
+                      unique: true
+                    },
+{
+                      type: 'Button', name: 'DealBtn',
+                      unique: true
+                    },
+                  ],
                 },
               ],
             },
