@@ -81,7 +81,12 @@ API 速查 → `docs/tween-library-reference.md`。
 
 **设计文档索引 → `docs/ninking/README.md`**
 
-**设计文档索引 → `docs/ninking/README.md`**
+## 忍者牌 HTML 可视化同步
+
+> **`ninja_data.gd` 变更时 → 同步更新 `docs/ninking/ninja_card_viewer.html`。**
+>
+> 自动：`sh tools/install-hooks.sh` 安装 pre-commit hook（推荐）
+> 手动：`python tools/extract_ninja_data.py docs/ninking/ninja_card_viewer.html`
 
 ## Code Review 检查项
 

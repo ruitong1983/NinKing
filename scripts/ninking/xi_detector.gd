@@ -312,6 +312,7 @@ static func _check_full_house(
 
 ## 合系列: 每行匹配任意列计数 (0-3)
 ## 每行只要其牌型出现在任一列中即计 1, 非对角匹配也算
+## 散牌行不计入 (散牌配散牌不算巧妙匹配)
 static func _count_diag_matches(
 		head_eval: HandEvaluator3.EvalResult,
 		mid_eval: HandEvaluator3.EvalResult,
@@ -323,6 +324,9 @@ static func _count_diag_matches(
 		col_evals.append(HandEvaluator3.evaluate([head_cards[i], mid_cards[i], tail_cards[i]]))
 	var row_types: Array[int] = [int(head_eval.hand_type), int(mid_eval.hand_type), int(tail_eval.hand_type)]
 	for row_type: int in row_types:
+		# 散牌不计入"合"——散牌配散牌不算巧妙匹配
+		if row_type == int(CardData.HandType3.HIGH_CARD_3):
+			continue
 		for ce in col_evals:
 			if row_type == int(ce.hand_type):
 				count += 1

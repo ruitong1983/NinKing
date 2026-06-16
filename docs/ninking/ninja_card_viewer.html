@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NinKing 忍者牌图鉴</title>
+<style>
+/* ══════════════════════════════════════════
+   NinKing 忍者牌图鉴 — 样式
+   ══════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg-main: #1a1a2e;
+  --bg-card: #16213e;
+  --bg-hover: #1e2a4a;
+  --bg-control: #0f1a30;
+  --text: #e0e0e0;
+  --text-muted: #888;
+  --text-dim: #666;
+  --gold: #c4a843;
+  --gold-dim: #c4a84355;
+  --border: #2a2a4a;
+  --border-light: #3a3a5a;
+  --common: #9e9e9e;
+  --uncommon: #4fc3f7;
+  --rare: #ef5350;
+  --legendary: #ffd54f;
+  --card-radius: 8px;
+  --filter-radius: 16px;
+}
+
+body {
+  font-family: -apple-system, 'Segoe UI', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+  background: var(--bg-main);
+  color: var(--text);
+  padding: 24px 32px;
+  min-height: 100vh;
+}
+
+/* ─── Header ─── */
+header { margin-bottom: 24px; }
+h1 { font-size: 26px; color: var(--gold); margin-bottom: 4px; }
+h1 small { font-size: 14px; color: var(--text-muted); font-weight: 400; }
+.subtitle { font-size: 13px; color: var(--text-muted); }
+.subtitle span { color: var(--text); }
+
+/* ─── Controls ─── */
+.controls { margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; }
+.filter-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.filter-label { font-size: 12px; color: var(--text-muted); min-width: 48px; }
+
+.filter-btn {
+  padding: 4px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--filter-radius);
+  background: transparent;
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.filter-btn:hover { background: var(--bg-hover); border-color: var(--border-light); }
+.filter-btn.active {
+  background: var(--gold-dim);
+  color: var(--gold);
+  border-color: var(--gold);
+}
+.filter-btn .count { opacity: 0.6; margin-left: 2px; font-size: 10px; }
+
+/* Rarity-specific active states */
+.filter-btn[data-value="common"].active { background: #9e9e9e33; color: var(--common); border-color: var(--common); }
+.filter-btn[data-value="uncommon"].active { background: #4fc3f733; color: var(--uncommon); border-color: var(--uncommon); }
+.filter-btn[data-value="rare"].active { background: #ef535033; color: var(--rare); border-color: var(--rare); }
+.filter-btn[data-value="legendary"].active { background: #ffd54f33; color: var(--legendary); border-color: var(--legendary); }
+
+.toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.toolbar input, .toolbar select {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-control);
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.toolbar input:focus, .toolbar select:focus { border-color: var(--gold); }
+.toolbar input { flex: 1; min-width: 160px; max-width: 320px; }
+.toolbar input::placeholder { color: var(--text-dim); }
+.toolbar select { cursor: pointer; }
+.toolbar .result-count { font-size: 12px; color: var(--text-muted); margin-left: auto; }
+
+/* ─── Card Grid ─── */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+/* ─── Card ─── */
+.card {
+  background: var(--bg-card);
+  border-radius: var(--card-radius);
+  border-top: 3px solid var(--text-dim);
+  padding: 12px 14px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 120px;
+}
+.card:hover {
+  background: var(--bg-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.card.rarity-common  { border-top-color: var(--common); }
+.card.rarity-uncommon { border-top-color: var(--uncommon); }
+.card.rarity-rare    { border-top-color: var(--rare); }
+.card.rarity-legendary { border-top-color: var(--legendary); }
+.card.deferred { opacity: 0.7; }
+
+.card-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.3;
+}
+.card-id {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: 'Consolas', 'Courier New', monospace;
+}
+
+.card-badges {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.badge-rarity {
+  font-size: 10px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+.badge-rarity.common    { background: #9e9e9e33; color: var(--common); }
+.badge-rarity.uncommon  { background: #4fc3f733; color: var(--uncommon); }
+.badge-rarity.rare      { background: #ef535033; color: var(--rare); }
+.badge-rarity.legendary { background: #ffd54f33; color: var(--legendary); }
+
+.badge-category {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.06);
+  color: var(--text-muted);
+}
+.badge-deferred {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #ff6b6b22;
+  color: #ff6b6b;
+  font-weight: 600;
+}
+
+.card-cost {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gold);
+  margin-top: auto;
+}
+.card-cost.legendary-cost { opacity: 0.4; }
+
+.card-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* ─── Card Detail (expanded) ─── */
+.card-detail {
+  display: none;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.card.expanded .card-detail { display: block; }
+.card-detail table { width: 100%; border-collapse: collapse; }
+.card-detail td { padding: 2px 4px; vertical-align: top; }
+.card-detail td:first-child { color: var(--text-dim); white-space: nowrap; width: 1%; padding-right: 8px; }
+.card-detail .effect-key { font-family: 'Consolas', 'Courier New', monospace; font-size: 10px; }
+.card-detail .effect-val { font-family: 'Consolas', 'Courier New', monospace; font-size: 10px; color: #8bc34a; }
+
+/* ─── Stats ─── */
+.stats {
+  background: var(--bg-card);
+  border-radius: var(--card-radius);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+.stats h2 {
+  font-size: 16px;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+@media (max-width: 720px) { .stats-grid { grid-template-columns: 1fr; } }
+.stat-group h3 {
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+.stat-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+  font-size: 12px;
+}
+.stat-label {
+  min-width: 56px;
+  color: var(--text-muted);
+  text-align: right;
+}
+.stat-count { min-width: 24px; color: var(--text-dim); font-size: 11px; }
+.stat-bar-bg {
+  flex: 1;
+  height: 12px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.stat-bar {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.4s;
+  min-width: 2px;
+}
+.stat-bar.rarity-common    { background: var(--common); }
+.stat-bar.rarity-uncommon  { background: var(--uncommon); }
+.stat-bar.rarity-rare      { background: var(--rare); }
+.stat-bar.rarity-legendary { background: var(--legendary); }
+.stat-bar.category         { background: var(--gold); }
+
+.stat-note {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+/* ─── Footer ─── */
+footer {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-dim);
+  padding: 12px 0;
+}
+footer a { color: var(--gold-dim); text-decoration: none; }
+footer a:hover { color: var(--gold); }
+
+/* ─── Animations ─── */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.card { animation: fadeIn 0.25s ease-out both; }
+
+/* ─── No results ─── */
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 48px 0;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ Header ═══ -->
+<header>
+  <h1>🏯 NinKing 忍者牌图鉴 <small id="card-count"></small></h1>
+  <p class="subtitle">基于 <span id="data-date">2026-06-16</span> <code>ninja_data.gd</code> · 点击卡牌查看详情 · ESC 清空搜索</p>
+</header>
+
+<!-- ═══ Controls ═══ -->
+<div class="controls">
+  <div class="filter-row">
+    <span class="filter-label">稀有度</span>
+    <button class="filter-btn active" data-group="rarity" data-value="all">全部</button>
+    <button class="filter-btn" data-group="rarity" data-value="common">普通 <span class="count"></span></button>
+    <button class="filter-btn" data-group="rarity" data-value="uncommon">稀有 <span class="count"></span></button>
+    <button class="filter-btn" data-group="rarity" data-value="rare">史诗 <span class="count"></span></button>
+    <button class="filter-btn" data-group="rarity" data-value="legendary">传说 <span class="count"></span></button>
+  </div>
+  <div class="filter-row" id="category-filters">
+    <span class="filter-label">维度</span>
+    <button class="filter-btn active" data-group="category" data-value="all">全部</button>
+  </div>
+  <div class="toolbar">
+    <input type="text" id="search-input" placeholder="搜索卡牌名称 / ID / 描述…">
+    <select id="sort-select">
+      <option value="id">排序: ID</option>
+      <option value="name">排序: 名称</option>
+      <option value="cost">排序: 费用 ↑</option>
+      <option value="cost-desc">排序: 费用 ↓</option>
+      <option value="rarity">排序: 稀有度</option>
+    </select>
+    <span class="result-count" id="result-count">显示 0/0 张</span>
+  </div>
+</div>
+
+<!-- ═══ Card Grid ═══ -->
+<div class="card-grid" id="card-grid"></div>
+
+<!-- ═══ Stats ═══ -->
+<div class="stats" id="stats-section">
+  <h2>📊 数据统计</h2>
+  <div class="stats-grid">
+    <div class="stat-group" id="rarity-stats">
+      <h3>稀有度分布</h3>
+    </div>
+    <div class="stat-group" id="category-stats">
+      <h3>维度分布</h3>
+    </div>
+  </div>
+  <div class="stat-note" id="stats-note"></div>
+</div>
+
+<!-- ═══ Footer ═══ -->
+<footer>
+  数据来源: <code>scripts/ninking/ninja_data.gd</code> ·
+  生成工具: <code>tools/extract_ninja_data.py</code> ·
+  <a href="https://github.com/ruitong1983/NinKing">NinKing</a>
+</footer>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  Ninja card data — auto-extracted from ninja_data.gd
+// ══════════════════════════════════════════════════════
+const NINJAS = [
+  {
+    "id": "n_001",
+    "category": "universal",
+    "name": "手里剑",
+    "rarity": "common",
+    "cost": 3,
+    "desc": "+10 筹码",
+    "effect": {
+      "add_chips": 10
+    }
+  },
+  {
+    "id": "n_002",
+    "category": "universal",
+    "name": "苦无",
+    "rarity": "common",
+    "cost": 4,
+    "desc": "+4 倍率",
+    "effect": {
+      "add_mult": 4
+    }
+  },
+  {
+    "id": "n_003",
+    "category": "universal",
+    "name": "忍刀",
+    "rarity": "common",
+    "cost": 5,
+    "desc": "+15 筹码, +2 倍率",
+    "effect": {
+      "add_chips": 15,
+      "add_mult": 2
+    }
+  },
+  {
+    "id": "n_004",
+    "category": "universal",
+    "name": "重刃",
+    "rarity": "common",
+    "cost": 4,
+    "desc": "+20 筹码",
+    "effect": {
+      "add_chips": 20
+    }
+  },
+  {
+    "id": "n_005",
+    "category": "universal",
+    "name": "影缝",
+    "rarity": "uncommon",
+    "cost": 8,
+    "desc": "+10 倍率",
+    "effect": {
+      "add_mult": 10
+    }
+  },
+  {
+    "id": "n_006",
+    "category": "universal",
+    "name": "奥义之卷",
+    "rarity": "rare",
+    "cost": 14,
+    "desc": "+30筹码 +10倍率",
+    "effect": {
+      "add_chips": 30,
+      "add_mult": 10
+    }
+  },
+  {
+    "id": "n_g01",
+    "category": "group_target",
+    "name": "虎头",
+    "rarity": "uncommon",
+    "cost": 5,
+    "desc": "影为散牌或对子时 +5 倍率",
+    "effect": {
+      "add_mult": 5,
+      "condition": {
+        "group": "head",
+        "at_most_hand_type": 1
+      }
+    }
+  },
+  {
+    "id": "n_g02",
+    "category": "group_target",
+    "name": "龙尾",
+    "rarity": "rare",
+    "cost": 12,
+    "desc": "滅为同花顺或豹子时 ×2",
+    "effect": {
+      "x_mult": 2,
+      "condition": {
+        "group": "tail",
+        "at_least_hand_type": 4
+      }
+    }
+  },
+  {
+    "id": "n_g03",
+    "category": "group_target",
+    "name": "中流砥柱",
+    "rarity": "uncommon",
+    "cost": 6,
+    "desc": "瞬 +50 筹码",
+    "effect": {
+      "add_chips": 50,
+      "condition": {
+        "group": "mid"
+      }
+    }
+  },
+  {
+    "id": "n_g04",
+    "category": "group_target",
+    "name": "藏锋",
+    "rarity": "rare",
+    "cost": 8,
+    "desc": "影越弱滅越强: 散×3 对×2 其余×1",
+    "effect": {
+      "x_mult_per_head_weakness": true
+    },
+    "head_weakness_scale": {
+      "0": 3,
+      "1": 2,
+      "2": 1,
+      "3": 1,
+      "4": 1,
+      "5": 1
+    }
+  },
+  {
+    "id": "n_g05",
+    "category": "group_target",
+    "name": "双头蛇",
+    "rarity": "uncommon",
+    "cost": 5,
+    "desc": "影或瞬≥顺子时 +40 筹码",
+    "effect": {
+      "add_chips": 40,
+      "condition": {
+        "group": "head_or_mid",
+        "at_least_hand_type": 2
+      }
+    }
+  },
+  {
+    "id": "n_g06",
+    "category": "group_target",
+    "name": "金字塔",
+    "rarity": "rare",
+    "cost": 12,
+    "desc": "影<瞬<滅严格递升×2",
+    "effect": {
+      "x_mult": 2,
+      "condition": {
+        "strict_ascending_types": true
+      }
+    }
+  },
+  {
+    "id": "n_r02",
+    "category": "rule_change",
+    "name": "均衡之印",
+    "rarity": "rare",
+    "cost": 7,
+    "desc": "三组必须同牌型，各组×2",
+    "effect": {
+      "constraint_override": "equal",
+      "equal_x_mult": 2
+    },
+    "mutex_group": "rule"
+  },
+  {
+    "id": "n_r03",
+    "category": "rule_change",
+    "name": "独尊之印",
+    "rarity": "rare",
+    "cost": 9,
+    "desc": "滅×2，影和瞬必须≥对子",
+    "effect": {
+      "x_mult": 2,
+      "condition": {
+        "group": "tail"
+      },
+      "constraint_override": "head_mid_min_pair"
+    },
+    "mutex_group": "rule"
+  },
+  {
+    "id": "n_x01",
+    "category": "xi_enhance",
+    "name": "喜鹊",
+    "rarity": "uncommon",
+    "cost": 4,
+    "desc": "每个喜的×倍率效果 +1",
+    "effect": {
+      "xi_x_bonus": 1
+    }
+  },
+  {
+    "id": "n_x02",
+    "category": "xi_enhance",
+    "name": "四张猎人",
+    "rarity": "uncommon",
+    "cost": 4,
+    "desc": "四张出现时 +30 筹码，否则 +5 筹码",
+    "effect": {
+      "add_chips": 30,
+      "condition": {
+        "xi": "四张"
+      },
+      "else_chips": 5
+    }
+  },
+  {
+    "id": "n_x03",
+    "category": "xi_enhance",
+    "name": "清一色",
+    "rarity": "uncommon",
+    "cost": 5,
+    "desc": "三清时 ×3（替代默认×2）",
+    "effect": {
+      "xi_override": {
+        "三清": 3
+      }
+    }
+  },
+  {
+    "id": "n_x04",
+    "category": "xi_enhance",
+    "name": "黑龙",
+    "rarity": "rare",
+    "cost": 8,
+    "desc": "全黑触发时再 ×2",
+    "effect": {
+      "x_mult": 2,
+      "condition": {
+        "xi": "全黑"
+      }
+    },
+    "deferred": true
+  },
+  {
+    "id": "n_x05",
+    "category": "xi_enhance",
+    "name": "赤凤",
+    "rarity": "rare",
+    "cost": 8,
+    "desc": "全红触发时再 ×2",
+    "effect": {
+      "x_mult": 2,
+      "condition": {
+        "xi": "全红"
+      }
+    },
+    "deferred": true
+  },
+  {
+    "id": "n_x06",
+    "category": "xi_enhance",
+    "name": "龙之眼",
+    "rarity": "rare",
+    "cost": 12,
+    "desc": "四张喜时每多一张×2（上限2次）",
+    "effect": {
+      "x_mult_per_extra_card": 2,
+      "x_extra_cap": 2
+    }
+  },
+  {
+    "id": "n_s01",
+    "category": "scaling",
+    "name": "修行者",
+    "rarity": "uncommon",
+    "cost": 6,
+    "desc": "每出牌 +1 倍率（永久累积）",
+    "effect": {
+      "add_mult": 0
+    },
+    "scaling": {
+      "trigger": "on_play",
+      "add_mult": 1
+    }
+  },
+  {
+    "id": "n_s02",
+    "category": "scaling",
+    "name": "三清道人",
+    "rarity": "uncommon",
+    "cost": 7,
+    "desc": "每打出三清 +25 筹码（永久累积）",
+    "effect": {
+      "add_chips": 0
+    },
+    "scaling": {
+      "trigger": "on_play",
+      "add_chips": 25,
+      "condition": {
+        "xi": "三清"
+      }
+    }
+  },
+  {
+    "id": "n_s03",
+    "category": "scaling",
+    "name": "龙脉",
+    "rarity": "uncommon",
+    "cost": 8,
+    "desc": "滅为同花顺时 +30 筹码（永久累积）",
+    "effect": {
+      "add_chips": 0
+    },
+    "scaling": {
+      "trigger": "on_play",
+      "add_chips": 30,
+      "condition": {
+        "group": "tail",
+        "hand_type": 4
+      }
+    }
+  },
+  {
+    "id": "n_s05",
+    "category": "scaling",
+    "name": "头悬梁",
+    "rarity": "uncommon",
+    "cost": 5,
+    "desc": "影为散牌+3倍率，否则重置",
+    "effect": {
+      "add_mult": 0
+    },
+    "scaling": {
+      "trigger": "on_play",
+      "add_mult": 3,
+      "condition": {
+        "group": "head",
+        "hand_type": 0
+      },
+      "reset_on_fail": true
+    }
+  },
+  {
+    "id": "n_s06",
+    "category": "scaling",
+    "name": "尾刺骨",
+    "rarity": "uncommon",
+    "cost": 6,
+    "desc": "滅为同花顺/豹子+5倍率，否则重置",
+    "effect": {
+      "add_mult": 0
+    },
+    "scaling": {
+      "trigger": "on_play",
+      "add_mult": 5,
+      "condition": {
+        "group": "tail",
+        "at_least_hand_type": 4
+      },
+      "reset_on_fail": true
+    }
+  },
+  {
+    "id": "n_e01",
+    "category": "economy",
+    "name": "福神",
+    "rarity": "uncommon",
+    "cost": 6,
+    "desc": "出牌后每触发一个喜 +$2",
+    "effect": {
+      "gold_per_xi": 2
+    }
+  },
+  {
+    "id": "n_e02",
+    "category": "economy",
+    "name": "金尾",
+    "rarity": "uncommon",
+    "cost": 5,
+    "desc": "滅有镀金增强牌时 +$3/张",
+    "effect": {
+      "gold_per_gold_card_in_tail": 3
+    }
+  },
+  {
+    "id": "n_e04",
+    "category": "economy",
+    "name": "利息之印",
+    "rarity": "uncommon",
+    "cost": 7,
+    "desc": "利息上限 +$5",
+    "effect": {
+      "interest_cap_bonus": 5
+    }
+  },
+  {
+    "id": "n_e05",
+    "category": "economy",
+    "name": "金剛力",
+    "rarity": "rare",
+    "cost": 8,
+    "desc": "每持有$5 +1倍率（上限+10）",
+    "effect": {
+      "mult_per_gold": 1,
+      "mult_gold_step": 5,
+      "mult_gold_cap": 10
+    }
+  },
+  {
+    "id": "n_e06",
+    "category": "economy",
+    "name": "黄金律",
+    "rarity": "rare",
+    "cost": 14,
+    "desc": "每$15持有×2（最多触发3次）",
+    "effect": {
+      "x_per_gold": 2,
+      "x_gold_step": 15,
+      "x_gold_cap": 3
+    }
+  },
+  {
+    "id": "n_t01",
+    "category": "tools",
+    "name": "火遁",
+    "rarity": "uncommon",
+    "cost": 8,
+    "desc": "+1 出牌次数",
+    "effect": {
+      "extra_plays": 1
+    }
+  },
+  {
+    "id": "n_t02",
+    "category": "tools",
+    "name": "水遁",
+    "rarity": "uncommon",
+    "cost": 6,
+    "desc": "+1 手替え次数",
+    "effect": {
+      "extra_redraws": 1
+    }
+  },
+  {
+    "id": "n_t05",
+    "category": "tools",
+    "name": "疾风",
+    "rarity": "uncommon",
+    "cost": 7,
+    "desc": "首回合出牌得分×2",
+    "effect": {
+      "first_play_x2": true
+    }
+  },
+  {
+    "id": "n_t06",
+    "category": "tools",
+    "name": "土遁",
+    "rarity": "rare",
+    "cost": 10,
+    "desc": "战败保留金币重开本结界（1局1次）",
+    "effect": {
+      "death_save": true
+    }
+  },
+  {
+    "id": "n_l01",
+    "category": "legendary",
+    "name": "天下人",
+    "rarity": "legendary",
+    "cost": 999,
+    "desc": "排列约束解除 + 三组各×2",
+    "effect": {
+      "constraint_override": "none",
+      "all_groups_x_mult": 2
+    }
+  },
+  {
+    "id": "n_l02",
+    "category": "legendary",
+    "name": "幻术大师",
+    "rarity": "legendary",
+    "cost": 999,
+    "desc": "出牌时半数手牌视作万能，10%概率损失1张",
+    "effect": {
+      "all_cards_wild": true,
+      "wild_coverage": 0.5,
+      "wild_break_chance": 0.1
+    }
+  },
+  {
+    "id": "n_l03",
+    "category": "legendary",
+    "name": "影武者",
+    "rarity": "legendary",
+    "cost": 999,
+    "desc": "每次出牌随机 1 组获得 ×3",
+    "effect": {
+      "random_group_x3": true
+    }
+  },
+  {
+    "id": "n_d01",
+    "category": "redraw",
+    "name": "忍法·换",
+    "rarity": "common",
+    "cost": 4,
+    "desc": "每次手替え后本次封印内 +10 筹码（累计）",
+    "effect": {
+      "add_chips_per_redraw_this_seal": 10
+    }
+  },
+  {
+    "id": "n_d02",
+    "category": "redraw",
+    "name": "赌命",
+    "rarity": "uncommon",
+    "cost": 7,
+    "desc": "手替え可多弃1张，但出牌次数-1",
+    "effect": {
+      "extra_redraw_card": 1,
+      "plays_minus": 1
+    }
+  },
+  {
+    "id": "n_c01",
+    "category": "cross_link",
+    "name": "镜像",
+    "rarity": "uncommon",
+    "cost": 6,
+    "desc": "影牌型 = 滅牌型时 ×2",
+    "effect": {
+      "x_mult": 2,
+      "condition": {
+        "head_tail_same_type": true
+      }
+    }
+  },
+  {
+    "id": "n_c02",
+    "category": "cross_link",
+    "name": "铁索连环",
+    "rarity": "uncommon",
+    "cost": 6,
+    "desc": "两组同牌型→全组+15筹码+3倍率",
+    "effect": {
+      "add_chips": 15,
+      "add_mult": 3,
+      "condition": {
+        "any_two_groups_same_type": true
+      }
+    }
+  },
+  {
+    "id": "n_f01",
+    "category": "face_card",
+    "name": "影之眷顾",
+    "rarity": "common",
+    "cost": 5,
+    "desc": "手中每张 J/Q/K +3 筹码",
+    "effect": {
+      "add_chips_per_face": 3
+    }
+  },
+  {
+    "id": "n_f02",
+    "category": "face_card",
+    "name": "王牌侍从",
+    "rarity": "uncommon",
+    "cost": 5,
+    "desc": "手中每张 Ace +5 倍率（上限 +20）",
+    "effect": {
+      "add_mult_per_ace": 5,
+      "ace_mult_cap": 20
+    }
+  }
+];  // ── auto-extracted ──
+
+// ═══ Category labels for display ═══
+const CATEGORY_LABELS = {
+  universal: "通用加成", group_target: "组别定向", rule_change: "规则变更",
+  xi_enhance: "喜之强化", scaling: "成长修炼", economy: "经济",
+  tools: "忍法", legendary: "传说", redraw: "手替え激励",
+  cross_link: "联动", face_card: "点数强化"
+};
+const CATEGORY_ORDER = ["universal","group_target","rule_change","xi_enhance","scaling","economy","tools","redraw","cross_link","face_card","legendary"];
+const RARITY_ORDER = { common: 0, uncommon: 1, rare: 2, legendary: 3 };
+const RARITY_LABELS = { common: "普通", uncommon: "稀有", rare: "史诗", legendary: "传说" };
+const RARITY_COLORS = { common: "#9e9e9e", uncommon: "#4fc3f7", rare: "#ef5350", legendary: "#ffd54f" };
+
+// ═══ State ═══
+let activeFilters = { rarity: "all", category: "all" };
+let searchQuery = "";
+let sortMode = "id";
+
+// ═══ Utilities ═══
+function escHtml(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+// ═══ Build category filter pills ═══
+(function initCategoryFilters() {
+  const container = document.getElementById("category-filters");
+  // Add "all" is already in HTML
+  for (const cat of CATEGORY_ORDER) {
+    const label = CATEGORY_LABELS[cat] || cat;
+    const btn = document.createElement("button");
+    btn.className = "filter-btn";
+    btn.dataset.group = "category";
+    btn.dataset.value = cat;
+    btn.textContent = label;
+    const count = NINJAS.filter(n => n.category === cat).length;
+    const span = document.createElement("span");
+    span.className = "count";
+    span.textContent = `(${count})`;
+    btn.appendChild(span);
+    container.appendChild(btn);
+  }
+})();
+
+// ═══ Filter / sort / render ═══
+function getFiltered() {
+  let cards = NINJAS;
+  if (activeFilters.rarity !== "all")
+    cards = cards.filter(n => n.rarity === activeFilters.rarity);
+  if (activeFilters.category !== "all")
+    cards = cards.filter(n => n.category === activeFilters.category);
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    cards = cards.filter(n =>
+      n.id.toLowerCase().includes(q) ||
+      n.name.toLowerCase().includes(q) ||
+      n.desc.toLowerCase().includes(q)
+    );
+  }
+  // Sort
+  const sorted = [...cards];
+  switch (sortMode) {
+    case "id": sorted.sort((a,b) => a.id.localeCompare(b.id)); break;
+    case "name": sorted.sort((a,b) => a.name.localeCompare(b.name, 'zh')); break;
+    case "cost": sorted.sort((a,b) => a.cost - b.cost); break;
+    case "cost-desc": sorted.sort((a,b) => b.cost - a.cost); break;
+    case "rarity": sorted.sort((a,b) => (RARITY_ORDER[a.rarity]||99) - (RARITY_ORDER[b.rarity]||99) || a.id.localeCompare(b.id)); break;
+  }
+  return sorted;
+}
+
+function render() {
+  const cards = getFiltered();
+  const grid = document.getElementById("card-grid");
+  const resultCount = document.getElementById("result-count");
+
+  resultCount.textContent = `显示 ${cards.length}/${NINJAS.length} 张`;
+
+  if (cards.length === 0) {
+    grid.innerHTML = '<div class="no-results">没有匹配的卡牌 — 试试调整筛选条件</div>';
+    return;
+  }
+
+  grid.innerHTML = cards.map(n => {
+    const rarity = n.rarity;
+    const catLabel = CATEGORY_LABELS[n.category] || n.category;
+    const isLegendary = rarity === "legendary";
+    const costDisplay = isLegendary ? "—" : `$${n.cost}`;
+    const deferred = n.deferred;
+
+    // Build detail table
+    let detailRows = [
+      ["ID", n.id],
+      ["类别", catLabel],
+      ["稀有度", RARITY_LABELS[rarity]],
+    ];
+    if (n.mutex_group) detailRows.push(["互斥组", n.mutex_group]);
+    if (n.scaling) {
+      const s = n.scaling;
+      detailRows.push(["成长", s.trigger === "on_play" ? "每出牌" : s.trigger]);
+      if (s.add_mult) detailRows.push(["  +倍率", `+${s.add_mult}/次`]);
+      if (s.add_chips) detailRows.push(["  +筹码", `+${s.add_chips}/次`]);
+      if (s.reset_on_fail) detailRows.push(["  重置", "条件不满足时重置"]);
+    }
+    // Effect details
+    const eff = n.effect;
+    for (const [k, v] of Object.entries(eff)) {
+      if (k === "condition" || k === "xi_override") continue;
+      const val = typeof v === "boolean" ? (v ? "✓" : "✗") : JSON.stringify(v);
+      detailRows.push(["effect."+k, val]);
+    }
+    if (eff.condition) {
+      detailRows.push(["条件", JSON.stringify(eff.condition)]);
+    }
+    if (n.head_weakness_scale) {
+      detailRows.push(["藏锋缩放", JSON.stringify(n.head_weakness_scale)]);
+    }
+
+    const detailHtml = detailRows.map(r =>
+      `<tr><td>${escHtml(r[0])}</td><td class="${r[0].startsWith('effect') ? 'effect-val' : ''}">${escHtml(r[1])}</td></tr>`
+    ).join("");
+
+    return `<div class="card rarity-${rarity}${deferred ? ' deferred' : ''}" data-id="${n.id}" onclick="toggleCard(this)">
+      <div class="card-name">${escHtml(n.name)}</div>
+      <div class="card-id">${n.id}</div>
+      <div class="card-badges">
+        <span class="badge-rarity ${rarity}">${RARITY_LABELS[rarity]}</span>
+        <span class="badge-category">${escHtml(catLabel)}</span>
+        ${deferred ? '<span class="badge-deferred">暂缓</span>' : ''}
+      </div>
+      <div class="card-desc">${escHtml(n.desc)}</div>
+      <div class="card-cost${isLegendary ? ' legendary-cost' : ''}">💰 ${costDisplay}</div>
+      <div class="card-detail"><table>${detailHtml}</table></div>
+    </div>`;
+  }).join("");
+}
+
+// ═══ Toggle card detail ═══
+function toggleCard(el) {
+  el.classList.toggle("expanded");
+}
+
+// ═══ Filter buttons ═══
+document.querySelectorAll(".filter-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const group = btn.dataset.group;
+    const value = btn.dataset.value;
+    activeFilters[group] = value;
+    // Deactivate siblings
+    document.querySelectorAll(`.filter-btn[data-group="${group}"]`).forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    render();
+  });
+});
+
+// ═══ Search ═══
+const searchInput = document.getElementById("search-input");
+searchInput.addEventListener("input", () => {
+  searchQuery = searchInput.value.trim();
+  render();
+});
+searchInput.addEventListener("keydown", e => {
+  if (e.key === "Escape") { searchInput.value = ""; searchQuery = ""; render(); }
+});
+
+// ═══ Sort ═══
+document.getElementById("sort-select").addEventListener("change", e => {
+  sortMode = e.target.value;
+  render();
+});
+
+// ═══ Stats ═══
+function renderStats() {
+  // Rarity distribution
+  const rarStat = document.getElementById("rarity-stats");
+  const rarCounts = {};
+  const rarTotal = NINJAS.length;
+  for (const r of ["common","uncommon","rare","legendary"]) {
+    rarCounts[r] = NINJAS.filter(n => n.rarity === r).length;
+  }
+  const maxRar = Math.max(...Object.values(rarCounts));
+  rarStat.innerHTML = "<h3>稀有度分布</h3>" +
+    Object.entries(rarCounts).map(([r, c]) =>
+      `<div class="stat-row">
+        <span class="stat-label" style="color:${RARITY_COLORS[r]}">${RARITY_LABELS[r]}</span>
+        <div class="stat-bar-bg"><div class="stat-bar rarity-${r}" style="width:${(c/maxRar*100).toFixed(1)}%"></div></div>
+        <span class="stat-count">${c}</span>
+      </div>`
+    ).join("");
+
+  // Category distribution
+  const catStat = document.getElementById("category-stats");
+  const catCounts = {};
+  for (const cat of CATEGORY_ORDER) {
+    const c = NINJAS.filter(n => n.category === cat).length;
+    if (c > 0) catCounts[cat] = c;
+  }
+  const maxCat = Math.max(...Object.values(catCounts));
+  catStat.innerHTML = "<h3>维度分布</h3>" +
+    Object.entries(catCounts).map(([cat, c]) =>
+      `<div class="stat-row">
+        <span class="stat-label">${CATEGORY_LABELS[cat]||cat}</span>
+        <div class="stat-bar-bg"><div class="stat-bar category" style="width:${(c/maxCat*100).toFixed(1)}%"></div></div>
+        <span class="stat-count">${c}</span>
+      </div>`
+    ).join("");
+
+  // Summary note
+  const costs = NINJAS.filter(n => n.rarity !== "legendary").map(n => n.cost);
+  const avgCost = costs.length > 0 ? (costs.reduce((a,b)=>a+b,0)/costs.length).toFixed(1) : "—";
+  const deferredCount = NINJAS.filter(n => n.deferred).length;
+  const note = document.getElementById("stats-note");
+  note.textContent = `共 ${NINJAS.length} 张牌 · 非传说牌均价 $${avgCost} · ${deferredCount} 张暂缓 · 12 种效果类别`;
+}
+
+// ═══ Init ═══
+document.getElementById("card-count").textContent = `· ${NINJAS.length} 张`;
+render();
+renderStats();
+</script>
+
+</body>
+</html>

@@ -399,6 +399,7 @@ func _on_play_pressed() -> void:
 	NinKingGameState.owned_ninjas = _selected_ninjas.duplicate()
 	_anim_handler.current_play_data = play_data
 	await _anim_handler.run_scoring()
+	_update_score_display(result, head_eval, mid_eval, tail_eval, col_evals, xi_result)
 	_set_status("动画完成 — 总分: %d" % result.total_score)
 
 
@@ -545,6 +546,29 @@ func _preview_dun_labels() -> void:
 		%MidColType.text = CardData.get_hand_type3_name(col_evals[1].hand_type) if col_evals[1].hand_type != CardData.HandType3.HIGH_CARD_3 else ""
 	if has_node("%RightColType"):
 		%RightColType.text = CardData.get_hand_type3_name(col_evals[2].hand_type) if col_evals[2].hand_type != CardData.HandType3.HIGH_CARD_3 else ""
+
+	# ── 喜即时检测 —— 手牌变动即刻更新左边栏 ──
+	_update_xi_preview(head_cards, mid_cards, tail_cards, head_eval, mid_eval, tail_eval)
+
+
+func _update_xi_preview(
+	head_cards: Array, mid_cards: Array, tail_cards: Array,
+	head_eval: HandEvaluator3.EvalResult, mid_eval: HandEvaluator3.EvalResult,
+	tail_eval: HandEvaluator3.EvalResult
+) -> void:
+	var xi_result := XiDetector.detect(head_cards, mid_cards, tail_cards, head_eval, mid_eval, tail_eval)
+	if xi_result and xi_result.has_any():
+		var xi_parts: Array[String] = []
+		for xi_name: String in xi_result.triggered:
+			var x_val: int = 1
+			for defn: Dictionary in XiDetector.XI_DEFINITIONS:
+				if defn["name"] == xi_name:
+					x_val = defn["x_mult"]
+					break
+			xi_parts.append("%s×%d" % [xi_name, x_val])
+		_col_xi_label.text = "喜: " + "  ".join(xi_parts)
+	else:
+		_col_xi_label.text = "喜: -"
 
 
 func _clear_all_type_labels() -> void:

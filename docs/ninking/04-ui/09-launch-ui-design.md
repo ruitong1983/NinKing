@@ -1,6 +1,6 @@
 # NinKing Launch UI 设计方案
 
-> **建立日期:** 2026-06-10 | **关联场景:** `ninking_launcher.tscn` + `main_menu.gd`
+> **建立日期:** 2026-06-10 | **最后更新:** 2026-06-16 | **关联场景:** `ninking_launcher.tscn` + `deck_select_panel.tscn` + `continue_panel.tscn` + `main_menu.gd`
 > **风格权威:** [`../05-art/16-art-direction-principles.md`](../05-art/16-art-direction-principles.md) · 少年漫画风
 ## §1 概述
 
@@ -32,26 +32,23 @@ Launcher (Control) [main_menu.gd]
 │
 ├── Overlay (ColorRect)               ← 全屏半透明遮罩 (程序化构建)
 │
-├── DeckPanel (Control)               ← 牌组选择面板 (程序化构建)
-│   └── DeckPanelBg (PanelContainer)
-│       └── DeckVBox (VBoxContainer)
-│           ├── DeckTitle (Label)      ← "選擇牌組"
-│           ├── DeckCards (HBoxContainer) ← 牌组卡片行
-│           │   ├── DeckCard_standard  ← 标准牌组
-│           │   ├── DeckCard_night     ← 暗夜牌组（置灰）
-│           │   └── DeckCard_sun       ← 赤阳牌组（置灰）
-│           └── DeckBtnRow (HBoxContainer)
-│               ├── 确认 (Button)
-│               └── 返回 (Button)
+├── %DeckSelectPanel (Control)       ← 子场景: deck_select_panel.tscn [deck_select_panel.gd]
+│   └── PanelBg (PanelContainer, 960×600 居中)
+│       └── VBox (VBoxContainer)
+│           ├── Title (Label)           ← "選擇牌組" 32px 金
+│           ├── %CardsRow (HBoxContainer) ← 牌组卡片行
+│           └── BtnRow (HBoxContainer)
+│               ├── %ConfirmBtn (Button 160×48)  ← "開始"
+│               └── %BackBtn (Button 160×48)     ← "返回"
 │
-├── ContinuePanel (Control)           ← 继续确认面板 (程序化构建)
-│   └── ContinuePanelBg (PanelContainer)
+├── %ContinuePanel (Control)         ← 子场景: continue_panel.tscn [continue_panel.gd]
+│   └── ContinuePanelBg (PanelContainer, 560×400 居中)
 │       └── ContinueVBox (VBoxContainer)
-│           ├── ContinueTitle (Label)  ← "繼續冒險"
-│           ├── ContinueInfo (Label)   ← run 信息摘要
+│           ├── %ContinueTitle (Label)  ← "繼續冒險" 32px 金
+│           ├── %ContinueInfo (Label)   ← run 信息摘要 24px 灰
 │           └── ContinueBtnRow (HBoxContainer)
-│               ├── 继续冒险 (Button)
-│               └── 返回 (Button)
+│               ├── %GoBtn (Button 180×48)    ← "继续冒险"
+│               └── %BackBtn (Button 160×48)  ← "返回"
 │
 └── ParticleLayer (CanvasLayer)        ← 樱花粒子层 layer=128 (程序化构建)
     └── AmbientTimer (Timer)           ← 驱动粒子爆发

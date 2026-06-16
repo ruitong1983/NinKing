@@ -1,0 +1,22 @@
+#!/bin/sh
+# ═══════════════════════════════════════════════════════
+# Pre-commit hook: sync ninja-card-viewer.html on data change
+# ═══════════════════════════════════════════════════════
+# Auto-install:  sh tools/install-hooks.sh
+# Manual install: cp tools/pre-commit .git/hooks/pre-commit
+# ═══════════════════════════════════════════════════════
+
+NINJA_GD="scripts/ninking/ninja_data.gd"
+VIEWER_HTML="docs/ninking/ninja_card_viewer.html"
+EXTRACT_SCRIPT="tools/extract_ninja_data.py"
+
+if git diff --cached --name-only | grep -qF "$NINJA_GD"; then
+  echo "📝 ninja_data.gd 已变更 → 同步 ninja_card_viewer.html..."
+  if python "$EXTRACT_SCRIPT" "$VIEWER_HTML"; then
+    git add "$VIEWER_HTML"
+    echo "✅ ninja_card_viewer.html 已更新并暂存"
+  else
+    echo "⚠️  ninja_card_viewer.html 同步失败，请检查 extract_ninja_data.py"
+    exit 1
+  fi
+fi

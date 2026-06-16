@@ -55,7 +55,7 @@ func setup(data: Dictionary) -> void:
 
 
 func apply_barrier_theme(_colors: Dictionary) -> void:
-	## Backwards-compatible entry point (used by card_preview.gd).
+	## Backwards-compatible entry point.
 	## Delegates to ink-wash theme — ignores `colors` since shop uses its own palette.
 	apply_ink_wash_theme()
 
