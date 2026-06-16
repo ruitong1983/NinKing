@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NinKing 忍者牌图鉴</title>
+<title>NinKing 忍者牌图鉴 · 喜系统</title>
 <style>
 /* ══════════════════════════════════════════
    NinKing 忍者牌图鉴 — 样式
@@ -282,6 +282,77 @@ footer a:hover { color: var(--gold); }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 .card { animation: fadeIn 0.25s ease-out both; }
 
+/* ─── Tabs ─── */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0;
+}
+.tab-btn {
+  padding: 10px 24px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-weight: 500;
+}
+.tab-btn:hover { color: var(--text); background: var(--bg-hover); }
+.tab-btn.active {
+  color: var(--gold);
+  background: var(--bg-card);
+  border-color: var(--border);
+  border-bottom-color: var(--bg-card);
+  margin-bottom: -1px;
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ─── Xi Table ─── */
+.xi-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+.xi-table th, .xi-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 13px; }
+.xi-table th { color: var(--gold); font-weight: 600; background: var(--bg-card); white-space: nowrap; }
+.xi-table tr:hover td { background: var(--bg-hover); }
+.xi-table .xi-name { color: #fff; font-weight: 600; white-space: nowrap; font-size: 14px; }
+.xi-table .xi-mult { color: var(--gold); font-weight: 600; white-space: nowrap; }
+.xi-table .xi-chips { color: var(--uncommon); white-space: nowrap; }
+.xi-table .xi-tier {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.xi-tier.global { background: #4fc3f733; color: var(--uncommon); }
+.xi-tier.group { background: #ef535033; color: var(--rare); }
+.xi-tier.special { background: #ffd54f33; color: var(--legendary); }
+.xi-tier.exclusive { background: #c4a84333; color: var(--gold); }
+.xi-section-title {
+  font-size: 18px;
+  color: var(--gold);
+  margin: 24px 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.xi-section-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.xi-section-desc strong { color: var(--text); }
+.xi-combo-note {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 8px;
+  font-style: italic;
+}
+
 /* ─── No results ─── */
 .no-results {
   grid-column: 1 / -1;
@@ -296,9 +367,18 @@ footer a:hover { color: var(--gold); }
 
 <!-- ═══ Header ═══ -->
 <header>
-  <h1>🏯 NinKing 忍者牌图鉴 <small id="card-count"></small></h1>
-  <p class="subtitle">基于 <span id="data-date">2026-06-16</span> <code>ninja_data.gd</code> · 点击卡牌查看详情 · ESC 清空搜索</p>
+  <h1>🏯 NinKing 忍者牌图鉴 · 喜系统 <small id="card-count"></small></h1>
+  <p class="subtitle">基于 <span id="data-date">2026-06-16</span> <code>ninja_data.gd</code> + <code>xi_detector.gd</code> · 点击卡牌查看详情 · ESC 清空搜索</p>
 </header>
+
+<!-- ═══ Tab Bar ═══ -->
+<div class="tab-bar">
+  <button class="tab-btn active" data-tab="ninja" onclick="switchTab('ninja')">🃏 忍者牌</button>
+  <button class="tab-btn" data-tab="xi" onclick="switchTab('xi')">🎉 喜系统</button>
+</div>
+
+<!-- ═══ Tab: Ninja Cards ═══ -->
+<div class="tab-content active" id="tab-ninja">
 
 <!-- ═══ Controls ═══ -->
 <div class="controls">
@@ -343,6 +423,45 @@ footer a:hover { color: var(--gold); }
   </div>
   <div class="stat-note" id="stats-note"></div>
 </div>
+
+</div><!-- /tab-ninja -->
+
+<!-- ═══ Tab: Xi System ═══ -->
+<div class="tab-content" id="tab-xi">
+
+<h2 class="xi-section-title">🎉 基础喜 (9 种)</h2>
+<div class="xi-section-desc">全局条件，每次出牌自动检测。多个喜独立触发，叠加计算。</div>
+<table class="xi-table" id="xi-basic-table">
+  <thead>
+    <tr><th>#</th><th>喜名</th><th>条件</th><th>倍率</th><th>Chips</th><th>分类</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<h2 class="xi-section-title">⚡ Phase E 新喜 (8 种)</h2>
+<div class="xi-section-desc">排列型喜，依赖 9 张 → 3×3 分组决策，有策略张力和选择路线。</div>
+<table class="xi-table" id="xi-phase-e-table">
+  <thead>
+    <tr><th>#</th><th>喜名</th><th>条件</th><th>倍率</th><th>Chips</th><th>分类</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<h2 class="xi-section-title">🔗 合系列 (互斥)</h2>
+<div class="xi-section-desc">行列牌型匹配度检测：遍历三行（影/瞬/滅），每行只要其牌型出现在任一列中即计 1 分。<strong>散牌行 (HIGH_CARD_3) 不计入</strong>——散牌配上散牌不算巧妙匹配。内部互斥，只取最高档触发。</div>
+<table class="xi-table" id="xi-combo-table">
+  <thead>
+    <tr><th>喜名</th><th>条件</th><th>倍率</th><th>分类</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<div class="xi-section-desc" style="margin-top:20px; border-top:1px solid var(--border); padding-top:16px;">
+  <strong>💡 计分公式：</strong>基础筹码 × 基础倍率 × 喜倍率叠乘 + 喜 Chips<br>
+  <strong>💡 昇龍 vs 背水：</strong>自然互斥（尾墩散牌不可能牌型递增），无需代码处理
+</div>
+
+</div><!-- /tab-xi -->
 
 <!-- ═══ Footer ═══ -->
 <footer>
@@ -934,6 +1053,85 @@ const NINJAS = [
   }
 ];  // ── auto-extracted ──
 
+// ══════════════════════════════════════════════════════
+//  Xi (喜) system definitions
+// ══════════════════════════════════════════════════════
+const XI_BASIC = [
+  { id: 1,  name: "全黑",       cond: "9 张全 ♠/♣",                         mult: 2, chips: 0,   tier: "global",  tierLabel: "全局" },
+  { id: 2,  name: "全红",       cond: "9 张全 ♥/♦",                         mult: 2, chips: 0,   tier: "global",  tierLabel: "全局" },
+  { id: 3,  name: "全顺",       cond: "9 张点数连续",                         mult: 2, chips: 0,   tier: "global",  tierLabel: "全局" },
+  { id: 4,  name: "全同花",     cond: "9 张同一花色",                         mult: 3, chips: 0,   tier: "global",  tierLabel: "全局" },
+  { id: 5,  name: "四张",       cond: "4+ 张同点数",                          mult: 1, chips: 50,  tier: "global",  tierLabel: "全局" },
+  { id: 6,  name: "三清",       cond: "三组全是同花（花色可不同）",             mult: 2, chips: 0,   tier: "group",   tierLabel: "组级" },
+  { id: 7,  name: "三顺清",     cond: "三组全是同花顺",                        mult: 3, chips: 0,   tier: "group",   tierLabel: "组级" },
+  { id: 8,  name: "顺清打头",   cond: "影为同花顺",                           mult: 2, chips: 0,   tier: "group",   tierLabel: "组级" },
+  { id: 9,  name: "全三条",     cond: "9 张组成 3 副三条",                     mult: 4, chips: 0,   tier: "global",  tierLabel: "全局" },
+];
+const XI_PHASE_E = [
+  { id: 10, name: "豹子",       cond: "任意一组为三条",                        mult: 2, chips: 0,   tier: "group",   tierLabel: "组级" },
+  { id: 11, name: "昇龍",       cond: "影<瞬<滅 牌型严格递增",                 mult: 3, chips: 0,   tier: "special", tierLabel: "排列递进" },
+  { id: 12, name: "背水",       cond: "尾墩为散牌 (HIGH_CARD_3)",              mult: 4, chips: 0,   tier: "special", tierLabel: "牺牲型" },
+  { id: 13, name: "貧打",       cond: "某墩精确含 2-3-5",                     mult: 4, chips: 0,   tier: "special", tierLabel: "特定组合" },
+  { id: 14, name: "陣眼",       cond: "中心牌全局最小或最大（含并列）",          mult: 3, chips: 0,   tier: "special", tierLabel: "位置型" },
+  { id: 15, name: "均爵",       cond: "每墩至少一张 J/Q/K",                   mult: 3, chips: 0,   tier: "special", tierLabel: "均匀分配" },
+  { id: 16, name: "三等",       cond: "三行 chip 总和相等",                    mult: 5, chips: 0,   tier: "special", tierLabel: "平衡型" },
+  { id: 17, name: "满堂",       cond: "3 行 + 3 列全部非散牌 (≥ONE_PAIR_3)",  mult: 5, chips: 0,   tier: "special", tierLabel: "行列全判" },
+];
+const XI_COMBOS = [
+  { name: "三合", cond: "3 行牌型各匹配一列（散牌行不计）", mult: 6, tier: "exclusive" },
+  { name: "双合", cond: "2 行牌型匹配列",                   mult: 4, tier: "exclusive" },
+  { name: "一合", cond: "1 行牌型匹配列",                   mult: 2, tier: "exclusive" },
+];
+
+// ═══ Tab switching ═══
+function switchTab(tabId) {
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === tabId));
+  document.querySelectorAll(".tab-content").forEach(c => c.classList.toggle("active", c.id === "tab-" + tabId));
+  if (tabId === "xi") renderXiTables();
+}
+
+// ═══ Render xi tables ═══
+function renderXiTables() {
+  // Basic xi
+  const basicBody = document.querySelector("#xi-basic-table tbody");
+  basicBody.innerHTML = XI_BASIC.map(x => {
+    const chipsStr = x.chips > 0 ? `+${x.chips}` : "—";
+    return `<tr>
+      <td style="color:var(--text-dim)">${x.id}</td>
+      <td class="xi-name">${x.name}</td>
+      <td>${x.cond}</td>
+      <td class="xi-mult">×${x.mult}</td>
+      <td class="xi-chips">${chipsStr}</td>
+      <td><span class="xi-tier ${x.tier}">${x.tierLabel}</span></td>
+    </tr>`;
+  }).join("");
+
+  // Phase E xi
+  const phaseBody = document.querySelector("#xi-phase-e-table tbody");
+  phaseBody.innerHTML = XI_PHASE_E.map(x => {
+    const chipsStr = x.chips > 0 ? `+${x.chips}` : "—";
+    return `<tr>
+      <td style="color:var(--text-dim)">${x.id}</td>
+      <td class="xi-name">${x.name}</td>
+      <td>${x.cond}</td>
+      <td class="xi-mult">×${x.mult}</td>
+      <td class="xi-chips">${chipsStr}</td>
+      <td><span class="xi-tier ${x.tier}">${x.tierLabel}</span></td>
+    </tr>`;
+  }).join("");
+
+  // Combos
+  const comboBody = document.querySelector("#xi-combo-table tbody");
+  comboBody.innerHTML = XI_COMBOS.map(x => {
+    return `<tr>
+      <td class="xi-name">${x.name}</td>
+      <td>${x.cond}</td>
+      <td class="xi-mult">×${x.mult}</td>
+      <td><span class="xi-tier ${x.tier}">互斥·最高档</span></td>
+    </tr>`;
+  }).join("");
+}
+
 // ═══ Category labels for display ═══
 const CATEGORY_LABELS = {
   universal: "通用加成", group_target: "组别定向", rule_change: "规则变更",
@@ -1146,9 +1344,10 @@ function renderStats() {
 }
 
 // ═══ Init ═══
-document.getElementById("card-count").textContent = `· ${NINJAS.length} 张`;
+document.getElementById("card-count").textContent = `· ${NINJAS.length} 忍者 · ${XI_BASIC.length + XI_PHASE_E.length} 喜`;
 render();
 renderStats();
+renderXiTables();
 </script>
 
 </body>
