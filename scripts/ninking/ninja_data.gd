@@ -106,9 +106,9 @@ const ALL_NINJAS: Array[Dictionary] = [
 	},
 	{
 		"id": "n_g06", "category": "group_target", "name": "金字塔",
-		"effect": {"x_mult": 2, "condition": {"strict_ascending_types": true}},
-		"cost": 12, "rarity": "rare",
-		"desc": "影<瞬<滅严格递升×2"
+		"effect": {"pyramid_x3": true},
+		"cost": 10, "rarity": "rare",
+		"desc": "各组牌型高于前组时该组×3（影无条件）"
 	},
 
 	# ─── 规则变更 (2, 互斥) ───
@@ -237,10 +237,10 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"desc": "出牌后每触发一个喜 +$2"
 	},
 	{
-		"id": "n_e02", "category": "economy", "name": "金尾",
-		"effect": {"gold_per_gold_card_in_tail": 3},
-		"cost": 5, "rarity": "uncommon",
-		"desc": "滅有镀金增强牌时 +$3/张"
+		"id": "n_e02", "category": "group_target", "name": "金尾",
+		"effect": {"x_mult": 2, "condition": {"group": "tail"}},
+		"cost": 6, "rarity": "uncommon",
+		"desc": "滅组计分×2"
 	},
 	{
 		"id": "n_e04", "category": "economy", "name": "利息之印",
@@ -291,21 +291,19 @@ const ALL_NINJAS: Array[Dictionary] = [
 	{
 		"id": "n_l01", "category": "legendary", "name": "天下人",
 		"effect": {
-			"constraint_override": "none",
-			"all_groups_x_mult": 2
+			"share_col_hand_to_rows": true
 		},
 		"cost": 999, "rarity": "legendary",
-		"desc": "排列约束解除 + 三组各×2"
+		"desc": "非散牌列的牌型加成分摊到三行"
 	},
 	{
 		"id": "n_l02", "category": "legendary", "name": "幻术大师",
 		"effect": {
-			"all_cards_wild": true,
-			"wild_coverage": 0.5,
-			"wild_break_chance": 0.1
+			"only_one_play": true,
+			"share_tail_hand_to_head_mid": true
 		},
 		"cost": 999, "rarity": "legendary",
-		"desc": "出牌时半数手牌视作万能，10%概率损失1张"
+		"desc": "仅1次出牌，滅的牌型加成（筹码+倍率）分摊到影和瞬"
 	},
 	{
 		"id": "n_l03", "category": "legendary", "name": "影武者",
@@ -314,18 +312,21 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"desc": "每次出牌随机 1 组获得 ×3"
 	},
 
-	# ─── 手替え激励 (2) — 新增 ───
+	# ─── 组别定向 (1) — 成双 (原忍法·换 重设) ───
 	{
-		"id": "n_d01", "category": "redraw", "name": "忍法·换",
-		"effect": {"add_chips_per_redraw_this_seal": 10},
+		"id": "n_d01", "category": "group_target", "name": "成双",
+		"effect": {
+			"pair_even_chips": 8,
+			"condition": {"hand_type": 1}
+		},
 		"cost": 4, "rarity": "common",
-		"desc": "每次手替え后本次封印内 +10 筹码（累计）"
+		"desc": "对子牌型时，组内每张偶数数字牌 +8 筹码"
 	},
 	{
-		"id": "n_d02", "category": "redraw", "name": "赌命",
-		"effect": {"extra_redraw_card": 1, "plays_minus": 1},
+		"id": "n_t07", "category": "tools", "name": "赌命",
+		"effect": {"extra_plays": -1, "x_mult": 2},
 		"cost": 7, "rarity": "uncommon",
-		"desc": "手替え可多弃1张，但出牌次数-1"
+		"desc": "出牌次数-1，三行三列均×2"
 	},
 
 	# ─── 跨组联动 (2) — 新增 ───

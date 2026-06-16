@@ -78,6 +78,40 @@ static func calculate(
 			head_eval, mid_eval, tail_eval,
 			head_ninja, mid_ninja, tail_ninja, gold)
 
+	# ─── share_col_hand_to_rows (天下人): 非散牌列的牌型加成给三行 ───
+	var share_col_hand: bool = false
+	for ninja: Dictionary in ninjas:
+		if ninja.get("effect", {}).get("share_col_hand_to_rows", false):
+			share_col_hand = true
+			break
+	if share_col_hand and col_evals.size() == 3:
+		var col_hand_chips: int = 0
+		var col_hand_mult: int = 0
+		for i: int in range(3):
+			var ct: int = col_evals[i].hand_type if col_evals[i] != null else CardData.HandType3.HIGH_CARD_3
+			if ct != CardData.HandType3.HIGH_CARD_3:
+				col_hand_chips += CardData.get_hand_type3_leveled_chips(ct, star_chart_levels)
+				col_hand_mult += CardData.get_hand_type3_leveled_mult(ct, star_chart_levels)
+		head_ninja.chips += col_hand_chips
+		mid_ninja.chips += col_hand_chips
+		tail_ninja.chips += col_hand_chips
+		head_ninja.mult += col_hand_mult
+		mid_ninja.mult += col_hand_mult
+		tail_ninja.mult += col_hand_mult
+	# ─── share_tail_hand_to_head_mid (幻术大师): 滅牌型加成给影和瞬 ───
+	var share_tail_hand: bool = false
+	for ninja: Dictionary in ninjas:
+		if ninja.get("effect", {}).get("share_tail_hand_to_head_mid", false):
+			share_tail_hand = true
+			break
+	if share_tail_hand:
+		var tail_hc: int = CardData.get_hand_type3_leveled_chips(tail_type, star_chart_levels)
+		var tail_hm: int = CardData.get_hand_type3_leveled_mult(tail_type, star_chart_levels)
+		head_ninja.chips += tail_hc
+		mid_ninja.chips += tail_hc
+		head_ninja.mult += tail_hm
+		mid_ninja.mult += tail_hm
+
 	# ── Compute each row's score ──
 	var head_score_val: int = 0
 	var mid_score_val: int = 0
@@ -168,99 +202,64 @@ static func calculate(
 			col_evals[1].hand_type,
 			col_evals[2].hand_type,
 		]
+		if override_type:
+			col_types = [
+				CardData.HandType3.HIGH_CARD_3,
+				CardData.HandType3.HIGH_CARD_3,
+				CardData.HandType3.HIGH_CARD_3,
+			]
 
 		for i: int in range(3):
-			var ct: CardData.HandType3 = col_types[i]
-			if ct == CardData.HandType3.HIGH_CARD_3:
-				col_scores.append(0)  # 散牌列给0分，保持3元素索引对齐
-				continue
+			if col_types[i] == CardData.HandType3.HIGH_CARD_3:
+				col_scores.append(0)
+			else:
+				var col_ninja_eff: Dictionary = { "chips": 0, "mult": 0, "x_stack": [] }
+				for ninja: Dictionary in ninjas:
+					var eff: Dictionary = ninja.get("effect", {})
+					_collect_ninja_for_column(eff, col_types[i], col_ninja_eff, gold)
+				# Pyramid effect does NOT apply to columns
+				var cs: int = _compute_group_score(
+					col_cards_array[i], col_types[i], star_chart_levels, col_ninja_eff, hungry_ghost)
+				col_scores.append(cs)
+				col_total += cs
 
-			# Collect ninja effects for this column
-			var col_ninja: Dictionary = { "chips": 0, "mult": 0, "x_stack": [] }
-			for ninja: Dictionary in ninjas:
-				var effect: Dictionary = ninja.get("effect", {})
-				_collect_ninja_for_column(effect, ct, col_ninja, gold)
-
-			var cs: int = _compute_group_score(
-				col_cards_array[i], ct, star_chart_levels, col_ninja, hungry_ghost)
-			col_scores.append(cs)
-			col_total += cs
-
-	result.col_scores = col_scores
-	result.col_total = col_total
-
-	# ── Total raw sum (rows + columns) ──
 	var total_raw: int = head_score_val + mid_score_val + tail_score_val + col_total
 
-	# ── Global xi ×mult (from xi_result triggered list) ──
+	# ── v5.0 Global xi ×mult ──
 	result.global_xi_x_stack = _get_global_xi_x_stack(xi_result, xi_bonus, xi_override)
 
-	# ── Group-level xi ×mult (三清/三顺清/顺清打头/豹子) ──
-	# Applied to both rows AND columns (v5.0)
+	# ── v5.0 Group-level xi ×mult ──
 	if xi_result and xi_result.has_any():
-		if "三清" in xi_result.triggered:
-			var sanqing_x: int = xi_override.get("三清", 2) + xi_bonus
-			if score_head: head_score_val = _apply_group_xi_to_score(head_score_val, sanqing_x)
-			if score_mid:  mid_score_val  = _apply_group_xi_to_score(mid_score_val, sanqing_x)
-			if score_tail: tail_score_val = _apply_group_xi_to_score(tail_score_val, sanqing_x)
-			col_total = 0
-			for j: int in col_scores.size():
-				col_scores[j] = _apply_group_xi_to_score(col_scores[j], sanqing_x)
-				col_total += col_scores[j]
-		if "三顺清" in xi_result.triggered:
-			var sanshunqing_x: int = xi_override.get("三顺清", 3) + xi_bonus
-			if score_head: head_score_val = _apply_group_xi_to_score(head_score_val, sanshunqing_x)
-			if score_mid:  mid_score_val  = _apply_group_xi_to_score(mid_score_val, sanshunqing_x)
-			if score_tail: tail_score_val = _apply_group_xi_to_score(tail_score_val, sanshunqing_x)
-			col_total = 0
-			for j: int in col_scores.size():
-				col_scores[j] = _apply_group_xi_to_score(col_scores[j], sanshunqing_x)
-				col_total += col_scores[j]
-		if "顺清打头" in xi_result.triggered and score_head:
-			var shunqing_x: int = xi_override.get("顺清打头", 2) + xi_bonus
-			head_score_val = _apply_group_xi_to_score(head_score_val, shunqing_x)
-		# 豹子 — per-group: each 墩 that's THREE_OF_KIND gets ×2
-		if "豹子" in xi_result.triggered:
-			var baoxi_x: int = xi_override.get("豹子", 2) + xi_bonus
-			if score_head and head_eval.hand_type == CardData.HandType3.THREE_OF_KIND_3:
-				head_score_val = _apply_group_xi_to_score(head_score_val, baoxi_x)
-			if score_mid and mid_eval.hand_type == CardData.HandType3.THREE_OF_KIND_3:
-				mid_score_val = _apply_group_xi_to_score(mid_score_val, baoxi_x)
-			if score_tail and tail_eval.hand_type == CardData.HandType3.THREE_OF_KIND_3:
-				tail_score_val = _apply_group_xi_to_score(tail_score_val, baoxi_x)
+		_apply_group_xi(result, xi_result, xi_override, xi_bonus,
+			score_head, score_mid, score_tail, head_eval, mid_eval, tail_eval,
+			col_scores)
 
-	# Recompute total_raw with group xi applied
-	total_raw = head_score_val + mid_score_val + tail_score_val + col_total
-	result.head_score = head_score_val
-	result.mid_score = mid_score_val
-	result.tail_score = tail_score_val
-	result.col_scores = col_scores
-	result.col_total = col_total
-
-	# ── Tail ×2 compensation (独柱 Seal Lord) — v5.0: ×2 on total ──
+	# ── v5.0 Recompute totals after xi ──
+	total_raw = result.head_score + result.mid_score + result.tail_score
+	col_total = 0
+	for cs_val: int in col_scores:
+		col_total += cs_val
+	total_raw += col_total
 	if tail_x2:
 		total_raw *= 2
-
-	# ── Ensure minimums ──
 	total_raw = max(total_raw, 1)
 
-	# ── Compute final score ──
 	result.total_score = total_raw
 	for x: int in result.global_xi_x_stack:
 		result.total_score *= x
-
-	# Ensure minimum
 	result.total_score = max(result.total_score, 1)
 
-	# ── Breakdown ──
-	result.chips_sum = total_chips
-	result.mult_sum = total_mult
-	result.breakdown["head_score"] = head_score_val
-	result.breakdown["mid_score"] = mid_score_val
-	result.breakdown["tail_score"] = tail_score_val
-	result.breakdown["col_total"] = col_total
-	result.breakdown["col_scores"] = col_scores
-	result.breakdown["global_xi_x_stack"] = result.global_xi_x_stack
+	# Breakdown for debugging
+	result.col_scores = col_scores
+	result.col_total = col_total
+	result.breakdown = {
+		"head_score": result.head_score,
+		"mid_score": result.mid_score,
+		"tail_score": result.tail_score,
+		"col_total": col_total,
+		"col_scores": col_scores,
+		"global_xi_x_stack": result.global_xi_x_stack,
+	}
 
 	return result
 
@@ -323,6 +322,10 @@ static func _collect_ninja_for_column(
 	col_ninja: Dictionary,
 	gold: int
 ) -> void:
+	# Pyramid effect — rows only, skip for columns
+	if effect.get("pyramid_x3", false):
+		return
+
 	var cond: Dictionary = effect.get("condition", {})
 
 	# Economy effects always apply (same as rows)
@@ -411,19 +414,21 @@ static func _get_global_xi_x_stack(xi_result: XiDetector.XiResult, xi_bonus: int
 
 # ──────────────────────────── Ninja per-group collection (rows) ────────────────────────────
 
-## Evaluate a single ninja effect and distribute to the correct row group(s).
+## Apply a single ninja's effect to row ninja accumulators.
+## Handles: chips, mult, x_mult, x_stack, economy, pair_even_chips.
+## Group-targeted effects are determined by ninja_affected_groups().
 static func collect_ninja_per_group(
 	effect: Dictionary,
 	head_type: CardData.HandType3, mid_type: CardData.HandType3, tail_type: CardData.HandType3,
-	_head_cards: Array, _mid_cards: Array, _tail_cards: Array,
-	_head_eval: HandEvaluator3.EvalResult, _mid_eval: HandEvaluator3.EvalResult, _tail_eval: HandEvaluator3.EvalResult,
+	head_cards: Array, mid_cards: Array, tail_cards: Array,
+	head_eval: HandEvaluator3.EvalResult, mid_eval: HandEvaluator3.EvalResult, tail_eval: HandEvaluator3.EvalResult,
 	head_ninja: Dictionary, mid_ninja: Dictionary, tail_ninja: Dictionary,
 	gold: int
 ) -> void:
 	var groups: Array[String] = ninja_affected_groups(effect,
 		head_type, mid_type, tail_type,
-		_head_cards, _mid_cards, _tail_cards,
-		_head_eval, _mid_eval, _tail_eval)
+		head_cards, mid_cards, tail_cards,
+		head_eval, mid_eval, tail_eval)
 
 	var chips: int = effect.get("add_chips", 0)
 	var mult: int = effect.get("add_mult", 0)
@@ -454,6 +459,32 @@ static func collect_ninja_per_group(
 			if xv > 1:
 				target.x_stack.append(xv)
 
+	# ─── pair_even_chips: count even number cards (2/4/6/8/10) in PAIR groups ───
+	var pair_even: int = effect.get("pair_even_chips", 0)
+	if pair_even > 0:
+		for group_name: String in groups:
+			var cards_arr: Array
+			match group_name:
+				"head":
+					cards_arr = head_cards
+				"mid":
+					cards_arr = mid_cards
+				_:
+					cards_arr = tail_cards
+			var even_count: int = 0
+			for card: CardData.PlayingCard in cards_arr:
+				if card.rank >= 2 and card.rank <= 10 and card.rank % 2 == 0:
+					even_count += 1
+			var target_p: Dictionary
+			match group_name:
+				"head":
+					target_p = head_ninja
+				"mid":
+					target_p = mid_ninja
+				_:
+					target_p = tail_ninja
+			target_p.chips += pair_even * even_count
+
 # If this ninja has no group condition and no economy, it applies to ALL groups
 	var has_x_stack: bool = false
 	for xv: int in x_stack:
@@ -476,7 +507,17 @@ static func collect_ninja_per_group(
 				head_ninja.x_stack.append(xv)
 				mid_ninja.x_stack.append(xv)
 				tail_ninja.x_stack.append(xv)
-			
+
+	# ─── pyramid_x3: per-group ×3 based on ascending hand types ───
+	if effect.get("pyramid_x3", false):
+		# 影：无条件×3（金字塔基底）
+		head_ninja.x_stack.append(3)
+		# 瞬：牌型 > 影 → ×3
+		if int(mid_type) > int(head_type):
+			mid_ninja.x_stack.append(3)
+		# 滅：牌型 > 瞬 → ×3
+		if int(tail_type) > int(mid_type):
+			tail_ninja.x_stack.append(3)
 
 
 ## Determine which groups a ninja's condition targets.
@@ -537,8 +578,6 @@ static func _check_cond_for_type(cond: Dictionary, hand_type: CardData.HandType3
 	var at_least: int = cond.get("at_least_hand_type", -1)
 	if at_least != -1 and int(hand_type) < at_least:
 		return false
-	if cond.get("strict_ascending_types", false):
-		pass
 	return true
 
 
@@ -589,9 +628,18 @@ static func analyze_effects(
 	var xi_bonus_val: int = 0
 	var xi_override_val: Dictionary = {}
 	var tools: Dictionary = {}
+	var share_col_hand_to_rows: bool = false
+	var share_tail_hand_to_head_mid: bool = false
 
 	for ninja: Dictionary in ninjas:
 		var effect: Dictionary = ninja.get("effect", {})
+
+		# 10) Detect 天下人 share_col_hand_to_rows
+		if effect.get("share_col_hand_to_rows", false):
+			share_col_hand_to_rows = true
+		# 11) Detect 幻术大师 share_tail_hand_to_head_mid
+		if effect.get("share_tail_hand_to_head_mid", false):
+			share_tail_hand_to_head_mid = true
 
 		# 1) Row effects
 		collect_ninja_per_group(effect,
@@ -612,13 +660,6 @@ static func analyze_effects(
 		if effect.get("gold_per_xi", 0) > 0:
 			if xi_result != null and xi_result.has_any():
 				gold_on_play += xi_result.triggered.size() * effect["gold_per_xi"]
-		if effect.get("gold_per_gold_card_in_tail", 0) > 0:
-			var tail_gold_count: int = 0
-			for card: CardData.PlayingCard in tail_cards:
-				if int(card.enhancement) == 1:  # Enhancement.GOLD
-					tail_gold_count += 1
-			gold_on_play += tail_gold_count * effect["gold_per_gold_card_in_tail"]
-
 		# 4) Interest cap
 		if effect.get("interest_cap_bonus", 0) > 0:
 			interest_cap += effect["interest_cap_bonus"]
@@ -646,8 +687,8 @@ static func analyze_effects(
 		var chips: int = effect.get("add_chips", 0)
 		var mult: int = effect.get("add_mult", 0)
 		var has_raw: bool = chips > 0 or mult > 0
-		var has_economy: bool = effect.get("mult_per_gold", 0) > 0 or effect.get("x_per_gold", 1) > 1
-		if has_raw or has_economy:
+		var has_economy_anim: bool = effect.get("mult_per_gold", 0) > 0 or effect.get("x_per_gold", 1) > 1
+		if has_raw or has_economy_anim:
 			var xi_cond: String = effect.get("condition", {}).get("xi", "")
 			if xi_cond == "" or (xi_result != null and xi_result.has_any() and xi_cond in xi_result.triggered):
 				var groups: Array[String] = ninja_affected_groups(effect,
@@ -667,12 +708,12 @@ static func analyze_effects(
 					"chips": chips,
 					"mult": mult,
 					"groups": row_indices,
-					"is_economy": not has_raw and has_economy,
+					"is_economy": not has_raw and has_economy_anim,
 				})
 
 		# 9) Tool effects (currently unprocessed)
 		var ep: int = effect.get("extra_plays", 0)
-		if ep > 0:
+		if ep != 0:
 			tools["extra_plays"] = tools.get("extra_plays", 0) + ep
 		var er: int = effect.get("extra_redraws", 0)
 		if er > 0:
@@ -681,8 +722,6 @@ static func analyze_effects(
 			tools["first_play_x2"] = true
 		if effect.get("death_save", false):
 			tools["death_save"] = true
-		if effect.get("all_cards_wild", false):
-			tools["all_cards_wild"] = true
 
 	return {
 		"per_group": per_group,
@@ -696,12 +735,13 @@ static func analyze_effects(
 		"xi_bonus": xi_bonus_val,
 		"xi_override": xi_override_val,
 		"tools": tools,
+		"share_col_hand_to_rows": share_col_hand_to_rows,
+		"share_tail_hand_to_head_mid": share_tail_hand_to_head_mid,
 	}
 
 
 ## Calculate score using a pre-computed ninja effects summary.
 ## Skips the ninja iteration loops (already done in analyze_effects()).
-## Backward-compatible: old callers using calculate() continue to work.
 static func calculate_with_summary(
 	head_cards: Array,
 	mid_cards: Array,
@@ -736,6 +776,30 @@ static func calculate_with_summary(
 	var head_type: int = CardData.HandType3.HIGH_CARD_3 if override_type else head_eval.hand_type
 	var mid_type: int = CardData.HandType3.HIGH_CARD_3 if override_type else mid_eval.hand_type
 	var tail_type: int = CardData.HandType3.HIGH_CARD_3 if override_type else tail_eval.hand_type
+
+	# ─── 天下人: 非散牌列的牌型加成给三行 ───
+	if summary.get("share_col_hand_to_rows", false) and col_evals.size() == 3:
+		var col_hand_chips: int = 0
+		var col_hand_mult: int = 0
+		for i: int in range(3):
+			var ct: int = col_evals[i].hand_type if col_evals[i] != null else CardData.HandType3.HIGH_CARD_3
+			if ct != CardData.HandType3.HIGH_CARD_3:
+				col_hand_chips += CardData.get_hand_type3_leveled_chips(ct, star_chart_levels)
+				col_hand_mult += CardData.get_hand_type3_leveled_mult(ct, star_chart_levels)
+		head_ninja.chips += col_hand_chips
+		mid_ninja.chips += col_hand_chips
+		tail_ninja.chips += col_hand_chips
+		head_ninja.mult += col_hand_mult
+		mid_ninja.mult += col_hand_mult
+		tail_ninja.mult += col_hand_mult
+	# ─── 幻术大师: 滅牌型加成给影和瞬 ───
+	if summary.get("share_tail_hand_to_head_mid", false):
+		var tail_hc: int = CardData.get_hand_type3_leveled_chips(tail_type, star_chart_levels)
+		var tail_hm: int = CardData.get_hand_type3_leveled_mult(tail_type, star_chart_levels)
+		head_ninja.chips += tail_hc
+		mid_ninja.chips += tail_hc
+		head_ninja.mult += tail_hm
+		mid_ninja.mult += tail_hm
 
 	# ── Compute each row ──
 	if score_head:
@@ -877,8 +941,63 @@ static func _row_score(
 			result.tail_ninja_x_stack = ninja_eff.x_stack.duplicate()
 
 
-## Apply group-level xi ×mult to score values in result.
-## Extracted to share between calculate() and calculate_with_summary().
+# ──────────────────────────── Chip and mult helper ────────────────────────────
+
+static func _group_card_chips(cards: Array, hungry_ghost: bool) -> int:
+	var total: int = 0
+	for card: CardData.PlayingCard in cards:
+		total += card.get_chip_value()
+	return total
+
+
+static func _group_ench_chips(cards: Array) -> int:
+	var total: int = 0
+	for card: CardData.PlayingCard in cards:
+		total += card.get_enhancement_chips()
+	return total
+
+
+static func _group_ench_mult(cards: Array) -> int:
+	var total: int = 0
+	for card: CardData.PlayingCard in cards:
+		total += card.get_enhancement_mult()
+	return total
+
+
+# ──────────────────────────── Economy effects ────────────────────────────
+
+## Apply gold-scaling effects (金剛力, 黄金律) to a group.
+## These are unconditional — they apply to ANY group (row or column).
+static func _apply_economy_effects(effect: Dictionary, gold: int, target: Dictionary) -> bool:
+	var applied: bool = false
+	var mult_step: int = effect.get("mult_per_gold", 0)
+	if mult_step > 0:
+		var step: int = effect.get("mult_gold_step", 5)
+		var cap: int = effect.get("mult_gold_cap", 0)
+		var earned: int = floori(float(gold) / float(step)) * mult_step
+		if cap > 0:
+			earned = mini(earned, cap)
+		if earned > 0:
+			target.mult += earned
+			applied = true
+
+	var x_step: int = effect.get("x_per_gold", 0)
+	if x_step > 1:
+		var step_g: int = effect.get("x_gold_step", 15)
+		var cap_x: int = effect.get("x_gold_cap", 0)
+		var count: int = floori(float(gold) / float(step_g))
+		if cap_x > 0:
+			count = mini(count, cap_x)
+		for _i: int in range(count):
+			target.x_stack.append(x_step)
+		if count > 0:
+			applied = true
+
+	return applied
+
+
+# ──────────────────────────── Group-level xi ×mult ────────────────────────────
+
 static func _apply_group_xi(
 	result: ScoreResult,
 	xi_result,
@@ -888,64 +1007,47 @@ static func _apply_group_xi(
 	head_eval, mid_eval, tail_eval,
 	col_scores: Array
 ) -> void:
-	if "三清" in xi_result.triggered:
-		var sanqing_x: int = xi_override.get("三清", 2) + xi_bonus
-		if score_head: result.head_score = _apply_group_xi_to_score(result.head_score, sanqing_x)
-		if score_mid:  result.mid_score = _apply_group_xi_to_score(result.mid_score, sanqing_x)
-		if score_tail: result.tail_score = _apply_group_xi_to_score(result.tail_score, sanqing_x)
-		for j: int in col_scores.size():
-			col_scores[j] = _apply_group_xi_to_score(col_scores[j], sanqing_x)
-	if "三顺清" in xi_result.triggered:
-		var sanshunqing_x: int = xi_override.get("三顺清", 3) + xi_bonus
-		if score_head: result.head_score = _apply_group_xi_to_score(result.head_score, sanshunqing_x)
-		if score_mid:  result.mid_score = _apply_group_xi_to_score(result.mid_score, sanshunqing_x)
-		if score_tail: result.tail_score = _apply_group_xi_to_score(result.tail_score, sanshunqing_x)
-		for j: int in col_scores.size():
-			col_scores[j] = _apply_group_xi_to_score(col_scores[j], sanshunqing_x)
-	if "顺清打头" in xi_result.triggered and score_head:
-		var shunqing_x: int = xi_override.get("顺清打头", 2) + xi_bonus
-		result.head_score = _apply_group_xi_to_score(result.head_score, shunqing_x)
-	if "豹子" in xi_result.triggered:
-		var baoxi_x: int = xi_override.get("豹子", 2) + xi_bonus
-		if score_head and head_eval.hand_type == CardData.HandType3.THREE_OF_KIND_3:
-			result.head_score = _apply_group_xi_to_score(result.head_score, baoxi_x)
-		if score_mid and mid_eval.hand_type == CardData.HandType3.THREE_OF_KIND_3:
-			result.mid_score = _apply_group_xi_to_score(result.mid_score, baoxi_x)
-		if score_tail and tail_eval.hand_type == CardData.HandType3.THREE_OF_KIND_3:
-			result.tail_score = _apply_group_xi_to_score(result.tail_score, baoxi_x)
+	for xi_name: String in xi_result.triggered:
+		var x_val: int = xi_override.get(xi_name, 0)
+		if x_val == 0:
+			for defn: Dictionary in XiDetector.XI_DEFINITIONS:
+				if defn["name"] == xi_name:
+					x_val = defn["x_mult"]
+					break
+		x_val += xi_bonus
+		if x_val <= 1:
+			continue
+
+		match xi_name:
+			"三清":
+				if score_head:
+					_apply_group_xi_to_group(result, "head", x_val)
+				if score_mid:
+					_apply_group_xi_to_group(result, "mid", x_val)
+				if score_tail:
+					_apply_group_xi_to_group(result, "tail", x_val)
+			"三顺清":
+				if score_head:
+					_apply_group_xi_to_group(result, "head", x_val)
+				if score_mid:
+					_apply_group_xi_to_group(result, "mid", x_val)
+				if score_tail:
+					_apply_group_xi_to_group(result, "tail", x_val)
+			"顺清打头":
+				if score_head:
+					_apply_group_xi_to_group(result, "head", x_val)
+			"豹子":
+				for g: String in ["head", "mid", "tail"]:
+					var ev = {"head": head_eval, "mid": mid_eval, "tail": tail_eval}[g]
+					if ev != null and ev.hand_type == CardData.HandType3.THREE_OF_KIND_3:
+						_apply_group_xi_to_group(result, g, x_val)
 
 
-# ──────────────────────────── Helpers ────────────────────────────
-
-## Apply economy effects (mult_per_gold, x_per_gold) to a target dict.
-## Returns true if any economy effects were present.
-static func _apply_economy_effects(effect: Dictionary, gold: int, target: Dictionary) -> bool:
-	var has_economy := false
-	if effect.get("mult_per_gold", 0) > 0:
-		has_economy = true
-		var step: int = effect.get("mult_gold_step", 5)
-		var cap: int = effect.get("mult_gold_cap", 10)
-		var bonus: int = mini(floori(float(gold) / step), cap) * effect["mult_per_gold"]
-		if bonus > 0:
-			target.mult += bonus
-	if effect.get("x_per_gold", 1) > 1:
-		has_economy = true
-		var step_x: int = effect.get("x_gold_step", 15)
-		var cap_x: int = effect.get("x_gold_cap", 3)
-		var count_x: int = mini(floori(float(gold) / step_x), cap_x)
-		for _i: int in range(count_x):
-			target.x_stack.append(effect["x_per_gold"])
-	return has_economy
-
-
-## Delegated to ScoreHelpers (kept as private wrapper for backward compat).
-static func _group_card_chips(cards: Array, hungry_ghost: bool) -> int:
-	return ScoreHelpers.group_card_chips(cards, hungry_ghost, true)
-
-
-static func _group_ench_chips(cards: Array) -> int:
-	return ScoreHelpers.group_ench_chips(cards)
-
-
-static func _group_ench_mult(cards: Array) -> int:
-	return ScoreHelpers.group_ench_mult(cards)
+static func _apply_group_xi_to_group(result: ScoreResult, group: String, x_mult: int) -> void:
+	match group:
+		"head":
+			result.head_score *= x_mult
+		"mid":
+			result.mid_score *= x_mult
+		"tail":
+			result.tail_score *= x_mult

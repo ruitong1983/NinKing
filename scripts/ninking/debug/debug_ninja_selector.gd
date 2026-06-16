@@ -22,14 +22,13 @@ const CATEGORY_NAMES: Dictionary = {
 	"economy": "经济",
 	"tools": "忍法",
 	"legendary": "传说",
-	"redraw": "手替激励",
 	"cross_link": "跨组联动",
 	"face_card": "点数/人牌",
 }
 
 const CATEGORY_ORDER: Array[String] = [
 	"universal", "group_target", "rule_change", "xi_enhance",
-	"scaling", "economy", "tools", "redraw", "cross_link", "face_card", "legendary",
+	"scaling", "economy", "tools", "cross_link", "face_card", "legendary",
 ]
 
 const RARITY_ORDER: Array[String] = ["common", "uncommon", "rare", "legendary"]

@@ -9,6 +9,8 @@ Usage:
     python tools/inject_recent_updates.py docs/ninking/ninja_card_viewer.html
 """
 
+from __future__ import annotations
+
 import re
 import subprocess
 import sys

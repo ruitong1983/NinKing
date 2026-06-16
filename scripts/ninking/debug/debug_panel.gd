@@ -7,8 +7,8 @@ const HEADER_HEIGHT := 44.0
 var _collapsed: bool = false
 var _content_children: Array[Node] = []
 
-@onready var _toggle_btn: Button = $"DebugVBox/ToggleBtn"
-@onready var _debug_vbox: VBoxContainer = $"DebugVBox"
+@onready var _toggle_btn: Button = $"ScrollContainer/DebugVBox/ToggleBtn"
+@onready var _debug_vbox: VBoxContainer = $"ScrollContainer/DebugVBox"
 
 
 func _ready() -> void:
