@@ -40,6 +40,8 @@
 | 忍者测试 / ninja-test | `ninja-test` | 构建 → 计分模拟 → Delta验证 → Review报告 |
 | 上传代码 / push / 提交推送 / sync | `upload-code` | git add . → commit → push |
 
+> **Skill 文件跟踪：** `.claude/skills/` 目录下的 skill 文件随项目代码一起纳入 git 版本管理，新增或修改 skill 时一并提交推送。
+
 ## 素材替换
 
 > **铁律：替换图片/音频等导入资源必须在 Godot 编辑器的 FileSystem dock 中拖入覆盖，禁止用外部工具直接替换文件。**
