@@ -102,9 +102,79 @@
 <div class="tree" id="tree-ninja"></div>
 </div>
 
+<div class="scene-card" id="launcher">
+<h2>ninking_launcher.tscn</h2>
+<div class="info">根: NinKingLauncher (Control) 1920×1080 · <span class="badge-script">main_menu.gd</span></div>
+<div class="tree" id="tree-launcher"></div>
+<div style="margin-top:8px;font-size:12px;color:#888">⏳ 待全量 tscn 扫描验证</div>
+</div>
+
+<div class="scene-card" id="shop">
+<h2>shop_panel.tscn</h2>
+<div class="info">根: ShopPanel (Control) 800×716 · <span class="badge-script">shop_ui.gd</span></div>
+<div class="tree" id="tree-shop"></div>
+<div style="margin-top:8px;font-size:12px;color:#888">⏳ 待全量 tscn 扫描验证</div>
+</div>
+
+<div class="scene-card" id="debug">
+<h2>debug_ninking_main.tscn</h2>
+<div class="info">根: DebugNinKingMain (Control) 1920×1080 · <span class="badge-script">debug_controller.gd</span></div>
+<div class="tree" id="tree-debug"></div>
+<div style="margin-top:8px;font-size:12px;color:#888">⏳ 待全量 tscn 扫描验证</div>
+</div>
+
 <script>
 // ─── Scene tree data ───
 const SCENES = {
+  launcher: {
+    children: [
+      { type: 'Control', name: 'NinKingLauncher', note: '1920×1080', children: [
+        { type: 'Control', name: 'MainMenuPanel', note: '主菜单 (view: menu)', children: [
+          { type: 'Label', name: 'TitleLabel', note: '"忍王"' },
+          { type: 'Button', name: 'NewGameBtn', note: '"新游戏"' },
+          { type: 'Button', name: 'ContinueBtn', note: '"继续"' },
+          { type: 'Button', name: 'DeckSelectBtn', note: '"牌组选择"' },
+        ]},
+        { type: 'Control', name: 'DeckSelectPanel', note: '牌组选择 (view: deck_select)', children: [
+          { type: 'Panel', name: 'DeckPanel' },
+        ]},
+        { type: 'Control', name: 'ContinuePanel', note: '继续确认弹窗', children: [
+          { type: 'Label', name: 'ContinueInfo' },
+          { type: 'Button', name: 'ConfirmContinue' },
+          { type: 'Button', name: 'CancelContinue' },
+        ]},
+      ]},
+    ]
+  },
+  shop: {
+    children: [
+      { type: 'Control', name: 'ShopPanel', note: '800×716, 右下角锚定', children: [
+        { type: 'ColorRect', name: 'Overlay', note: 'BarrierTheme.panel' },
+        { type: 'ColorRect', name: 'TopBorder', note: '800×3 #1A1A1A' },
+        { type: 'ColorRect', name: 'TitleBar', note: '800×40' },
+        { type: 'Label', name: 'ShopSubtitle', note: '"萬屋！" 32px' },
+        { type: 'Label', name: 'GoldLabel', note: '"$0" 20px' },
+        { type: 'Button', name: 'RerollBtn', note: '"入替 $3"' },
+        { type: 'GridContainer', name: 'AbilityGrid', note: '2列 忍者卡 ×4' },
+        { type: 'ColorRect', name: 'Separator', note: '680×1' },
+        { type: 'GridContainer', name: 'ItemColumn', note: '2列 星图卡 ×2' },
+        { type: 'ColorRect', name: 'BottomBar', note: '800×40' },
+        { type: 'Button', name: 'ContinueBtn', note: '"討伐へ ▶"' },
+      ]},
+    ]
+  },
+  debug: {
+    children: [
+      { type: 'Control', name: 'DebugNinKingMain', note: '1920×1080', children: [
+        { type: 'Control', name: 'DebugPanel', note: '调试控制面板', children: [
+          { type: 'Button', name: 'LoadHandBtn', note: 'Load Hand' },
+          { type: 'Button', name: 'CalcScoreBtn', note: 'Calc Score' },
+        ]},
+        { type: 'Control', name: 'DebugUiPanel', note: '调试UI (复用主场景组件)' },
+        { type: 'GridContainer', name: 'CardGrid', note: '52 牌全展示' },
+      ]},
+    ]
+  },
   main: {
     children: [
       { type: 'CardManager', name: 'CardManager', note: 'card-framework 框架' },
