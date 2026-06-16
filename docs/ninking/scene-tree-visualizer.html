@@ -106,21 +106,18 @@
 <h2>ninking_launcher.tscn</h2>
 <div class="info">根: NinKingLauncher (Control) 1920×1080 · <span class="badge-script">main_menu.gd</span></div>
 <div class="tree" id="tree-launcher"></div>
-<div style="margin-top:8px;font-size:12px;color:#888">⏳ 待全量 tscn 扫描验证</div>
 </div>
 
 <div class="scene-card" id="shop">
 <h2>shop_panel.tscn</h2>
 <div class="info">根: ShopPanel (Control) 800×716 · <span class="badge-script">shop_ui.gd</span></div>
 <div class="tree" id="tree-shop"></div>
-<div style="margin-top:8px;font-size:12px;color:#888">⏳ 待全量 tscn 扫描验证</div>
 </div>
 
 <div class="scene-card" id="debug">
 <h2>debug_ninking_main.tscn</h2>
 <div class="info">根: DebugNinKingMain (Control) 1920×1080 · <span class="badge-script">debug_controller.gd</span></div>
 <div class="tree" id="tree-debug"></div>
-<div style="margin-top:8px;font-size:12px;color:#888">⏳ 待全量 tscn 扫描验证</div>
 </div>
 
 <script>
@@ -128,50 +125,167 @@
 const SCENES = {
   launcher: {
     children: [
-      { type: 'Control', name: 'NinKingLauncher', note: '1920×1080', children: [
-        { type: 'Control', name: 'MainMenuPanel', note: '主菜单 (view: menu)', children: [
-          { type: 'Label', name: 'TitleLabel', note: '"忍王"' },
-          { type: 'Button', name: 'NewGameBtn', note: '"新游戏"' },
-          { type: 'Button', name: 'ContinueBtn', note: '"继续"' },
-          { type: 'Button', name: 'DeckSelectBtn', note: '"牌组选择"' },
-        ]},
-        { type: 'Control', name: 'DeckSelectPanel', note: '牌组选择 (view: deck_select)', children: [
-          { type: 'Panel', name: 'DeckPanel' },
-        ]},
-        { type: 'Control', name: 'ContinuePanel', note: '继续确认弹窗', children: [
-          { type: 'Label', name: 'ContinueInfo' },
-          { type: 'Button', name: 'ConfirmContinue' },
-          { type: 'Button', name: 'CancelContinue' },
-        ]},
+      { type: 'Control', name: 'Launcher', note: '1920×1080 [main_menu.gd]', children: [
+        { type: 'TextureRect', name: 'LaunchBg', note: '背景' },
+        { type: 'Button', name: 'StartBtn', note: '"开始游戏"' },
+        { type: 'Button', name: 'ContinueBtn', note: '"继续"' },
+        { type: 'Button', name: 'SettingsBtn', note: '"设置"' },
+        { type: 'Button', name: 'QuitBtn', note: '"退出"' },
+        { type: 'Button', name: 'DebugBtn', note: '"调试"' },
       ]},
     ]
   },
   shop: {
     children: [
-      { type: 'Control', name: 'ShopPanel', note: '800×716, 右下角锚定', children: [
-        { type: 'ColorRect', name: 'Overlay', note: 'BarrierTheme.panel' },
-        { type: 'ColorRect', name: 'TopBorder', note: '800×3 #1A1A1A' },
-        { type: 'ColorRect', name: 'TitleBar', note: '800×40' },
+      { type: 'Control', name: 'ShopPanel', note: '800×716 [shop_ui.gd]', children: [
+        { type: 'ColorRect', name: 'StageBg', note: '面板底色' },
+        { type: 'ColorRect', name: 'TitleBar', note: '标题栏' },
         { type: 'Label', name: 'ShopSubtitle', note: '"萬屋！" 32px' },
-        { type: 'Label', name: 'GoldLabel', note: '"$0" 20px' },
         { type: 'Button', name: 'RerollBtn', note: '"入替 $3"' },
-        { type: 'GridContainer', name: 'AbilityGrid', note: '2列 忍者卡 ×4' },
-        { type: 'ColorRect', name: 'Separator', note: '680×1' },
-        { type: 'GridContainer', name: 'ItemColumn', note: '2列 星图卡 ×2' },
-        { type: 'ColorRect', name: 'BottomBar', note: '800×40' },
+        { type: 'Label', name: 'GoldLabel', note: '"$0" 20px' },
+        { type: 'GridContainer', name: 'AbilityGrid', note: '2列 忍者卡槽 ×4' },
+        { type: 'ColorRect', name: 'Separator', note: '分割线' },
+        { type: 'GridContainer', name: 'ItemColumn', note: '2列 星图卡槽 ×2' },
+        { type: 'ColorRect', name: 'BottomBar', note: '底栏' },
         { type: 'Button', name: 'ContinueBtn', note: '"討伐へ ▶"' },
       ]},
     ]
   },
   debug: {
     children: [
-      { type: 'Control', name: 'DebugNinKingMain', note: '1920×1080', children: [
-        { type: 'Control', name: 'DebugPanel', note: '调试控制面板', children: [
-          { type: 'Button', name: 'LoadHandBtn', note: 'Load Hand' },
-          { type: 'Button', name: 'CalcScoreBtn', note: 'Calc Score' },
+      { type: 'Control', name: 'NinKingDebug', note: '1920×1080 [debug_controller.gd]', children: [
+        { type: 'TextureRect', name: 'GameBg', note: '桌布背景' },
+        { type: 'CardManager', name: 'CardManager', note: 'card-framework' },
+        { type: 'VBoxContainer', name: 'MainVBox', children: [
+          { type: 'HBoxContainer', name: 'ContentRow', children: [
+            { type: 'Control', name: 'LeftPanel', children: [
+              { type: 'ColorRect', name: 'PanelBg' },
+              { type: 'Panel', name: 'MatchPanel', children: [
+                { type: 'VBoxContainer', name: 'MatchVBox', children: [
+                  { type: 'Label', name: 'MatchTitle', note: '"比赛信息"' },
+                  { type: 'Label', name: 'HandsLabel', note: '"討伐"' },
+                  { type: 'Label', name: 'GoldLabel', note: '"$"' },
+                ]},
+              ]},
+              { type: 'Panel', name: 'AntePanel', children: [
+                { type: 'VBoxContainer', name: 'AnteVBox', children: [
+                  { type: 'Label', name: 'BarrierLabel', note: '"结界"' },
+                  { type: 'Label', name: 'RoundLabel', note: '"回合"' },
+                ]},
+              ]},
+              { type: 'Panel', name: 'HandTypePanel', children: [
+                { type: 'Control', name: 'HandTypeVBox', children: [
+                  { type: 'Control', name: 'Row影', children: [
+                    { type: 'Label', name: 'ShadowDun' },
+                    { type: 'Label', name: 'ShadowType' },
+                    { type: 'Label', name: 'ShadowLv' },
+                    { type: 'RichTextLabel', name: 'ShadowScore' },
+                  ]},
+                  { type: 'Control', name: 'Row瞬', children: [
+                    { type: 'Label', name: 'FlashDun' },
+                    { type: 'Label', name: 'FlashType' },
+                    { type: 'Label', name: 'FlashLv' },
+                    { type: 'RichTextLabel', name: 'FlashScore' },
+                  ]},
+                  { type: 'Control', name: 'Row滅', children: [
+                    { type: 'Label', name: 'DestroyDun' },
+                    { type: 'Label', name: 'DestroyType' },
+                    { type: 'Label', name: 'DestroyLv' },
+                    { type: 'RichTextLabel', name: 'DestroyScore' },
+                  ]},
+                  { type: 'ColorRect', name: 'ColDivider' },
+                  { type: 'Control', name: 'ColumnBar', children: [
+                    { type: 'Label', name: 'LeftColType' },
+                    { type: 'Label', name: 'MidColType' },
+                    { type: 'Label', name: 'RightColType' },
+                    { type: 'Label', name: 'LeftColLabel' },
+                    { type: 'Label', name: 'LeftColLv' },
+                    { type: 'RichTextLabel', name: 'LeftColScore' },
+                    { type: 'Label', name: 'MidColLabel' },
+                    { type: 'Label', name: 'MidColLv' },
+                    { type: 'RichTextLabel', name: 'MidColScore' },
+                    { type: 'Label', name: 'RightColLabel' },
+                    { type: 'Label', name: 'RightColLv' },
+                    { type: 'RichTextLabel', name: 'RightColScore' },
+                  ]},
+                ]},
+              ]},
+              { type: 'Panel', name: 'ScorePanel', children: [
+                { type: 'VBoxContainer', name: 'ScoreVBox', children: [
+                  { type: 'Label', name: 'ColXiLabel' },
+                  { type: 'Label', name: 'ScoreLabel' },
+                  { type: 'ProgressBar', name: 'ProgressBar' },
+                  { type: 'Label', name: 'TargetScoreLabel' },
+                ]},
+              ]},
+            ]},
+            { type: 'Control', name: 'CenterColumn', children: [
+              { type: 'Control', name: 'NinjaBar' },
+              { type: 'HBoxContainer', name: 'HandArea', children: [
+                { type: 'Button', name: 'PlayBtn', note: '"討伐"' },
+              ]},
+              { type: 'Panel', name: 'DunArea', children: [
+                { type: 'HBoxContainer', name: 'ColumnLabelRow', children: [
+                  { type: 'Label', name: 'Col0Label' },
+                  { type: 'Label', name: 'Col1Label' },
+                  { type: 'Label', name: 'Col2Label' },
+                ]},
+                { type: 'Label', name: 'HeadLabel' },
+                { type: 'Label', name: 'HeadTypeLabel' },
+                { type: 'Label', name: 'MiddleLabel' },
+                { type: 'Label', name: 'MiddleTypeLabel' },
+                { type: 'Label', name: 'TailLabel' },
+                { type: 'Label', name: 'TailTypeLabel' },
+                { type: 'Control', name: 'CardGrid', note: '3×3 卡牌' },
+              ]},
+              { type: 'Button', name: 'AiRearrangeBtn', note: '"陣形"' },
+            ]},
+          ]},
         ]},
-        { type: 'Control', name: 'DebugUiPanel', note: '调试UI (复用主场景组件)' },
-        { type: 'GridContainer', name: 'CardGrid', note: '52 牌全展示' },
+        { type: 'Label', name: 'StatusLabel', note: '约束提示' },
+        { type: 'Control', name: 'DebugPanel', note: '调试控制面板', children: [
+          { type: 'ColorRect', name: 'PanelBg' },
+          { type: 'VBoxContainer', name: 'DebugVBox', children: [
+            { type: 'Button', name: 'ToggleBtn', note: '切换' },
+            { type: 'Label', name: 'RightTitle', note: '忍者选择' },
+            { type: 'Button', name: 'NinjaSelectBtn', note: '选择忍者' },
+            { type: 'Label', name: 'NinjaStatusLabel' },
+            { type: 'Label', name: 'StarTitle', note: '星图' },
+            { type: 'VBoxContainer', name: 'StarChartContainer' },
+            { type: 'Button', name: 'ClearBtn', note: '清除' },
+            { type: 'Label', name: 'CardTrayLabel', note: '牌库' },
+            { type: 'GridContainer', name: 'CardTray', note: '52 张' },
+            { type: 'Label', name: 'CardQueueLabel', note: '手牌' },
+            { type: 'HBoxContainer', name: 'CardQueueContainer' },
+            { type: 'Button', name: 'DealBtn', note: '发牌' },
+            { type: 'Button', name: 'RandomBtn', note: '随机' },
+            { type: 'Button', name: 'BackBtn', note: '返回' },
+          ]},
+        ]},
+        { type: 'Control', name: 'NinjaSelector', note: '忍者选择浮层', children: [
+          { type: 'ColorRect', name: 'SelectorBg', note: '#000 遮罩' },
+          { type: 'PanelContainer', name: 'SelectorPanel', children: [
+            { type: 'VBoxContainer', name: 'SelectorVBox', children: [
+              { type: 'HBoxContainer', name: 'TitleRow', children: [
+                { type: 'Label', name: 'SelectorTitle' },
+                { type: 'Control', name: 'SortSpacer' },
+                { type: 'HBoxContainer', name: 'SortBtns', children: [
+                  { type: 'Button', name: 'CategoryBtn', note: '分类' },
+                  { type: 'Button', name: 'RarityBtn', note: '稀有度' },
+                  { type: 'Button', name: 'AllBtn', note: '全部' },
+                ]},
+              ]},
+              { type: 'ScrollContainer', name: 'ScrollContainer', children: [
+                { type: 'GridContainer', name: 'NinjaGrid', note: '忍者网格' },
+              ]},
+              { type: 'HBoxContainer', name: 'BtnRow', children: [
+                { type: 'Button', name: 'ConfirmBtn', note: '确认' },
+                { type: 'Button', name: 'CancelBtn', note: '取消' },
+              ]},
+            ]},
+          ]},
+        ]},
+        { type: 'Button', name: 'DeckBtn', note: '"牌库"' },
       ]},
     ]
   },
@@ -269,8 +383,6 @@ const SCENES = {
             ]},
             { type: 'Button', name: 'AiRearrangeBtn', unique: true, note: '"陣形" 84×116' },
           ]},
-          { type: 'Label', name: 'StatusLabel', unique: true, note: '约束提示 24px' },
-          { type: 'Button', name: 'DeckBtn', unique: true, note: '"牌库: XX" 200×48' },
         ]},
         { type: 'Control', name: 'ScoringOverlay', unique: true, note: '计分覆盖层 z_index:10', children: [
           { type: 'ColorRect', name: 'OverlayBg', note: '#000 70%' },
