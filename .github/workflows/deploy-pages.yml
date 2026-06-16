@@ -39,9 +39,6 @@ jobs:
       - name: Inject recent commits into HTML
         run: python tools/inject_recent_updates.py docs/ninking/ninja_card_viewer.html
 
-      - name: Copy card images for viewer (not tracked in git)
-        run: python tools/extract_card_images.py
-
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
