@@ -180,16 +180,16 @@ static func _collect_play_gold(gs, all_cards: Array[CardData.PlayingCard], xi_re
 		for ninja: Dictionary in gs.owned_ninjas:
 			var eff: Dictionary = ninja.get("effect", {})
 
-		# E1: 福神 — gold per xi triggered
-		if eff.get("gold_per_xi", 0) > 0:
-			if xi_result and xi_result.has_any():
-				gold_earned += xi_result.triggered.size() * eff["gold_per_xi"]
+			# E1: 福神 — gold per xi triggered
+			if eff.get("gold_per_xi", 0) > 0:
+				if xi_result and xi_result.has_any():
+					gold_earned += xi_result.triggered.size() * eff["gold_per_xi"]
 
-		# E2: 金尾 — gold per GOLD enhancement card in tail (Enhancement.GOLD = 1)
-		if eff.get("gold_per_gold_card_in_tail", 0) > 0:
-			for card: CardData.PlayingCard in gs.current_arrangement.tail:
-				if int(card.enhancement) == 1:
-					gold_earned += eff["gold_per_gold_card_in_tail"]
+			# E2: 金尾 — gold per GOLD enhancement card in tail (Enhancement.GOLD = 1)
+			if eff.get("gold_per_gold_card_in_tail", 0) > 0:
+				for card: CardData.PlayingCard in gs.current_arrangement.tail:
+					if int(card.enhancement) == 1:
+						gold_earned += eff["gold_per_gold_card_in_tail"]
 
 	# E4: 镀金 — +$3 per card with GOLD enhancement (Enhancement.GOLD = 1)
 	# E5: 金封印 — +$3 per card with GOLD seal (Seal.GOLD = 2)

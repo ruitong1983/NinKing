@@ -40,138 +40,135 @@
 
 ## 2. 场景树全图
 
-> **校验依据：** `scenes/ninking/ninking_main.tscn` 实际节点结构（2026-06-11 最终同步）。
-> 旧版文档中 `MainArea`/`StatusPanel`/`ActionBar`/`DiscardBtn`/`SwapBtn` 等节点不存在，已删除。
+> **校验依据：** `scenes/ninking/ninking_main.tscn` 实际节点结构（2026-06-16 同步）。
+> `[game_manager.gd]` = 脚本绑定 ｜ `[%Name]` = unique_name_in_owner ｜ `（运行时动态加载）` = 代码创建
 
 ```
-NinKingMain (Control) 1920×1080                [game_manager.gd]
-├── CardManager (CardManager)                  [card-manager 框架]
-├── GameBg (TextureRect) [%GameBg]             — 桌布背景 table_bg.png, 结界主题动态 modulate
-└── UIManager (Control) [%UIManager]           [ui_manager.gd]
+NinKingMain (Control) 1920×1080                      [game_manager.gd]
+├── CardManager (CardManager)                         [card-framework 框架]
+├── GameBg (TextureRect) [%GameBg]                    — 桌布背景, 结界动态 modulate
+└── UIManager (Control) [%UIManager]                  [ui_manager.gd]
     │
-    ├── LevelIntro (Control) [%LevelIntro]     — 封印入场水印 (view: "intro")
-    │   ├── IntroOverlay (ColorRect)            #000 80%
+    ├── LevelIntro (Control) [%LevelIntro]            — 封印入场水印 (view: "intro")
+    │   ├── IntroOverlay (ColorRect)                  #000 80%
     │   ├── BossPortrait (TextureRect) [%BossPortrait]
-    │   ├── LevelLabel [%LevelLabel]            "结界X · 修罗ノ封印" 48px
-    │   └── TargetLabel [%TargetLabel]          "封印 300" 24px
+    │   ├── LevelLabel (Label) [%LevelLabel]           "结界X · 修罗ノ封印" 48px
+    │   └── TargetLabel (Label) [%TargetLabel]         "封印 300" 24px
     │
-    │   │   ├── ScoreCard (Panel)           — 得分卡, anchor_top=0, anchor_bottom=0.5 (上半 1/2)
-    │   │   │   └── ScoreCardVBox           — anchors full rect (layout_mode=1)
-    │   │   │       ├── ColXiLabel (32px 列金/喜accent)
-    │   │   │       ├── HandTypeRow (VBoxContainer)    — 合入 ScoreCardVBox
-    │   │   │       │   ├── Row影 → ShadowDun/ShadowType/ShadowScore/%ShadowLv
-    │   │   │       │   ├── Row瞬 → FlashDun/FlashType/FlashScore/%FlashLv
-    │   │   │       │   └── Row滅 → DestroyDun/DestroyType/DestroyScore/%DestroyLv
-    │   │   │       ├── ScoreLabel (48px "忍気 N")
-    │   │   │       ├── ColXiLabel [%ColXiLabel]   "列: x16  喜: x2" 32px 金
-    │   │   │       ├── HandTypeRow (VBoxContainer)
-    │   │   │       │   ├── Row影 (HBoxContainer, separation=8)
-    │   │   │       │   │   ├── ShadowDun (Label 40px R)  "影" 20px 蓝 #588CF2
-    │   │   │       │   │   ├── ShadowType [%ShadowType]  "对子" 20px 白 (弹性)
-    │   │   │       │   │   └── ShadowScore [%ShadowScore] "37×2" 20px 蓝 70px R
-    │   │   │       │   ├── Row瞬 (HBoxContainer, separation=8)
-    │   │   │       │   │   ├── FlashDun (Label 40px R)   "瞬" 20px 银灰 #BFBFCB
-    │   │   │       │   │   ├── FlashType [%FlashType]    "顺子" 20px 白 (弹性)
-    │   │   │       │   │   └── FlashScore [%FlashScore]   "50×3" 20px 银灰 70px R
-    │   │   │       │   └── Row滅 (HBoxContainer, separation=8)
-    │   │   │       │       ├── DestroyDun (Label 40px R) "滅" 20px 红 #F24D4D
-    │   │   │       │       ├── DestroyType [%DestroyType] "同花" 20px 白 (弹性)
-    │   │   │       │       └── DestroyScore [%DestroyScore] "53×4" 20px 红 70px R
-    │   │   │       ├── ScoreLabel [%ScoreLabel]     "忍気 0" 48px
-    │   │   │       ├── ProgressBar [%ProgressBar]   封印进度条 28px (右端=312px=渐隐起始)
-    │   │   │       └── TargetScoreLabel [%TargetScoreLabel] "封印 300" 28px
-    │   │   │
-    │   │   ├── MatchPanel (Panel)             — anchor_top=0.5, anchor_bottom=0.75 (中间 1/4, 无圆角, 无边框, 挂 fade)
-    │   │   │   └── MatchVBox                  — anchors full, separation=10
-    │   │   │       ├── MatchTitle             "比赛信息" 20px 金 #C4A843
-    │   │   │       ├── HandsLabel [%HandsLabel] "討伐 X" 28px
-    │   │   │       └── GoldLabel [%GoldLabel]    "$X" 28px
-    │   │   │
-    │   │   └── AntePanel (Panel)              — anchor_top=0.75, anchor_bottom=1.0 (底部 1/4, 无圆角, 无边框, 挂 fade)
-    │   │       └── AnteVBox                   — anchors full, separation=10
-    │   │           ├── BarrierLabel [%BarrierLabel] "结界 X/8" 28px
-    │   │           └── RoundLabel [%RoundLabel]     "回合 X" 28px
+    ├── GameLayout (HBoxContainer) [%GameLayout]      — 游戏主界面布局 (view: "game")
     │   │
-    │   └── CenterColumn (VBoxContainer)          — 中央区域 (fill)
-    │       ├── NinjaBar (HBoxContainer) [%NinjaBar]  — 忍者牌栏 5 槽
-    │       ├── StatusLabel [%StatusLabel]        — 约束提示 24px
-    │       ├── HandArea (HBoxContainer) [%HandArea] 1138×728
-    │       │   ├── PlayBtn [%PlayBtn]            "討伐" 84×116
-    │       │   ├── DunArea (Panel) 620×728       — 三墩容器
-    │       │   │   ├── DunHead (Panel) [%DunHead] — 影 (hand[0-2])
-    │       │   │   │   ├── HeadLabel [%HeadLabel]
-    │       │   │   │   ├── HeadTypeLabel [%HeadTypeLabel]
-    │       │   │   │   └── HeadCards (Hand) [%HeadCards]
-    │       │   │   ├── DunMiddle (Panel) [%DunMiddle] — 瞬 (hand[3-5])
-    │       │   │   │   ├── MiddleLabel [%MiddleLabel]
-    │       │   │   │   ├── MiddleTypeLabel [%MiddleTypeLabel]
-    │       │   │   │   └── MiddleCards (Hand) [%MiddleCards]
-    │       │   │   ├── DunTail (Panel) [%DunTail] — 滅 (hand[6-8])
-    │       │   │   │   ├── TailLabel [%TailLabel]
-    │       │   │   │   ├── TailTypeLabel [%TailTypeLabel]
-    │       │   │   │   └── TailCards (Hand) [%TailCards]
-    │       │   │   └── ColumnLabelRow (HBoxContainer) — 列牌型标签 (A9)
-    │       │   │       ├── Col0Label [%Col0Label]
-    │       │   │       ├── Col1Label [%Col1Label]
-    │       │   │       └── Col2Label [%Col2Label]
-    │       │   └── AiRearrangeBtn [%AiRearrangeBtn] "陣\n形" 84×116
-    │       └── DeckBtn [%DeckBtn]               "牌库: XX" 200×48
+    │   ├── LeftPanel (Control) [%LeftPanel]           — 左侧 420px 信息面板
+    │   │   ├── PanelBg (ColorRect) [%PanelBg]         — 全透明 (结界动态 modulate)
+    │   │   │
+    │   │   ├── HandTypePanel (Panel) [%HandTypePanel] — anchor_top=0 anchor_bottom=0.5
+    │   │   │   └── HandTypeVBox (Control)
+    │   │   │       ├── Row影 (Control)
+    │   │   │       │   ├── ShadowDun (Label)          "影" 20px #588CF2
+    │   │   │       │   ├── ShadowType (Label) [%ShadowType]
+    │   │   │       │   ├── ShadowLv (Label) [%ShadowLv]
+    │   │   │       │   └── ShadowScore (RichTextLabel) [%ShadowScore]
+    │   │   │       ├── Row瞬 (Control)
+    │   │   │       │   ├── FlashDun (Label)           "瞬" 20px #BFBFCB
+    │   │   │       │   ├── FlashType (Label) [%FlashType]
+    │   │   │       │   ├── FlashLv (Label) [%FlashLv]
+    │   │   │       │   └── FlashScore (RichTextLabel) [%FlashScore]
+    │   │   │       ├── Row滅 (Control)
+    │   │   │       │   ├── DestroyDun (Label)         "滅" 20px #F24D4D
+    │   │   │       │   ├── DestroyType (Label) [%DestroyType]
+    │   │   │       │   ├── DestroyLv (Label) [%DestroyLv]
+    │   │   │       │   └── DestroyScore (RichTextLabel) [%DestroyScore]
+    │   │   │       ├── ColDivider (ColorRect)          — 列分割线
+    │   │   │       └── ColumnBar (Control)             — 三列牌型/分数/等级
+    │   │   │           ├── LeftColType (Label) [%LeftColType]
+    │   │   │           ├── MidColType (Label) [%MidColType]
+    │   │   │           ├── RightColType (Label) [%RightColType]
+    │   │   │           ├── LeftColLabel (Label)
+    │   │   │           ├── LeftColLv (Label)
+    │   │   │           ├── LeftColScore (RichTextLabel)
+    │   │   │           ├── MidColLabel (Label)
+    │   │   │           ├── MidColLv (Label)
+    │   │   │           ├── MidColScore (RichTextLabel)
+    │   │   │           ├── RightColLabel (Label)
+    │   │   │           ├── RightColLv (Label)
+    │   │   │           └── RightColScore (RichTextLabel)
+    │   │   │
+    │   │   ├── ScorePanel (Panel) [%ScorePanel]       — anchor_top=0.5 anchor_bottom=0.75
+    │   │   │   └── ScoreVBox (VBoxContainer)
+    │   │   │       ├── ColXiLabel (Label) [%ColXiLabel] "列: x16  喜: x2" 32px
+    │   │   │       ├── ScoreLabel (Label) [%ScoreLabel] "忍気 0" 48px
+    │   │   │       ├── ProgressBar (ProgressBar) [%ProgressBar] 28px
+    │   │   │       └── TargetScoreLabel (Label) [%TargetScoreLabel] "封印 0" 28px
+    │   │   │
+    │   │   ├── MatchPanel (Panel) [%MatchPanel]       — anchor_top=0.75 anchor_bottom=0.875
+    │   │   │   └── MatchVBox (VBoxContainer)
+    │   │   │       ├── MatchTitle (Label)              "比赛信息" 20px 金
+    │   │   │       ├── HandsLabel (Label) [%HandsLabel] "討伐 X" 28px
+    │   │   │       └── GoldLabel (Label) [%GoldLabel]  "$X" 28px
+    │   │   │
+    │   │   └── AntePanel (Panel) [%AntePanel]          — anchor_top=0.875 anchor_bottom=1.0
+    │   │       └── AnteVBox (VBoxContainer)
+    │   │           ├── BarrierLabel (Label) [%BarrierLabel] "结界 X/8" 28px
+    │   │           └── RoundLabel (Label) [%RoundLabel]     "回合 X" 28px
+    │   │
+    │   ├── CenterColumn (Control) [%CenterColumn]      — 中央游戏区 (fill)
+    │   │   ├── NinjaBar (Control) [%NinjaBar]           — 忍者牌栏（运行时动态加载）
+    │   │   ├── HandArea (HBoxContainer) [%HandArea]    — 操作按钮区
+    │   │   │   └── PlayBtn (Button) [%PlayBtn]         "討伐" 84×116
+    │   │   ├── DunArea (Panel) [%DunArea]              — 三墩卡牌区 620×728
+    │   │   │   ├── ColumnLabelRow (HBoxContainer)      — 列牌型标签行
+    │   │   │   │   ├── Col0Label (Label) [%Col0Label]
+    │   │   │   │   ├── Col1Label (Label) [%Col1Label]
+    │   │   │   │   └── Col2Label (Label) [%Col2Label]
+    │   │   │   ├── HeadLabel (Label) [%HeadLabel]       "影"
+    │   │   │   ├── HeadTypeLabel (Label) [%HeadTypeLabel]
+    │   │   │   ├── MiddleLabel (Label) [%MiddleLabel]   "瞬"
+    │   │   │   ├── MiddleTypeLabel (Label) [%MiddleTypeLabel]
+    │   │   │   ├── TailLabel (Label) [%TailLabel]       "滅"
+    │   │   │   ├── TailTypeLabel (Label) [%TailTypeLabel]
+    │   │   │   └── CardGrid (Control) [%CardGrid]       — 3×3 卡牌网格
+    │   │   │       [hand_card_container.gd]
+    │   │   └── AiRearrangeBtn (Button) [%AiRearrangeBtn] "陣\n形" 84×116
+    │   │
+    │   ├── StatusLabel (Label) [%StatusLabel]          — 约束提示 24px
+    │   └── DeckBtn (Button) [%DeckBtn]                 "牌库: XX" 200×48
     │
-    ├── ScoringOverlay (Control) [%ScoringOverlay] — 计分覆盖层 (z_index:10, 场景保留兼容)
-    │   ├── OverlayBg (ColorRect)                #000 70%
-    │   ├── HandNameLabel [%HandNameLabel]       "高牌" 48px
-    │   ├── ScoreValueLabel [%ScoreValueLabel]   "+ 0" 72px 金
-    │   └── ScoreBreakdown [%ScoreBreakdown]     24px 分解文字
-    │   ⛔ LevelComplete (已删除, 2026-06-12 Phase E)
-    │      Phase E 移除: 计分动画结束后金币飞入左面板, ~1.5s 自动进 Shop
+    ├── ScoringOverlay (Control) [%ScoringOverlay]     — 计分覆盖层 (z_index:10)
+    │   ├── OverlayBg (ColorRect)                      #000 70%
+    │   ├── HandNameLabel (Label) [%HandNameLabel]     "高牌" 48px
+    │   ├── ScoreValueLabel (Label) [%ScoreValueLabel] "+ 0" 72px 金
+    │   └── ScoreBreakdown (Label) [%ScoreBreakdown]   24px 分解文字
     │
-    ├── ShopOverlay (Control) [%ShopOverlay]    — 底部滑入商店 (view: "shop", mouse_filter=STOP)
-    │   │ ⚠️ shop 状态下 GameLayout + GameBg 保持可见 (左边栏 + 顶部忍者牌)
-    │   │    面板只覆盖底部 364~1080 区域, ShopOverlay 用 STOP 拦截区域外点击
-    │   └── 运行时: add_child(load("shop_panel.tscn").instantiate())
-    │       └── ShopPanel (Control) — 右下角锚定, 800×716, x:880 y:364, [shop_ui.gd]
-    │           ├── Overlay (ColorRect)                BarrierTheme.panel 纯色 ← 非透明遮罩
-    │           ├── TopBorder (ColorRect)              800×3, #1A1A1A 墨色分割线
-    │           ├── TitleBar (ColorRect)                800×40  #1E1E33 100%
-    │           ├── ShopSubtitle (Label)                "萬屋！" 32px 左对齐 x:24
-    │           ├── GoldLabel [%GoldLabel]              "$0" 20px 纯文字, x:610
-    │           ├── RerollBtn [%RerollBtn]              "入替 $3" 97×28, x:685 y:6
-    │           ├── AbilityGrid (GridContainer)         680×380 2列 h_sep:20, x:24-704 y:58-438
-    │           │   └── [ShopSlot × 4]                  横排 330×190 忍者卡
-    │           ├── Separator (ColorRect)               680×1 y:458, #000 15%
-    │           ├── ItemColumn (GridContainer)          680×190 2列 h_sep:20, x:24-704 y:469-659
-    │           │   └── [ShopSlot × 2]                  横排 330×190 星图卡
-    │           ├── BottomBar (ColorRect)               800×40 y:676, #1E1E33 100%
-    │           └── ContinueBtn [%ContinueBtn]          "討伐へ ▶" 180×32 居中
+    ├── ShopOverlay (Control) [%ShopOverlay]            — 底部滑入商店（运行时动态加载 shop_panel.tscn）
+    │   ⛔  LevelComplete (已删除, 2026-06-12 Phase E)
+    │   ⛔  ShopPanel 详细子树 → 见 shop_panel.tscn / 07-shop-ui-design.md
     │
-    │       ⛔ NextLevelHint (已删除, 零高度)
-    │       ⛔ B5 EnchantTargetSelector (已删除, 无信号连接)
+    ├── GameOver (Control) [%GameOver]                  — 失败弹窗 (view: "gameover")
+    │   ├── OverlayBg (ColorRect)                      #000 80%
+    │   ├── GameOverLabel (Label) [%GameOverLabel]     "失败" 48px 红
+    │   ├── RetryButton (Button) [%RetryButton]         "重新开始"
+    │   ├── BackToMenuButton (Button) [%BackToMenuButton] "返回主菜单"
+    │   └── ScoreSummary (Label) [%ScoreSummary]
     │
-    ├── GameOver (Control) [%GameOver]           — 失败弹窗 (view: "gameover")
-    │   ├── OverlayBg #000 80%
-    │   ├── GameOverLabel [%GameOverLabel]       "失败" 48px 红
-    │   ├── ScoreSummary [%ScoreSummary]
-    │   ├── RetryButton [%RetryButton]           "重新开始"
-    │   └── BackToMenuButton [%BackToMenuButton] "返回主菜单"
+    ├── VictoryOverlay (Control)                        — 通关弹窗 (view: "victory")
+    │   ├── OverlayBg (ColorRect)                      #000 70%
+    │   ├── VictoryLabel (Label)                        "忍道制霸!" 56px
+    │   ├── StatsSummary (Label)
+    │   └── MenuButton (Button)                         "返回主菜单"
     │
-    ├── VictoryOverlay (Control)                 — 通关弹窗 (view: "victory")
-    │   ├── OverlayBg #000 70%
-    │   ├── VictoryLabel                         "忍道制霸!" 56px
-    │   ├── StatsSummary
-    │   └── MenuButton                           "返回主菜单"
+    ├── DeckViewer (Control) [%DeckViewer]              — 牌库查看器 (z_index:10)
+    │   ├── ViewerBg (ColorRect) [%ViewerBg]            #000 75%
+    │   └── CardPanel (Panel) 900×640
+    │       ├── TitleBar (HBoxContainer)
+    │       │   ├── ViewerTitle (Label)                 "牌库" 24px 金
+    │       │   └── CloseBtn (Button) [%CloseBtn]       "✕"
+    │       ├── CountRow (HBoxContainer)
+    │       │   ├── DrawCountLabel (Label) [%DrawCountLabel] "牌堆: 0 张"
+    │       │   └── DiscardCountLabel (Label) [%DiscardCountLabel] "手替札: 0 张"
+    │       └── CardScroll (ScrollContainer)
+    │           └── DeckCardGrid (GridContainer) [%DeckCardGrid] 13 列
     │
-    └── DeckViewer (Control) [%DeckViewer]       — 牌库查看器 (z_index:10)
-        ├── ViewerBg (ColorRect) [%ViewerBg]     — 遮罩背景 #000 75%
-        └── CardPanel (Panel) 900×640
-            ├── TitleBar (HBoxContainer)          — 标题栏
-            │   ├── ViewerTitle (Label) "牌库" 24px 金
-            │   └── CloseBtn [%CloseBtn] "✕" (flat)
-            ├── CountRow (HBoxContainer)
-            │   ├── DrawCountLabel [%DrawCountLabel]    "牌堆: 0 张"
-            │   └── DiscardCountLabel [%DiscardCountLabel] "手替札: 0 张"
-            ├── CardScroll (ScrollContainer)
-            │   └── CardGrid [%CardGrid] (GridContainer, 13列, 动态 NinKingCard)
-            └── (CardPanel 边界)
+    ├── StatusLabel (Label) [%StatusLabel]              — 约束提示 24px
+    └── DeckBtn (Button) [%DeckBtn]                     "牌库: XX" 200×48
 ```
 
 ---
@@ -204,54 +201,72 @@ NinKingMain (Control) 1920×1080                [game_manager.gd]
 |------|-----|
 | 节点路径 | `UIManager/GameLayout/LeftPanel` |
 | 访问名 | `%LeftPanel` |
-| 宽度 | 420px |
+| width | 480px (custom_minimum_size) |
 | 背景 | `PanelBg` (ColorRect) **全透明** (保留节点供代码 barrier theme / BounceScore / toast 使用) |
-| 渐隐 | `panel_edge_fade.gdshader` 挂载于 PanelBg + ScoreCard + MatchPanel + AntePanel |
+| 渐隐 | `panel_edge_fade.gdshader` 挂载于 HandTypePanel + ScorePanel + MatchPanel + AntePanel |
 | 用途 | 显示全部计分与状态数据 |
 
-**布局方案 (2026-06-11 重构)：** LeftPanel 三面板锚定分区布局。
-- **ContentVBox 已移除**，ScoreCard / MatchPanel / AntePanel 均为 LeftPanel 直接子节点，全部 `layout_mode=1`（锚定）
-- **ScoreCard**: `anchor_top=0`, `anchor_bottom=0.5` → 上半 1/2（深绿半透明底，去金边）
-- **MatchPanel**: `anchor_top=0.5`, `anchor_bottom=0.75` → 中间 1/4（暗红褐底，去金边）
-- **AntePanel**: `anchor_top=0.75`, `anchor_bottom=1.0` → 底部 1/4（暗金琥珀底，去金边）
-- 三块互不重叠、响应式填充分区，各面板保持独立底色
+**布局方案 (v2026-06-16)：** LeftPanel 四面板锚定分区布局。
 
-**Ink-bleed 渐隐：** `game_manager._ready()` 对 4 节点挂载 canvas_item shader,
-`fade_start=0.64`，右边缘渐隐范围加大（从 64% 处开始），更深地融入背景。
+| 面板 | 节点 | 锚定 | 高度 |
+|------|------|------|------|
+| 牌型+列展示 | `HandTypePanel` | `top=0, bottom=0.4` | 40% |
+| 分数/进度 | `ScorePanel` | `top=0.4, bottom=0.65` | 25% |
+| 讨伐/金币 | `MatchPanel` | `top=0.65, bottom=0.85` | 20% |
+| 结界/回合 | `AntePanel` | `top=0.85, bottom=1.0` | 15% |
+
+四块互不重叠、响应式填充分区，各面板保持独立底色。
+
+**Ink-bleed 渐隐：** 4 节点挂载 `panel_edge_fade.gdshader`, `fade_start=0.64`，右边缘渐隐。
 
 **子区域：**
 
-##### a. ScoreCard (上半 1/2) — 含 HandTypeRow
+##### a. HandTypePanel (顶部 0~40%) — 三墩牌型 + 列牌型
 
-ScoreCardVBox 以 `layout_mode=1` 锚定，`offset_left=16, offset_right=-68`（左16px内边距，右边止于渐隐起始 269px = 420×64%），VBoxContainer 自动排列子项。
+节点路径 `UIManager/GameLayout/LeftPanel/HandTypePanel`，`bg_color #0F281F` 不透明度 0.6。
+
+```
+HandTypePanel (Panel) [%HandTypePanel]
+└── HandTypeVBox (Control)
+    ├── Row影 (Control)
+    │   ├── ShadowDun (Label)          "影" 20px #588CF2
+    │   ├── ShadowType [%ShadowType]   "对子" 20px 白 (弹性)
+    │   ├── ShadowLv [%ShadowLv]       Lv badge 色阶
+    │   └── ShadowScore [%ShadowScore] "37×2" RichText
+    ├── Row瞬 (Control)
+    │   ├── FlashDun (Label)           "瞬" 20px #BFBFCB
+    │   ├── FlashType [%FlashType]     "顺子" 20px 白
+    │   ├── FlashLv [%FlashLv]
+    │   └── FlashScore [%FlashScore]   "50×3" RichText
+    ├── Row滅 (Control)
+    │   ├── DestroyDun (Label)         "滅" 20px #F24D4D
+    │   ├── DestroyType [%DestroyType] "同花" 20px 白
+    │   ├── DestroyLv [%DestroyLv]
+    │   └── DestroyScore [%DestroyScore] "53×4" RichText
+    ├── ColDivider (ColorRect)          — 分割线
+    └── ColumnBar (Control)             — 三列牌型/分数
+        ├── LeftColType [%LeftColType]
+        ├── MidColType [%MidColType]
+        ├── RightColType [%RightColType]
+        └── (Left/Mid/Right ColLabel + ColLv + ColScore)
+```
+
+分数 = (卡牌筹码 + 牌型筹码) × 牌型倍率，由 `HandTypeLabeler._update_dun_types()` 实时预览。
+Lv badge 色阶：Lv.1-2 `#7A7A7A` 灰 | Lv.3-4 `#588CF2` 蓝 | Lv.5-6 `#C4A843` 金。Lv.0 不显示。
+
+##### b. ScorePanel (中部 40%~65%) — 分数/进度
 
 | 元素 | 字号 | 颜色 | 用途 |
 |------|------|------|------|
-| ColXiLabel | 32px | 列 `#C4A843` 金 / 喜 accent | 列×累乘 + 喜预览 (v4.0 替换 CMC) |
-| HandTypeRow | — | — | **三墩牌型+分数 (已合入 ScoreCardVBox)** |
-| ScoreLabel | 48px | `(0.941, 0.929, 0.894)` 白 | "気 N" |
-| ProgressBar | 28px | 灰底 + 金 fill | 进度条, 两端圆角 6px |
-| TargetScoreLabel | **28px** | 灰 `#7A7A6A` | "封印 N" |
+| ColXiLabel [%ColXiLabel] | 32px | 列 `#C4A843` 金 / 喜 accent | 列×累乘 + 喜预览 |
+| ScoreLabel [%ScoreLabel] | 48px | `(0.941, 0.929, 0.894)` 白 | "気 N" |
+| ProgressBar [%ProgressBar] | 28px | 灰底 + 金 fill | 进度条 |
+| TargetScoreLabel [%TargetScoreLabel] | 28px | 灰 `#7A7A6A` | "封印 N" |
 
-ScoreCardVBox 子序：`ColXiLabel → HandTypeRow → ScoreLabel → ProgressBar → TargetScoreLabel`
-旧 CMC (ChipsLabel/MultSign/MultLabel) 已替换为 ColXiLabel。
-StyleBoxFlat: `content_margin(16,16,16,16)`，无边框、无圆角。`bg_color #0F281F` 不透明度 0.6。
-内容宽度由 ScoreCardVBox 的 `offset_right=-68` 约束至渐隐起始。
+ScoreVBox 子序：`ColXiLabel → ScoreLabel → ProgressBar → TargetScoreLabel`
+StyleBoxFlat: `content_margin(16,...)`，无边框、无圆角。`bg_color #0F281F` 0.6。
 
-##### b. HandTypeRow (VBoxContainer 含 3 行) — 位于 ScoreCardVBox 内
-
-每行为 HBoxContainer，展示对应墩的牌型名 + 分数预览 + Lv badge（星图等级）：
-
-| 行 | 墩名 (40px R) | 牌型名 (弹性 L) | 分数 (70px R) | Lv badge (弹性 L) |
-|----|-------------|--------------|--------------|------------------|
-| 影 | `ShadowDun` "影" #588CF2 | `%ShadowType` "对子" 白 | `%ShadowScore` "37×2" #588CF2 | `%ShadowLv` "Lv.2" 色阶 |
-| 瞬 | `FlashDun` "瞬" #BFBFCB | `%FlashType` "顺子" 白 | `%FlashScore` "50×3" #BFBFCB | `%FlashLv` "Lv.4" 色阶 |
-| 滅 | `DestroyDun` "滅" #F24D4D | `%DestroyType` "同花" 白 | `%DestroyScore` "53×4" #F24D4D | `%DestroyLv` "Lv.1" 色阶 |
-
-分数 = (卡牌筹码 + 牌型筹码) × 牌型倍率，由 `HandTypeLabeler._update_dun_types()` 实时预览。
-Lv badge 色阶：Lv.1-2 `#7A7A7A` 灰 | Lv.3-4 `#588CF2` 蓝 | Lv.5-6 `#C4A843` 金。Lv.0 不显示。鼠标悬浮 badge 弹出浮层显示牌型名+等级+筹码/倍率。计分 Phase 1 揭示时跟随分数 GOLD flash。
-
-##### c. MatchPanel (中间 1/4) — 直属于 LeftPanel
+##### c. MatchPanel (中部 65%~85%) — 比赛信息
 
 | 字段 | 节点 | 格式 | 字号 |
 |------|------|------|------|
@@ -261,9 +276,8 @@ Lv badge 色阶：Lv.1-2 `#7A7A7A` 灰 | Lv.3-4 `#588CF2` 蓝 | Lv.5-6 `#C4A843`
 
 **面板颜色：** `StyleBoxFlat_match_panel` — `bg_color #4A2020` (暗红褐)。无边框、无圆角。
 **渐隐：** `ShaderMaterial_match_fade` (panel_edge_fade.gdshader, `fade_start=0.64`)
-**锚定：** `anchor_top=0.5`, `anchor_bottom=0.75`（中间 1/4, 夹于 ScoreCard 与 AntePanel 之间）
 
-##### d. AntePanel (底部 1/4) — 直属于 LeftPanel
+##### d. AntePanel (底部 85%~100%) — 结界/回合
 
 | 字段 | 节点 | 格式 | 字号 |
 |------|------|------|------|
@@ -272,13 +286,16 @@ Lv badge 色阶：Lv.1-2 `#7A7A7A` 灰 | Lv.3-4 `#588CF2` 蓝 | Lv.5-6 `#C4A843`
 
 **面板颜色：** `StyleBoxFlat_ante_panel` — `bg_color #3D2B1A` (暗金琥珀)。无边框、无圆角。
 **渐隐：** `ShaderMaterial_ante_fade` (panel_edge_fade.gdshader, `fade_start=0.64`)
-**锚定：** `anchor_top=0.75`, `anchor_bottom=1.0`（底部 1/4, LeftPanel 下半段）
 
 #### 3.3.3 中央列 `CenterColumn`
 
 | 属性 | 值 |
 |------|-----|
-| 位置 | LeftPanel 右侧，自适应填充 |
+| 节点 | `UIManager/GameLayout/CenterColumn` (Control) |
+| 访问名 | `%CenterColumn` |
+| 布局 | LeftPanel 右侧，自适应填充 |
+| 子节点 | NinjaBar, HandArea, DunArea, AiRearrangeBtn (平级) |
+| 注意 | StatusLabel 和 DeckBtn 不在 CenterColumn 下，直属于 UIManager |
 
 **子区域：**
 
@@ -286,33 +303,50 @@ Lv badge 色阶：Lv.1-2 `#7A7A7A` 灰 | Lv.3-4 `#588CF2` 蓝 | Lv.5-6 `#C4A843`
 
 | 属性 | 值 |
 |------|-----|
-| 节点 | `UIManager/GameLayout/CenterColumn/NinjaBar` |
+| 节点 | `UIManager/GameLayout/CenterColumn/NinjaBar` (Control) |
 | 访问名 | `%NinjaBar` |
-| 容器 | `NinjaBarContainer` (extends CardContainer)，运行时动态实例化，挂载于 %NinjaBar 下 |
-| 卡片类 | `NinjaInventoryCard` (extends Card)，125×175 固定尺寸 (5:7 对齐标准扑克) |
-| 管理节点 | `NinjaBarNode` (Node)，%NinjaBar 的子节点，不参与布局 |
-| 卡片 | 动态显示拥有的忍者牌，无空槽占位（Balatro 风） |
-| 入场 | 刷新时 staggger pop-in（80ms 间隔，`GlobalTweens.pop_in`，pivot_offset 居中） |
-| 移除 | 淡出+缩小（0.2s），其余卡自动重排 |
-| 间距 | 弹性压缩 8~24px，居中排列，slot_width=125 固定 |
-| 悬停 | DraggableObject hover → scale 1.15，上浮 -6px |
-| 点击 | 左键 → Balatro 风 zoom-in 详情（全屏遮罩+卡面 4x+名+desc） |
-| 拖拽 | Card-Framework 状态机驱动，DropZone 竖直分区检测落点，支持任意距离拖拽重排（check_card_can_be_dropped + get_partition_index 双重写绕过传感器限制） |
-| 排序持久化 | `reorder_requested` 信号 → `NinjaBarNode._on_reorder_requested()` → `owned_ninjas` 数组顺序保存 |
-| 刷新 | `NinjaBarNode.refresh(owned_ninjas, max_slots)` — 差值更新 |
+| 容器 | `NinjaBarContainer` (extends CardContainer)，运行时动态实例化 |
+| 卡片类 | `NinjaInventoryCard` (extends Card)，125×175 |
+| 管理节点 | `NinjaBarNode` (Node)，%NinjaBar 的子节点 |
+| 行为详见 | [`02-cards/22-display-card-base-spec.md`](../02-cards/22-display-card-base-spec.md) |
 
-##### b. 手牌区 `HandArea` (HBoxContainer, 1138×728)
+##### b. 操作按钮区 `HandArea` (HBoxContainer)
 
 | 属性 | 值 |
 |------|-----|
-| 组件场景 | `res://scenes/ninking/ninking_card.tscn` (NinKingCard) |
-| 卡牌数 | **9** (3×3 三组) |
-| 单牌尺寸 | 90×130 |
-| 交互 | 点击两张牌互换（蓝高亮=交换源）；换牌模式（红高亮=标记丢弃） |
-| 约束 | 影牌力 ≤ 瞬牌力 ≤ 滅牌力 |
-| 约束满足 | 三道标签同时点亮为属性 accent 色 + 集中线从标签向卡牌汇聚，StatusLabel 留空 |
-| 约束违规 | 违规段标签变灰 + 小「×」叠印（漫画错误标记）；StatusLabel 显示原因 |
-| 高亮算法 | 逐对匹配：Pair1(影≤瞬) 点亮影+瞬，Pair2(瞬≤滅) 点亮瞬+滅。全满足=全亮可討伐 |
+| 节点 | `UIManager/GameLayout/CenterColumn/HandArea` [%HandArea] |
+| 用途 | 存放操作按钮 (PlayBtn) |
+| 子节点 | `PlayBtn` (Button) [%PlayBtn] "討伐" 84×116 |
+| 注意 | DunArea 是 HandArea 的**平级兄弟节点**，非子节点 |
+
+##### c. 三墩卡牌区 `DunArea` (Panel, 620×728)
+
+| 属性 | 值 |
+|------|-----|
+| 节点 | `UIManager/GameLayout/CenterColumn/DunArea` [%DunArea] |
+| 用途 | 展示 3×3 卡牌网格 + 墩标签 + 列标签 |
+| 结构 | 扁平——无 DunHead/DunMiddle/DunTail 包裹层，各标签和 CardGrid 都是 DunArea 直子 |
+
+```
+DunArea (Panel) [%DunArea]
+├── ColumnLabelRow (HBoxContainer)        — 列牌型标签
+│   ├── Col0Label (Label) [%Col0Label]
+│   ├── Col1Label (Label) [%Col1Label]
+│   └── Col2Label (Label) [%Col2Label]
+├── HeadLabel (Label) [%HeadLabel]         "影"
+├── HeadTypeLabel (Label) [%HeadTypeLabel]
+├── MiddleLabel (Label) [%MiddleLabel]     "瞬"
+├── MiddleTypeLabel (Label) [%MiddleTypeLabel]
+├── TailLabel (Label) [%TailLabel]         "滅"
+├── TailTypeLabel (Label) [%TailTypeLabel]
+└── CardGrid (Control) [%CardGrid]         — 3×3 卡牌网格, [hand_card_container.gd]
+```
+
+| 约束 | 规则 |
+|------|------|
+| 约束满足 | HeadType/MiddleType/TailType 三标签同时点亮为 accent 色; StatusLabel 留空 |
+| 约束违规 | 违规段标签变灰 + 「×」叠印; StatusLabel 显示原因 |
+| 高亮算法 | 逐对匹配 Pair1(影≤瞬) 点亮影+瞬, Pair2(瞬≤滅) 点亮瞬+滅 |
 
 ### 3.4 计分流程 (SCORING 状态)
 
