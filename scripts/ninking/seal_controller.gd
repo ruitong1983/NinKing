@@ -70,16 +70,23 @@ static func prepare_play(gs) -> Dictionary:
 		xi_result = XiDetector.detect(head_cards, mid_cards, tail_cards,
 			head_eval, mid_eval, tail_eval)
 
-	# Score calculation
-	var score_result: ScoreResult = ScoreCalculator.calculate(
+	# Score calculation — use consolidated analyze_effects() single pass
+	var summary: Dictionary = ScoreCalculator.analyze_effects(
 		head_cards, mid_cards, tail_cards,
 		head_eval, mid_eval, tail_eval,
 		col_evals,
 		gs.owned_ninjas,
+		gs.gold,
+		xi_result
+	)
+	var score_result: ScoreResult = ScoreCalculator.calculate_with_summary(
+		head_cards, mid_cards, tail_cards,
+		head_eval, mid_eval, tail_eval,
+		col_evals,
+		summary,
 		gs.star_chart_levels,
 		xi_result,
 		seal_lord_effects,
-		gs.gold
 	)
 
 	return {
@@ -94,6 +101,7 @@ static func prepare_play(gs) -> Dictionary:
 		"barrier_num": gs.barrier_num,
 		"owned_ninjas": gs.owned_ninjas,
 		"gold": gs.gold,
+			"summary": summary,  # Phase H: pre-computed ninja effects
 		"star_chart_levels": gs.star_chart_levels,
 		"current_arrangement": {
 			"head": gs.current_arrangement.head,
@@ -112,6 +120,7 @@ static func prepare_play(gs) -> Dictionary:
 static func finalize_play(gs, play_data: Dictionary) -> void:
 	var score_result: ScoreResult = play_data["score_result"]
 	var xi_result: XiDetector.XiResult = play_data["xi_result"]
+	var summary: Dictionary = play_data.get("summary", {})
 
 	gs.plays_remaining -= 1
 	gs.emit_plays_changed()
@@ -160,11 +169,16 @@ static func finalize_play(gs, play_data: Dictionary) -> void:
 ## Collect gold from economic ninja effects + card enhancements/seals after a play.
 ## TODO: Replace int() casts with CardData.Enhancement.GOLD / CardData.Seal.GOLD
 ## once Godot "hides global script class" cache bug is resolved.
-static func _collect_play_gold(gs, all_cards: Array[CardData.PlayingCard], xi_result) -> void:
+static func _collect_play_gold(gs, all_cards: Array[CardData.PlayingCard], xi_result, summary: Dictionary = {}) -> void:
 	var gold_earned: int = 0
 
-	for ninja: Dictionary in gs.owned_ninjas:
-		var eff: Dictionary = ninja.get("effect", {})
+	# Phase H: use pre-computed gold_on_play from summary
+	gold_earned += summary.get("gold_on_play", 0)
+
+	# Legacy fallback: iterate only if summary didn't provide gold_on_play
+	if summary.get("gold_on_play", 0) == 0:
+		for ninja: Dictionary in gs.owned_ninjas:
+			var eff: Dictionary = ninja.get("effect", {})
 
 		# E1: 福神 — gold per xi triggered
 		if eff.get("gold_per_xi", 0) > 0:
@@ -210,19 +224,21 @@ static func swap_cards(gs: NinKingGameState, idx1: int, idx2: int) -> void:
 # Seal completion → 萬屋 flow
 # ══════════════════════════════════════════
 
-static func _complete_seal(gs) -> void:
+static func _complete_seal(gs, summary: Dictionary = {}) -> void:
 	# Gold reward
+	var extra_interest: int = summary.get("interest_cap_bonus", 0)
 	var seal_cfg: Dictionary = BarrierConfig.get_seal(gs.barrier_num, gs.seal_idx)
 	gs.gold += seal_cfg.get("gold", 0)
 	gs.gold_changed.emit(gs.gold)
 
 	# Interest (every $5 = $1, cap $5)
-	var interest_cap: int = 5
-	# Check for economy ninja that raises cap
-	for ninja: Dictionary in gs.owned_ninjas:
-		var eff: Dictionary = ninja.get("effect", {})
-		if eff.get("interest_cap_bonus", 0) > 0:
-			interest_cap += eff["interest_cap_bonus"]
+	var interest_cap: int = 5 + extra_interest
+	# Legacy fallback
+	if extra_interest == 0:
+		for ninja: Dictionary in gs.owned_ninjas:
+			var eff: Dictionary = ninja.get("effect", {})
+			if eff.get("interest_cap_bonus", 0) > 0:
+				interest_cap += eff["interest_cap_bonus"]
 
 	var interest: int = mini(floori(float(gs.gold) / 5.0), interest_cap)
 	gs.gold += interest
