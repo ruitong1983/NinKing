@@ -142,7 +142,6 @@ def build_tree(nodes: list[dict]) -> dict | None:
     for node in nodes:
         if node["is_root"]:
             root = node
-            root["_path"] = root["name"]
         else:
             p = node["parent"]
             if p == ".":
@@ -162,14 +161,22 @@ def build_tree(nodes: list[dict]) -> dict | None:
         if n.get("instance"):
             result["instance"] = n["instance"]
 
-        pth = n.get("_path", n["name"])
-        kids = children_map.get(pth, [])
+        # Determine children_map lookup key from tscn's parent field.
+        #   parent="."  → key = node name (root-level child)
+        #   parent="P"  → key = P + "/" + name (deeper, P is relative path from root)
+        #   is_root     → key = root name
+        p = n.get("parent", "")
+        if n.get("is_root") or p in ("", "."):
+            key = n["name"]
+        else:
+            key = p + "/" + n["name"]
+
+        kids = children_map.get(key, [])
         if kids:
             # Sort by unique_id for stable ordering (roughly insertion order)
             kids.sort(key=lambda x: int(x.get("unique_id") or "0"))
             result["children"] = []
             for kid in kids:
-                kid["_path"] = pth + "/" + kid["name"]
                 sub = _walk(kid)
                 if sub:
                     result["children"].append(sub)
@@ -339,33 +346,41 @@ def _annotate_tree(tree: dict, scene_key: str, prefix: str, notes: dict) -> int:
 # ═══════════════════════════════════════════════════════════
 
 def _tree_to_js(tree: dict, indent: int = 2) -> str:
-    """Render a single tree node as JS object literal (compact, no trailing comma)."""
+    """Render a single tree node as JS object literal (commas between props)."""
     pad = "  " * indent
     inner_pad = "  " * (indent + 1)
     lines: list[str] = []
-    lines.append(f"{{")
-    lines.append(f"{inner_pad}type: '{tree['type']}', name: '{tree['name']}'")
 
+    # Collect all property lines
+    props: list[str] = []
+    props.append(f"type: '{tree['type']}', name: '{tree['name']}'")
     if tree.get("unique"):
-        lines.append(f"{inner_pad}unique: true")
+        props.append("unique: true")
     if tree.get("script"):
-        lines.append(f"{inner_pad}script: '{tree['script']}'")
+        props.append(f"script: '{tree['script']}'")
     if tree.get("instance"):
-        lines.append(f"{inner_pad}instance: '{tree['instance']}'")
+        props.append(f"instance: '{tree['instance']}'")
     if tree.get("note"):
         note = tree["note"].replace("'", "\\'")
-        lines.append(f"{inner_pad}note: '{note}'")
+        props.append(f"note: '{note}'")
 
     children = tree.get("children", [])
+
+    lines.append(f"{{")
+    for p in props:
+        lines.append(f"{inner_pad}{p},")
+
     if children:
         lines.append(f"{inner_pad}children: [")
-        for i, child in enumerate(children):
+        for child in children:
             lines.append(_tree_to_js(child, indent + 2))
-            if i < len(children) - 1:
-                lines[-1] += ","
-        lines.append(f"{inner_pad}]")
+        lines.append(f"{inner_pad}],")
 
-    lines.append(f"{pad}}}")
+    # If trailing comma on last prop line and no children, remove it
+    if not children and lines[-1].endswith(","):
+        lines[-1] = lines[-1][:-1]
+
+    lines.append(f"{pad}}},")
     return "\n".join(lines)
 
 
@@ -473,13 +488,20 @@ def embed_into_html(html_path: Path) -> None:
     # Update timestamp in subtitle
     from datetime import date
     today = date.today().isoformat()
+    # Format A: ninja_card_viewer — `<span id="data-date">2026-06-16</span>`
+    html = re.sub(
+        r'(id="data-date">)\d{4}-\d{2}-\d{2}(</span>)',
+        rf'\g<1>{today}\g<2>',
+        html
+    )
+    # Format B (legacy): scene-tree-visualizer — `基于 2026-06-16 tscn 扫描`
     html = re.sub(
         r'基于 \d{4}-\d{2}-\d{2} tscn 扫描',
         f'基于 {today} tscn 扫描',
         html
     )
 
-    # Remove stale-note section (user confirmed no longer needed)
+    # Remove stale-note section (legacy standalone file cleanup)
     html = re.sub(
         r'<div class="stale-note">.*?</div>\s*',
         '',

@@ -81,20 +81,14 @@ API 速查 → `docs/tween-library-reference.md`。
 
 **设计文档索引 → `docs/ninking/README.md`**
 
-## 场景树 HTML 可视化同步
+## HTML 可视化同步
 
-> **`.tscn` 变更时 → 同步更新 `docs/ninking/scene-tree-visualizer.html`。**
+> **仅当显式要求「更新HTML」时执行**，不随 `update-docs` 自动触发。
 >
-> 方法与步骤 → `docs/ninking/scene-tree-visualizer-methodology.md`
+> 触发命令：**`/update-html`**（需安装 skill）
+> 方法文档：`docs/ninking/html-visualization-guide.md`
 >
-> 维护规则 → `.claude/skills/update-docs/SKILL.md` §「场景树文档同步（铁律）」
-
-## 忍者牌 HTML 可视化同步
-
-> **`ninja_data.gd` 变更时 → 同步更新 `docs/ninking/ninja_card_viewer.html`。**
->
-> 自动：`sh tools/install-hooks.sh` 安装 pre-commit hook（推荐）
-> 手动：`python tools/extract_ninja_data.py docs/ninking/ninja_card_viewer.html`
+> 管辖范围：场景树 `scene-tree-visualizer.html` · 忍者牌 `ninja_card_viewer.html` · 测试 `ninja-test-viewer.html`
 
 ## Code Review 检查项
 

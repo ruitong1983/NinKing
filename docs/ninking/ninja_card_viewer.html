@@ -45,6 +45,48 @@ h1 small { font-size: 14px; color: var(--text-muted); font-weight: 400; }
 .subtitle { font-size: 13px; color: var(--text-muted); }
 .subtitle span { color: var(--text); }
 
+/* ─── Recent Updates ─── */
+.recent-updates {
+  margin-bottom: 18px;
+  padding: 12px 16px;
+  background: var(--bg-control);
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.recent-updates h3 {
+  font-size: 14px;
+  color: var(--gold);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.recent-updates h3 small {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+.recent-updates ul { list-style: none; padding: 0; }
+.recent-updates li {
+  padding: 2px 0;
+  color: var(--text-muted);
+}
+.recent-updates li .date { color: var(--text-dim); font-size: 11px; margin-right: 6px; }
+.recent-updates li .tag {
+  display: inline-block;
+  font-size: 10px;
+  padding: 0 6px;
+  border-radius: 3px;
+  margin-right: 6px;
+  font-weight: 500;
+}
+.tag-ninja { background: #4fc3f722; color: #4fc3f7; }
+.tag-xi { background: #c4a84322; color: #c4a843; }
+.tag-scene { background: #66bb6a22; color: #66bb6a; }
+.tag-docs { background: #ab47bc22; color: #ab47bc; }
+.tag-fix { background: #ef535022; color: #ef5350; }
+.recent-updates .empty { color: var(--text-dim); font-style: italic; font-size: 12px; }
+
 /* ─── Controls ─── */
 .controls { margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; }
 .filter-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
@@ -129,6 +171,15 @@ h1 small { font-size: 14px; color: var(--text-muted); font-weight: 400; }
 .card.rarity-rare    { border-top-color: var(--rare); }
 .card.rarity-legendary { border-top-color: var(--legendary); }
 .card.deferred { opacity: 0.7; }
+
+.card-img {
+  width: 100%;
+  aspect-ratio: 125 / 175;
+  object-fit: cover;
+  border-radius: 6px;
+  background: rgba(0,0,0,0.2);
+  display: block;
+}
 
 .card-name {
   font-size: 15px;
@@ -403,7 +454,11 @@ footer a:hover { color: var(--gold); }
 .node-cardmanager .badge-type { background: #5a3d5a; color: #ff8aff; }
 .node-panelcontainer .badge-type { background: #3d5a3d; color: #8fbc8f; }
 .node-instance  .badge-type { background: #5a3d5a; color: #ff8aff; }
-.page-nav { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+
+	.legend { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; padding: 10px 14px; background: #16213e; border-radius: 8px; font-size: 12px; }
+	.legend-item { display: flex; align-items: center; gap: 6px; }
+	.legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+	.page-nav { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
 .page-nav a { color: #c4a843; text-decoration: none; padding: 4px 12px; border: 1px solid #c4a84344; border-radius: 4px; font-size: 13px; }
 .page-nav a:hover { background: #c4a84322; }
 .page-nav a.active { background: #c4a84333; }
@@ -416,6 +471,16 @@ footer a:hover { color: var(--gold); }
   <h1>🏯 NinKing 参考手册 <small id="card-count"></small></h1>
   <p class="subtitle">基于 <span id="data-date">2026-06-16</span> · 忍者牌 / 喜系统 / 场景树 · 点击卡牌查看详情 · ESC 清空搜索</p>
 </header>
+
+<!-- ═══ Recent Updates (auto-injected by tools/inject_recent_updates.py) ═══ -->
+<div id="recent-updates" class="recent-updates">
+  <h3>📋 最近更新</h3>
+  <!-- RECENT_UPDATES_PLACEHOLDER -->
+<ul>
+  <li><span class="date">2026-06-16</span><span class="tag tag-ninja">ninja</span>feat: 忍者牌HTML接入卡牌图片素材（方案B: CI拷贝+gitignore）</li>
+</ul>
+<p style="font-size:11px;color:var(--text-dim);margin-top:6px">最新提交 · 部署于 2026-06-16 18:25</p>
+</div>
 
 <!-- ═══ Tab Bar ═══ -->
 <div class="tab-bar">
@@ -512,6 +577,20 @@ footer a:hover { color: var(--gold); }
 
 <!-- ═══ Tab: Scene Tree ═══ -->
 <div class="tab-content" id="tab-scene">
+
+<div class="legend">
+  <div class="legend-item"><span class="legend-dot" style="background:#b8b8ff"></span> Control</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#8fbc8f"></span> Panel</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#e8c88a"></span> Label</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#ff8a8a"></span> Button</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#8ac8ff"></span> TextureRect</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#c88aff"></span> ColorRect</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#8affc8"></span> HBoxContainer</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#a8e6a8"></span> VBoxContainer</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#e8e88a"></span> GridContainer</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#ff8aff"></span> CardManager</div>
+</div>
+
 
 <div class="scene-card" id="scene-main">
 <h2>ninking_main.tscn</h2>
@@ -1163,31 +1242,31 @@ const NINJAS = [
 //  Xi (喜) system definitions
 // ══════════════════════════════════════════════════════
 const XI_BASIC = [
-  { id: 1,  name: "全黑",       cond: "9 张全 ♠/♣",                         mult: 2, chips: 0,   tier: "global",  tierLabel: "全局" },
-  { id: 2,  name: "全红",       cond: "9 张全 ♥/♦",                         mult: 2, chips: 0,   tier: "global",  tierLabel: "全局" },
-  { id: 3,  name: "全顺",       cond: "9 张点数连续",                         mult: 2, chips: 0,   tier: "global",  tierLabel: "全局" },
-  { id: 4,  name: "全同花",     cond: "9 张同一花色",                         mult: 3, chips: 0,   tier: "global",  tierLabel: "全局" },
-  { id: 5,  name: "四张",       cond: "4+ 张同点数",                          mult: 1, chips: 50,  tier: "global",  tierLabel: "全局" },
-  { id: 6,  name: "三清",       cond: "三组全是同花（花色可不同）",             mult: 2, chips: 0,   tier: "group",   tierLabel: "组级" },
-  { id: 7,  name: "三顺清",     cond: "三组全是同花顺",                        mult: 3, chips: 0,   tier: "group",   tierLabel: "组级" },
-  { id: 8,  name: "顺清打头",   cond: "影为同花顺",                           mult: 2, chips: 0,   tier: "group",   tierLabel: "组级" },
-  { id: 9,  name: "全三条",     cond: "9 张组成 3 副三条",                     mult: 4, chips: 0,   tier: "global",  tierLabel: "全局" },
-];
+  { id: 1, name: "全黑", cond: "9 张全 ♠/♣", mult: 2, chips: 0, tier: "global", tierLabel: "全局" },
+  { id: 2, name: "全红", cond: "9 张全 ♥/♦", mult: 2, chips: 0, tier: "global", tierLabel: "全局" },
+  { id: 3, name: "全顺", cond: "9 张点数连续", mult: 2, chips: 0, tier: "global", tierLabel: "全局" },
+  { id: 4, name: "全同花", cond: "9 张同一花色", mult: 3, chips: 0, tier: "global", tierLabel: "全局" },
+  { id: 5, name: "四张", cond: "4+ 张同点数", mult: 5, chips: 0, tier: "global", tierLabel: "全局" },
+  { id: 6, name: "三清", cond: "三组全是同花（花色可不同）", mult: 2, chips: 0, tier: "group", tierLabel: "组级" },
+  { id: 7, name: "三顺清", cond: "三组全是同花顺", mult: 3, chips: 0, tier: "group", tierLabel: "组级" },
+  { id: 8, name: "顺清打头", cond: "影为同花顺", mult: 2, chips: 0, tier: "group", tierLabel: "组级" },
+  { id: 9, name: "全三条", cond: "9 张组成 3 副三条", mult: 4, chips: 0, tier: "global", tierLabel: "全局" },
+];  // ── xi-auto-extracted:basic ──
 const XI_PHASE_E = [
-  { id: 10, name: "豹子",       cond: "任意一组为三条",                        mult: 2, chips: 0,   tier: "group",   tierLabel: "组级" },
-  { id: 11, name: "昇龍",       cond: "影<瞬<滅 牌型严格递增",                 mult: 3, chips: 0,   tier: "special", tierLabel: "排列递进" },
-  { id: 12, name: "背水",       cond: "尾墩为散牌 (HIGH_CARD_3)",              mult: 4, chips: 0,   tier: "special", tierLabel: "牺牲型" },
-  { id: 13, name: "貧打",       cond: "某墩精确含 2-3-5",                     mult: 4, chips: 0,   tier: "special", tierLabel: "特定组合" },
-  { id: 14, name: "陣眼",       cond: "中心牌全局最小或最大（含并列）",          mult: 3, chips: 0,   tier: "special", tierLabel: "位置型" },
-  { id: 15, name: "均爵",       cond: "每墩至少一张 J/Q/K",                   mult: 3, chips: 0,   tier: "special", tierLabel: "均匀分配" },
-  { id: 16, name: "三等",       cond: "三行 chip 总和相等",                    mult: 5, chips: 0,   tier: "special", tierLabel: "平衡型" },
-  { id: 17, name: "满堂",       cond: "3 行 + 3 列全部非散牌 (≥ONE_PAIR_3)",  mult: 5, chips: 0,   tier: "special", tierLabel: "行列全判" },
-];
+  { id: 10, name: "豹子", cond: "任意一组为三条", mult: 2, chips: 0, tier: "group", tierLabel: "组级" },
+  { id: 11, name: "昇龍", cond: "影<瞬<滅 牌型严格递增", mult: 3, chips: 0, tier: "special", tierLabel: "排列递进" },
+  { id: 12, name: "背水", cond: "尾墩为散牌 (HIGH_CARD_3)", mult: 4, chips: 0, tier: "special", tierLabel: "牺牲型" },
+  { id: 13, name: "貧打", cond: "某墩精确含 2-3-5", mult: 4, chips: 0, tier: "special", tierLabel: "特定组合" },
+  { id: 14, name: "陣眼", cond: "中心牌全局最小或最大（含并列）", mult: 3, chips: 0, tier: "special", tierLabel: "位置型" },
+  { id: 15, name: "均爵", cond: "每墩至少一张 J/Q/K", mult: 3, chips: 0, tier: "special", tierLabel: "均匀分配" },
+  { id: 16, name: "三等", cond: "三行 chip 总和相等", mult: 5, chips: 0, tier: "special", tierLabel: "平衡型" },
+  { id: 17, name: "满堂", cond: "3 行 + 3 列全部非散牌 (≥ONE_PAIR_3)", mult: 5, chips: 0, tier: "special", tierLabel: "行列全判" },
+];  // ── xi-auto-extracted:phase-e ──
 const XI_COMBOS = [
   { name: "三合", cond: "3 行牌型各匹配一列（散牌行不计）", mult: 6, tier: "exclusive" },
-  { name: "双合", cond: "2 行牌型匹配列",                   mult: 4, tier: "exclusive" },
-  { name: "一合", cond: "1 行牌型匹配列",                   mult: 2, tier: "exclusive" },
-];
+  { name: "双合", cond: "2 行牌型匹配列", mult: 4, tier: "exclusive" },
+  { name: "一合", cond: "1 行牌型匹配列", mult: 2, tier: "exclusive" },
+];  // ── xi-auto-extracted:combos ──
 
 // ═══ Tab switching ═══
 function switchTab(tabId) {
@@ -1366,6 +1445,7 @@ function render() {
     ).join("");
 
     return `<div class="card rarity-${rarity}${deferred ? ' deferred' : ''}" data-id="${n.id}" onclick="toggleCard(this)">
+      <img class="card-img" src="./images/cards/${n.id}.png" alt="${escHtml(n.name)}" loading="lazy" onerror="this.style.display='none'">
       <div class="card-name">${escHtml(n.name)}</div>
       <div class="card-id">${n.id}</div>
       <div class="card-badges">
@@ -1458,9 +1538,7 @@ function renderStats() {
   note.textContent = `共 ${NINJAS.length} 张牌 · 非传说牌均价 $${avgCost} · ${deferredCount} 张暂缓 · 12 种效果类别`;
 }
 
-// ══════════════════════════════════════════════════════
-//  Scene tree data — auto-extracted from .tscn files
-// ══════════════════════════════════════════════════════
+
 const SCENES = {
   main: {
     children: [
@@ -1491,8 +1569,8 @@ const SCENES = {
 {
                           type: 'GridContainer', name: 'DeckCardGrid',
                           unique: true
-                        }
-                      ]
+                        },
+                      ],
                     },
 {
                       type: 'HBoxContainer', name: 'TitleBar',
@@ -1503,8 +1581,8 @@ const SCENES = {
                         },
 {
                           type: 'Label', name: 'ViewerTitle'
-                        }
-                      ]
+                        },
+                      ],
                     },
 {
                       type: 'HBoxContainer', name: 'CountRow',
@@ -1516,16 +1594,16 @@ const SCENES = {
 {
                           type: 'Label', name: 'DiscardCountLabel',
                           unique: true
-                        }
-                      ]
-                    }
-                  ]
+                        },
+                      ],
+                    },
+                  ],
                 },
 {
                   type: 'ColorRect', name: 'ViewerBg',
                   unique: true
-                }
-              ]
+                },
+              ],
             },
 {
               type: 'Button', name: 'DeckBtn',
@@ -1563,10 +1641,10 @@ const SCENES = {
 {
                               type: 'Label', name: 'HandsLabel',
                               unique: true
-                            }
-                          ]
-                        }
-                      ]
+                            },
+                          ],
+                        },
+                      ],
                     },
 {
                       type: 'Panel', name: 'AntePanel',
@@ -1581,10 +1659,10 @@ const SCENES = {
 {
                               type: 'Label', name: 'BarrierLabel',
                               unique: true
-                            }
-                          ]
-                        }
-                      ]
+                            },
+                          ],
+                        },
+                      ],
                     },
 {
                       type: 'ColorRect', name: 'PanelBg',
@@ -1613,8 +1691,8 @@ const SCENES = {
 {
                                   type: 'Label', name: 'DestroyType',
                                   unique: true
-                                }
-                              ]
+                                },
+                              ],
                             },
 {
                               type: 'Control', name: 'Row影',
@@ -1633,8 +1711,8 @@ const SCENES = {
 {
                                   type: 'RichTextLabel', name: 'ShadowScore',
                                   unique: true
-                                }
-                              ]
+                                },
+                              ],
                             },
 {
                               type: 'Control', name: 'Row瞬',
@@ -1653,8 +1731,8 @@ const SCENES = {
 {
                                   type: 'Label', name: 'FlashType',
                                   unique: true
-                                }
-                              ]
+                                },
+                              ],
                             },
 {
                               type: 'Control', name: 'ColumnBar',
@@ -1706,15 +1784,15 @@ const SCENES = {
 {
                                   type: 'Label', name: 'MidColType',
                                   unique: true
-                                }
-                              ]
+                                },
+                              ],
                             },
 {
                               type: 'ColorRect', name: 'ColDivider'
-                            }
-                          ]
-                        }
-                      ]
+                            },
+                          ],
+                        },
+                      ],
                     },
 {
                       type: 'Panel', name: 'ScorePanel',
@@ -1737,12 +1815,12 @@ const SCENES = {
 {
                               type: 'ProgressBar', name: 'ProgressBar',
                               unique: true
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
                 },
 {
                   type: 'Control', name: 'CenterColumn',
@@ -1788,15 +1866,15 @@ const SCENES = {
 {
                               type: 'Label', name: 'Col2Label',
                               unique: true
-                            }
-                          ]
+                            },
+                          ],
                         },
 {
                           type: 'Control', name: 'CardGrid',
                           unique: true,
                           script: 'hand_card_container.gd'
-                        }
-                      ]
+                        },
+                      ],
                     },
 {
                       type: 'Button', name: 'AiRearrangeBtn',
@@ -1809,16 +1887,16 @@ const SCENES = {
 {
                           type: 'Button', name: 'PlayBtn',
                           unique: true
-                        }
-                      ]
+                        },
+                      ],
                     },
 {
                       type: 'Control', name: 'NinjaBar',
                       unique: true
-                    }
-                  ]
-                }
-              ]
+                    },
+                  ],
+                },
+              ],
             },
 {
               type: 'Control', name: 'GameOver',
@@ -1842,8 +1920,8 @@ const SCENES = {
                 },
 {
                   type: 'ColorRect', name: 'OverlayBg'
-                }
-              ]
+                },
+              ],
             },
 {
               type: 'Control', name: 'LevelIntro',
@@ -1863,8 +1941,8 @@ const SCENES = {
 {
                   type: 'Label', name: 'TargetLabel',
                   unique: true
-                }
-              ]
+                },
+              ],
             },
 {
               type: 'Control', name: 'ScoringOverlay',
@@ -1884,8 +1962,8 @@ const SCENES = {
 {
                   type: 'Label', name: 'ScoreValueLabel',
                   unique: true
-                }
-              ]
+                },
+              ],
             },
 {
               type: 'Control', name: 'VictoryOverlay',
@@ -1901,17 +1979,13 @@ const SCENES = {
                 },
 {
                   type: 'Button', name: 'MenuButton'
-                }
-              ]
-            }
-          ]
+                },
+              ],
+            },
+          ],
         },
-{
-          type: 'Instance', name: 'CardManager',
-          instance: 'card_manager.tscn'
-        }
-      ]
-    }
+      ],
+    },
     ]
   },
   launcher: {
@@ -1949,9 +2023,9 @@ const SCENES = {
           type: 'Button', name: 'QuitBtn',
           unique: true,
           note: '"退出"'
-        }
-      ]
-    }
+        },
+      ],
+    },
     ]
   },
   shop: {
@@ -2009,9 +2083,9 @@ const SCENES = {
 {
           type: 'ColorRect', name: 'StageBg',
           note: '面板底色'
-        }
-      ]
-    }
+        },
+      ],
+    },
     ]
   },
   ninja: {
@@ -2026,25 +2100,25 @@ const SCENES = {
           children: [
 {
               type: 'TextureRect', name: 'TextureRect'
-            }
-          ]
+            },
+          ],
         },
 {
           type: 'Control', name: 'BackFace',
           children: [
 {
               type: 'TextureRect', name: 'TextureRect'
-            }
-          ]
+            },
+          ],
         },
 {
           type: 'TextureRect', name: 'FrameOverlay'
         },
 {
           type: 'Label', name: 'NameLabel'
-        }
-      ]
-    }
+        },
+      ],
+    },
     ]
   },
   debug: {
@@ -2064,13 +2138,11 @@ const SCENES = {
               children: [
 {
                   type: 'Button', name: 'BackBtn',
-                  unique: true,
-                  note: '返回'
+                  unique: true
                 },
 {
                   type: 'Button', name: 'ClearBtn',
-                  unique: true,
-                  note: '清除'
+                  unique: true
                 },
 {
                   type: 'Label', name: 'NinjaStatusLabel',
@@ -2078,8 +2150,7 @@ const SCENES = {
                 },
 {
                   type: 'Button', name: 'NinjaSelectBtn',
-                  unique: true,
-                  note: '选择忍者'
+                  unique: true
                 },
 {
                   type: 'VBoxContainer', name: 'StarChartContainer',
@@ -2087,35 +2158,28 @@ const SCENES = {
                 },
 {
                   type: 'Button', name: 'RandomBtn',
-                  unique: true,
-                  note: '随机'
+                  unique: true
                 },
 {
-                  type: 'Label', name: 'RightTitle',
-                  note: '忍者选择'
+                  type: 'Label', name: 'RightTitle'
                 },
 {
-                  type: 'Label', name: 'StarTitle',
-                  note: '星图'
+                  type: 'Label', name: 'StarTitle'
                 },
 {
-                  type: 'Button', name: 'ToggleBtn',
-                  note: '切换'
+                  type: 'Button', name: 'ToggleBtn'
                 },
 {
-                  type: 'Label', name: 'CardTrayLabel',
-                  note: '牌库'
+                  type: 'Label', name: 'CardTrayLabel'
                 },
 {
                   type: 'GridContainer', name: 'CardTray',
                   unique: true,
-                  script: 'debug_card_tray.gd',
-                  note: '52 张'
+                  script: 'debug_card_tray.gd'
                 },
 {
                   type: 'Label', name: 'CardQueueLabel',
-                  unique: true,
-                  note: '手牌'
+                  unique: true
                 },
 {
                   type: 'HBoxContainer', name: 'CardQueueContainer',
@@ -2123,15 +2187,14 @@ const SCENES = {
                 },
 {
                   type: 'Button', name: 'DealBtn',
-                  unique: true,
-                  note: '发牌'
-                }
-              ]
+                  unique: true
+                },
+              ],
             },
 {
               type: 'ColorRect', name: 'PanelBg'
-            }
-          ]
+            },
+          ],
         },
 {
           type: 'Label', name: 'StatusLabel',
@@ -2159,17 +2222,15 @@ const SCENES = {
                           children: [
 {
                               type: 'Label', name: 'BarrierLabel',
-                              unique: true,
-                              note: '"结界"'
+                              unique: true
                             },
 {
                               type: 'Label', name: 'RoundLabel',
-                              unique: true,
-                              note: '"回合"'
-                            }
-                          ]
-                        }
-                      ]
+                              unique: true
+                            },
+                          ],
+                        },
+                      ],
                     },
 {
                       type: 'Panel', name: 'ScorePanel',
@@ -2192,10 +2253,10 @@ const SCENES = {
 {
                               type: 'Label', name: 'ColXiLabel',
                               unique: true
-                            }
-                          ]
-                        }
-                      ]
+                            },
+                          ],
+                        },
+                      ],
                     },
 {
                       type: 'ColorRect', name: 'PanelBg'
@@ -2208,21 +2269,18 @@ const SCENES = {
                           children: [
 {
                               type: 'Label', name: 'GoldLabel',
-                              unique: true,
-                              note: '"$"'
+                              unique: true
                             },
 {
-                              type: 'Label', name: 'MatchTitle',
-                              note: '"比赛信息"'
+                              type: 'Label', name: 'MatchTitle'
                             },
 {
                               type: 'Label', name: 'HandsLabel',
-                              unique: true,
-                              note: '"討伐"'
-                            }
-                          ]
-                        }
-                      ]
+                              unique: true
+                            },
+                          ],
+                        },
+                      ],
                     },
 {
                       type: 'Panel', name: 'HandTypePanel',
@@ -2250,8 +2308,8 @@ const SCENES = {
                                 },
 {
                                   type: 'Label', name: 'DestroyDun'
-                                }
-                              ]
+                                },
+                              ],
                             },
 {
                               type: 'Control', name: 'Row瞬',
@@ -2270,8 +2328,8 @@ const SCENES = {
 {
                                   type: 'Label', name: 'FlashLv',
                                   unique: true
-                                }
-                              ]
+                                },
+                              ],
                             },
 {
                               type: 'Control', name: 'ColumnBar',
@@ -2323,8 +2381,8 @@ const SCENES = {
 {
                                   type: 'Label', name: 'MidColLv',
                                   unique: true
-                                }
-                              ]
+                                },
+                              ],
                             },
 {
                               type: 'Control', name: 'Row影',
@@ -2343,14 +2401,14 @@ const SCENES = {
 {
                                   type: 'RichTextLabel', name: 'ShadowScore',
                                   unique: true
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
                 },
 {
                   type: 'Control', name: 'CenterColumn',
@@ -2361,10 +2419,9 @@ const SCENES = {
                       children: [
 {
                           type: 'Button', name: 'PlayBtn',
-                          unique: true,
-                          note: '"討伐"'
-                        }
-                      ]
+                          unique: true
+                        },
+                      ],
                     },
 {
                       type: 'Control', name: 'NinjaBar',
@@ -2400,8 +2457,7 @@ const SCENES = {
 {
                           type: 'Control', name: 'CardGrid',
                           unique: true,
-                          script: 'hand_card_container.gd',
-                          note: '3×3 卡牌'
+                          script: 'hand_card_container.gd'
                         },
 {
                           type: 'HBoxContainer', name: 'ColumnLabelRow',
@@ -2417,26 +2473,20 @@ const SCENES = {
 {
                               type: 'Label', name: 'Col0Label',
                               unique: true
-                            }
-                          ]
-                        }
-                      ]
+                            },
+                          ],
+                        },
+                      ],
                     },
 {
                       type: 'Button', name: 'AiRearrangeBtn',
-                      unique: true,
-                      note: '"陣形"'
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-{
-          type: 'Instance', name: 'CardManager',
-          instance: 'card_manager.tscn',
-          note: 'card-framework'
+                      unique: true
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
 {
           type: 'Button', name: 'DeckBtn',
@@ -2460,25 +2510,22 @@ const SCENES = {
                       children: [
 {
                           type: 'Button', name: 'CancelBtn',
-                          unique: true,
-                          note: '取消'
+                          unique: true
                         },
 {
                           type: 'Button', name: 'ConfirmBtn',
-                          unique: true,
-                          note: '确认'
-                        }
-                      ]
+                          unique: true
+                        },
+                      ],
                     },
 {
                       type: 'ScrollContainer', name: 'ScrollContainer',
                       children: [
 {
                           type: 'GridContainer', name: 'NinjaGrid',
-                          unique: true,
-                          note: '忍者网格'
-                        }
-                      ]
+                          unique: true
+                        },
+                      ],
                     },
 {
                       type: 'HBoxContainer', name: 'TitleRow',
@@ -2495,35 +2542,31 @@ const SCENES = {
                           children: [
 {
                               type: 'Button', name: 'AllBtn',
-                              unique: true,
-                              note: '全部'
+                              unique: true
                             },
 {
                               type: 'Button', name: 'RarityBtn',
-                              unique: true,
-                              note: '稀有度'
+                              unique: true
                             },
 {
                               type: 'Button', name: 'CategoryBtn',
-                              unique: true,
-                              note: '分类'
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
+                              unique: true
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
             },
 {
-              type: 'ColorRect', name: 'SelectorBg',
-              note: '#000 遮罩'
-            }
-          ]
-        }
-      ]
-    }
+              type: 'ColorRect', name: 'SelectorBg'
+            },
+          ],
+        },
+      ],
+    },
     ]
   },
   card: {
@@ -2538,23 +2581,21 @@ const SCENES = {
           note: '插画层',
           children: [
 {
-              type: 'TextureRect', name: 'TextureRect',
-              note: '120×160'
-            }
-          ]
+              type: 'TextureRect', name: 'TextureRect'
+            },
+          ],
         },
 {
           type: 'Control', name: 'BackFace',
           note: '背面',
           children: [
 {
-              type: 'TextureRect', name: 'TextureRect',
-              note: '120×160'
-            }
-          ]
-        }
-      ]
-    }
+              type: 'TextureRect', name: 'TextureRect'
+            },
+          ],
+        },
+      ],
+    },
     ]
   },
   popup: {
@@ -2580,9 +2621,9 @@ const SCENES = {
 {
           type: 'Label', name: 'DescLabel',
           unique: true
-        }
-      ]
-    }
+        },
+      ],
+    },
     ]
   },
   deck: {
@@ -2598,38 +2639,33 @@ const SCENES = {
           children: [
 {
               type: 'VBoxContainer', name: 'VBox',
-              note: 'separation=32',
               children: [
 {
                   type: 'HBoxContainer', name: 'BtnRow',
                   children: [
 {
                       type: 'Button', name: 'ConfirmBtn',
-                      unique: true,
-                      note: '"开始" 160×48'
+                      unique: true
                     },
 {
                       type: 'Button', name: 'BackBtn',
-                      unique: true,
-                      note: '"返回" 160×48'
-                    }
-                  ]
+                      unique: true
+                    },
+                  ],
                 },
 {
-                  type: 'Label', name: 'Title',
-                  note: '"选择牌组" 32px 金'
+                  type: 'Label', name: 'Title'
                 },
 {
                   type: 'HBoxContainer', name: 'CardsRow',
-                  unique: true,
-                  note: '牌组预览'
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    }
+                  unique: true
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
     ]
   },
   continue: {
@@ -2645,39 +2681,34 @@ const SCENES = {
           children: [
 {
               type: 'VBoxContainer', name: 'ContinueVBox',
-              note: 'separation=24',
               children: [
 {
                   type: 'Label', name: 'ContinueTitle',
-                  unique: true,
-                  note: '32px 金'
+                  unique: true
                 },
 {
                   type: 'Label', name: 'ContinueInfo',
-                  unique: true,
-                  note: '24px 灰'
+                  unique: true
                 },
 {
                   type: 'HBoxContainer', name: 'ContinueBtnRow',
                   children: [
 {
                       type: 'Button', name: 'GoBtn',
-                      unique: true,
-                      note: '"继续冒险" 180×48'
+                      unique: true
                     },
 {
                       type: 'Button', name: 'BackBtn',
-                      unique: true,
-                      note: '"返回" 160×48'
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    }
+                      unique: true
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
     ]
   }
 };

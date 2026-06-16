@@ -18,8 +18,10 @@ addons/
 export/
 dist/
 
-# Claude / AI assistant
-.claude/
+# Claude / AI assistant (skills/ 纳入版本控制)
+.claude/*
+!.claude/skills/
+!.claude/skills/**
 .mcp.json
 .ziva/
 

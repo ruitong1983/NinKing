@@ -1,22 +1,32 @@
 #!/bin/sh
 # ═══════════════════════════════════════════════════════
-# Pre-commit hook: sync ninja-card-viewer.html on data change
+# Pre-commit hook: sync ninja_card_viewer.html on data change
+# All extraction scripts embed into this single HTML file.
 # ═══════════════════════════════════════════════════════
 # Auto-install:  sh tools/install-hooks.sh
 # Manual install: cp tools/pre-commit .git/hooks/pre-commit
 # ═══════════════════════════════════════════════════════
 
-NINJA_GD="scripts/ninking/ninja_data.gd"
-VIEWER_HTML="docs/ninking/ninja_card_viewer.html"
-EXTRACT_SCRIPT="tools/extract_ninja_data.py"
+# Prefer python over python3 (Windows Store python3 stub breaks in Git Bash)
+PYTHON="python"
+command -v "$PYTHON" >/dev/null 2>&1 || PYTHON="python3"
 
-if git diff --cached --name-only | grep -qF "$NINJA_GD"; then
-  echo "📝 ninja_data.gd 已变更 → 同步 ninja_card_viewer.html..."
-  if python "$EXTRACT_SCRIPT" "$VIEWER_HTML"; then
-    git add "$VIEWER_HTML"
-    echo "✅ ninja_card_viewer.html 已更新并暂存"
-  else
-    echo "⚠️  ninja_card_viewer.html 同步失败，请检查 extract_ninja_data.py"
-    exit 1
-  fi
+HTML="docs/ninking/ninja_card_viewer.html"
+EXTRACTORS="tools/extract_ninja_data.py tools/extract_xi_data.py tools/tscn_parser.py"
+INJECTOR="tools/inject_recent_updates.py"
+
+for SCRIPT in $EXTRACTORS; do
+  echo "  ⟳ $(basename "$SCRIPT" .py)..."
+  "$PYTHON" "$SCRIPT" "$HTML" || { echo "  ⚠️  $SCRIPT failed"; exit 1; }
+done
+
+echo "  ⟳ 最近更新..."
+"$PYTHON" "$INJECTOR" "$HTML"
+
+# Only stage HTML if changed
+if git diff --quiet "$HTML"; then
+  echo "  ✓ HTML 无变更"
+else
+  git add "$HTML"
+  echo "  ✓ HTML 已更新并暂存"
 fi
