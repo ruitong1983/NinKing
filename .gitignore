@@ -59,3 +59,6 @@ tmp_godot_out.txt
 skills-lock.json
 .agents/
 *.translation
+
+# Generated HTML viewer assets (copied from assets/ by tools/extract_card_images.py)
+docs/ninking/images/

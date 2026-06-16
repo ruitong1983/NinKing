@@ -14,6 +14,7 @@ command -v "$PYTHON" >/dev/null 2>&1 || PYTHON="python3"
 HTML="docs/ninking/ninja_card_viewer.html"
 EXTRACTORS="tools/extract_ninja_data.py tools/extract_xi_data.py tools/tscn_parser.py"
 INJECTOR="tools/inject_recent_updates.py"
+IMAGES="tools/extract_card_images.py"
 
 for SCRIPT in $EXTRACTORS; do
   echo "  ⟳ $(basename "$SCRIPT" .py)..."
@@ -22,6 +23,9 @@ done
 
 echo "  ⟳ 最近更新..."
 "$PYTHON" "$INJECTOR" "$HTML"
+
+echo "  ⟳ 卡牌图片..."
+"$PYTHON" "$IMAGES"
 
 # Only stage HTML if changed
 if git diff --quiet "$HTML"; then

@@ -172,6 +172,15 @@ h1 small { font-size: 14px; color: var(--text-muted); font-weight: 400; }
 .card.rarity-legendary { border-top-color: var(--legendary); }
 .card.deferred { opacity: 0.7; }
 
+.card-img {
+  width: 100%;
+  aspect-ratio: 125 / 175;
+  object-fit: cover;
+  border-radius: 6px;
+  background: rgba(0,0,0,0.2);
+  display: block;
+}
+
 .card-name {
   font-size: 15px;
   font-weight: 600;
@@ -468,9 +477,9 @@ footer a:hover { color: var(--gold); }
   <h3>📋 最近更新</h3>
   <!-- RECENT_UPDATES_PLACEHOLDER -->
 <ul>
-  <li><span class="date">2026-06-16</span><span class="tag tag-docs">docs</span><span class="tag tag-fix">fix</span><span class="tag tag-scene">scene</span>docs: 同步最新数据到 HTML（合并单文件 + 场景树解析修复 + 最近更新保留1条）</li>
+  <li><span class="date">2026-06-16</span><span class="tag tag-docs">docs</span><span class="tag tag-scene">scene</span>docs: 合并 scene-tree-visualizer 到 ninja_card_viewer 单文件 + 工具链收尾</li>
 </ul>
-<p style="font-size:11px;color:var(--text-dim);margin-top:6px">最新提交 · 部署于 2026-06-16 17:46</p>
+<p style="font-size:11px;color:var(--text-dim);margin-top:6px">最新提交 · 部署于 2026-06-16 18:23</p>
 </div>
 
 <!-- ═══ Tab Bar ═══ -->
@@ -1436,6 +1445,7 @@ function render() {
     ).join("");
 
     return `<div class="card rarity-${rarity}${deferred ? ' deferred' : ''}" data-id="${n.id}" onclick="toggleCard(this)">
+      <img class="card-img" src="./images/cards/${n.id}.png" alt="${escHtml(n.name)}" loading="lazy" onerror="this.style.display='none'">
       <div class="card-name">${escHtml(n.name)}</div>
       <div class="card-id">${n.id}</div>
       <div class="card-badges">
