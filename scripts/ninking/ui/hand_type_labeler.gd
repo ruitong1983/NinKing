@@ -454,14 +454,12 @@ func _update_col_xi_preview(hand: Array[CardData.PlayingCard]) -> void:
 	var xi_parts: Array[String] = []
 	if xi_result != null and xi_result.has_any():
 		for xi_name: String in xi_result.triggered:
-			var is_global: bool = xi_name in ["全黑", "全红", "全顺", "全同花", "四张", "全三条"]
-			if is_global:
-				var x_val: int = 1
-				for defn: Dictionary in XiDetector.XI_DEFINITIONS:
-					if defn["name"] == xi_name:
-						x_val = defn["x_mult"]
-						break
-				xi_parts.append("%s×%d" % [xi_name, x_val])
+			var x_val: int = 1
+			for defn: Dictionary in XiDetector.XI_DEFINITIONS:
+				if defn["name"] == xi_name:
+					x_val = defn["x_mult"]
+					break
+			xi_parts.append("%s×%d" % [xi_name, x_val])
 
 	if xi_parts.size() > 0:
 		_col_xi_label.text = "喜: " + "  ".join(xi_parts)

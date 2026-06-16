@@ -46,6 +46,17 @@ static func buy_ninja(gs: Node, ninja: Dictionary) -> bool:
 	return true
 
 
+## B14: Replace a ninja at index with a new one (used when slots are full).
+## Does NOT check gold — caller must deduct cost before calling.
+static func replace_ninja(gs: Node, index: int, new_ninja: Dictionary) -> bool:
+	if index < 0 or index >= gs.owned_ninjas.size():
+		return false
+	gs.owned_ninjas[index] = new_ninja.duplicate(true)
+	if gs.current_state == gs.State.PLAYING:
+		gs.auto_arrange()
+	return true
+
+
 static func sell_ninja(gs: Node, index: int) -> void:
 	if index < 0 or index >= gs.owned_ninjas.size():
 		return

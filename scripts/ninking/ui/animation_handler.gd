@@ -409,14 +409,12 @@ func _build_xi_summary(xi_result: XiDetector.XiResult) -> String:
 		return "喜: -"
 	var parts: Array[String] = []
 	for xi_name: String in xi_result.triggered:
-		var is_global: bool = xi_name in ["全黑", "全红", "全顺", "全同花", "四张", "全三条"]
-		if is_global:
-			var x_val: int = 1
-			for defn: Dictionary in XiDetector.XI_DEFINITIONS:
-				if defn["name"] == xi_name:
-					x_val = defn["x_mult"]
-					break
-			parts.append("%s×%d" % [xi_name, x_val])
+		var x_val: int = 1
+		for defn: Dictionary in XiDetector.XI_DEFINITIONS:
+			if defn["name"] == xi_name:
+				x_val = defn["x_mult"]
+				break
+		parts.append("%s×%d" % [xi_name, x_val])
 	if parts.size() > 0:
 		return "喜: " + "  ".join(parts)
 	return "喜: -"

@@ -144,7 +144,7 @@ func _ready() -> void:
 
 	# Hand interaction (swap state machine)
 	hand_interaction = HandInteraction.new()
-	hand_interaction.setup(hand_display, _on_ninking_card_clicked, _on_ninking_card_dragged)
+	hand_interaction.setup(hand_display, _on_ninking_card_clicked)
 
 	# Deck viewer
 	deck_viewer_ctrl = DeckViewerController.new()
@@ -291,6 +291,33 @@ func shop_panel_mark_item_purchased(item_id: String) -> void:
 		_current_shop_panel.mark_item_purchased(item_id)
 
 
+# ══════════════════════════════════════════
+# B14: Ninja replace overlay
+# ══════════════════════════════════════════
+
+var _replace_overlay: NinjaReplaceOverlay = null
+
+
+## Show the ninja replace overlay. Returns the overlay instance so caller
+## can await replacement_chosen signal. The overlay auto-queues on hide.
+func show_replace_overlay(new_ninja: Dictionary, old_ninjas: Array[Dictionary]) -> NinjaReplaceOverlay:
+	if _replace_overlay != null and is_instance_valid(_replace_overlay):
+		_replace_overlay.queue_free()
+		_replace_overlay = null
+
+	var overlay := NinjaReplaceOverlay.new()
+	overlay.setup(new_ninja, old_ninjas)
+	add_child(overlay)
+	_replace_overlay = overlay
+	return overlay
+
+
+func hide_replace_overlay() -> void:
+	if _replace_overlay != null and is_instance_valid(_replace_overlay):
+		_replace_overlay.queue_free()
+	_replace_overlay = null
+
+
 # 🏪 Shop signal relay — game_manager connects to these
 signal shop_purchase_requested(ability_data: Dictionary)
 signal shop_item_purchase_requested(item_data: Dictionary)
@@ -389,7 +416,7 @@ func update_target(target: int) -> void:
 
 func _refresh_internal(hand: Array[CardData.PlayingCard]) -> void:
 	hand_interaction.set_hand(hand)
-	hand_display.refresh(hand, hand_interaction.swap_source_idx, _on_ninking_card_clicked, _on_ninking_card_dragged)
+	hand_display.refresh(hand, hand_interaction.swap_source_idx, _on_ninking_card_clicked)
 	hand_display.update_labels(hand)
 	dun_highlighter.update(NinKingGameState.current_arrangement)
 	play_btn.disabled = not NinKingGameState.is_constraint_satisfied()
@@ -415,10 +442,6 @@ func on_cards_swapped(src: int, tgt: int) -> void:
 
 func _on_ninking_card_clicked(idx: int) -> void:
 	hand_interaction.handle_card_clicked(idx)
-
-
-func _on_ninking_card_dragged(idx: int, drop_position: Vector2) -> void:
-	hand_interaction.handle_card_dragged(idx, drop_position)
 
 
 # ══════════════════════════════════════════

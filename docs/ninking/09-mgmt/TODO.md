@@ -323,6 +323,22 @@
 
 ---
 
+## 📐 Phase H — 忍者牌效果集中分析（消除冗余遍历）
+
+> **方案审阅通过, 2026-06-16** | **Spec:** [`specs/ninja-effect-consolidation.md`](specs/ninja-effect-consolidation.md)
+> **核心:** 7 次冗余遍历 → 1 次集中分析。在 `ScoreCalculator` 加 `analyze_effects()` 单次遍历方法，聚合忍者效果供所有消费者复用。保留旧 `calculate()` 签名向后兼容。
+
+| # | 任务 | 说明 | 优先级 | 状态 |
+|---|------|------|--------|------|
+| H1 | **`ScoreCalculator.analyze_effects()` 单次遍历** — 返回 Dictionary 汇总所有忍者效果（per_group/col/anim_contribs/gold/tools/scaling/constraint）| `scripts/ninking/score_calculator.gd` + `calculate_with_summary()` 新入口 | **P0** | 🔵 |
+| H2 | **SealController 消费 summary** — `prepare_play()` 调用一次 `analyze_effects()`，`_collect_play_gold()` 改用 summary.gold_on_play | `scripts/ninking/seal_controller.gd` | **P1** | ⬜ |
+| H3 | **AnimationHandler 消费 summary** — 删除 `_compute_ninja_contributions()`（~65 行），改用 `summary.anim_contribs` | `scripts/ninking/ui/animation_handler.gd` | **P1** | ⬜ |
+| H4 | **ArrangeController 消费 summary** — `_compute_per_group_ninja_effects()` 改用 `summary.per_group` | `scripts/ninking/arrange_controller.gd` | **P2** | ⬜ |
+| H5 | **工具效果可见性** — `analyze_effects()` 中收集 extra_plays/extra_redraws/death_save 等悬空效果到 `summary.tools` | `scripts/ninking/score_calculator.gd` | **P2** | ⬜ |
+| H6 | **Phase 2 预研文档** — 最终效果 pipeline（5 阶段）+ `NinjaCardInstance` 运行时类设计文档 | 文档 | **P2** | ⬜ |
+
+---
+
 ## 🔒 Phase D-E — 远期（暂缓）
 
 | # | 任务 | 说明 | 状态 |
@@ -346,9 +362,9 @@
 Phase A ──→ Phase B ──→ Phase C ──→ Phase E ──→ Phase F1
  核心可玩    系统完善    Boss深度    发布就绪    忍者牌补齐
 
-Phase F1 ──→ Phase F2 ──→ Phase F3
- 基础补齐     机制扩展     深度打磨
- (15新+3降)   (12售出/重触发/Boss/牌组)  (10喜/三组/资源)
+Phase F1 ──→ Phase F2 ──→ Phase F3 ──→ Phase H ──→ Phase I
+ 基础补齐     机制扩展     深度打磨     效果集中     运行时Pipeline
+ (15新+3降)   (12售出/重触发/Boss/牌组)  (10喜/三组/资源)   (消除7×遍历)  (NinjaCardInstance + 5阶段)
 
  A1-A8 完成 = 可玩原型
  B4-B8 完成 = 完整体验
@@ -356,6 +372,9 @@ Phase F1 ──→ Phase F2 ──→ Phase F3
  F1 = 70 张卡池 + 衰减/×mult 成长
  F2 = 10 维度全覆盖
  F3 = 差异化打磨
+ H1 = 消除 6/7 冗余遍历
+ H6 = Phase 2 设计就绪
+ I1 = 运行时类 + 5 阶段 Pipeline
 ```
 
 ---
@@ -463,3 +482,4 @@ Phase F1 ──→ Phase F2 ──→ Phase F3
 | 2026-06-16 | 🃏 **方案审阅+Grill: 满员忍者替换购买(Balatro风)**: 先买后换 → 全屏模态弹窗(新牌+5卡副本) → 半价退款 → `_replace_guard` 防重入。review-plan 3 维度审阅通过，A1(重入守卫)/A2(操作锁定)/Q1(弹窗内渲染)/Q2(ui_manager 临时管理) 决策确认。B14 加入 TODO Phase B。|
 | 2026-06-16 | ✨ **忍者牌稀有度闪光材质效果调优**: 边框纹理 resize fix(_resize_to_card() 500x700 to 125x175); Uncommon 静态转缓慢银光(speed=0.5/int=0.35); Rare 降速降强度(speed=1.0/int=0.3); Legendary 多次降强度(1.0 to 0.6 to 0.45)+呼吸范围同步调低; 所有参数三文件同步(.tres+RARITY_FLASH_PARAMS+脉冲范围)。附: 恢复缺失 card_preview.gd。|
 | 2026-06-15 | 📐 **全部 6 项代码质量任务实施完成** 🎉: C30 创建 `score_helpers.gd`(含 `include_seal` 参数) + 两处调用替换; C31 `ScoreResult`→`score_result.gd`(更新 5 引用文件); C32 `Arrangement`→`arrangement.gd`(更新 4 引用文件); C33 `CardVisualComposer.create_tooltip_stylebox()`+ 替换两处; C34 `ContinuePanel`→`continue_panel.tscn`(新建脚本 `continue_panel.gd`); C35 `CardDetailPopup`→`card_detail_popup.tscn`(节点预置于场景)。净消除 ~100 行重复代码, 新增 3 文件 + 2 场景。|
+| 2026-06-16 | 📋 **方案审阅: Phase H 忍者牌效果集中分析**: review-plan 3 维度审阅通过。🔴 A1(砍独立类→用 Dictionary)、A2(循环依赖→放 ScoreCalculator)、A4(保持旧 `calculate()` 签名兼容) 已修。🟡 A3(`EffectPhase` 枚举推迟到 Phase 2)。H1-H6 共 6 项加入 TODO。|

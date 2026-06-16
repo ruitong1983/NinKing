@@ -1,6 +1,6 @@
 # Tween & VFX 库参考手册
 
-> 最后更新：2026-06-15 | 源码：`scripts/tween/`
+> 最后更新：2026-06-16 | 源码：`scripts/tween/`
 >
 > **铁律：实现任何 Tween/VFX 前，必须先查本文档。确认已有 API 是否覆盖需求，避免手写 `create_tween()`。**
 >
@@ -56,6 +56,8 @@ GlobalTweens (autoload, 胶水层)
 | 弧线弹性补间 | `GlobalTweens.move_arc(node, target_pos, 0.5, 0.5)` | 贝塞尔弧线+弹性归位 |
 | 溶解消散 | `GlobalTweens.dissolve_out(node, 1.0, 0.2, Color.ORANGE)` | 需预先挂载 dissolve2d shader |
 | 忍者触发 | `GlobalTweens.ninja_trigger(node, 0.6)` | Balatro 风弹起→wobble→squash 落回，auto_kill domain "ninja" |
+| Shader 参数单次补间 | `GlobalTweens.tween_shader_param(node, material, "param", to_val, 0.15)` | 将 ShaderMaterial 的 shader_parameter 补间到目标值 |
+| Shader 参数脉冲循环 | `GlobalTweens.shader_pulse(node, material, "param", 0.5, 0.9, 0.8)` | 在 min/max 间循环呼吸，EASE_IN_OUT_SINE，适用于自发光/传奇呼吸 |
 | 卡牌 hover 放大 | `GlobalTweens.card_hover(node, Vector2(1.05,1.05), -4.0)` | scale+上浮 |
 | 卡牌 unhover 还原 | `GlobalTweens.card_unhover(node, Vector2.ONE, 0.0)` | scale+位置归位 |
 | 卡牌倾斜追踪鼠标 | `GlobalTweens.enable_card_tilt(node)` | 每帧跟随鼠标旋转 |
@@ -199,7 +201,24 @@ GlobalTweens.burst_particles(position: Vector2, preset: String = "sparkle") -> v
 ParticlePool.burst_custom(position, amount, lifetime, color, texture, spread, velocity_min, velocity_max)
 ```
 
-### 1.5 音效耦合
+### 1.5 Shader 参数动效
+
+```gdscript
+# Shader 参数单次补间（委托给 TweenFX）
+GlobalTweens.tween_shader_param(context_node: Node, material: ShaderMaterial, param_name: String, to_value: Variant, duration: float = 0.15) -> Tween
+
+# Shader 参数脉冲（无限循环，委托给 TweenFX）
+GlobalTweens.shader_pulse(context_node: Node, material: ShaderMaterial, param_name: String, min_val: float, max_val: float, cycle_duration: float = 0.8) -> Tween
+```
+
+- `tween_shader_param`：将 `material.shader_parameter/<param_name>` 从当前值补间到 `to_value`。EASE_OUT SINE。auto_kill domain `"shader_param|<name>"`。适用于悬停加速/恢复 shader 参数。
+- `shader_pulse`：无限循环在 `min_val ↔ max_val` 之间，EASE_IN_OUT SINE，半周期 = `cycle_duration / 2`。auto_kill domain `"shader_pulse|<name>"`。适用于呼吸发光等持续性动效。
+
+**注意：** `context_node` 必须是在场景树中的节点（用于 `create_tween()`），而 `material` 可以是独立的 ShaderMaterial 实例。这允许对非 Node 的材质资源做属性补间。
+
+**使用场景：** 忍者卡牌稀有度材质（Foil/Holo/Polychrome）的悬停加速和传奇呼吸脉冲均通过这两个 API 实现，无需手写 `create_tween()`。
+
+### 1.6 音效耦合
 
 ```gdscript
 # 在 Tween 播放到 at_elapsed 秒时触发音效
@@ -342,6 +361,20 @@ TweenFX.ninja_pop_trigger(node: Node, duration: float = 0.6) -> Tween
 - auto_kill domain: `"ninja"`（与 scale/position/modulate/rotation 隔离）
 - 配合白闪→金闪+屏幕震动+粒子爆发可获得 Balatro 风完整打击感
 - 通常通过 `GlobalTweens.ninja_trigger(node)` 调用
+
+### 2.9 Shader 参数动效
+
+```gdscript
+TweenFX.tween_shader_param(context_node: Node, material: ShaderMaterial, param_name: String, to_value: Variant, duration: float = 0.15) -> Tween
+TweenFX.shader_pulse(context_node: Node, material: ShaderMaterial, param_name: String, min_val: float, max_val: float, cycle_duration: float = 0.8) -> Tween
+```
+
+- `tween_shader_param`：单次补间。将 `material.shader_parameter/<param_name>` 从当前值补间到 `to_value`。EASE_OUT SINE。auto_kill domain `"shader_param|<name>"`。通过 `context_node` 创建 Tween（必须在场景树中），材质实例参数独立。
+- `shader_pulse`：无限循环脉冲。在 `min_val ↔ max_val` 之间 EASE_IN_OUT SINE 往复，半周期 = `cycle_duration / 2`。auto_kill domain `"shader_pulse|<name>"`。适用于呼吸发光等持续性动效。
+
+**设计理由：** shader_parameter 是 `set_shader_parameter(key, value)` 方法而非属性，但 Godot 4 支持 `shader_parameter/` 前缀的属性语法。这两个函数利用此语法直接对 ShaderMaterial 资源做属性补间，无需手写 `tween_method` + lambda。
+
+**使用场景：** 忍者卡牌稀有度材质（Uncommon 金属箔 / Rare 全息 / Legendary 极光闪粉）的悬停加速和传奇呼吸脉冲。卡牌只存一个 `_flash_mat` 引用，主面和边框共享同一材质实例，一通补间同时影响两层。
 
 ---
 

@@ -15,6 +15,21 @@ const XI_DEFINITIONS: Array[Dictionary] = [
 	{ "name": "三顺清", "x_mult": 3, "chips": 0 },
 	{ "name": "顺清打头", "x_mult": 2, "chips": 0 },
 	{ "name": "全三条", "x_mult": 4, "chips": 0 },
+	# ── 组级基础喜 (2026-06-16) ──
+	{ "name": "豹子", "x_mult": 2, "chips": 0 },
+	# ── Phase E 新喜 (2026-06-16) ──
+	{ "name": "昇龍", "x_mult": 3, "chips": 0 },
+	{ "name": "背水", "x_mult": 4, "chips": 0 },
+	{ "name": "貧打", "x_mult": 4, "chips": 0 },
+	{ "name": "陣眼", "x_mult": 3, "chips": 0 },
+	{ "name": "均爵", "x_mult": 3, "chips": 0 },
+	{ "name": "三等", "x_mult": 5, "chips": 0 },
+	# ── 2026-06-16 追加 ──
+	{ "name": "满堂", "x_mult": 5, "chips": 0 },
+	# ── 合系列 (行列对角匹配, 互斥) ──
+	{ "name": "三合", "x_mult": 6, "chips": 0 },
+	{ "name": "双合", "x_mult": 4, "chips": 0 },
+	{ "name": "一合", "x_mult": 2, "chips": 0 },
 ]
 
 
@@ -83,6 +98,51 @@ static func detect(head_cards: Array, mid_cards: Array, tail_cards: Array,
 	# 9. 全三条 — 9 cards form 3 three-of-a-kinds
 	if _check_all_triples(all_cards):
 		result.add_xi("全三条", 4, 0)
+
+	# 10. 豹子 — any 墩 is three-of-a-kind (组级, per-group ×2)
+	if head_eval.hand_type == CardData.HandType3.THREE_OF_KIND_3 \
+			or mid_eval.hand_type == CardData.HandType3.THREE_OF_KIND_3 \
+			or tail_eval.hand_type == CardData.HandType3.THREE_OF_KIND_3:
+		result.add_xi("豹子", 2, 0)
+
+	# ── Phase E 新喜 (2026-06-16) ──
+
+	# 11. 昇龍 — 影<瞬<滅 牌型严格递增
+	if _check_dragon_rise(head_eval, mid_eval, tail_eval):
+		result.add_xi("昇龍", 3, 0)
+
+	# 12. 背水 — 尾墩散牌 (HIGH_CARD_3)
+	if _check_last_stand(tail_eval):
+		result.add_xi("背水", 4, 0)
+
+	# 13. 貧打 — 某墩精确含 2-3-5
+	if _check_poor_strike(head_cards, mid_cards, tail_cards):
+		result.add_xi("貧打", 4, 0)
+
+	# 14. 陣眼 — 中心牌(9张中间)全局最小或最大(含并列)
+	if _check_center_eye(all_cards, mid_cards):
+		result.add_xi("陣眼", 3, 0)
+
+	# 15. 均爵 — 每墩至少一张 J/Q/K (A不算)
+	if _check_all_face(head_cards, mid_cards, tail_cards):
+		result.add_xi("均爵", 3, 0)
+
+	# 16. 三等 — 三行卡牌chip总和相等(类幻方)
+	if _check_equal_chips(head_cards, mid_cards, tail_cards):
+		result.add_xi("三等", 5, 0)
+
+	# 17. 满堂 — all 3 rows + all 3 columns 均为非散牌
+	if _check_full_house(head_eval, mid_eval, tail_eval, head_cards, mid_cards, tail_cards):
+		result.add_xi("满堂", 5, 0)
+
+	# ── 合系列 (互斥: 只取最高档) ──
+	var diag_matches: int = _count_diag_matches(head_eval, mid_eval, tail_eval, head_cards, mid_cards, tail_cards)
+	if diag_matches == 3:
+		result.add_xi("三合", 6, 0)
+	elif diag_matches == 2:
+		result.add_xi("双合", 4, 0)
+	elif diag_matches >= 1:
+		result.add_xi("一合", 2, 0)
 
 	return result
 
@@ -155,6 +215,119 @@ static func _check_four_of_kind(cards: Array) -> bool:
 		if count >= 4:
 			return true
 	return false
+
+
+# ──────────── Phase E 新喜检测 (2026-06-16) ────────────
+
+## 昇龍: 影<瞬<滅 牌型严格递增 (int 比较 HandType3 枚举值)
+static func _check_dragon_rise(
+		head_eval: HandEvaluator3.EvalResult,
+		mid_eval: HandEvaluator3.EvalResult,
+		tail_eval: HandEvaluator3.EvalResult) -> bool:
+	return (int(head_eval.hand_type) < int(mid_eval.hand_type)
+		and int(mid_eval.hand_type) < int(tail_eval.hand_type))
+
+
+## 背水: 尾墩为散牌 (HIGH_CARD_3)
+static func _check_last_stand(tail_eval: HandEvaluator3.EvalResult) -> bool:
+	return tail_eval.hand_type == CardData.HandType3.HIGH_CARD_3
+
+
+## 貧打: 某墩精确包含 2-3-5 (rank 值, 不计花色)
+static func _check_poor_strike(head_cards: Array, mid_cards: Array, tail_cards: Array) -> bool:
+	var groups: Array[Array] = [head_cards, mid_cards, tail_cards]
+	for group: Array in groups:
+		var ranks: Array[int] = []
+		for c: CardData.PlayingCard in group:
+			ranks.append(c.rank)
+		ranks.sort()
+		if ranks.size() == 3 \
+				and ranks[0] == CardData.Rank.TWO \
+				and ranks[1] == CardData.Rank.THREE \
+				and ranks[2] == CardData.Rank.FIVE:
+			return true
+	return false
+
+
+## 陣眼: 中心牌(瞬墩中间张)为全局最小或最大(含并列)
+static func _check_center_eye(all_cards: Array, mid_cards: Array) -> bool:
+	var center_rank: int = mid_cards[1].rank
+	var min_rank: int = center_rank
+	var max_rank: int = center_rank
+	for c: CardData.PlayingCard in all_cards:
+		if c.rank < min_rank:
+			min_rank = c.rank
+		if c.rank > max_rank:
+			max_rank = c.rank
+	return center_rank == min_rank or center_rank == max_rank
+
+
+## 均爵: 每墩至少一张 J/Q/K (Aces 不算人头牌)
+static func _check_all_face(head_cards: Array, mid_cards: Array, tail_cards: Array) -> bool:
+	var face_ranks: Array[int] = [CardData.Rank.JACK, CardData.Rank.QUEEN, CardData.Rank.KING]
+	for group: Array in [head_cards, mid_cards, tail_cards]:
+		var has_face: bool = false
+		for c: CardData.PlayingCard in group:
+			if c.rank in face_ranks:
+				has_face = true
+				break
+		if not has_face:
+			return false
+	return true
+
+
+## 三等: 三行卡牌 chip 值总和相等 (类幻方/数独)
+static func _check_equal_chips(head_cards: Array, mid_cards: Array, tail_cards: Array) -> bool:
+	var head_sum: int = 0
+	var mid_sum: int = 0
+	var tail_sum: int = 0
+	for c: CardData.PlayingCard in head_cards:
+		head_sum += c.get_chip_value()
+	for c: CardData.PlayingCard in mid_cards:
+		mid_sum += c.get_chip_value()
+	for c: CardData.PlayingCard in tail_cards:
+		tail_sum += c.get_chip_value()
+	return head_sum == mid_sum and mid_sum == tail_sum
+
+
+## 满堂: 3行+3列全部非散牌 (≥ ONE_PAIR_3)
+static func _check_full_house(
+		head_eval: HandEvaluator3.EvalResult,
+		mid_eval: HandEvaluator3.EvalResult,
+		tail_eval: HandEvaluator3.EvalResult,
+		head_cards: Array, mid_cards: Array, tail_cards: Array) -> bool:
+	# Check rows
+	if head_eval.hand_type == CardData.HandType3.HIGH_CARD_3 \
+			or mid_eval.hand_type == CardData.HandType3.HIGH_CARD_3 \
+			or tail_eval.hand_type == CardData.HandType3.HIGH_CARD_3:
+		return false
+	# Check columns
+	for i: int in range(3):
+		var col_cards: Array = [head_cards[i], mid_cards[i], tail_cards[i]]
+		var col_eval = HandEvaluator3.evaluate(col_cards)
+		if col_eval.hand_type == CardData.HandType3.HIGH_CARD_3:
+			return false
+	return true
+
+
+## 合系列: 每行匹配任意列计数 (0-3)
+## 每行只要其牌型出现在任一列中即计 1, 非对角匹配也算
+static func _count_diag_matches(
+		head_eval: HandEvaluator3.EvalResult,
+		mid_eval: HandEvaluator3.EvalResult,
+		tail_eval: HandEvaluator3.EvalResult,
+		head_cards: Array, mid_cards: Array, tail_cards: Array) -> int:
+	var count: int = 0
+	var col_evals: Array = []
+	for i: int in range(3):
+		col_evals.append(HandEvaluator3.evaluate([head_cards[i], mid_cards[i], tail_cards[i]]))
+	var row_types: Array[int] = [int(head_eval.hand_type), int(mid_eval.hand_type), int(tail_eval.hand_type)]
+	for row_type: int in row_types:
+		for ce in col_evals:
+			if row_type == int(ce.hand_type):
+				count += 1
+				break
+	return count
 
 
 static func _check_three_flush(head_eval: HandEvaluator3.EvalResult,

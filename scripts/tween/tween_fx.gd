@@ -643,3 +643,59 @@ static func dissolve_out(
 			node.queue_free()
 	)
 	return tw
+
+
+# ─── Shader 参数动效 ───
+
+## Shader 参数单次补间：将 node.material.shader_parameter/<param_name>
+## 从当前值补间到 to_value。提供 auto_kill, domain "shader_param|<name>"。
+## context_node: 用于 create_tween() 的节点（必须在场景树中）。
+## material: 目标 ShaderMaterial（与 context_node 不同，可以是 Resource）。
+static func tween_shader_param(
+	context_node: Node,
+	material: ShaderMaterial,
+	param_name: String,
+	to_value: Variant,
+	duration: float = 0.15,
+	auto_kill: bool = true
+) -> Tween:
+	if not is_instance_valid(context_node) or not is_instance_valid(material):
+		return null
+	var domain := "shader_param|%s" % param_name
+	if auto_kill:
+		_kill_tracked(context_node, domain)
+	var tw := context_node.create_tween()
+	tw.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SINE)
+	tw.tween_property(material, "shader_parameter/%s" % param_name, to_value, duration)
+	if auto_kill:
+		_track(context_node, tw, domain)
+	return tw
+
+
+## Shader 参数脉冲（无限循环）：material.shader_parameter/<param_name>
+## 在 min_val ↔ max_val 之间循环往复，EASE_IN_OUT_SINE。
+## 适用于呼吸发光等持续性动效。
+## context_node: 用于 create_tween() 的节点（必须在场景树中）。
+## auto_kill domain: "shader_pulse|<name>"
+static func shader_pulse(
+	context_node: Node,
+	material: ShaderMaterial,
+	param_name: String,
+	min_val: float,
+	max_val: float,
+	cycle_duration: float = 0.8,
+	auto_kill: bool = true
+) -> Tween:
+	if not is_instance_valid(context_node) or not is_instance_valid(material):
+		return null
+	var domain := "shader_pulse|%s" % param_name
+	if auto_kill:
+		_kill_tracked(context_node, domain)
+	var tw := context_node.create_tween()
+	tw.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	tw.set_loops()
+	tw.tween_property(material, "shader_parameter/%s" % param_name, max_val, cycle_duration * 0.5)
+	tw.tween_property(material, "shader_parameter/%s" % param_name, min_val, cycle_duration * 0.5)
+	if auto_kill:
+		_track(context_node, tw, domain)
+	return tw

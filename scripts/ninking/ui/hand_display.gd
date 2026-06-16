@@ -54,8 +54,7 @@ func _clear_all() -> void:
 
 func _add_card(card_data: CardData.PlayingCard, idx: int,
 		swap_idx: int,
-		on_card_clicked: Callable = Callable(),
-		on_card_dragged: Callable = Callable()) -> void:
+		on_card_clicked: Callable = Callable()) -> void:
 	var pc: NinKingCard = NinKingCard.new()
 	pc.card_size = Vector2(125, 175)
 	pc.name = "CardBtn_%d" % idx
@@ -63,8 +62,6 @@ func _add_card(card_data: CardData.PlayingCard, idx: int,
 	pc.card_index = idx
 	if on_card_clicked.is_valid() and not pc.ninking_card_clicked.is_connected(on_card_clicked):
 		pc.ninking_card_clicked.connect(on_card_clicked)
-	if on_card_dragged.is_valid() and not pc.ninking_card_dragged.is_connected(on_card_dragged):
-		pc.ninking_card_dragged.connect(on_card_dragged)
 	if idx == swap_idx:
 		pc.set_visual_state(NinKingCard.VisualState.SWAP_SOURCE)
 	_card_grid.add_card(pc)
@@ -72,26 +69,17 @@ func _add_card(card_data: CardData.PlayingCard, idx: int,
 	GlobalTweens.pop_in(pc, 0.25)
 
 
-func refresh(hand: Array[CardData.PlayingCard], swap_idx: int, on_card_clicked: Callable = Callable(), on_card_dragged: Callable = Callable()) -> void:
+func refresh(hand: Array[CardData.PlayingCard], swap_idx: int, on_card_clicked: Callable = Callable()) -> void:
 	_current_hand = hand
 	_clear_all()
 	if hand.size() < 9:
 		_labeler.reset_labels()
 		return
 	for i: int in range(9):
-		_add_card(hand[i], i, swap_idx, on_card_clicked, on_card_dragged)
+		_add_card(hand[i], i, swap_idx, on_card_clicked)
 	if _card_grid and _card_grid.is_inside_tree():
 		var timer := _card_grid.get_tree().create_timer(0.3)
 		timer.timeout.connect(_fixup_layout, CONNECT_ONE_SHOT)
-
-
-## Find target card index from a global drop position.
-## Returns { "target_idx": int } or empty dict if outside grid.
-func find_drop_target(global_pos: Vector2) -> Dictionary:
-	var idx := _card_grid.grid_index_at(global_pos)
-	if idx < 0 or idx >= _current_hand.size():
-		return {}
-	return {"target_idx": idx}
 
 
 func update_labels(hand: Array[CardData.PlayingCard]) -> void:

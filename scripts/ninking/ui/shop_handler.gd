@@ -10,7 +10,8 @@ const SB = preload("res://scripts/config/sound_bank.gd")
 var _ui  # duck-typed — accepts UIManager or DebugUiProxy
 var _transition_guard: bool = false
 var _shop_cache: Dictionary = {}
-var _reroll_count: int = 0  # B4: 本趟商店已刷新次数，每次打开新商店时重置
+var _reroll_count: int = 0
+var _replace_guard: bool = false  # B14: 替换弹窗打开期间锁定其他操作
 
 
 func setup(ui) -> void:  # ui: duck-typed (UIManager | DebugUiProxy)
@@ -26,6 +27,8 @@ func go_shop_pressed() -> void:
 	## Phase C: In-scene shop overlay entry (no scene switch).
 	## Phase E: No full game_layout fade — LeftPanel + NinjaBar stay visible.
 	if _transition_guard:
+		return
+	if _replace_guard:
 		return
 	_transition_guard = true
 	GlobalTweens.play_sfx(SB.SHOP_EXIT)
@@ -58,12 +61,12 @@ func on_enter_shop() -> void:
 
 
 func on_purchase_requested(ability: Dictionary) -> void:
+	# B14: Guard — block during replace
+	if _replace_guard:
+		return
+	# B14: Full slots → start replace flow instead of rejecting
 	if NinKingGameState.owned_ninjas.size() >= NinKingGameState.max_ninja_slots:
-		GlobalTweens.play_sfx(SB.UI_ERROR)
-		ToastManager.show(
-			"忍者牌槽位已满 (%d/%d)!" % [NinKingGameState.max_ninja_slots, NinKingGameState.max_ninja_slots],
-			2.0
-		)
+		_start_replace_flow(ability)
 		return
 	if ShopManager.buy_ninja(NinKingGameState, ability):
 		GlobalTweens.play_sfx(SB.ITEM_PURCHASE)
@@ -76,7 +79,91 @@ func on_purchase_requested(ability: Dictionary) -> void:
 		ToastManager.show("金币不足!", 1.5)
 
 
+
+# ═══ B14: 替换购买 — 先买后换 ═══
+
+func _start_replace_flow(new_ninja: Dictionary) -> void:
+	## Balatro-style replace: deduct gold first → show overlay → confirm/cancel.
+	if _replace_guard:
+		return
+	var gs = NinKingGameState
+
+	# 1. Check gold
+	if gs.gold < new_ninja["cost"]:
+		GlobalTweens.play_sfx(SB.UI_ERROR)
+		ToastManager.show("金币不足!", 1.5)
+		return
+
+	_replace_guard = true
+
+	# 2. Deduct gold first (buy before replace)
+	gs.gold -= new_ninja["cost"]
+	gs.gold_changed.emit(gs.gold)
+	_ui.shop_panel_update_gold(gs.gold)
+
+	# 3. Show replace overlay and wait for result
+	var overlay: NinjaReplaceOverlay = _ui.show_replace_overlay(new_ninja, gs.owned_ninjas)
+	var result: Dictionary = await overlay.replacement_chosen
+
+	# Guard: overlay was freed during await (edge case) → refund
+	if result == null:
+		gs.gold += new_ninja["cost"]
+		gs.gold_changed.emit(gs.gold)
+		_replace_guard = false
+		return
+
+	# 4. Re-check validity (shop may have changed while awaiting)
+	if not is_instance_valid(_ui) or not _ui.is_shop_open():
+		gs.gold += new_ninja["cost"]
+		gs.gold_changed.emit(gs.gold)
+		if is_instance_valid(_ui):
+			_ui.hide_replace_overlay()
+		_replace_guard = false
+		return
+
+	_ui.hide_replace_overlay()
+
+	match result.get("action", ""):
+		"CANCEL":
+			gs.gold += new_ninja["cost"]
+			gs.gold_changed.emit(gs.gold)
+			_ui.shop_panel_update_gold(gs.gold)
+			GlobalTweens.play_sfx(SB.UI_ERROR)
+			ToastManager.show("已取消", 1.0)
+
+		"CONFIRM":
+			var idx: int = result.get("index", -1)
+			if idx < 0 or idx >= gs.owned_ninjas.size():
+				gs.gold += new_ninja["cost"]
+				gs.gold_changed.emit(gs.gold)
+				_ui.shop_panel_update_gold(gs.gold)
+				_ui.hide_replace_overlay()
+				_replace_guard = false
+				return
+
+			var old_ninja: Dictionary = gs.owned_ninjas[idx]
+			var refund: int = max(1, ceili(old_ninja.get("cost", 0) * 0.5))
+
+			ShopManager.replace_ninja(gs, idx, new_ninja)
+
+			gs.gold += refund
+			gs.gold_changed.emit(gs.gold)
+			_ui.shop_panel_update_gold(gs.gold)
+			_ui.refresh_ninjas(gs.owned_ninjas, gs.max_ninja_slots)
+
+			GlobalTweens.play_sfx(SB.SWAP)
+			GlobalTweens.play_sfx(SB.UI_COIN)
+			ToastManager.show(
+				"%s → %s (退還 $%d)" % [old_ninja.get("name", "???"), new_ninja.get("name", "???"), refund],
+				2.5
+			)
+
+	_replace_guard = false
+
 func on_item_purchase_requested(item: Dictionary) -> void:
+	# B14: Guard — block during replace
+	if _replace_guard:
+		return
 	# B6: Star charts — buy and auto-apply (consumed on purchase, not stored)
 	if item.has("hand_type"):
 		_purchase_star_chart(item)
@@ -129,6 +216,10 @@ func _purchase_star_chart(item: Dictionary) -> void:
 
 
 func on_reroll_requested() -> void:
+	# B14: Guard — block during replace
+	if _replace_guard:
+		ToastManager.show("替换中，请先完成", 1.5)
+		return
 	## B4: 递进式费用 $3 + _reroll_count。不够钱时给 Toast 提示。
 	var cost: int = _get_reroll_cost()
 	if NinKingGameState.gold < cost:
@@ -159,6 +250,10 @@ func on_reroll_requested() -> void:
 
 
 func on_sell_requested(index: int) -> void:
+	# B14: Guard — block during replace
+	if _replace_guard:
+		ToastManager.show("替换中，请先完成", 1.5)
+		return
 	## Sell a ninja at the given index with dissolve exit effect.
 	if index < 0 or index >= NinKingGameState.owned_ninjas.size():
 		GlobalTweens.play_sfx(SB.UI_ERROR)
@@ -172,6 +267,10 @@ func on_sell_requested(index: int) -> void:
 
 
 func on_continue_requested() -> void:
+	# B14: Guard — block during replace
+	if _replace_guard:
+		ToastManager.show("替换中，请先完成", 1.5)
+		return
 	## Phase C: Exit shop overlay -> advance to next seal (no scene switch).
 	if _transition_guard:
 		return

@@ -4,7 +4,7 @@
 > 引擎：Godot 4.6.2 / 纯 2D
 > 设计日期：2026-06-06
 > 实现日期：2026-06-06
-> 最后更新：2026-06-15 (Fake3D VFX Phase 1-4 完成)
+> 最后更新：2026-06-16 (稀有度材质 Foil/Holo/Polychrome 接入)
 > 状态：✅ 框架已实现 + 上层对接完成
 
 ---
@@ -25,8 +25,8 @@
 
 ```
 scripts/tween/                            # 动效子系统（全部 class_name，可移植）
-├── global_tweens.gd     (172 行) ❌ 不可移植：本项目 Autoload 胶水层
-├── tween_fx.gd          (577 行) ✅ 纯静态 Tween 动效工具 (Autoload: TweenFX) — 含 move_arc / dissolve_out
+├── global_tweens.gd     (~189 行) ❌ 不可移植：本项目 Autoload 胶水层
+├── tween_fx.gd          (~700 行) ✅ 纯静态 Tween 动效工具 (Autoload: TweenFX) — 含 move_arc / dissolve_out / shader_pulse / tween_shader_param
 ├── screen_shake.gd      ( 78 行) ✅ 屏幕震动系统 (class_name: ScreenShake)
 ├── hit_stop.gd          ( 57 行) ✅ 顿帧/冻结帧 (class_name: HitStop)
 ├── card_tilt.gd         ( 83 行) ✅ 卡牌倾斜/物理摊开感 (class_name: CardTilt)
@@ -44,7 +44,10 @@ resources/shaders/
 
 resources/materials/
 ├── fake3d.tres               ✅ 默认透视材质
-├── fake3d_flash.tres         ✅ 辉光材质
+├── fake3d_flash.tres         ✅ 辉光材质 (基类, 不直接使用)
+├── fake3d_uncommon.tres      ✅ 金属箔材质 (Foil, Uncommon)
+├── fake3d_rare.tres          ✅ 全息彩虹材质 (Holo, Rare)
+├── fake3d_legendary.tres     ✅ 极光闪粉材质 (Polychrome, Legendary)
 ├── fake3d_shadow.tres        ✅ 阴影材质 (未接入)
 ├── dissolve2d.tres           ✅ 溶解材质
 └── dissolve_noise.tres       ✅ 噪声纹理 (FastNoiseLite)
@@ -345,6 +348,10 @@ GlobalTweens ──┬── TweenFX         (Autoload, 纯静态) — 含 move_
 | 测试场景 | ✅ | `e6d1c3c` |
 | scoring_animation 对接 | ✅ | `1565625` |
 | tscn 格式修复 | ✅ | `1cb3c8e` |
+| Fake3D 稀有度材质 (Foil/Holo/Polychrome) | ✅ | 2026-06-16 | 3 x .tres + TweenFX shader_pulse/tween_shader_param + card 集成 |
+| GlobalTweens shader_pulse / tween_shader_param | ✅ | 2026-06-16 | 委托至 TweenFX, 含 auto_kill domain 追踪 |
+| 边框纹理 resize 修复 | ✅ | 2026-06-16 | `_resize_to_card()` 将 500x700 框素材 resize 到 125x175 匹配 card_size |
+| 稀有度闪光参数迭代调优 | ✅ | 2026-06-16 | Uncommon: speed=0.5/move=0.2/int=0.35 缓慢银光; Rare: speed=1.0/move=0.6/int=0.3 柔和彩虹; Legendary: speed=1.5/move=0.8/int=0.45 彩虹+呼吸 |
 
 ---
 
@@ -368,6 +375,7 @@ GlobalTweens ──┬── TweenFX         (Autoload, 纯静态) — 含 move_
 | ✅ 弧线补间 move_arc | `tween_fx.gd` | 贝塞尔弧线+弹性归位 |
 | ✅ 溶解消散 dissolve_out | `tween_fx.gd` | 噪声溶解+燃烧边缘 |
 | ✅ CRT 移除 (V24) | 全项目 | 扫描线/色差/暗角已删除 |
+| ✅ 稀有度材质 Foil/Holo/Polychrome | `ninja_inventory_card.gd` + `.tres` ×3 | 3 档 flash 材质 + 传奇呼吸脉冲 + 悬停加速，全走 GlobalTweens API |
 
 ### 🔲 低优先级
 

@@ -449,9 +449,17 @@ func _update_score_display(
 		%Col2Label.text = CardData.get_hand_type3_name(col_evals[2].hand_type)
 
 	if xi_result and xi_result.has_any():
-		_col_xi_label.text = "[%s]" % ", ".join(xi_result.triggered)
+		var xi_parts: Array[String] = []
+		for xi_name: String in xi_result.triggered:
+			var x_val: int = 1
+			for defn: Dictionary in XiDetector.XI_DEFINITIONS:
+				if defn["name"] == xi_name:
+					x_val = defn["x_mult"]
+					break
+			xi_parts.append("%s×%d" % [xi_name, x_val])
+		_col_xi_label.text = "喜: " + "  ".join(xi_parts)
 	else:
-		_col_xi_label.text = ""
+		_col_xi_label.text = "喜: -"
 
 
 func _update_hand_type_labels(
@@ -491,7 +499,7 @@ func _update_hand_type_labels(
 
 
 func _preview_dun_labels() -> void:
-	## 发牌后即时评估行/列牌型，更新 DunArea 标签（不触发完整计分）。
+	## 发牌后即时评估行/列牌型，更新 DunArea 标签 + 左边栏牌型（不触发完整计分）。
 	if _cards_on_table() != 9:
 		return
 
@@ -503,9 +511,23 @@ func _preview_dun_labels() -> void:
 	var mid_eval := HandEvaluator3.evaluate(mid_cards)
 	var tail_eval := HandEvaluator3.evaluate(tail_cards)
 
+	# ── 中间 DunArea 标签 ──
 	%HeadTypeLabel.text = CardData.get_hand_type3_name(head_eval.hand_type)
 	%MiddleTypeLabel.text = CardData.get_hand_type3_name(mid_eval.hand_type)
 	%TailTypeLabel.text = CardData.get_hand_type3_name(tail_eval.hand_type)
+
+	# ── 左边栏 HandTypeVBox 牌型 ──
+	%ShadowType.text = CardData.get_hand_type3_name(head_eval.hand_type)
+	%FlashType.text = CardData.get_hand_type3_name(mid_eval.hand_type)
+	%DestroyType.text = CardData.get_hand_type3_name(tail_eval.hand_type)
+
+	# Level & 公式（根据 _star_chart_levels）
+	%ShadowLv.text = "Lv.%d" % _star_chart_levels.get(head_eval.hand_type, 0)
+	%FlashLv.text = "Lv.%d" % _star_chart_levels.get(mid_eval.hand_type, 0)
+	%DestroyLv.text = "Lv.%d" % _star_chart_levels.get(tail_eval.hand_type, 0)
+	%ShadowScore.text = _fmt_chips_x_mult_preview(head_eval.hand_type)
+	%FlashScore.text = _fmt_chips_x_mult_preview(mid_eval.hand_type)
+	%DestroyScore.text = _fmt_chips_x_mult_preview(tail_eval.hand_type)
 
 	var col_evals: Array[HandEvaluator3.EvalResult] = [
 		_eval_column(0, head_cards, mid_cards, tail_cards),
@@ -515,6 +537,14 @@ func _preview_dun_labels() -> void:
 	%Col0Label.text = CardData.get_hand_type3_name(col_evals[0].hand_type)
 	%Col1Label.text = CardData.get_hand_type3_name(col_evals[1].hand_type)
 	%Col2Label.text = CardData.get_hand_type3_name(col_evals[2].hand_type)
+
+	# ── 左边栏 ColumnBar 类型（如果场景有这些节点） ──
+	if has_node("%LeftColType"):
+		%LeftColType.text = CardData.get_hand_type3_name(col_evals[0].hand_type) if col_evals[0].hand_type != CardData.HandType3.HIGH_CARD_3 else ""
+	if has_node("%MidColType"):
+		%MidColType.text = CardData.get_hand_type3_name(col_evals[1].hand_type) if col_evals[1].hand_type != CardData.HandType3.HIGH_CARD_3 else ""
+	if has_node("%RightColType"):
+		%RightColType.text = CardData.get_hand_type3_name(col_evals[2].hand_type) if col_evals[2].hand_type != CardData.HandType3.HIGH_CARD_3 else ""
 
 
 func _clear_all_type_labels() -> void:
@@ -538,6 +568,19 @@ func _clear_all_type_labels() -> void:
 
 func _fmt_chips_x_mult(chips: int, mult: int, score: int) -> String:
 	return "%d ×%d = %d" % [chips, max(mult, 1), score]
+
+
+## Preview formula using base chips/mult × star chart level.
+func _fmt_chips_x_mult_preview(hand_type: CardData.HandType3) -> String:
+	var lvl: int = _star_chart_levels.get(hand_type, 0)
+	if lvl <= 0:
+		return ""
+	var base: Dictionary = CardData.get_hand_type3_base(hand_type)
+	var upgrade: Dictionary = CardData.get_star_chart_upgrade(hand_type)
+	var total_chips: int = base["chips"] + upgrade["chips"] * lvl
+	var total_mult: int = base["mult"] + upgrade["mult"] * lvl
+	var score: int = total_chips * max(total_mult, 1)
+	return "%d ×%d = %d" % [total_chips, total_mult, score]
 
 
 # ══════════════════════════════════════════

@@ -109,7 +109,7 @@ func _build(config: Dictionary) -> void:
 		var row_y: float = after_effect_y
 		for row: Dictionary in effect_rows:
 			_build_effect_row(row, viewport_size.x, row_y)
-			row_y += 28
+			row_y += 36  # 32px row height + 4px gap
 		after_effect_y = row_y + 4
 
 	# ── Description (only show if: no effect rows, OR effect has condition text) ──
@@ -194,7 +194,8 @@ func _build_effect_row(row: Dictionary, screen_w: float, y: float) -> void:
 	var rtl: RichTextLabel = RichTextLabel.new()
 	rtl.bbcode_enabled = true
 	rtl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	rtl.size = Vector2(300, 26)
+	rtl.scroll_active = false
+	rtl.size = Vector2(300, 32)
 	rtl.position = Vector2(screen_w / 2 - 150, y)
 	rtl.add_theme_font_size_override("normal_font_size", 24)
 	rtl.autowrap_mode = TextServer.AUTOWRAP_OFF

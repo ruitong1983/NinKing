@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://b2wvq6lf4g547"]
 
-[ext_resource type="Script" uid="uid://bwwxmvfujxpqu" path="res://scripts/ninking/ui/card_preview.gd" id="1_ewmad"]
+[ext_resource type="Script" path="res://scripts/ninking/ui/card_preview.gd" id="1_ewmad"]
 
 [node name="CardPreview" type="Control" unique_id=202275891]
 layout_mode = 3

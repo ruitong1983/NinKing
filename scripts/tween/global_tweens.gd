@@ -176,3 +176,13 @@ func play_sfx(stream: AudioStream, volume_db: float = 0.0, pitch_scale: float = 
 		player.play()
 	else:
 		player.queue_free()
+
+
+
+# ── Shader 参数动效 ──
+
+func tween_shader_param(context_node: Node, material: ShaderMaterial, param_name: String, to_value: Variant, duration: float = 0.15, auto_kill: bool = true) -> Tween:
+	return FX.tween_shader_param(context_node, material, param_name, to_value, duration, auto_kill)
+
+func shader_pulse(context_node: Node, material: ShaderMaterial, param_name: String, min_val: float, max_val: float, cycle_duration: float = 0.8, auto_kill: bool = true) -> Tween:
+	return FX.shader_pulse(context_node, material, param_name, min_val, max_val, cycle_duration, auto_kill)

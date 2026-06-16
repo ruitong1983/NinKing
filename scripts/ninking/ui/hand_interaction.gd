@@ -4,6 +4,8 @@ extends RefCounted
 ## Swap interaction state machine for the 9-card hand.
 ## Pure logic — no rendering. Calls HandDisplay.refresh() when visual state changes.
 ## v2: Single HandCardContainer, no more per-Hand iteration.
+## v3: Drag-drop handled by Card Framework drop processing + HandCardContainer.move_cards() override.
+##     HandInteraction only handles click-based swaps.
 
 const SB = preload("res://scripts/config/sound_bank.gd")
 
@@ -11,15 +13,13 @@ var _display: RefCounted  # HandDisplay
 var _current_hand: Array[CardData.PlayingCard] = []
 
 var _on_card_clicked: Callable
-var _on_card_dragged: Callable
 
 var swap_source_idx: int = -1
 
 
-func setup(display: RefCounted, on_card_clicked: Callable = Callable(), on_card_dragged: Callable = Callable()) -> void:
+func setup(display: RefCounted, on_card_clicked: Callable = Callable()) -> void:
 	_display = display
 	_on_card_clicked = on_card_clicked
-	_on_card_dragged = on_card_dragged
 
 
 ## Main entry point — route a card click to swap logic.
@@ -34,7 +34,7 @@ func set_hand(hand: Array[CardData.PlayingCard]) -> void:
 
 func _refresh_display() -> void:
 	if _display:
-		_display.refresh(_current_hand, swap_source_idx, _on_card_clicked, _on_card_dragged)
+		_display.refresh(_current_hand, swap_source_idx, _on_card_clicked)
 
 
 # ══════════════════════════════════════════
@@ -60,26 +60,6 @@ func _handle_swap(idx: int) -> void:
 		GlobalTweens.play_sfx(SB.SWAP)
 		_current_hand = NinKingGameState.hand
 		# hand_swapped signal triggers refresh via game_manager
-
-
-# ══════════════════════════════════════════
-# Drag-drop swap (cross-group)
-# ══════════════════════════════════════════
-
-## Handle a drag-drop from one card to another position.
-## Called by UIManager when NinKingCard emits ninking_card_dragged.
-func handle_card_dragged(src_idx: int, drop_position: Vector2) -> void:
-	var target: Dictionary = _display.find_drop_target(drop_position)
-	if target.is_empty():
-		return
-	var tgt_idx: int = target["target_idx"]
-	if tgt_idx < 0 or tgt_idx >= _current_hand.size() or tgt_idx == src_idx:
-		return
-	swap_source_idx = -1
-	SealController.swap_cards(NinKingGameState, src_idx, tgt_idx)
-	GlobalTweens.play_sfx(SB.SWAP)
-	_current_hand = NinKingGameState.hand
-	# hand_swapped signal triggers refresh via game_manager
 
 
 func set_cards_interactable(card_grid: HandCardContainer, interactable: bool) -> void:

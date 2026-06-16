@@ -17,6 +17,15 @@ const ROW_0_Y_MIN: float = 34.0  # minimum top offset for row 0
 
 
 func _card_can_be_added(_cards: Array) -> bool:
+	# If all cards are already in this container (same-container reorder),
+	# skip the capacity check — the card count won't change.
+	var all_contained: bool = true
+	for c in _cards:
+		if not _held_cards.has(c):
+			all_contained = false
+			break
+	if all_contained:
+		return true
 	return _held_cards.size() + _cards.size() <= ROWS * COLS
 
 
@@ -32,7 +41,7 @@ func _update_target_positions() -> void:
 	var container_w: float = size.x
 	var container_h: float = size.y
 
-	# Horizontal — even distribution (same as before)
+	# Horizontal — even distribution
 	var h_excess: float = maxf(container_w - COLS * CARD_W, 0.0)
 	var h_margin: float = h_excess / float(COLS + 1)
 	var spacing: float = CARD_W + h_margin
@@ -115,6 +124,24 @@ func get_partition_index() -> int:
 	if col < 0 or row < 0:
 		return -1
 	return row * COLS + clampi(col, 0, COLS - 1)
+
+
+## Override: intercept same-container single-card drops to perform a swap
+## + sync game state via SealController.swap_cards().
+func move_cards(cards: Array, index: int = -1, with_history: bool = true) -> bool:
+	if cards.size() == 1 and _held_cards.has(cards[0]) and index >= 0:
+		var src_idx: int = _held_cards.find(cards[0])
+		index = clampi(index, 0, _held_cards.size() - 1)
+		if src_idx == index:
+			return true  # Same slot — no-op
+		SealController.swap_cards(NinKingGameState, src_idx, index)
+		# If not in PLAYING state (e.g. debug menu), swap_cards won't
+		# emit hand_swapped → swap_two_cards won't fire via signal.
+		# Call it directly to ensure visual swap.
+		if NinKingGameState.current_state != NinKingGameState.State.PLAYING:
+			swap_two_cards(src_idx, index)
+		return true
+	return super.move_cards(cards, index, with_history)
 
 
 func get_target_pose_for(card: Card) -> Dictionary:
