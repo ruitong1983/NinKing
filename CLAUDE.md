@@ -81,6 +81,14 @@ API 速查 → `docs/tween-library-reference.md`。
 
 **设计文档索引 → `docs/ninking/README.md`**
 
+## 场景树 HTML 可视化同步
+
+> **`.tscn` 变更时 → 同步更新 `docs/ninking/scene-tree-visualizer.html`。**
+>
+> 方法与步骤 → `docs/ninking/scene-tree-visualizer-methodology.md`
+>
+> 维护规则 → `.claude/skills/update-docs/SKILL.md` §「场景树文档同步（铁律）」
+
 ## 忍者牌 HTML 可视化同步
 
 > **`ninja_data.gd` 变更时 → 同步更新 `docs/ninking/ninja_card_viewer.html`。**

@@ -1,0 +1,244 @@
+{
+  "main": {
+    "type": "Control",
+    "name": "NinKingMain",
+    "script": "game_manager.gd",
+    "children": [
+      {
+        "type": "TextureRect",
+        "name": "GameBg",
+        "unique": true
+      },
+      {
+        "type": "Control",
+        "name": "UIManager",
+        "unique": true,
+        "script": "ui_manager.gd"
+      }
+    ],
+    "note": "1920¡Á1080 [game_manager.gd]"
+  },
+  "launcher": {
+    "type": "Control",
+    "name": "Launcher",
+    "script": "main_menu.gd",
+    "children": [
+      {
+        "type": "Button",
+        "name": "StartBtn",
+        "unique": true
+      },
+      {
+        "type": "Button",
+        "name": "DebugBtn",
+        "unique": true
+      },
+      {
+        "type": "Button",
+        "name": "SettingsBtn",
+        "unique": true
+      },
+      {
+        "type": "TextureRect",
+        "name": "LaunchBg"
+      },
+      {
+        "type": "Button",
+        "name": "ContinueBtn",
+        "unique": true
+      },
+      {
+        "type": "Button",
+        "name": "QuitBtn",
+        "unique": true
+      }
+    ],
+    "note": "1920¡Á1080 [main_menu.gd]"
+  },
+  "shop": {
+    "type": "Control",
+    "name": "ShopPanel",
+    "script": "shop_ui.gd",
+    "children": [
+      {
+        "type": "ColorRect",
+        "name": "BottomBar",
+        "unique": true
+      },
+      {
+        "type": "GridContainer",
+        "name": "ItemColumn",
+        "unique": true
+      },
+      {
+        "type": "Button",
+        "name": "RerollBtn",
+        "unique": true
+      },
+      {
+        "type": "ColorRect",
+        "name": "TitleBar",
+        "unique": true
+      },
+      {
+        "type": "Label",
+        "name": "GoldLabel",
+        "unique": true
+      },
+      {
+        "type": "Label",
+        "name": "ShopSubtitle",
+        "unique": true
+      },
+      {
+        "type": "GridContainer",
+        "name": "AbilityGrid",
+        "unique": true
+      },
+      {
+        "type": "Button",
+        "name": "ContinueBtn",
+        "unique": true
+      },
+      {
+        "type": "ColorRect",
+        "name": "Separator",
+        "unique": true
+      },
+      {
+        "type": "ColorRect",
+        "name": "StageBg"
+      }
+    ],
+    "note": "800¡Á716 [shop_ui.gd]"
+  },
+  "ninja": {
+    "type": "Control",
+    "name": "NinjaCard",
+    "script": "ninja_inventory_card.gd",
+    "children": [
+      {
+        "type": "Control",
+        "name": "FrontFace"
+      },
+      {
+        "type": "Control",
+        "name": "BackFace"
+      },
+      {
+        "type": "TextureRect",
+        "name": "FrameOverlay"
+      },
+      {
+        "type": "Label",
+        "name": "NameLabel"
+      }
+    ],
+    "note": "125¡Á175 [ninja_inventory_card.gd]"
+  },
+  "debug": {
+    "type": "Control",
+    "name": "NinKingDebug",
+    "script": "debug_controller.gd",
+    "children": [
+      {
+        "type": "Control",
+        "name": "DebugPanel",
+        "script": "debug_panel.gd"
+      },
+      {
+        "type": "Label",
+        "name": "StatusLabel",
+        "unique": true
+      },
+      {
+        "type": "TextureRect",
+        "name": "GameBg"
+      },
+      {
+        "type": "VBoxContainer",
+        "name": "MainVBox"
+      },
+      {
+        "type": "Button",
+        "name": "DeckBtn",
+        "unique": true
+      },
+      {
+        "type": "Control",
+        "name": "NinjaSelector",
+        "unique": true,
+        "script": "debug_ninja_selector.gd"
+      }
+    ],
+    "note": "1920¡Á1080 [debug_controller.gd]"
+  },
+  "card": {
+    "type": "Control",
+    "name": "NinKingCard",
+    "script": "ninking_card.gd",
+    "children": [
+      {
+        "type": "Control",
+        "name": "FrontFace"
+      },
+      {
+        "type": "Control",
+        "name": "BackFace"
+      }
+    ],
+    "note": "card_size=125¡Á175 [ninking_card.gd]"
+  },
+  "popup": {
+    "type": "Control",
+    "name": "CardDetailPopup",
+    "script": "card_detail_popup.gd",
+    "children": [
+      {
+        "type": "ColorRect",
+        "name": "DetailOverlay",
+        "unique": true
+      },
+      {
+        "type": "Label",
+        "name": "NameLabel",
+        "unique": true
+      },
+      {
+        "type": "Control",
+        "name": "EffectContainer",
+        "unique": true
+      },
+      {
+        "type": "Label",
+        "name": "DescLabel",
+        "unique": true
+      }
+    ],
+    "note": "È«ÆÁ¸²¸Ç [card_detail_popup.gd]"
+  },
+  "deck": {
+    "type": "Control",
+    "name": "DeckSelectPanel",
+    "script": "deck_select_panel.gd",
+    "children": [
+      {
+        "type": "PanelContainer",
+        "name": "PanelBg"
+      }
+    ],
+    "note": "È«ÆÁ, visible=false [deck_select_panel.gd]"
+  },
+  "continue": {
+    "type": "Control",
+    "name": "ContinuePanel",
+    "script": "continue_panel.gd",
+    "children": [
+      {
+        "type": "PanelContainer",
+        "name": "ContinuePanelBg"
+      }
+    ],
+    "note": "1920¡Á1080, visible=false [continue_panel.gd]"
+  }
+}

@@ -86,6 +86,14 @@
 | [`references/balatro-joker-design.md`](references/balatro-joker-design.md) | Balatro 小丑牌设计参考 |
 | [`references/ninking-balatro-gap-analysis.md`](references/ninking-balatro-gap-analysis.md) | NinKing vs Balatro 差距分析 |
 
+## 🛠️ 工具与可视化
+
+| 文件 | 内容 |
+|------|------|
+| [`scene-tree-visualizer.html`](scene-tree-visualizer.html) | **场景树可视化 HTML：** 项目全部 .tscn 节点树浏览（双击打开） |
+| [`scene-tree-visualizer-methodology.md`](scene-tree-visualizer-methodology.md) | **场景树 HTML 生成/维护方法：** tscn 解析规则、数据格式、更新流程 |
+| [`ninja_card_viewer.html`](ninja_card_viewer.html) | **忍者牌数据可视化 HTML：** 双击浏览忍者可选项 |
+
 ## 测试数据 (testing/)
 
 | 内容 | 说明 |
