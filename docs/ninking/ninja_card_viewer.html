@@ -45,6 +45,48 @@ h1 small { font-size: 14px; color: var(--text-muted); font-weight: 400; }
 .subtitle { font-size: 13px; color: var(--text-muted); }
 .subtitle span { color: var(--text); }
 
+/* ─── Recent Updates ─── */
+.recent-updates {
+  margin-bottom: 18px;
+  padding: 12px 16px;
+  background: var(--bg-control);
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.recent-updates h3 {
+  font-size: 14px;
+  color: var(--gold);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.recent-updates h3 small {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+.recent-updates ul { list-style: none; padding: 0; }
+.recent-updates li {
+  padding: 2px 0;
+  color: var(--text-muted);
+}
+.recent-updates li .date { color: var(--text-dim); font-size: 11px; margin-right: 6px; }
+.recent-updates li .tag {
+  display: inline-block;
+  font-size: 10px;
+  padding: 0 6px;
+  border-radius: 3px;
+  margin-right: 6px;
+  font-weight: 500;
+}
+.tag-ninja { background: #4fc3f722; color: #4fc3f7; }
+.tag-xi { background: #c4a84322; color: #c4a843; }
+.tag-scene { background: #66bb6a22; color: #66bb6a; }
+.tag-docs { background: #ab47bc22; color: #ab47bc; }
+.tag-fix { background: #ef535022; color: #ef5350; }
+.recent-updates .empty { color: var(--text-dim); font-style: italic; font-size: 12px; }
+
 /* ─── Controls ─── */
 .controls { margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; }
 .filter-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
@@ -416,6 +458,25 @@ footer a:hover { color: var(--gold); }
   <h1>🏯 NinKing 参考手册 <small id="card-count"></small></h1>
   <p class="subtitle">基于 <span id="data-date">2026-06-16</span> · 忍者牌 / 喜系统 / 场景树 · 点击卡牌查看详情 · ESC 清空搜索</p>
 </header>
+
+<!-- ═══ Recent Updates (auto-injected by tools/inject_recent_updates.py) ═══ -->
+<div id="recent-updates" class="recent-updates">
+  <h3>📋 最近更新</h3>
+  <!-- RECENT_UPDATES_PLACEHOLDER -->
+<ul>
+  <li><span class="date">2026-06-16</span><span class="tag tag-ninja">ninja</span><span class="tag tag-scene">scene</span>feat: 场景树合入忍者牌HTML，三选项卡切换</li>
+  <li><span class="date">2026-06-16</span><span class="tag tag-docs">docs</span><span class="tag tag-ninja">ninja</span><span class="tag tag-xi">xi</span>feat: 喜系统加入忍者牌HTML + 文档同步</li>
+  <li><span class="date">2026-06-16</span><span class="tag tag-ninja">ninja</span>ci: GitHub Actions 自动提取部署忍者牌图鉴</li>
+  <li><span class="date">2026-06-16</span><span class="tag tag-docs">docs</span><span class="tag tag-scene">scene</span>docs: 场景树HTML方法论文档 + 全局引用</li>
+  <li><span class="date">2026-06-16</span><span class="tag tag-docs">docs</span><span class="tag tag-scene">scene</span>docs: 场景覆盖补齐 + 废弃文件删除</li>
+  <li><span class="date">2026-06-16</span><span class="tag tag-docs">docs</span><span class="tag tag-fix">fix</span><span class="tag tag-scene">scene</span>docs: HTML 场景树补齐 launcher/shop/debug 真实节点结构</li>
+  <li><span class="date">2026-06-16</span><span class="tag tag-fix">fix</span>fix: manual Array[Dictionary] conversion — Godot 4 运行时无法 as 转换</li>
+  <li><span class="date">2026-06-16</span><span class="tag tag-fix">fix</span><span class="tag tag-scene">scene</span>fix: HTML 场景树可视化补全 launcher/shop/debug 三个场景卡片</li>
+  <li><span class="date">2026-06-16</span><span class="tag tag-docs">docs</span><span class="tag tag-scene">scene</span>docs: 场景树文档对齐实际tscn + HTML可视化 + 旧场景清理</li>
+  <li><span class="date">2026-06-16</span><span class="tag tag-fix">fix</span>fix: animation_handler type assertion — Array[Dictionary] cast</li>
+</ul>
+<p style="font-size:11px;color:var(--text-dim);margin-top:6px">最近 10 条提交 · 部署于 2026-06-16 17:05</p>
+</div>
 
 <!-- ═══ Tab Bar ═══ -->
 <div class="tab-bar">
@@ -1163,31 +1224,31 @@ const NINJAS = [
 //  Xi (喜) system definitions
 // ══════════════════════════════════════════════════════
 const XI_BASIC = [
-  { id: 1,  name: "全黑",       cond: "9 张全 ♠/♣",                         mult: 2, chips: 0,   tier: "global",  tierLabel: "全局" },
-  { id: 2,  name: "全红",       cond: "9 张全 ♥/♦",                         mult: 2, chips: 0,   tier: "global",  tierLabel: "全局" },
-  { id: 3,  name: "全顺",       cond: "9 张点数连续",                         mult: 2, chips: 0,   tier: "global",  tierLabel: "全局" },
-  { id: 4,  name: "全同花",     cond: "9 张同一花色",                         mult: 3, chips: 0,   tier: "global",  tierLabel: "全局" },
-  { id: 5,  name: "四张",       cond: "4+ 张同点数",                          mult: 1, chips: 50,  tier: "global",  tierLabel: "全局" },
-  { id: 6,  name: "三清",       cond: "三组全是同花（花色可不同）",             mult: 2, chips: 0,   tier: "group",   tierLabel: "组级" },
-  { id: 7,  name: "三顺清",     cond: "三组全是同花顺",                        mult: 3, chips: 0,   tier: "group",   tierLabel: "组级" },
-  { id: 8,  name: "顺清打头",   cond: "影为同花顺",                           mult: 2, chips: 0,   tier: "group",   tierLabel: "组级" },
-  { id: 9,  name: "全三条",     cond: "9 张组成 3 副三条",                     mult: 4, chips: 0,   tier: "global",  tierLabel: "全局" },
-];
+  { id: 1, name: "全黑", cond: "9 张全 ♠/♣", mult: 2, chips: 0, tier: "global", tierLabel: "全局" },
+  { id: 2, name: "全红", cond: "9 张全 ♥/♦", mult: 2, chips: 0, tier: "global", tierLabel: "全局" },
+  { id: 3, name: "全顺", cond: "9 张点数连续", mult: 2, chips: 0, tier: "global", tierLabel: "全局" },
+  { id: 4, name: "全同花", cond: "9 张同一花色", mult: 3, chips: 0, tier: "global", tierLabel: "全局" },
+  { id: 5, name: "四张", cond: "4+ 张同点数", mult: 5, chips: 0, tier: "global", tierLabel: "全局" },
+  { id: 6, name: "三清", cond: "三组全是同花（花色可不同）", mult: 2, chips: 0, tier: "group", tierLabel: "组级" },
+  { id: 7, name: "三顺清", cond: "三组全是同花顺", mult: 3, chips: 0, tier: "group", tierLabel: "组级" },
+  { id: 8, name: "顺清打头", cond: "影为同花顺", mult: 2, chips: 0, tier: "group", tierLabel: "组级" },
+  { id: 9, name: "全三条", cond: "9 张组成 3 副三条", mult: 4, chips: 0, tier: "global", tierLabel: "全局" },
+];  // ── xi-auto-extracted:basic ──
 const XI_PHASE_E = [
-  { id: 10, name: "豹子",       cond: "任意一组为三条",                        mult: 2, chips: 0,   tier: "group",   tierLabel: "组级" },
-  { id: 11, name: "昇龍",       cond: "影<瞬<滅 牌型严格递增",                 mult: 3, chips: 0,   tier: "special", tierLabel: "排列递进" },
-  { id: 12, name: "背水",       cond: "尾墩为散牌 (HIGH_CARD_3)",              mult: 4, chips: 0,   tier: "special", tierLabel: "牺牲型" },
-  { id: 13, name: "貧打",       cond: "某墩精确含 2-3-5",                     mult: 4, chips: 0,   tier: "special", tierLabel: "特定组合" },
-  { id: 14, name: "陣眼",       cond: "中心牌全局最小或最大（含并列）",          mult: 3, chips: 0,   tier: "special", tierLabel: "位置型" },
-  { id: 15, name: "均爵",       cond: "每墩至少一张 J/Q/K",                   mult: 3, chips: 0,   tier: "special", tierLabel: "均匀分配" },
-  { id: 16, name: "三等",       cond: "三行 chip 总和相等",                    mult: 5, chips: 0,   tier: "special", tierLabel: "平衡型" },
-  { id: 17, name: "满堂",       cond: "3 行 + 3 列全部非散牌 (≥ONE_PAIR_3)",  mult: 5, chips: 0,   tier: "special", tierLabel: "行列全判" },
-];
+  { id: 10, name: "豹子", cond: "任意一组为三条", mult: 2, chips: 0, tier: "group", tierLabel: "组级" },
+  { id: 11, name: "昇龍", cond: "影<瞬<滅 牌型严格递增", mult: 3, chips: 0, tier: "special", tierLabel: "排列递进" },
+  { id: 12, name: "背水", cond: "尾墩为散牌 (HIGH_CARD_3)", mult: 4, chips: 0, tier: "special", tierLabel: "牺牲型" },
+  { id: 13, name: "貧打", cond: "某墩精确含 2-3-5", mult: 4, chips: 0, tier: "special", tierLabel: "特定组合" },
+  { id: 14, name: "陣眼", cond: "中心牌全局最小或最大（含并列）", mult: 3, chips: 0, tier: "special", tierLabel: "位置型" },
+  { id: 15, name: "均爵", cond: "每墩至少一张 J/Q/K", mult: 3, chips: 0, tier: "special", tierLabel: "均匀分配" },
+  { id: 16, name: "三等", cond: "三行 chip 总和相等", mult: 5, chips: 0, tier: "special", tierLabel: "平衡型" },
+  { id: 17, name: "满堂", cond: "3 行 + 3 列全部非散牌 (≥ONE_PAIR_3)", mult: 5, chips: 0, tier: "special", tierLabel: "行列全判" },
+];  // ── xi-auto-extracted:phase-e ──
 const XI_COMBOS = [
   { name: "三合", cond: "3 行牌型各匹配一列（散牌行不计）", mult: 6, tier: "exclusive" },
-  { name: "双合", cond: "2 行牌型匹配列",                   mult: 4, tier: "exclusive" },
-  { name: "一合", cond: "1 行牌型匹配列",                   mult: 2, tier: "exclusive" },
-];
+  { name: "双合", cond: "2 行牌型匹配列", mult: 4, tier: "exclusive" },
+  { name: "一合", cond: "1 行牌型匹配列", mult: 2, tier: "exclusive" },
+];  // ── xi-auto-extracted:combos ──
 
 // ═══ Tab switching ═══
 function switchTab(tabId) {
