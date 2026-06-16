@@ -7,6 +7,8 @@ Usage:
     python tools/tscn_parser.py docs/ninking/scene-tree-visualizer.html  # embed
 """
 
+from __future__ import annotations
+
 import ast
 import json
 import re
