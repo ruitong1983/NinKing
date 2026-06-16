@@ -1,5 +1,5 @@
 extends GridContainer
-## Debug 牌库网格 — 4列 × 13行，每列一个花色 (♠|♥|♦|♣)，A→K 从上到下。
+## Debug 牌库网格 — 13列 × 4行，每行一个花色 (♠|♥|♦|♣)，A→K 从左到右。
 ## 点击牌 → 高亮 → 再点击上方 9 格空格 → 放入该牌。
 
 signal card_selected(card_data: CardData.PlayingCard)
@@ -22,7 +22,7 @@ func _rebuild(source_deck: Array[CardData.PlayingCard]) -> void:
 	_tray_cards.clear()
 	_card_btns.clear()
 
-	columns = 4
+	columns = 13
 
 	var SUIT_ORDER: Array[CardData.Suit] = [
 		CardData.Suit.SPADES, CardData.Suit.HEARTS,
@@ -36,9 +36,9 @@ func _rebuild(source_deck: Array[CardData.PlayingCard]) -> void:
 		CardData.Rank.KING,
 	]
 
-	# rank 外层, suit 内层 → GridContainer 左→右填充 → 每列一个花色
-	for rank: int in RANK_ORDER:
-		for suit: CardData.Suit in SUIT_ORDER:
+	# suit 外层, rank 内层 → GridContainer 左→右填充 → 一行13列(每行一个花色)
+	for suit: CardData.Suit in SUIT_ORDER:
+		for rank: int in RANK_ORDER:
 			var card_data: CardData.PlayingCard = _find_in_deck(source_deck, suit, rank)
 			_tray_cards.append(card_data)
 

@@ -343,6 +343,21 @@
 
 ---
 
+## 📐 Phase I — score_calculator.gd 性能评估与拆分重构可行性
+
+> **1056 行，静态类，双路径（旧 `calculate()`/新 `calculate_with_summary()+analyze_effects()`）。**
+> **前置依赖：** Phase H（`analyze_effects()` 全量接入各消费者）完成后进行，确保调用路径已经稳定。
+
+| # | 任务 | 说明 | 优先级 | 状态 |
+|---|------|------|--------|------|
+| I1 | **性能基准测试** — 测量 `calculate()` vs `calculate_with_summary()` 在 0/5/10/15 忍者数下的单次执行耗时（GDScript `Time.get_ticks_usec()` 插桩），找出瓶颈函数（`_collect_ninja_for_column` 嵌套循环、`analyze_effects` 遍历等）。关注 3×3 网格算满的极端情况 | `scripts/ninking/score_calculator.gd` | P2 | ⬜ |
+| I2 | **重复逻辑消除评估** — 量化 `calculate()` 与 `calculate_with_summary()` 间的代码重复度（预估 40-60% 重叠）。评估弃用旧路径的可行性（哪些调用方仍用旧 `calculate()`，能否全部迁移到 summary 路径）。识别 `_compute_group_score()` 与 `_row_score()` 的合并空间 | 全项目 grep `ScoreCalculator.calculate\b` + 手动比对 | P2 | ⬜ |
+| I3 | **领域拆分方案** — 评估按关注点拆分为多个小文件的可行性：① **`ninja_row_collector.gd`** — `collect_ninja_per_group()` + `ninja_affected_groups()` + `_collect_ninja_for_column()` 等忍者效果分配逻辑（~250 行）② **`xi_applicator.gd`** — `_get_global_xi_x_stack()` + `_apply_group_xi()` + `_apply_group_xi_to_group()`（~70 行）③ **`economy_effects.gd`** — `_apply_economy_effects()`（~30 行）④ **`score_calculator.gd`** 保留主入口 + `_compute_group_score()` + `_row_score()`（~400 行）。评估跨文件静态方法 vs 注入式 vs 单一职责 RefCounted 类的架构取舍 | 设计方案文档 | P2 | ⬜ |
+| I4 | **Phase H 全量接入后并行去旧** — H3(H4) 消费 summary 完成后，将剩余 `calculate()` 调用方改为 `analyze_effects()+calculate_with_summary()`，删除旧路径（或标记 `@deprecated`）。净消除重复逻辑，单次忍者遍历 | 全项目调用点分析 | P2 | ⬜ |
+| I5 | **NinjaCardInstance 运行时类设计** — Phase H spec 中 H6 的延续。将 `Dictionary` summary 升级为强类型 `NinjaCardInstance` 类（含 effect/condition/scaling/decay/current_values 字段），代替散装 Dictionary。减少运行时 `effect.get("add_chips", 0)` 式字符串键访问，提升类型安全 + 可读性 | `scripts/ninking/ninja_card_instance.gd`(新) | P3 | ⬜ |
+
+---
+
 ## 🔒 Phase D-E — 远期（暂缓）
 
 | # | 任务 | 说明 | 状态 |

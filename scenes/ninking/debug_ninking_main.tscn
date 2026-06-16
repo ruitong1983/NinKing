@@ -902,7 +902,7 @@ anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -390.0
+offset_left = -350.0
 grow_horizontal = 0
 grow_vertical = 2
 mouse_filter = 1
@@ -917,16 +917,21 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.102, 0.102, 0.18, 0.88)
 
-[node name="DebugVBox" type="VBoxContainer" parent="DebugPanel" unique_id=744568700]
+[node name="ScrollContainer" type="ScrollContainer" parent="DebugPanel" unique_id=1121774351]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="DebugVBox" type="VBoxContainer" parent="DebugPanel/ScrollContainer" unique_id=744568700]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
 theme_override_constants/separation = 6
 
-[node name="ToggleBtn" type="Button" parent="DebugPanel/DebugVBox" unique_id=1885800595]
+[node name="ToggleBtn" type="Button" parent="DebugPanel/ScrollContainer/DebugVBox" unique_id=1885800595]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -934,79 +939,80 @@ theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
 theme_override_font_sizes/font_size = 18
 text = "▲"
 
-[node name="RightTitle" type="Label" parent="DebugPanel/DebugVBox" unique_id=983889649]
+[node name="RightTitle" type="Label" parent="DebugPanel/ScrollContainer/DebugVBox" unique_id=983889649]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
 theme_override_font_sizes/font_size = 24
 text = "DEBUG 控制"
 
-[node name="NinjaSelectBtn" type="Button" parent="DebugPanel/DebugVBox" unique_id=830119812]
+[node name="NinjaSelectBtn" type="Button" parent="DebugPanel/ScrollContainer/DebugVBox" unique_id=830119812]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "🥷 忍者選択"
 
-[node name="NinjaStatusLabel" type="Label" parent="DebugPanel/DebugVBox" unique_id=571507819]
+[node name="NinjaStatusLabel" type="Label" parent="DebugPanel/ScrollContainer/DebugVBox" unique_id=571507819]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "已選: 0/5"
 
-[node name="StarTitle" type="Label" parent="DebugPanel/DebugVBox" unique_id=1803176780]
+[node name="StarTitle" type="Label" parent="DebugPanel/ScrollContainer/DebugVBox" unique_id=1803176780]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
 theme_override_font_sizes/font_size = 18
 text = "⭐ 星図レベル"
 
-[node name="StarChartContainer" type="VBoxContainer" parent="DebugPanel/DebugVBox" unique_id=842126260]
+[node name="StarChartContainer" type="VBoxContainer" parent="DebugPanel/ScrollContainer/DebugVBox" unique_id=842126260]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ClearBtn" type="Button" parent="DebugPanel/DebugVBox" unique_id=413288290]
+[node name="ClearBtn" type="Button" parent="DebugPanel/ScrollContainer/DebugVBox" unique_id=413288290]
 unique_name_in_owner = true
 layout_mode = 2
 text = "🗑 清空牌桌"
 
-[node name="CardTrayLabel" type="Label" parent="DebugPanel/DebugVBox" unique_id=2000000001]
+[node name="RandomBtn" type="Button" parent="DebugPanel/ScrollContainer/DebugVBox" unique_id=899856943]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+text = "🎲 发牌"
+
+[node name="CardTrayLabel" type="Label" parent="DebugPanel/ScrollContainer/DebugVBox" unique_id=2000000001]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
 theme_override_font_sizes/font_size = 18
 text = "🃏 牌庫"
 
-[node name="CardTray" type="GridContainer" parent="DebugPanel/DebugVBox" unique_id=2000000002]
+[node name="CardTray" type="GridContainer" parent="DebugPanel/ScrollContainer/DebugVBox" unique_id=2000000002]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/h_separation = 3
 theme_override_constants/v_separation = 3
-columns = 4
+columns = 13
 script = ExtResource("7_tray")
 
-[node name="CardQueueLabel" type="Label" parent="DebugPanel/DebugVBox" unique_id=2000000003]
+[node name="CardQueueLabel" type="Label" parent="DebugPanel/ScrollContainer/DebugVBox" unique_id=2000000003]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
 theme_override_font_sizes/font_size = 15
 text = "📋 已選隊列 (0/9)"
 
-[node name="CardQueueContainer" type="HBoxContainer" parent="DebugPanel/DebugVBox" unique_id=2000000004]
+[node name="CardQueueContainer" type="HBoxContainer" parent="DebugPanel/ScrollContainer/DebugVBox" unique_id=2000000004]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 3
 
-[node name="DealBtn" type="Button" parent="DebugPanel/DebugVBox" unique_id=2000000005]
+[node name="DealBtn" type="Button" parent="DebugPanel/ScrollContainer/DebugVBox" unique_id=2000000005]
 unique_name_in_owner = true
 layout_mode = 2
 disabled = true
 text = "发牌"
 
-[node name="RandomBtn" type="Button" parent="DebugPanel/DebugVBox" unique_id=899856943]
-unique_name_in_owner = true
-layout_mode = 2
-text = "🎲 发牌"
-
-[node name="BackBtn" type="Button" parent="DebugPanel/DebugVBox" unique_id=17129958]
+[node name="BackBtn" type="Button" parent="DebugPanel/ScrollContainer/DebugVBox" unique_id=17129958]
 unique_name_in_owner = true
 layout_mode = 2
 text = "← 返回"

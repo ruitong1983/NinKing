@@ -100,6 +100,20 @@ func _start_seal() -> void:
 	current_score = 0
 	plays_remaining = 3
 
+	# Tool effects from owned ninjas: extra_plays (火遁+1 / 赌命-1)
+	for ninja: Dictionary in owned_ninjas:
+		var ep: int = ninja.get("effect", {}).get("extra_plays", 0)
+		plays_remaining += ep
+	# Clamp to minimum 1
+	if plays_remaining < 1:
+		plays_remaining = 1
+
+	# 幻术大师: only_one_play → 强制仅1次出牌
+	for ninja: Dictionary in owned_ninjas:
+		if ninja.get("effect", {}).get("only_one_play", false):
+			plays_remaining = 1
+			break
+
 	# Seal Lord effects
 	current_seal_lord_name = ""
 	current_seal_lord_effects.clear()

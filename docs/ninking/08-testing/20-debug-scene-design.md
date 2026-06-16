@@ -74,22 +74,25 @@ NinKingDebug (Control) [debug_controller.gd]
 │   │   │   │       └── DunTail → TailCards          ← 滅 3 格
 │   │   │   └── AiRearrangeBtn [陣形]       ← disabled
 │   │   │
-│   │   └── DebugPanel (Control, 390px)
-│   │       └── DebugVBox (VBoxContainer)
-│   │           ├── RightTitle ("DEBUG 控制")
-│   │           ├── NinjaSelectBtn [🥷 忍者選択]
-│   │           ├── NinjaStatusLabel ("已選: 0/5")
-│   │           ├── StarTitle ("⭐ 星図レベル")
-│   │           ├── StarChartContainer      ← 6 牌型等级行 + [+] 按钮
-│   │           ├── ClearBtn [🗑 清空牌桌]
-│   │           ├── CardTrayLabel ("🃏 牌庫")
-│   │           ├── CardTray (GridContainer, 4 cols) [debug_card_tray.gd]
-│   │           │   └── 52 × Button (4列×13行 ♠♥♦♣)
-│   │           ├── CardQueueLabel ("📋 已選隊列")
-│   │           ├── CardQueueContainer (HBoxContainer)  ← 已选牌横向标签
-│   │           ├── DealBtn [发牌]          ← 满 9 张亮起
-│   │           ├── RandomBtn [🎲 随机发牌]
-│   │           └── BackBtn [← 返回]
+│   │   └── DebugPanel (Control, 540px)
+│   │       ├── PanelBg (ColorRect, full rect)
+│   │       └── ScrollContainer (full rect)
+│   │           └── DebugVBox (VBoxContainer)
+│   │               ├── ToggleBtn [▲]       ← 折叠/展开 DebugPanel
+│   │               ├── RightTitle ("DEBUG 控制")
+│   │               ├── NinjaSelectBtn [🥷 忍者選択]
+│   │               ├── NinjaStatusLabel ("已選: 0/5")
+│   │               ├── StarTitle ("⭐ 星図レベル")
+│   │               ├── StarChartContainer      ← 6 牌型等级行 + [+] 按钮
+│   │               ├── ClearBtn [🗑 清空牌桌]
+│   │               ├── RandomBtn [🎲 发牌]     ← 高 60px，常亮
+│   │               ├── CardTrayLabel ("🃏 牌庫")
+│   │               ├── CardTray (GridContainer, 13 cols) [debug_card_tray.gd]
+│   │               │   └── 52 × Button (13列×4行 ♠♥♦♣)
+│   │               ├── CardQueueLabel ("📋 已選隊列")
+│   │               ├── CardQueueContainer (HBoxContainer)  ← 已选牌横向标签
+│   │               ├── DealBtn [发牌]          ← 满 9 张亮起
+│   │               └── BackBtn [← 返回]
 │
 └── NinjaSelector (Control, full screen, hidden) [debug_ninja_selector.gd]
     ├── SelectorBg (ColorRect, #000 70%)
@@ -146,7 +149,7 @@ NinKingDebug (Control) [debug_controller.gd]
 | 节点 | 所在场景 | 说明 |
 |------|---------|------|
 | UIManager 下所有 overlay | 主场景 | LevelIntro / ScoringOverlay / GameOver / VictoryOverlay / DeckViewer / ShopOverlay |
-| DebugPanel + DebugVBox | Debug | 右侧调试控制面板（卡牌托盘/星图/忍者选择） |
+| DebugPanel + ScrollContainer + DebugVBox | Debug | 右侧调试控制面板（卡牌托盘/星图/忍者选择） |
 | DebugBtn (Launcher) | 主场景 Launcher | 进入 Debug 的入口按钮 |
 | NinjaSelector | Debug | 忍者选择弹窗 |
 | ToggleBtn | Debug | DebugPanel 折叠按钮 |
@@ -241,7 +244,7 @@ NinKingDebug (Control) [debug_controller.gd]
 | 按钮 | 行为 |
 |------|------|
 | 发牌 | 将队列中 9 张牌按序填入手牌区（仅满 9 张可用） |
-| 🎲 随机发牌 | 从 52 张洗牌取 9 张填入影/瞬/滅 |
+| 🎲 发牌 | 从 52 张洗牌取 9 张填入影/瞬/滅（高 60px，常亮） |
 | 🗑 清空牌桌 | 清空 3 个 Hand + 队列，重置 LeftPanel 显示 |
 | ← 返回 | `change_scene_to_file("ninking_launcher.tscn")` |
 
@@ -267,7 +270,8 @@ NinKingDebug (Control) [debug_controller.gd]
 |------|------|------|
 | `debug_ninking_main.tscn` | `scenes/ninking/` | Debug 场景 |
 | `debug_controller.gd` | `scripts/ninking/debug/` | 主控制器 |
-| `debug_card_tray.gd` | `scripts/ninking/debug/` | 右侧卡牌托盘 (GridContainer) |
+| `debug_card_tray.gd` | `scripts/ninking/debug/` | 右侧卡牌托盘 (GridContainer, 13列) |
+| `debug_panel.gd` | `scripts/ninking/debug/` | DebugPanel 折叠/展开控制 |
 | `debug_ninja_selector.gd` | `scripts/ninking/debug/` | 忍者选择弹窗 |
 | `main_menu.gd` | `scripts/ninking/ui/` | +4 行 Debug 按钮接线 |
 | `ninking_launcher.tscn` | `scenes/ninking/` | + DebugBtn 节点 |
