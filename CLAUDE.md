@@ -10,15 +10,15 @@
 >
 > Skill（ui-modify-plan / review-plan / update-docs）在方案确认后执行。
 
-# 📋 工作清单 → `docs/ninking/TODO.md`
+# 📋 工作清单 → `docs/ninking/09-mgmt/TODO.md`
 
 > 每次会话开始先读取。完成任务后更新状态。
 
-# 🔧 疑难问题 → `docs/ninking/90-troubleshooting.md`
+# 🔧 疑难问题 → `docs/ninking/09-mgmt/90-troubleshooting.md`
 
 > 遇到非显而易见的报错/异常行为/Godot 编辑器问题，先查此手册是否已有记录。
 
-# 🧪 Godot MCP Pro 测试 → 先读 `docs/ninking/testing-guide.md`
+# 🧪 Godot MCP Pro 测试 → 先读 `docs/ninking/08-testing/testing-guide.md`
 
 > **调用 `mcp__godot-mcp-pro__play_scene` / `execute_game_script` / `find_ui_elements` / `simulate_mouse_click` / `get_game_screenshot` 做游戏测试前，必须先读此指南。**
 >
@@ -40,7 +40,7 @@
 
 > **铁律：替换图片/音频等导入资源必须在 Godot 编辑器的 FileSystem dock 中拖入覆盖，禁止用外部工具直接替换文件。**
 >
-> 疑难问题 → `docs/ninking/90-troubleshooting.md`
+> 疑难问题 → `docs/ninking/09-mgmt/90-troubleshooting.md`
 
 # Claude Code 开发规范 · Godot 4.6.2 纯2D
 
@@ -55,7 +55,7 @@
 - ⚠️ 文件操作必须用 Read/Write/Edit 工具，禁止 PowerShell/Bash 做文件内容读写
 - ⚠️ Edit 失败一次 → 立刻改用 Write 重写整个文件。禁止 shell 脚本做字符串替换（会引入 BOM/UTF-16 LE/中文乱码）
 - ⚠️ PowerShell: `Set-Content -Encoding UTF8` 会加 BOM; `>` / `Out-File` 默认 UTF-16 LE
-- ⚠️ **TextureRect 必须显式设 `expand_mode`**：禁止依赖默认值 `EXPAND_KEEP_SIZE`（会让 `minimum_size` 锁定为纹理原生尺寸，溢出布局）。程序化创建的 TextureRect 必须紧跟 `.expand_mode = TextureRect.EXPAND_IGNORE_SIZE`。已在 `card_detail_popup.gd` / `ninja_inventory_card.gd` 踩坑两次。→ `docs/ninking/90-troubleshooting.md §4`
+- ⚠️ **TextureRect 必须显式设 `expand_mode`**：禁止依赖默认值 `EXPAND_KEEP_SIZE`（会让 `minimum_size` 锁定为纹理原生尺寸，溢出布局）。程序化创建的 TextureRect 必须紧跟 `.expand_mode = TextureRect.EXPAND_IGNORE_SIZE`。已在 `card_detail_popup.gd` / `ninja_inventory_card.gd` 踩坑两次。→ `docs/ninking/09-mgmt/90-troubleshooting.md §4`
 
 ## Card-Framework 卡牌框架
 
@@ -73,7 +73,7 @@ API 速查 → `docs/tween-library-reference.md`。
 
 > **铁律：修改主场景（`ninking_main.tscn` / `ninking_launcher.tscn`）时，若 Debug 场景（`debug_ninking_main.tscn`）中存在相同节点/脚本/布局/信号绑定，必须同步修改 Debug 场景，保持两者一致。**
 >
-> **对照细则 → `docs/ninking/20-debug-scene-design.md` §4.1**（完全对齐 / 同名不同型 / 独占 + 修改决策速查）
+> **对照细则 → `docs/ninking/08-testing/20-debug-scene-design.md` §4.1**（完全对齐 / 同名不同型 / 独占 + 修改决策速查）
 
 ## 设计文档同步
 
