@@ -15,7 +15,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-COMMIT_COUNT = 10
+COMMIT_COUNT = 1
 
 # Keywords → CSS tag class
 TAG_RULES: list[tuple[list[str], str]] = [
@@ -83,7 +83,7 @@ def format_recent_updates(commits: list[dict]) -> str:
     lines.append(
         f'<p style="font-size:11px;color:var(--text-dim);'
         f'margin-top:6px">'
-        f'最近 {len(commits)} 条提交 · 部署于 {datetime.now().strftime("%Y-%m-%d %H:%M")}'
+        f'最新提交 · 部署于 {datetime.now().strftime("%Y-%m-%d %H:%M")}'
         f'</p>'
     )
     return "\n".join(lines)

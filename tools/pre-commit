@@ -1,7 +1,7 @@
 #!/bin/sh
 # ═══════════════════════════════════════════════════════
-# Pre-commit hook: sync ninja-card-viewer.html on data change
-# Runs all extract scripts to keep the HTML viewer up-to-date.
+# Pre-commit hook: sync ninja_card_viewer.html on data change
+# All extraction scripts embed into this single HTML file.
 # ═══════════════════════════════════════════════════════
 # Auto-install:  sh tools/install-hooks.sh
 # Manual install: cp tools/pre-commit .git/hooks/pre-commit
