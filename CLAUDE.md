@@ -33,8 +33,12 @@
 | 关键词 | Skill | 流程 |
 |--------|-------|------|
 | 改UI / 调整界面 / 布局 / 按钮 / 配色/字体/间距 | `ui-modify-plan` | 方案 → Figma同步 → 实现 |
-| 代码审查 / review | `review-plan` | 对照检查项逐条 |
+| 代码审查 / review / codereview | `review-plan` | 对照检查项逐条 |
 | 游戏机制/数值/布局变更 | `update-docs` | 判断是否同步 docs/ |
+| 更新HTML / update-html | `update-html` | 更新 HTML 可视化文件 |
+| 消除告警 / fix warnings / UNUSED_VARIABLE | `fix-gdscript-warnings` | 消除 GDScript 未使用变量/参数告警 |
+| 忍者测试 / ninja-test | `ninja-test` | 构建 → 计分模拟 → Delta验证 → Review报告 |
+| 上传代码 / push / 提交推送 / sync | `upload-code` | git add . → commit → push |
 
 ## 素材替换
 
