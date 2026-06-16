@@ -361,20 +361,67 @@ footer a:hover { color: var(--gold); }
   color: var(--text-dim);
   font-size: 14px;
 }
+
+/* ─── Scene Tree ─── */
+.scene-card { background: var(--bg-card); border-radius: var(--card-radius); padding: 16px; margin-bottom: 20px; }
+.scene-card h2 { font-size: 16px; color: #ddd; margin-bottom: 8px; }
+.scene-card .info { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
+.tree { user-select: none; }
+.tree-row { display: flex; align-items: center; gap: 6px; padding: 3px 6px; border-radius: 4px; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+.tree-row:hover { background: rgba(255,255,255,0.05); }
+.tree-row.has-children { cursor: pointer; }
+.toggle { width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; color: #888; flex-shrink: 0; transition: transform 0.2s; }
+.toggle.collapsed { transform: rotate(-90deg); }
+.toggle.no-children { visibility: hidden; }
+.children { padding-left: 22px; }
+.children.collapsed { display: none; }
+.badge-type { font-size: 10px; padding: 1px 5px; border-radius: 3px; font-weight: 600; flex-shrink: 0; }
+.badge-name { font-size: 13px; font-weight: 500; }
+.badge-unique { font-size: 10px; color: #7ec8e3; background: rgba(126,200,227,0.15); padding: 0 4px; border-radius: 2px; font-family: monospace; }
+.badge-script { font-size: 10px; color: #a8e6cf; background: rgba(168,230,207,0.12); padding: 0 4px; border-radius: 2px; }
+.badge-note { font-size: 11px; color: #999; margin-left: 4px; }
+.node-control   .badge-type { background: #3d3d6b; color: #b8b8ff; }
+.node-panel     .badge-type { background: #3d5a3d; color: #8fbc8f; }
+.node-label     .badge-type { background: #5a4d3d; color: #e8c88a; }
+.node-button    .badge-type { background: #5a3d3d; color: #ff8a8a; }
+.node-texturerect .badge-type { background: #3d4d5a; color: #8ac8ff; }
+.node-colorrect .badge-type { background: #4a3d5a; color: #c88aff; }
+.node-hbox      .badge-type { background: #3d5a5a; color: #8affc8; }
+.node-vbox      .badge-type { background: #3d4a3d; color: #a8e6a8; }
+.node-control   .badge-name { color: #b8b8ff; }
+.node-panel     .badge-name { color: #8fbc8f; }
+.node-label     .badge-name { color: #e8c88a; }
+.node-button    .badge-name { color: #ff8a8a; }
+.node-texturerect .badge-name { color: #8ac8ff; }
+.node-colorrect .badge-name { color: #c88aff; }
+.node-hbox      .badge-name { color: #8affc8; }
+.node-vbox      .badge-name { color: #a8e6a8; }
+.node-scroll    .badge-type { background: #3d4a5a; color: #8ac8e8; }
+.node-grid      .badge-type { background: #4a4a3d; color: #e8e88a; }
+.node-progress  .badge-type { background: #3d5a4a; color: #8ae8a8; }
+.node-richtext  .badge-type { background: #5a4d4a; color: #e8b88a; }
+.node-cardmanager .badge-type { background: #5a3d5a; color: #ff8aff; }
+.node-panelcontainer .badge-type { background: #3d5a3d; color: #8fbc8f; }
+.node-instance  .badge-type { background: #5a3d5a; color: #ff8aff; }
+.page-nav { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.page-nav a { color: #c4a843; text-decoration: none; padding: 4px 12px; border: 1px solid #c4a84344; border-radius: 4px; font-size: 13px; }
+.page-nav a:hover { background: #c4a84322; }
+.page-nav a.active { background: #c4a84333; }
 </style>
 </head>
 <body>
 
 <!-- ═══ Header ═══ -->
 <header>
-  <h1>🏯 NinKing 忍者牌图鉴 · 喜系统 <small id="card-count"></small></h1>
-  <p class="subtitle">基于 <span id="data-date">2026-06-16</span> <code>ninja_data.gd</code> + <code>xi_detector.gd</code> · 点击卡牌查看详情 · ESC 清空搜索</p>
+  <h1>🏯 NinKing 参考手册 <small id="card-count"></small></h1>
+  <p class="subtitle">基于 <span id="data-date">2026-06-16</span> · 忍者牌 / 喜系统 / 场景树 · 点击卡牌查看详情 · ESC 清空搜索</p>
 </header>
 
 <!-- ═══ Tab Bar ═══ -->
 <div class="tab-bar">
   <button class="tab-btn active" data-tab="ninja" onclick="switchTab('ninja')">🃏 忍者牌</button>
   <button class="tab-btn" data-tab="xi" onclick="switchTab('xi')">🎉 喜系统</button>
+  <button class="tab-btn" data-tab="scene" onclick="switchTab('scene')">🌳 场景树</button>
 </div>
 
 <!-- ═══ Tab: Ninja Cards ═══ -->
@@ -463,9 +510,68 @@ footer a:hover { color: var(--gold); }
 
 </div><!-- /tab-xi -->
 
+<!-- ═══ Tab: Scene Tree ═══ -->
+<div class="tab-content" id="tab-scene">
+
+<div class="scene-card" id="scene-main">
+<h2>ninking_main.tscn</h2>
+<div class="info">根: NinKingMain (Control) 1920×1080 · <span class="badge-script">game_manager.gd</span></div>
+<div class="tree" id="tree-main"></div>
+</div>
+
+<div class="scene-card" id="scene-launcher">
+<h2>ninking_launcher.tscn</h2>
+<div class="info">根: NinKingLauncher (Control) 1920×1080 · <span class="badge-script">main_menu.gd</span></div>
+<div class="tree" id="tree-launcher"></div>
+</div>
+
+<div class="scene-card" id="scene-shop">
+<h2>shop_panel.tscn</h2>
+<div class="info">根: ShopPanel (Control) 800×716 · <span class="badge-script">shop_ui.gd</span></div>
+<div class="tree" id="tree-shop"></div>
+</div>
+
+<div class="scene-card" id="scene-ninja">
+<h2>ninja_card.tscn</h2>
+<div class="info">根: NinjaCard (Control) 125×175 · <span class="badge-script">ninja_inventory_card.gd</span></div>
+<div class="tree" id="tree-ninja"></div>
+</div>
+
+<div class="scene-card" id="scene-card">
+<h2>ninking_card.tscn</h2>
+<div class="info">根: NinKingCard (Control) · <span class="badge-script">ninking_card.gd</span> · Card-Framework 基础卡牌模板</div>
+<div class="tree" id="tree-card"></div>
+</div>
+
+<div class="scene-card" id="scene-popup">
+<h2>card_detail_popup.tscn</h2>
+<div class="info">根: CardDetailPopup (Control) 全屏覆盖 · <span class="badge-script">card_detail_popup.gd</span></div>
+<div class="tree" id="tree-popup"></div>
+</div>
+
+<div class="scene-card" id="scene-deck">
+<h2>deck_select_panel.tscn</h2>
+<div class="info">根: DeckSelectPanel (Control) 全屏覆盖 · <span class="badge-script">deck_select_panel.gd</span></div>
+<div class="tree" id="tree-deck"></div>
+</div>
+
+<div class="scene-card" id="scene-continue">
+<h2>continue_panel.tscn</h2>
+<div class="info">根: ContinuePanel (Control) 1920×1080 · <span class="badge-script">continue_panel.gd</span></div>
+<div class="tree" id="tree-continue"></div>
+</div>
+
+<div class="scene-card" id="scene-debug">
+<h2>debug_ninking_main.tscn</h2>
+<div class="info">根: NinKingDebug (Control) 1920×1080 · <span class="badge-script">debug_controller.gd</span></div>
+<div class="tree" id="tree-debug"></div>
+</div>
+
+</div><!-- /tab-scene -->
+
 <!-- ═══ Footer ═══ -->
 <footer>
-  数据来源: <code>scripts/ninking/ninja_data.gd</code> ·
+  数据来源: <code>scripts/ninking/ninja_data.gd</code> · <code>scripts/ninking/xi_detector.gd</code> · <code>tscn_parser.py</code>
   生成工具: <code>tools/extract_ninja_data.py</code> ·
   <a href="https://github.com/ruitong1983/NinKing">NinKing</a>
 </footer>
@@ -1088,6 +1194,15 @@ function switchTab(tabId) {
   document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === tabId));
   document.querySelectorAll(".tab-content").forEach(c => c.classList.toggle("active", c.id === "tab-" + tabId));
   if (tabId === "xi") renderXiTables();
+  if (tabId === "scene") renderSceneTrees();
+}
+
+// ═══ Render scene trees (re-run on tab switch) ═══
+function renderSceneTrees() {
+  Object.entries(SCENES).forEach(([id, data]) => {
+    const root = document.getElementById('tree-' + id);
+    if (root && root.children.length === 0) renderTree(root, data.children, 0);
+  });
 }
 
 // ═══ Render xi tables ═══
@@ -1343,11 +1458,1328 @@ function renderStats() {
   note.textContent = `共 ${NINJAS.length} 张牌 · 非传说牌均价 $${avgCost} · ${deferredCount} 张暂缓 · 12 种效果类别`;
 }
 
+// ══════════════════════════════════════════════════════
+//  Scene tree data — auto-extracted from .tscn files
+// ══════════════════════════════════════════════════════
+const SCENES = {
+  main: {
+    children: [
+{
+      type: 'Control', name: 'NinKingMain',
+      script: 'game_manager.gd',
+      note: '1920×1080 [game_manager.gd]',
+      children: [
+{
+          type: 'TextureRect', name: 'GameBg',
+          unique: true
+        },
+{
+          type: 'Control', name: 'UIManager',
+          unique: true,
+          script: 'ui_manager.gd',
+          children: [
+{
+              type: 'Control', name: 'DeckViewer',
+              unique: true,
+              children: [
+{
+                  type: 'Panel', name: 'CardPanel',
+                  children: [
+{
+                      type: 'ScrollContainer', name: 'CardScroll',
+                      children: [
+{
+                          type: 'GridContainer', name: 'DeckCardGrid',
+                          unique: true
+                        }
+                      ]
+                    },
+{
+                      type: 'HBoxContainer', name: 'TitleBar',
+                      children: [
+{
+                          type: 'Button', name: 'CloseBtn',
+                          unique: true
+                        },
+{
+                          type: 'Label', name: 'ViewerTitle'
+                        }
+                      ]
+                    },
+{
+                      type: 'HBoxContainer', name: 'CountRow',
+                      children: [
+{
+                          type: 'Label', name: 'DrawCountLabel',
+                          unique: true
+                        },
+{
+                          type: 'Label', name: 'DiscardCountLabel',
+                          unique: true
+                        }
+                      ]
+                    }
+                  ]
+                },
+{
+                  type: 'ColorRect', name: 'ViewerBg',
+                  unique: true
+                }
+              ]
+            },
+{
+              type: 'Button', name: 'DeckBtn',
+              unique: true
+            },
+{
+              type: 'Control', name: 'ShopOverlay',
+              unique: true
+            },
+{
+              type: 'Label', name: 'StatusLabel',
+              unique: true
+            },
+{
+              type: 'HBoxContainer', name: 'GameLayout',
+              unique: true,
+              children: [
+{
+                  type: 'Control', name: 'LeftPanel',
+                  unique: true,
+                  children: [
+{
+                      type: 'Panel', name: 'MatchPanel',
+                      children: [
+{
+                          type: 'VBoxContainer', name: 'MatchVBox',
+                          children: [
+{
+                              type: 'Label', name: 'GoldLabel',
+                              unique: true
+                            },
+{
+                              type: 'Label', name: 'MatchTitle'
+                            },
+{
+                              type: 'Label', name: 'HandsLabel',
+                              unique: true
+                            }
+                          ]
+                        }
+                      ]
+                    },
+{
+                      type: 'Panel', name: 'AntePanel',
+                      children: [
+{
+                          type: 'VBoxContainer', name: 'AnteVBox',
+                          children: [
+{
+                              type: 'Label', name: 'RoundLabel',
+                              unique: true
+                            },
+{
+                              type: 'Label', name: 'BarrierLabel',
+                              unique: true
+                            }
+                          ]
+                        }
+                      ]
+                    },
+{
+                      type: 'ColorRect', name: 'PanelBg',
+                      unique: true
+                    },
+{
+                      type: 'Panel', name: 'HandTypePanel',
+                      children: [
+{
+                          type: 'Control', name: 'HandTypeVBox',
+                          children: [
+{
+                              type: 'Control', name: 'Row滅',
+                              children: [
+{
+                                  type: 'RichTextLabel', name: 'DestroyScore',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'DestroyLv',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'DestroyDun'
+                                },
+{
+                                  type: 'Label', name: 'DestroyType',
+                                  unique: true
+                                }
+                              ]
+                            },
+{
+                              type: 'Control', name: 'Row影',
+                              children: [
+{
+                                  type: 'Label', name: 'ShadowDun'
+                                },
+{
+                                  type: 'Label', name: 'ShadowLv',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'ShadowType',
+                                  unique: true
+                                },
+{
+                                  type: 'RichTextLabel', name: 'ShadowScore',
+                                  unique: true
+                                }
+                              ]
+                            },
+{
+                              type: 'Control', name: 'Row瞬',
+                              children: [
+{
+                                  type: 'RichTextLabel', name: 'FlashScore',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'FlashDun'
+                                },
+{
+                                  type: 'Label', name: 'FlashLv',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'FlashType',
+                                  unique: true
+                                }
+                              ]
+                            },
+{
+                              type: 'Control', name: 'ColumnBar',
+                              children: [
+{
+                                  type: 'Label', name: 'MidColLabel',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'RightColLabel',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'MidColLv',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'RightColLv',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'LeftColLv',
+                                  unique: true
+                                },
+{
+                                  type: 'RichTextLabel', name: 'RightColScore',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'RightColType',
+                                  unique: true
+                                },
+{
+                                  type: 'RichTextLabel', name: 'MidColScore',
+                                  unique: true
+                                },
+{
+                                  type: 'RichTextLabel', name: 'LeftColScore',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'LeftColLabel',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'LeftColType',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'MidColType',
+                                  unique: true
+                                }
+                              ]
+                            },
+{
+                              type: 'ColorRect', name: 'ColDivider'
+                            }
+                          ]
+                        }
+                      ]
+                    },
+{
+                      type: 'Panel', name: 'ScorePanel',
+                      children: [
+{
+                          type: 'VBoxContainer', name: 'ScoreVBox',
+                          children: [
+{
+                              type: 'Label', name: 'ScoreLabel',
+                              unique: true
+                            },
+{
+                              type: 'Label', name: 'TargetScoreLabel',
+                              unique: true
+                            },
+{
+                              type: 'Label', name: 'ColXiLabel',
+                              unique: true
+                            },
+{
+                              type: 'ProgressBar', name: 'ProgressBar',
+                              unique: true
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+{
+                  type: 'Control', name: 'CenterColumn',
+                  children: [
+{
+                      type: 'Panel', name: 'DunArea',
+                      children: [
+{
+                          type: 'Label', name: 'TailLabel',
+                          unique: true
+                        },
+{
+                          type: 'Label', name: 'TailTypeLabel',
+                          unique: true
+                        },
+{
+                          type: 'Label', name: 'MiddleTypeLabel',
+                          unique: true
+                        },
+{
+                          type: 'Label', name: 'HeadLabel',
+                          unique: true
+                        },
+{
+                          type: 'Label', name: 'MiddleLabel',
+                          unique: true
+                        },
+{
+                          type: 'Label', name: 'HeadTypeLabel',
+                          unique: true
+                        },
+{
+                          type: 'HBoxContainer', name: 'ColumnLabelRow',
+                          children: [
+{
+                              type: 'Label', name: 'Col0Label',
+                              unique: true
+                            },
+{
+                              type: 'Label', name: 'Col1Label',
+                              unique: true
+                            },
+{
+                              type: 'Label', name: 'Col2Label',
+                              unique: true
+                            }
+                          ]
+                        },
+{
+                          type: 'Control', name: 'CardGrid',
+                          unique: true,
+                          script: 'hand_card_container.gd'
+                        }
+                      ]
+                    },
+{
+                      type: 'Button', name: 'AiRearrangeBtn',
+                      unique: true
+                    },
+{
+                      type: 'HBoxContainer', name: 'HandArea',
+                      unique: true,
+                      children: [
+{
+                          type: 'Button', name: 'PlayBtn',
+                          unique: true
+                        }
+                      ]
+                    },
+{
+                      type: 'Control', name: 'NinjaBar',
+                      unique: true
+                    }
+                  ]
+                }
+              ]
+            },
+{
+              type: 'Control', name: 'GameOver',
+              unique: true,
+              children: [
+{
+                  type: 'Button', name: 'RetryButton',
+                  unique: true
+                },
+{
+                  type: 'Button', name: 'BackToMenuButton',
+                  unique: true
+                },
+{
+                  type: 'Label', name: 'ScoreSummary',
+                  unique: true
+                },
+{
+                  type: 'Label', name: 'GameOverLabel',
+                  unique: true
+                },
+{
+                  type: 'ColorRect', name: 'OverlayBg'
+                }
+              ]
+            },
+{
+              type: 'Control', name: 'LevelIntro',
+              unique: true,
+              children: [
+{
+                  type: 'ColorRect', name: 'IntroOverlay'
+                },
+{
+                  type: 'TextureRect', name: 'BossPortrait',
+                  unique: true
+                },
+{
+                  type: 'Label', name: 'LevelLabel',
+                  unique: true
+                },
+{
+                  type: 'Label', name: 'TargetLabel',
+                  unique: true
+                }
+              ]
+            },
+{
+              type: 'Control', name: 'ScoringOverlay',
+              unique: true,
+              children: [
+{
+                  type: 'ColorRect', name: 'OverlayBg'
+                },
+{
+                  type: 'Label', name: 'HandNameLabel',
+                  unique: true
+                },
+{
+                  type: 'Label', name: 'ScoreBreakdown',
+                  unique: true
+                },
+{
+                  type: 'Label', name: 'ScoreValueLabel',
+                  unique: true
+                }
+              ]
+            },
+{
+              type: 'Control', name: 'VictoryOverlay',
+              children: [
+{
+                  type: 'Label', name: 'StatsSummary'
+                },
+{
+                  type: 'Label', name: 'VictoryLabel'
+                },
+{
+                  type: 'ColorRect', name: 'OverlayBg'
+                },
+{
+                  type: 'Button', name: 'MenuButton'
+                }
+              ]
+            }
+          ]
+        },
+{
+          type: 'Instance', name: 'CardManager',
+          instance: 'card_manager.tscn'
+        }
+      ]
+    }
+    ]
+  },
+  launcher: {
+    children: [
+{
+      type: 'Control', name: 'Launcher',
+      script: 'main_menu.gd',
+      note: '1920×1080 [main_menu.gd]',
+      children: [
+{
+          type: 'Button', name: 'StartBtn',
+          unique: true,
+          note: '"开始游戏"'
+        },
+{
+          type: 'Button', name: 'DebugBtn',
+          unique: true,
+          note: '"调试"'
+        },
+{
+          type: 'Button', name: 'SettingsBtn',
+          unique: true,
+          note: '"设置"'
+        },
+{
+          type: 'TextureRect', name: 'LaunchBg',
+          note: '背景'
+        },
+{
+          type: 'Button', name: 'ContinueBtn',
+          unique: true,
+          note: '"继续"'
+        },
+{
+          type: 'Button', name: 'QuitBtn',
+          unique: true,
+          note: '"退出"'
+        }
+      ]
+    }
+    ]
+  },
+  shop: {
+    children: [
+{
+      type: 'Control', name: 'ShopPanel',
+      script: 'shop_ui.gd',
+      note: '800×716 [shop_ui.gd]',
+      children: [
+{
+          type: 'ColorRect', name: 'BottomBar',
+          unique: true,
+          note: '底栏'
+        },
+{
+          type: 'GridContainer', name: 'ItemColumn',
+          unique: true,
+          note: '2列 星图卡槽 ×2'
+        },
+{
+          type: 'Button', name: 'RerollBtn',
+          unique: true,
+          note: '"入替 $3"'
+        },
+{
+          type: 'ColorRect', name: 'TitleBar',
+          unique: true,
+          note: '标题栏'
+        },
+{
+          type: 'Label', name: 'GoldLabel',
+          unique: true,
+          note: '"$0" 20px'
+        },
+{
+          type: 'Label', name: 'ShopSubtitle',
+          unique: true,
+          note: '"萬屋！" 32px'
+        },
+{
+          type: 'GridContainer', name: 'AbilityGrid',
+          unique: true,
+          note: '2列 忍者卡槽 ×4'
+        },
+{
+          type: 'Button', name: 'ContinueBtn',
+          unique: true,
+          note: '"討伐へ ▶"'
+        },
+{
+          type: 'ColorRect', name: 'Separator',
+          unique: true,
+          note: '分割线'
+        },
+{
+          type: 'ColorRect', name: 'StageBg',
+          note: '面板底色'
+        }
+      ]
+    }
+    ]
+  },
+  ninja: {
+    children: [
+{
+      type: 'Control', name: 'NinjaCard',
+      script: 'ninja_inventory_card.gd',
+      note: '125×175 [ninja_inventory_card.gd]',
+      children: [
+{
+          type: 'Control', name: 'FrontFace',
+          children: [
+{
+              type: 'TextureRect', name: 'TextureRect'
+            }
+          ]
+        },
+{
+          type: 'Control', name: 'BackFace',
+          children: [
+{
+              type: 'TextureRect', name: 'TextureRect'
+            }
+          ]
+        },
+{
+          type: 'TextureRect', name: 'FrameOverlay'
+        },
+{
+          type: 'Label', name: 'NameLabel'
+        }
+      ]
+    }
+    ]
+  },
+  debug: {
+    children: [
+{
+      type: 'Control', name: 'NinKingDebug',
+      script: 'debug_controller.gd',
+      note: '1920×1080 [debug_controller.gd]',
+      children: [
+{
+          type: 'Control', name: 'DebugPanel',
+          script: 'debug_panel.gd',
+          note: '调试控制面板',
+          children: [
+{
+              type: 'VBoxContainer', name: 'DebugVBox',
+              children: [
+{
+                  type: 'Button', name: 'BackBtn',
+                  unique: true,
+                  note: '返回'
+                },
+{
+                  type: 'Button', name: 'ClearBtn',
+                  unique: true,
+                  note: '清除'
+                },
+{
+                  type: 'Label', name: 'NinjaStatusLabel',
+                  unique: true
+                },
+{
+                  type: 'Button', name: 'NinjaSelectBtn',
+                  unique: true,
+                  note: '选择忍者'
+                },
+{
+                  type: 'VBoxContainer', name: 'StarChartContainer',
+                  unique: true
+                },
+{
+                  type: 'Button', name: 'RandomBtn',
+                  unique: true,
+                  note: '随机'
+                },
+{
+                  type: 'Label', name: 'RightTitle',
+                  note: '忍者选择'
+                },
+{
+                  type: 'Label', name: 'StarTitle',
+                  note: '星图'
+                },
+{
+                  type: 'Button', name: 'ToggleBtn',
+                  note: '切换'
+                },
+{
+                  type: 'Label', name: 'CardTrayLabel',
+                  note: '牌库'
+                },
+{
+                  type: 'GridContainer', name: 'CardTray',
+                  unique: true,
+                  script: 'debug_card_tray.gd',
+                  note: '52 张'
+                },
+{
+                  type: 'Label', name: 'CardQueueLabel',
+                  unique: true,
+                  note: '手牌'
+                },
+{
+                  type: 'HBoxContainer', name: 'CardQueueContainer',
+                  unique: true
+                },
+{
+                  type: 'Button', name: 'DealBtn',
+                  unique: true,
+                  note: '发牌'
+                }
+              ]
+            },
+{
+              type: 'ColorRect', name: 'PanelBg'
+            }
+          ]
+        },
+{
+          type: 'Label', name: 'StatusLabel',
+          unique: true,
+          note: '约束提示'
+        },
+{
+          type: 'TextureRect', name: 'GameBg',
+          note: '桌布背景'
+        },
+{
+          type: 'VBoxContainer', name: 'MainVBox',
+          children: [
+{
+              type: 'HBoxContainer', name: 'ContentRow',
+              children: [
+{
+                  type: 'Control', name: 'LeftPanel',
+                  children: [
+{
+                      type: 'Panel', name: 'AntePanel',
+                      children: [
+{
+                          type: 'VBoxContainer', name: 'AnteVBox',
+                          children: [
+{
+                              type: 'Label', name: 'BarrierLabel',
+                              unique: true,
+                              note: '"结界"'
+                            },
+{
+                              type: 'Label', name: 'RoundLabel',
+                              unique: true,
+                              note: '"回合"'
+                            }
+                          ]
+                        }
+                      ]
+                    },
+{
+                      type: 'Panel', name: 'ScorePanel',
+                      children: [
+{
+                          type: 'VBoxContainer', name: 'ScoreVBox',
+                          children: [
+{
+                              type: 'Label', name: 'TargetScoreLabel',
+                              unique: true
+                            },
+{
+                              type: 'Label', name: 'ScoreLabel',
+                              unique: true
+                            },
+{
+                              type: 'ProgressBar', name: 'ProgressBar',
+                              unique: true
+                            },
+{
+                              type: 'Label', name: 'ColXiLabel',
+                              unique: true
+                            }
+                          ]
+                        }
+                      ]
+                    },
+{
+                      type: 'ColorRect', name: 'PanelBg'
+                    },
+{
+                      type: 'Panel', name: 'MatchPanel',
+                      children: [
+{
+                          type: 'VBoxContainer', name: 'MatchVBox',
+                          children: [
+{
+                              type: 'Label', name: 'GoldLabel',
+                              unique: true,
+                              note: '"$"'
+                            },
+{
+                              type: 'Label', name: 'MatchTitle',
+                              note: '"比赛信息"'
+                            },
+{
+                              type: 'Label', name: 'HandsLabel',
+                              unique: true,
+                              note: '"討伐"'
+                            }
+                          ]
+                        }
+                      ]
+                    },
+{
+                      type: 'Panel', name: 'HandTypePanel',
+                      children: [
+{
+                          type: 'Control', name: 'HandTypeVBox',
+                          children: [
+{
+                              type: 'ColorRect', name: 'ColDivider'
+                            },
+{
+                              type: 'Control', name: 'Row滅',
+                              children: [
+{
+                                  type: 'RichTextLabel', name: 'DestroyScore',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'DestroyLv',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'DestroyType',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'DestroyDun'
+                                }
+                              ]
+                            },
+{
+                              type: 'Control', name: 'Row瞬',
+                              children: [
+{
+                                  type: 'Label', name: 'FlashDun'
+                                },
+{
+                                  type: 'Label', name: 'FlashType',
+                                  unique: true
+                                },
+{
+                                  type: 'RichTextLabel', name: 'FlashScore',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'FlashLv',
+                                  unique: true
+                                }
+                              ]
+                            },
+{
+                              type: 'Control', name: 'ColumnBar',
+                              children: [
+{
+                                  type: 'Label', name: 'MidColLabel',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'RightColLabel',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'LeftColLv',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'LeftColLabel',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'MidColType',
+                                  unique: true
+                                },
+{
+                                  type: 'RichTextLabel', name: 'RightColScore',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'RightColLv',
+                                  unique: true
+                                },
+{
+                                  type: 'RichTextLabel', name: 'LeftColScore',
+                                  unique: true
+                                },
+{
+                                  type: 'RichTextLabel', name: 'MidColScore',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'RightColType',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'LeftColType',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'MidColLv',
+                                  unique: true
+                                }
+                              ]
+                            },
+{
+                              type: 'Control', name: 'Row影',
+                              children: [
+{
+                                  type: 'Label', name: 'ShadowLv',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'ShadowType',
+                                  unique: true
+                                },
+{
+                                  type: 'Label', name: 'ShadowDun'
+                                },
+{
+                                  type: 'RichTextLabel', name: 'ShadowScore',
+                                  unique: true
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+{
+                  type: 'Control', name: 'CenterColumn',
+                  children: [
+{
+                      type: 'HBoxContainer', name: 'HandArea',
+                      unique: true,
+                      children: [
+{
+                          type: 'Button', name: 'PlayBtn',
+                          unique: true,
+                          note: '"討伐"'
+                        }
+                      ]
+                    },
+{
+                      type: 'Control', name: 'NinjaBar',
+                      unique: true
+                    },
+{
+                      type: 'Panel', name: 'DunArea',
+                      children: [
+{
+                          type: 'Label', name: 'HeadLabel',
+                          unique: true
+                        },
+{
+                          type: 'Label', name: 'HeadTypeLabel',
+                          unique: true
+                        },
+{
+                          type: 'Label', name: 'MiddleLabel',
+                          unique: true
+                        },
+{
+                          type: 'Label', name: 'MiddleTypeLabel',
+                          unique: true
+                        },
+{
+                          type: 'Label', name: 'TailLabel',
+                          unique: true
+                        },
+{
+                          type: 'Label', name: 'TailTypeLabel',
+                          unique: true
+                        },
+{
+                          type: 'Control', name: 'CardGrid',
+                          unique: true,
+                          script: 'hand_card_container.gd',
+                          note: '3×3 卡牌'
+                        },
+{
+                          type: 'HBoxContainer', name: 'ColumnLabelRow',
+                          children: [
+{
+                              type: 'Label', name: 'Col1Label',
+                              unique: true
+                            },
+{
+                              type: 'Label', name: 'Col2Label',
+                              unique: true
+                            },
+{
+                              type: 'Label', name: 'Col0Label',
+                              unique: true
+                            }
+                          ]
+                        }
+                      ]
+                    },
+{
+                      type: 'Button', name: 'AiRearrangeBtn',
+                      unique: true,
+                      note: '"陣形"'
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+{
+          type: 'Instance', name: 'CardManager',
+          instance: 'card_manager.tscn',
+          note: 'card-framework'
+        },
+{
+          type: 'Button', name: 'DeckBtn',
+          unique: true,
+          note: '"牌库"'
+        },
+{
+          type: 'Control', name: 'NinjaSelector',
+          unique: true,
+          script: 'debug_ninja_selector.gd',
+          note: '忍者选择浮层',
+          children: [
+{
+              type: 'PanelContainer', name: 'SelectorPanel',
+              children: [
+{
+                  type: 'VBoxContainer', name: 'SelectorVBox',
+                  children: [
+{
+                      type: 'HBoxContainer', name: 'BtnRow',
+                      children: [
+{
+                          type: 'Button', name: 'CancelBtn',
+                          unique: true,
+                          note: '取消'
+                        },
+{
+                          type: 'Button', name: 'ConfirmBtn',
+                          unique: true,
+                          note: '确认'
+                        }
+                      ]
+                    },
+{
+                      type: 'ScrollContainer', name: 'ScrollContainer',
+                      children: [
+{
+                          type: 'GridContainer', name: 'NinjaGrid',
+                          unique: true,
+                          note: '忍者网格'
+                        }
+                      ]
+                    },
+{
+                      type: 'HBoxContainer', name: 'TitleRow',
+                      children: [
+{
+                          type: 'Control', name: 'SortSpacer'
+                        },
+{
+                          type: 'Label', name: 'SelectorTitle',
+                          unique: true
+                        },
+{
+                          type: 'HBoxContainer', name: 'SortBtns',
+                          children: [
+{
+                              type: 'Button', name: 'AllBtn',
+                              unique: true,
+                              note: '全部'
+                            },
+{
+                              type: 'Button', name: 'RarityBtn',
+                              unique: true,
+                              note: '稀有度'
+                            },
+{
+                              type: 'Button', name: 'CategoryBtn',
+                              unique: true,
+                              note: '分类'
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+{
+              type: 'ColorRect', name: 'SelectorBg',
+              note: '#000 遮罩'
+            }
+          ]
+        }
+      ]
+    }
+    ]
+  },
+  card: {
+    children: [
+{
+      type: 'Control', name: 'NinKingCard',
+      script: 'ninking_card.gd',
+      note: 'card_size=125×175',
+      children: [
+{
+          type: 'Control', name: 'FrontFace',
+          note: '插画层',
+          children: [
+{
+              type: 'TextureRect', name: 'TextureRect',
+              note: '120×160'
+            }
+          ]
+        },
+{
+          type: 'Control', name: 'BackFace',
+          note: '背面',
+          children: [
+{
+              type: 'TextureRect', name: 'TextureRect',
+              note: '120×160'
+            }
+          ]
+        }
+      ]
+    }
+    ]
+  },
+  popup: {
+    children: [
+{
+      type: 'Control', name: 'CardDetailPopup',
+      script: 'card_detail_popup.gd',
+      note: '全屏覆盖',
+      children: [
+{
+          type: 'ColorRect', name: 'DetailOverlay',
+          unique: true,
+          note: '#000 80%'
+        },
+{
+          type: 'Label', name: 'NameLabel',
+          unique: true
+        },
+{
+          type: 'Control', name: 'EffectContainer',
+          unique: true
+        },
+{
+          type: 'Label', name: 'DescLabel',
+          unique: true
+        }
+      ]
+    }
+    ]
+  },
+  deck: {
+    children: [
+{
+      type: 'Control', name: 'DeckSelectPanel',
+      script: 'deck_select_panel.gd',
+      note: '全屏, visible=false',
+      children: [
+{
+          type: 'PanelContainer', name: 'PanelBg',
+          note: '960×600 居中',
+          children: [
+{
+              type: 'VBoxContainer', name: 'VBox',
+              note: 'separation=32',
+              children: [
+{
+                  type: 'HBoxContainer', name: 'BtnRow',
+                  children: [
+{
+                      type: 'Button', name: 'ConfirmBtn',
+                      unique: true,
+                      note: '"开始" 160×48'
+                    },
+{
+                      type: 'Button', name: 'BackBtn',
+                      unique: true,
+                      note: '"返回" 160×48'
+                    }
+                  ]
+                },
+{
+                  type: 'Label', name: 'Title',
+                  note: '"选择牌组" 32px 金'
+                },
+{
+                  type: 'HBoxContainer', name: 'CardsRow',
+                  unique: true,
+                  note: '牌组预览'
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+    ]
+  },
+  continue: {
+    children: [
+{
+      type: 'Control', name: 'ContinuePanel',
+      script: 'continue_panel.gd',
+      note: '1920×1080, visible=false',
+      children: [
+{
+          type: 'PanelContainer', name: 'ContinuePanelBg',
+          note: '560×400 居中',
+          children: [
+{
+              type: 'VBoxContainer', name: 'ContinueVBox',
+              note: 'separation=24',
+              children: [
+{
+                  type: 'Label', name: 'ContinueTitle',
+                  unique: true,
+                  note: '32px 金'
+                },
+{
+                  type: 'Label', name: 'ContinueInfo',
+                  unique: true,
+                  note: '24px 灰'
+                },
+{
+                  type: 'HBoxContainer', name: 'ContinueBtnRow',
+                  children: [
+{
+                      type: 'Button', name: 'GoBtn',
+                      unique: true,
+                      note: '"继续冒险" 180×48'
+                    },
+{
+                      type: 'Button', name: 'BackBtn',
+                      unique: true,
+                      note: '"返回" 160×48'
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+    ]
+  }
+};
+
+// ─── Render tree ───
+function typeClass(type) {
+  const map = {
+    'Control':'control','Panel':'panel','Label':'label','Button':'button',
+    'TextureRect':'texturerect','ColorRect':'colorrect','PanelContainer':'panel',
+    'HBoxContainer':'hbox','VBoxContainer':'vbox',
+    'ScrollContainer':'scroll','GridContainer':'grid','ProgressBar':'progress',
+    'RichTextLabel':'richtext','CardManager':'cardmanager',
+  };
+  return 'node-'+ (map[type] || 'control');
+}
+
+function renderTree(container, nodes, depth) {
+  if (!nodes || !nodes.length) return;
+  const ul = document.createElement('div');
+  ul.className = 'children';
+  nodes.forEach(n => {
+    const hasChild = n.children && n.children.length;
+    const li = document.createElement('div');
+    li.className = 'tree-node ' + typeClass(n.type);
+
+    const row = document.createElement('div');
+    row.className = 'tree-row' + (hasChild ? ' has-children' : '');
+
+    const toggler = document.createElement('span');
+    toggler.className = 'toggle' + (hasChild ? '' : ' no-children');
+    toggler.textContent = '▼';
+    if (!hasChild) toggler.innerHTML = '&nbsp;';
+
+    const typeBadge = document.createElement('span');
+    typeBadge.className = 'badge-type';
+    typeBadge.textContent = n.type;
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'badge-name';
+    nameSpan.textContent = n.name;
+
+    row.appendChild(toggler);
+    row.appendChild(typeBadge);
+    row.appendChild(nameSpan);
+
+    if (n.unique) {
+      const u = document.createElement('span');
+      u.className = 'badge-unique';
+      u.textContent = '%' + n.name;
+      row.appendChild(u);
+    }
+    if (n.script) {
+      const s = document.createElement('span');
+      s.className = 'badge-script';
+      s.textContent = n.script;
+      row.appendChild(s);
+    }
+    if (n.note) {
+      const nt = document.createElement('span');
+      nt.className = 'badge-note';
+      nt.textContent = '— ' + n.note;
+      row.appendChild(nt);
+    }
+
+    li.appendChild(row);
+
+    if (hasChild) {
+      const childContainer = document.createElement('div');
+      childContainer.className = 'children';
+      renderTree(childContainer, n.children, depth+1);
+      li.appendChild(childContainer);
+
+      row.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const tc = toggler;
+        const cc = li.querySelector(':scope > .children');
+        if (cc.classList.contains('collapsed')) {
+          cc.classList.remove('collapsed');
+          tc.classList.remove('collapsed');
+        } else {
+          cc.classList.add('collapsed');
+          tc.classList.add('collapsed');
+        }
+      });
+    }
+
+    ul.appendChild(li);
+  });
+  container.appendChild(ul);
+}
+
 // ═══ Init ═══
 document.getElementById("card-count").textContent = `· ${NINJAS.length} 忍者 · ${XI_BASIC.length + XI_PHASE_E.length} 喜`;
 render();
 renderStats();
 renderXiTables();
+
+// ═══ Render scene trees ═══
+Object.entries(SCENES).forEach(([id, data]) => {
+  const root = document.getElementById('tree-' + id);
+  if (root) renderTree(root, data.children, 0);
+});
 </script>
 
 </body>
