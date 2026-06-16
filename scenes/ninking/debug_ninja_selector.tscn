@@ -1,0 +1,112 @@
+[gd_scene format=3 uid="uid://bq5sru3f2ol7t"]
+
+[ext_resource type="Script" uid="uid://bhsy8ww8j2k2n" path="res://scripts/ninking/debug/debug_ninja_selector.gd" id="1_script"]
+
+[node name="NinjaSelector" type="Control" unique_id=1259498117]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_script")
+
+[node name="SelectorBg" type="ColorRect" parent="." unique_id=896070960]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+color = Color(0, 0, 0, 0.7)
+
+[node name="SelectorPanel" type="PanelContainer" parent="." unique_id=2048698903]
+layout_mode = 0
+offset_left = 200.0
+offset_top = 140.0
+offset_right = 1500.0
+offset_bottom = 940.0
+
+[node name="SelectorVBox" type="VBoxContainer" parent="SelectorPanel" unique_id=1336702862]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TitleRow" type="HBoxContainer" parent="SelectorPanel/SelectorVBox" unique_id=1351474432]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SelectorTitle" type="Label" parent="SelectorPanel/SelectorVBox/TitleRow" unique_id=68897870]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 28
+text = "选择忍者 (0/5)"
+horizontal_alignment = 1
+
+[node name="SortSpacer" type="Control" parent="SelectorPanel/SelectorVBox/TitleRow" unique_id=79989383]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SortBtns" type="HBoxContainer" parent="SelectorPanel/SelectorVBox/TitleRow" unique_id=1600948343]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="CategoryBtn" type="Button" parent="SelectorPanel/SelectorVBox/TitleRow/SortBtns" unique_id=517306873]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(56, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+toggle_mode = true
+button_pressed = true
+text = "类型"
+
+[node name="RarityBtn" type="Button" parent="SelectorPanel/SelectorVBox/TitleRow/SortBtns" unique_id=683539593]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(56, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+toggle_mode = true
+text = "稀有度"
+
+[node name="AllBtn" type="Button" parent="SelectorPanel/SelectorVBox/TitleRow/SortBtns" unique_id=107407723]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(48, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+toggle_mode = true
+text = "全部"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="SelectorPanel/SelectorVBox" unique_id=1534587076]
+custom_minimum_size = Vector2(0, 500)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="NinjaGrid" type="GridContainer" parent="SelectorPanel/SelectorVBox/ScrollContainer" unique_id=2037431316]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
+columns = 5
+
+[node name="BtnRow" type="HBoxContainer" parent="SelectorPanel/SelectorVBox" unique_id=62405024]
+layout_mode = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="ConfirmBtn" type="Button" parent="SelectorPanel/SelectorVBox/BtnRow" unique_id=915369102]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "开始"
+
+[node name="CancelBtn" type="Button" parent="SelectorPanel/SelectorVBox/BtnRow" unique_id=1619444526]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "取消"
