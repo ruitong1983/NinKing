@@ -477,9 +477,9 @@ footer a:hover { color: var(--gold); }
   <h3>📋 最近更新</h3>
   <!-- RECENT_UPDATES_PLACEHOLDER -->
 <ul>
-  <li><span class="date">2026-06-17</span><span class="tag tag-docs">docs</span><span class="tag tag-fix">fix</span>fix(html): 修复 Pages 上图片404 — CI 复制 assets 到 docs/</li>
+  <li><span class="date">2026-06-17</span><span class="tag tag-docs">docs</span>docs: 新增 §9 GitHub Pages 部署说明到 html-visualization-guide</li>
 </ul>
-<p style="font-size:11px;color:var(--text-dim);margin-top:6px">最新提交 · 部署于 2026-06-17 14:26</p>
+<p style="font-size:11px;color:var(--text-dim);margin-top:6px">最新提交 · 部署于 2026-06-17 17:13</p>
 </div>
 
 <!-- ═══ Tab Bar ═══ -->
@@ -899,58 +899,28 @@ const NINJAS = [
     "category": null,
     "name": "四张猎人",
     "rarity": "uncommon",
-    "cost": 4,
-    "desc": "四张出现时 +30 筹码，否则 +5 筹码",
+    "cost": 6,
+    "desc": "四张出现时所有行列组 +50 筹码",
     "effect": {
-      "add_chips": 30,
+      "add_chips": 50,
       "condition": {
         "xi": "四张"
-      },
-      "else_chips": 5
+      }
     }
   },
   {
     "id": "n_x03",
     "category": null,
-    "name": "清一色",
+    "name": "两仪",
     "rarity": "uncommon",
-    "cost": 5,
-    "desc": "三清时 ×3（替代默认×2）",
+    "cost": 6,
+    "desc": "手牌中有 2 和 A 时全局×5",
     "effect": {
-      "xi_override": {
-        "三清": 3
+      "x_mult": 5,
+      "condition": {
+        "has_2_and_ace": true
       }
     }
-  },
-  {
-    "id": "n_x04",
-    "category": null,
-    "name": "黑龙",
-    "rarity": "rare",
-    "cost": 8,
-    "desc": "全黑触发时再 ×2",
-    "effect": {
-      "x_mult": 2,
-      "condition": {
-        "xi": "全黑"
-      }
-    },
-    "deferred": true
-  },
-  {
-    "id": "n_x05",
-    "category": null,
-    "name": "赤凤",
-    "rarity": "rare",
-    "cost": 8,
-    "desc": "全红触发时再 ×2",
-    "effect": {
-      "x_mult": 2,
-      "condition": {
-        "xi": "全红"
-      }
-    },
-    "deferred": true
   },
   {
     "id": "n_x06",

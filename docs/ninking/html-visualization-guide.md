@@ -150,7 +150,7 @@ python tools/extract_ninja_data.py
 | `cost` | 售价（传说牌为 999） |
 | `desc` | 效果描述文本 |
 | `effect` | 效果参数对象 |
-| `deferred` | `true` 表示暂缓实现（黑龙/赤凤） |
+| `deferred` | `true` 表示暂缓实现 |
 | `mutex_group` | 互斥组 ID |
 | `scaling` | 成长参数（触发条件/每次增量/重置条件） |
 

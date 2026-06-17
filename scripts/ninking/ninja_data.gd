@@ -16,7 +16,7 @@ extends RefCounted
 ## Shop generation → NinjaPool. Scaling engine → NinjaScaling.
 
 # ══════════════════════════════════════════
-# Complete pool — 45 cards (43 active + 2 deferred)
+# Complete pool — 43 cards (43 active)
 # ══════════════════════════════════════════
 
 const ALL_NINJAS: Array[Dictionary] = [
@@ -163,31 +163,16 @@ const ALL_NINJAS: Array[Dictionary] = [
 	{
 		"id": "n_x02", "tags": ["筹码"], "name": "四张猎人",
 		"effect": {
-			"add_chips": 30, "condition": {"xi": "四张"},
-			"else_chips": 5
+			"add_chips": 50, "condition": {"xi": "四张"}
 		},
-		"cost": 4, "rarity": "uncommon",
-		"desc": "四张出现时 +30 筹码，否则 +5 筹码"
+		"cost": 6, "rarity": "uncommon",
+		"desc": "四张出现时所有行列组 +50 筹码"
 	},
 	{
-		"id": "n_x03", "tags": ["倍率X"], "name": "清一色",
-		"effect": {"xi_override": {"三清": 3}},
-		"cost": 5, "rarity": "uncommon",
-		"desc": "三清时 ×3（替代默认×2）"
-	},
-	{
-		"id": "n_x04", "tags": ["倍率X"], "name": "黑龙",
-		"effect": {"x_mult": 2, "condition": {"xi": "全黑"}},
-		"cost": 8, "rarity": "rare",
-		"desc": "全黑触发时再 ×2",
-		"deferred": true
-	},
-	{
-		"id": "n_x05", "tags": ["倍率X"], "name": "赤凤",
-		"effect": {"x_mult": 2, "condition": {"xi": "全红"}},
-		"cost": 8, "rarity": "rare",
-		"desc": "全红触发时再 ×2",
-		"deferred": true
+		"id": "n_x03", "tags": ["倍率X"], "name": "两仪",
+		"effect": {"x_mult": 5, "condition": {"has_2_and_ace": true}},
+		"cost": 6, "rarity": "uncommon",
+		"desc": "手牌中有 2 和 A 时全局×5"
 	},
 	{
 		"id": "n_x06", "tags": ["倍率X"], "name": "龙之眼",
@@ -232,10 +217,10 @@ const ALL_NINJAS: Array[Dictionary] = [
 
 	# ─── 忍法 (4) ───
 	{
-		"id": "n_t01", "tags": ["操控"], "name": "火遁",
-		"effect": {"extra_plays": 1},
+		"id": "n_t01", "tags": ["倍率+"], "name": "火遁",
+		"effect": {"add_mult": 8, "condition": {"hand_type": 4}},
 		"cost": 8, "rarity": "uncommon",
-		"desc": "+1 出牌次数"
+		"desc": "同花顺组+8 倍率"
 	},
 	{
 		"id": "n_t02", "tags": ["倍率+"], "name": "水遁",
@@ -250,10 +235,10 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"desc": "对子组+3 倍率"
 	},
 	{
-		"id": "n_t06", "tags": ["特殊"], "name": "土遁",
-		"effect": {"death_save": true},
+		"id": "n_t06", "tags": ["倍率+"], "name": "土遁",
+		"effect": {"add_mult": 5, "condition": {"hand_type": 3}},
 		"cost": 10, "rarity": "rare",
-		"desc": "战败保留金币重开本结界（1局1次）"
+		"desc": "同花组+5 倍率"
 	},
 
 	# ─── 传说 (3) ───
