@@ -77,6 +77,54 @@ static func calculate(
 
 	for ninja: Dictionary in ninjas:
 		var effect: Dictionary = ninja.get("effect", {})
+		# add_mult_to_rows: col_hand_type condition -> add mult to all rows
+		var _add_to_rows: int = effect.get("add_mult_to_rows", 0)
+		if _add_to_rows > 0 and col_evals.size() >= 3:
+			var _req_ct: int = effect.get("condition", {}).get("col_hand_type", -1)
+			var _match_flag: bool = false
+			if _req_ct != -1:
+				for _i in range(3):
+					if col_evals[_i] != null and int(col_evals[_i].hand_type) == _req_ct:
+						_match_flag = true
+						break
+			else:
+				_match_flag = true
+			if _match_flag:
+				head_ninja.mult += _add_to_rows
+				mid_ninja.mult += _add_to_rows
+				tail_ninja.mult += _add_to_rows
+		# add_chips_to_rows: col_hand_type condition -> add chips to all rows
+		var _chips_to_rows: int = effect.get("add_chips_to_rows", 0)
+		if _chips_to_rows > 0 and col_evals.size() >= 3:
+			var _rct_c: int = effect.get("condition", {}).get("col_hand_type", -1)
+			var _mf_c: bool = false
+			if _rct_c != -1:
+				for _ic in range(3):
+					if col_evals[_ic] != null and int(col_evals[_ic].hand_type) == _rct_c:
+						_mf_c = true
+						break
+			else:
+				_mf_c = true
+			if _mf_c:
+				head_ninja.chips += _chips_to_rows
+				mid_ninja.chips += _chips_to_rows
+				tail_ninja.chips += _chips_to_rows
+		# x_mult_to_rows: col_hand_type condition -> x_mult to all rows
+		var _x_to_rows: int = effect.get("x_mult_to_rows", 0)
+		if _x_to_rows > 1 and col_evals.size() >= 3:
+			var _req_ctx: int = effect.get("condition", {}).get("col_hand_type", -1)
+			var _match_flag_x: bool = false
+			if _req_ctx != -1:
+				for _ix in range(3):
+					if col_evals[_ix] != null and int(col_evals[_ix].hand_type) == _req_ctx:
+						_match_flag_x = true
+						break
+			else:
+				_match_flag_x = true
+			if _match_flag_x:
+				head_ninja.x_stack.append(_x_to_rows)
+				mid_ninja.x_stack.append(_x_to_rows)
+				tail_ninja.x_stack.append(_x_to_rows)
 		ScoreEffectCollector.collect_ninja_per_group(effect, head_type, mid_type, tail_type,
 			head_cards, mid_cards, tail_cards,
 			head_eval, mid_eval, tail_eval,
@@ -289,6 +337,54 @@ static func analyze_effects(
 			summary_tail_only_x3 = true
 
 		# 1) Row effects
+		# add_mult_to_rows: col_hand_type condition -> add mult to all rows
+		var _atr: int = effect.get("add_mult_to_rows", 0)
+		if _atr > 0 and col_evals.size() >= 3:
+			var _rct: int = effect.get("condition", {}).get("col_hand_type", -1)
+			var _mf: bool = false
+			if _rct != -1:
+				for _i2 in range(3):
+					if col_evals[_i2] != null and int(col_evals[_i2].hand_type) == _rct:
+						_mf = true
+						break
+			else:
+				_mf = true
+			if _mf:
+				per_group.head.mult += _atr
+				per_group.mid.mult += _atr
+				per_group.tail.mult += _atr
+		# add_chips_to_rows: col_hand_type condition -> add chips to all rows
+		var _ctr: int = effect.get("add_chips_to_rows", 0)
+		if _ctr > 0 and col_evals.size() >= 3:
+			var _rctc: int = effect.get("condition", {}).get("col_hand_type", -1)
+			var _mfc: bool = false
+			if _rctc != -1:
+				for _ic2 in range(3):
+					if col_evals[_ic2] != null and int(col_evals[_ic2].hand_type) == _rctc:
+						_mfc = true
+						break
+			else:
+				_mfc = true
+			if _mfc:
+				per_group.head.chips += _ctr
+				per_group.mid.chips += _ctr
+				per_group.tail.chips += _ctr
+		# x_mult_to_rows: col_hand_type condition -> x_mult to all rows
+		var _xtr: int = effect.get("x_mult_to_rows", 0)
+		if _xtr > 1 and col_evals.size() >= 3:
+			var _rctx: int = effect.get("condition", {}).get("col_hand_type", -1)
+			var _mfx: bool = false
+			if _rctx != -1:
+				for _ix2 in range(3):
+					if col_evals[_ix2] != null and int(col_evals[_ix2].hand_type) == _rctx:
+						_mfx = true
+						break
+			else:
+				_mfx = true
+			if _mfx:
+				per_group.head.x_stack.append(_xtr)
+				per_group.mid.x_stack.append(_xtr)
+				per_group.tail.x_stack.append(_xtr)
 		ScoreEffectCollector.collect_ninja_per_group(effect,
 			head_type, mid_type, tail_type,
 			head_cards, mid_cards, tail_cards,

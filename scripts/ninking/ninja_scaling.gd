@@ -5,8 +5,8 @@ extends RefCounted
 ## Extracted from NinjaData. Modifies ninja `effect` values in-place.
 ## Called from SealController.finalize_play() (B10).
 ##
-## 5 scaling ninjas: n_s01(修行者), n_s02(三清道人), n_s03(龙脉),
-##   n_s05(天华), n_s06(王座). n_s04(忍法帖) deleted.
+## Active scaling ninjas: n_s01(修行者, 暂缓). Deleted: n_s02-n_s04.
+##   天华/王座已重设计为 n_110 閃光 / n_111 流光（倍率X·列传行）。
 
 
 ## Process scaling ninja effects after each play.
