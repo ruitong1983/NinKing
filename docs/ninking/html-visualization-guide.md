@@ -271,3 +271,48 @@ python tools/xxx.py path/to/page.html  # 直接嵌入 HTML
 - 确认文件 UTF-8 无 BOM
 - 确认 `<meta charset="UTF-8">` 在 `<head>` 中
 - Windows 下用浏览器直接打开（不要用旧版记事本编辑）
+
+---
+
+## 九、GitHub Pages 部署
+
+> **工作流文件：** `.github/workflows/deploy-pages.yml`
+
+### 9.1 架构
+
+GitHub Actions 自动部署 `ninja_card_viewer.html` 到 GitHub Pages。
+
+```
+PR merged to master
+    ↓
+Actions: Deploy NinKing Pages
+    │
+    ├─ 1. Checkout 仓库（fetch-depth: 0）
+    ├─ 2. 提取 4 种数据注入 HTML（extract_ninja_data / extract_xi_data / tscn_parser / inject_recent_updates）
+    ├─ 3. 复制 assets/images/cards/ninjas/ → docs/assets/images/cards/ninjas/   ← CI 时复制，不进 git
+    └─ 4. Upload artifact（path: docs/）→ Deploy to Pages
+```
+
+### 9.2 关键约束
+
+| 约束 | 说明 |
+|------|------|
+| **只发布 `docs/`** | `actions/upload-pages-artifact` 的 `path: docs/` 限定，仓库根目录的 `assets/` 不在 Pages 上 |
+| **图片需 CI 复制** | `assets/images/cards/ninjas/*.png` 在 CI 中复制到 `docs/assets/images/cards/ninjas/`，不进 git 仓库 |
+| **HTML 路径** | `ninja_card_viewer.html` 中图片引用为 `../assets/images/cards/ninjas/{id}.png`（相对于 `docs/ninking/`） |
+
+### 9.3 部署三种方式
+
+| 方式 | 操作 | 说明 |
+|------|------|------|
+| **A — 快速同步** | 本地跑 4 个提取脚本 | 只更新本地 HTML，不提交 |
+| **B — 部署上线** | 修改 → commit → push → `gh pr create` → merge | PR 合入 master 后自动部署 |
+| **C — 一步到位** | `bash tools/publish_html.sh --pr` | 提取 + 提交 + PR 一条命令 |
+
+### 9.4 验证部署
+
+1. 访问 `https://ruitong1983.github.io/NinKing/ninking/ninja_card_viewer.html`
+2. 确认卡牌图片正常加载（按 F12 → Network 标签检查图片请求无 404）
+3. 确认忍者牌/喜系统/场景树三个选项卡数据最新
+
+> **最后更新:** 2026-06-17
