@@ -6,7 +6,7 @@
 [ext_resource type="Script" uid="uid://dgk1vdi44nj6m" path="res://scripts/ninking/ui/ui_manager.gd" id="2_ui_mgr"]
 [ext_resource type="Texture2D" uid="uid://cmh6fgxip28j3" path="res://assets/images/background/table_bg.png" id="3_tblbg"]
 [ext_resource type="PackedScene" uid="uid://4jkp5mgq3d6t" path="res://scenes/ninking/ninking_card_factory.tscn" id="4_ensa0"]
-[ext_resource type="Shader" uid="uid://v8sl5wp6qlqi" path="res://scripts/ninking/ui/panel_edge_fade.gdshader" id="5_shader_fade"]
+[ext_resource type="Shader" uid="uid://v8sl5wp6qlqi" path="res://shaders/panel_edge_fade.gdshader" id="5_shader_fade"]
 [ext_resource type="Script" uid="uid://dkduntlls22m2" path="res://scripts/ninking/ui/hand_card_container.gd" id="8_pgq0x"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_match_fade"]

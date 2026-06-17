@@ -100,7 +100,7 @@ func _start_seal() -> void:
 	current_score = 0
 	plays_remaining = 3
 
-	# Tool effects from owned ninjas: extra_plays (火遁+1 / 赌命-1)
+	# Tool effects from owned ninjas: extra_plays (火遁已改同花顺倍率 / 赌命-1)
 	for ninja: Dictionary in owned_ninjas:
 		var ep: int = ninja.get("effect", {}).get("extra_plays", 0)
 		plays_remaining += ep

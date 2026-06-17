@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://c7u8hryloq7hy" path="res://addons/card-framework/card_manager.tscn" id="2_cm"]
 [ext_resource type="Texture2D" uid="uid://deelue8r4tqif" path="res://assets/images/background/table_bg.png" id="3_bg"]
 [ext_resource type="PackedScene" uid="uid://4jkp5mgq3d6t" path="res://scenes/ninking/ninking_card_factory.tscn" id="4_factory"]
-[ext_resource type="Shader" uid="uid://v8sl5wp6qlqi" path="res://scripts/ninking/ui/panel_edge_fade.gdshader" id="5_shader"]
+[ext_resource type="Shader" uid="uid://v8sl5wp6qlqi" path="res://shaders/panel_edge_fade.gdshader" id="5_shader"]
 [ext_resource type="Script" uid="uid://plki4nqvse4n" path="res://scripts/ninking/debug/debug_card_tray.gd" id="7_tray"]
 [ext_resource type="Script" uid="uid://dlyk22r2thr0n" path="res://scripts/ninking/debug/debug_panel.gd" id="8_rwsde"]
 [ext_resource type="Script" uid="uid://bvwoeasc8o6eb" path="res://scripts/ninking/debug/debug_controller.gd" id="9_ctrl"]

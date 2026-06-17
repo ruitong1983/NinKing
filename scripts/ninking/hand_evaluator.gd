@@ -61,7 +61,6 @@ static func _determine_type(cards: Array[CardData.PlayingCard]) -> CardData.Hand
 # ──────────────────────────── Internal ────────────────────────────
 
 static func _check_flush(cards: Array[CardData.PlayingCard]) -> bool:
-	# Wild cards match any suit
 	var base_suit: int = -1
 	for c: CardData.PlayingCard in cards:
 		if c.enhancement == CardData.Enhancement.WILD:

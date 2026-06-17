@@ -1,3 +1,4 @@
+## SealController — play execution & seal completion.
 class_name SealController
 extends RefCounted
 
@@ -60,7 +61,7 @@ static func prepare_play(gs) -> Dictionary:
 
 	# Column evaluation (3 vertical columns — from arrangement, not auto-arranger)
 	var col_evals: Array[HandEvaluator3.EvalResult] = []
-	for i: int in range(3):
+	for i in range(3):
 		var col_cards: Array[CardData.PlayingCard] = [head_cards[i], mid_cards[i], tail_cards[i]]
 		col_evals.append(HandEvaluator3.evaluate(col_cards))
 

@@ -23,7 +23,8 @@ XI_GROUP = {'三清':2,'三顺清':3,'顺清打头':2}
 def pc(s): return (s[0], RANK_VAL[s[1:]])
 def cchip(c): return RANK_CHIP[c[1]]
 def gchips(cs): return sum( cchip(c) for c in cs )
-def is_flush(cs): return len({c[0] for c in cs}) == 1
+def is_flush(cs):
+    return len({c[0] for c in cs}) == 1
 
 def eval_group(cs):
     r = sorted([c[1] for c in cs])
@@ -255,6 +256,19 @@ SET_Q = (['♠2','♥3','♣4'], ['♠5','♥5','♦9'], ['♣7','♠10','♥K']
 # 喜: 全三条×4 → 基线: 1956
 SET_R = (['♠3','♥3','♦3'], ['♠7','♥7','♦7'], ['♠J','♥J','♦J'])
 
+# v6.0: 两仪 color-flush 专用牌组
+# head: ♥2♦5♥9 (红混), mid: ♥3♦6♥10 (红混), tail: ♠4♣8♠Q (黑混)
+# Strict: 0/0/0 | Color: 3/3/3 → 三清! | 基线: 散牌各×1
+SET_CF1 = (['♥2','♦5','♥9'], ['♥3','♦6','♥10'], ['♠4','♣8','♠Q'])
+# SET_CF2 — 部分变色，部分不变
+# head: ♥2♦5♠K (红+黑混), mid: ♥3♦6♥10 (红混), tail: ♠4♣8♠Q (黑混)
+# Strict: 0/0/0 | Color: 0/3/3 → 无三清
+SET_CF2 = (['♥2','♦5','♠K'], ['♥3','♦6','♥10'], ['♠4','♣8','♠Q'])
+# SET_CF3 — 全混色，两边都无同花
+# head: ♥2♠5♦9, mid: ♠3♥6♣10, tail: ♣4♦8♥Q
+# 0/0/0 both ways
+SET_CF3 = (['♥2','♠5','♦9'], ['♠3','♥6','♣10'], ['♣4','♦8','♥Q'])
+
 print('=== 忍者牌扩展测试 v3 生成 ===')
 print(f'套牌: X(12472) Y(38656) Z(49664) W(9600) V(11120) U(10024) P(10416) Q(1308) R(1956)')
 
@@ -337,15 +351,15 @@ total_delta += tc('n_x01','喜鹊','T7','三清+全黑+1[X_喜W]', *SET_W, no_ni
 total_delta += tc('n_x01','喜鹊','T8','四张+1[V2]', *SET_V2, no_ninja(), xi_bonus=1)            # 四张×6
 total_delta += tc('n_x01','喜鹊','T9','三清+全黑+1[Y大列]', *SET_Y, no_ninja(), xi_bonus=1)   # 三清×3+全黑×3+列16
 
-# n_x02 四张猎人 +30c(四张) else +5c
-total_delta += tc('n_x02','四张猎人','T7','三清无四张+5c[W]', *SET_W, ne_all(c=5))          # 无四张→+5c
-total_delta += tc('n_x02','四张猎人','T8','四张触发+30c[V2]', *SET_V2, ne_all(c=30))          # 四张→+30c
-total_delta += tc('n_x02','四张猎人','T9','全对子无四张+5c[Z]', *SET_Z, ne_all(c=5))        # 无四张→+5c
+# n_x02 四张猎人 四张触发时所有行列组 +50c
+total_delta += tc('n_x02','四张猎人','T7','三清无四张不触发[W]', *SET_W, no_ninja())          # 无四张→0
+total_delta += tc('n_x02','四张猎人','T8','四张触发+50c[V2]', *SET_V2, ne_all(c=50))          # 四张→+50c
+total_delta += tc('n_x02','四张猎人','T9','全对子无四张不触发[Z]', *SET_Z, no_ninja())        # 无四张→0
 
-# n_x03 清一色 三清×3
-total_delta += tc('n_x03','清一色','T7','三清+全黑×3[W]', *SET_W, no_ninja(), xi_override={'三清':3})
-total_delta += tc('n_x03','清一色','T8','三清+全黑+大列×3[Y]', *SET_Y, no_ninja(), xi_override={'三清':3})
-total_delta += tc('n_x03','清一色','T9','无三清不触发[X]', *SET_X, no_ninja(), xi_override={'三清':3})
+# n_x03 两仪 花色对等 — 同花色红系(♥+♦)/黑系(♠+♣)判定为同花
+total_delta += tc('n_x03','两仪','T7','全色同花→三清[CF1]', *SET_CF1, no_ninja())
+total_delta += tc('n_x03','两仪','T8','部分变色[CF2]', *SET_CF2, no_ninja())
+total_delta += tc('n_x03','两仪','T9','全混色无变化[CF3]', *SET_CF3, no_ninja())
 
 # n_x06 龙之眼 每多一张四张×2(上限2次)
 total_delta += tc('n_x06','龙之眼','T7','单套四张×2[V2]', *SET_V2, ne_all(x=[2]))
@@ -377,7 +391,12 @@ total_delta += tc('n_f02','王牌侍从','T8','2A+10m[Z]', *SET_Z, ne_all(m=10))
 total_delta += tc('n_f02','王牌侍从','T9','0A+0m[Q]', *SET_Q, no_ninja())             # 无A
 
 
-# ==================== Batch 5: 规则变更+传说+风遁 (4 cards) ====================
+# ==================== Batch 5: 规则变更+传说+火遁+风遁+土遁 (6 cards) ====================
+
+# n_t01 火遁 hand_type=4→+8m (改造: +1出牌→同花顺+倍率)
+total_delta += tc('n_t01','火遁','T7','尾同花顺+8m[X]', *SET_X, ne_partial(t={'c':0,'m':8,'x':[]}))  # 豹(5)+顺(2)+同花顺(4) ✅
+total_delta += tc('n_t01','火遁','T8','三同花不触发[Y]', *SET_Y, no_ninja())                           # 全同花(3) ❌
+total_delta += tc('n_t01','火遁','T9','全对子不触发[Z]', *SET_Z, no_ninja())                           # 全对子(1) ❌
 
 # n_r02 均衡之印 三组同牌型→×2
 total_delta += tc('n_r02','均衡之印','T7','三组对子×2[Z]', *SET_Z, ne_all(x=[2]))       # 三对→同型 ✅
@@ -393,6 +412,11 @@ total_delta += tc('n_r03','独尊之印','T9','头同花+中同花触发×2尾[W
 total_delta += tc('n_t05','风遁','T7','豹+顺+同花顺不触发[X]', *SET_X, no_ninja())    # none is 对子(1)
 total_delta += tc('n_t05','风遁','T8','三同花不触发[Y]', *SET_Y, no_ninja())           # all 同花(3) ❌
 total_delta += tc('n_t05','风遁','T9','全对子+3m[Z]', *SET_Z, ne_all(m=3))              # all 对子(1) ✅
+
+# n_t06 土遁 hand_type=3→+5m (改造: 死亡回溯→同花+倍率)
+total_delta += tc('n_t06','土遁','T7','豹+顺+同花顺不触发[X]', *SET_X, no_ninja())        # 豹(5)+顺(2)+同花顺(4) none is 同花
+total_delta += tc('n_t06','土遁','T8','三同花+5m[Y]', *SET_Y, ne_all(m=5))                 # all 同花(3) ✅
+total_delta += tc('n_t06','土遁','T9','全对子不触发[Z]', *SET_Z, no_ninja())               # 全对子(1) ❌
 
 # n_t02 水遁 hand_type=2→+5m (改造: 原手替え→顺子+倍率)
 total_delta += tc('n_t02','水遁','T7','中顺+5m[X]', *SET_X, ne_partial(m={'m':5}))    # mid顺(2) ✅

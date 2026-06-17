@@ -382,7 +382,6 @@ func _on_play_pressed() -> void:
 	var baseline_result: ScoreResult = ScoreCalculator.calculate(
 		head_cards, mid_cards, tail_cards,
 		head_eval, mid_eval, tail_eval,
-		col_evals, [], _star_chart_levels, xi_result, {}, 0
 	)
 
 	# ── Main: selected ninjas ──

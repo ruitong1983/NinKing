@@ -29,6 +29,7 @@ MCPGameInspector="*res://addons/godot_mcp/mcp_game_inspector_service.gd"
 TweenFX="*res://scripts/tween/tween_fx.gd"
 RangeHighlighter="*res://scripts/system/range_highlighter.gd"
 NinKingGameState="*res://scripts/ninking/game_state.gd"
+GlobalShaders="*res://scripts/shader/global_shaders.gd"
 
 [display]
 
@@ -37,7 +38,7 @@ window/size/viewport_height=1080
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/QuickAudioPreview/plugin.cfg", "res://addons/godot_mcp/plugin.cfg")
+enabled=PackedStringArray("res://addons/QuickAudioPreview/plugin.cfg", "res://addons/godot_mcp/plugin.cfg", "res://addons/shader_library/plugin.cfg")
 
 [godot_mcp]
 
@@ -55,3 +56,7 @@ theme/custom="res://assets/themes/manga_theme.tres"
 rendering_device/driver.windows="opengl3"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+
+[shader_library]
+
+internal/previous_shaders_folder="res://shaders/shaderlib/"

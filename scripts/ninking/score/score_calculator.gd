@@ -46,7 +46,8 @@ static func calculate(
 
 	var result: ScoreResult = ScoreResult.new()
 
-	# ── Auto-extract xi_bonus/xi_override from ninjas (fix: callers never pass these) ──
+	# ── Auto-extract xi_bonus/xi_override/xi_max_mult from ninjas (fix: callers never pass these) ──
+	var xi_max_mult: bool = false
 	for ninja_p: Dictionary in ninjas:
 		var eff: Dictionary = ninja_p.get("effect", {})
 		xi_bonus += eff.get("xi_x_bonus", 0)
@@ -54,6 +55,8 @@ static func calculate(
 		for k: String in eff_override:
 			if eff_override[k] > xi_override.get(k, 0):
 				xi_override[k] = eff_override[k]
+			if eff.get("xi_max_mult_stack", false):
+				xi_max_mult = true
 
 	# ── Seal Lord overrides ──
 	var score_head: bool = not seal_lord_effects.get("skip_head", false)
@@ -74,10 +77,58 @@ static func calculate(
 
 	for ninja: Dictionary in ninjas:
 		var effect: Dictionary = ninja.get("effect", {})
+		# add_mult_to_rows: col_hand_type condition -> add mult to all rows
+		var _add_to_rows: int = effect.get("add_mult_to_rows", 0)
+		if _add_to_rows > 0 and col_evals.size() >= 3:
+			var _req_ct: int = effect.get("condition", {}).get("col_hand_type", -1)
+			var _match_flag: bool = false
+			if _req_ct != -1:
+				for _i in range(3):
+					if col_evals[_i] != null and int(col_evals[_i].hand_type) == _req_ct:
+						_match_flag = true
+						break
+			else:
+				_match_flag = true
+			if _match_flag:
+				head_ninja.mult += _add_to_rows
+				mid_ninja.mult += _add_to_rows
+				tail_ninja.mult += _add_to_rows
+		# add_chips_to_rows: col_hand_type condition -> add chips to all rows
+		var _chips_to_rows: int = effect.get("add_chips_to_rows", 0)
+		if _chips_to_rows > 0 and col_evals.size() >= 3:
+			var _rct_c: int = effect.get("condition", {}).get("col_hand_type", -1)
+			var _mf_c: bool = false
+			if _rct_c != -1:
+				for _ic in range(3):
+					if col_evals[_ic] != null and int(col_evals[_ic].hand_type) == _rct_c:
+						_mf_c = true
+						break
+			else:
+				_mf_c = true
+			if _mf_c:
+				head_ninja.chips += _chips_to_rows
+				mid_ninja.chips += _chips_to_rows
+				tail_ninja.chips += _chips_to_rows
+		# x_mult_to_rows: col_hand_type condition -> x_mult to all rows
+		var _x_to_rows: int = effect.get("x_mult_to_rows", 0)
+		if _x_to_rows > 1 and col_evals.size() >= 3:
+			var _req_ctx: int = effect.get("condition", {}).get("col_hand_type", -1)
+			var _match_flag_x: bool = false
+			if _req_ctx != -1:
+				for _ix in range(3):
+					if col_evals[_ix] != null and int(col_evals[_ix].hand_type) == _req_ctx:
+						_match_flag_x = true
+						break
+			else:
+				_match_flag_x = true
+			if _match_flag_x:
+				head_ninja.x_stack.append(_x_to_rows)
+				mid_ninja.x_stack.append(_x_to_rows)
+				tail_ninja.x_stack.append(_x_to_rows)
 		ScoreEffectCollector.collect_ninja_per_group(effect, head_type, mid_type, tail_type,
 			head_cards, mid_cards, tail_cards,
 			head_eval, mid_eval, tail_eval,
-			head_ninja, mid_ninja, tail_ninja, gold)
+			head_ninja, mid_ninja, tail_ninja, gold, xi_result)
 
 	# ─── Cross-group bonuses ───
 	var flags: Dictionary = _detect_cross_group_flags(ninjas)
@@ -124,6 +175,7 @@ static func calculate(
 	# ── v5.0: Column chip×mult scoring (independent of rows) ──
 	var col_scores: Array[int] = []
 	var col_total: int = 0
+	var total_raw: int = 0
 
 	if col_evals.size() == 3:
 		# Build column cards from head/mid/tail
@@ -151,7 +203,7 @@ static func calculate(
 				var col_ninja_eff: Dictionary = { "chips": 0, "mult": 0, "x_stack": [] }
 				for ninja: Dictionary in ninjas:
 					var eff: Dictionary = ninja.get("effect", {})
-					ScoreEffectCollector._collect_ninja_for_column(eff, col_types[i], col_ninja_eff, gold)
+					ScoreEffectCollector._collect_ninja_for_column(eff, col_types[i], col_ninja_eff, gold, xi_result)
 				# 均衡之印 applies to columns too
 				if flags.eq_active:
 					col_ninja_eff.chips += flags.eq_chips
@@ -160,10 +212,8 @@ static func calculate(
 				col_scores.append(cs)
 				col_total += cs
 
-	var total_raw: int = head_score_val + mid_score_val + tail_score_val + col_total
-
 	# ── v5.0 Global xi ×mult ──
-	result.global_xi_x_stack = ScoreXiHandler.get_global_xi_x_stack(xi_result, xi_bonus, xi_override)
+	result.global_xi_x_stack = ScoreXiHandler.get_global_xi_x_stack(xi_result, xi_bonus, xi_override, xi_max_mult)
 
 	# ── v5.0 Group-level xi ×mult ──
 	if xi_result and xi_result.has_any():
@@ -258,6 +308,7 @@ static func analyze_effects(
 	var scaling_ninjas: Array = []
 	var xi_bonus_val: int = 0
 	var xi_override_val: Dictionary = {}
+	var xi_max_mult_flag: bool = false
 	var tools: Dictionary = {}
 	var share_col_hand_to_rows: bool = false
 	var share_tail_hand_to_head_mid: bool = false
@@ -286,19 +337,67 @@ static func analyze_effects(
 			summary_tail_only_x3 = true
 
 		# 1) Row effects
+		# add_mult_to_rows: col_hand_type condition -> add mult to all rows
+		var _atr: int = effect.get("add_mult_to_rows", 0)
+		if _atr > 0 and col_evals.size() >= 3:
+			var _rct: int = effect.get("condition", {}).get("col_hand_type", -1)
+			var _mf: bool = false
+			if _rct != -1:
+				for _i2 in range(3):
+					if col_evals[_i2] != null and int(col_evals[_i2].hand_type) == _rct:
+						_mf = true
+						break
+			else:
+				_mf = true
+			if _mf:
+				per_group.head.mult += _atr
+				per_group.mid.mult += _atr
+				per_group.tail.mult += _atr
+		# add_chips_to_rows: col_hand_type condition -> add chips to all rows
+		var _ctr: int = effect.get("add_chips_to_rows", 0)
+		if _ctr > 0 and col_evals.size() >= 3:
+			var _rctc: int = effect.get("condition", {}).get("col_hand_type", -1)
+			var _mfc: bool = false
+			if _rctc != -1:
+				for _ic2 in range(3):
+					if col_evals[_ic2] != null and int(col_evals[_ic2].hand_type) == _rctc:
+						_mfc = true
+						break
+			else:
+				_mfc = true
+			if _mfc:
+				per_group.head.chips += _ctr
+				per_group.mid.chips += _ctr
+				per_group.tail.chips += _ctr
+		# x_mult_to_rows: col_hand_type condition -> x_mult to all rows
+		var _xtr: int = effect.get("x_mult_to_rows", 0)
+		if _xtr > 1 and col_evals.size() >= 3:
+			var _rctx: int = effect.get("condition", {}).get("col_hand_type", -1)
+			var _mfx: bool = false
+			if _rctx != -1:
+				for _ix2 in range(3):
+					if col_evals[_ix2] != null and int(col_evals[_ix2].hand_type) == _rctx:
+						_mfx = true
+						break
+			else:
+				_mfx = true
+			if _mfx:
+				per_group.head.x_stack.append(_xtr)
+				per_group.mid.x_stack.append(_xtr)
+				per_group.tail.x_stack.append(_xtr)
 		ScoreEffectCollector.collect_ninja_per_group(effect,
 			head_type, mid_type, tail_type,
 			head_cards, mid_cards, tail_cards,
 			head_eval, mid_eval, tail_eval,
 			per_group.head, per_group.mid, per_group.tail,
-			gold)
+			gold, xi_result)
 
 		# 2) Column effects
 		var col_count: int = col_evals.size()
 		for ci: int in range(col_summary.size()):
 			if ci < col_count:
 				var ct: int = col_evals[ci].hand_type if col_evals[ci] != null else CardData.HandType3.HIGH_CARD_3
-				ScoreEffectCollector._collect_ninja_for_column(effect, ct, col_summary[ci], gold)
+				ScoreEffectCollector._collect_ninja_for_column(effect, ct, col_summary[ci], gold, xi_result)
 
 		# 3) Economy gold from play
 		if effect.get("gold_per_xi", 0) > 0:
@@ -316,8 +415,10 @@ static func analyze_effects(
 		if so != "":
 			scoring_override = so
 
-		# 6) Xi bonuses
+		# 6) Xi bonuses & 龙之眼
 		xi_bonus_val += effect.get("xi_x_bonus", 0)
+		if effect.get("xi_max_mult_stack", false):
+			xi_max_mult_flag = true
 		var eff_xi_ov: Dictionary = effect.get("xi_override", {})
 		for k: String in eff_xi_ov:
 			if eff_xi_ov[k] > xi_override_val.get(k, 0):
@@ -373,6 +474,7 @@ static func analyze_effects(
 		"scaling_ninjas": scaling_ninjas,
 		"xi_bonus": xi_bonus_val,
 		"xi_override": xi_override_val,
+		"xi_max_mult": xi_max_mult_flag,
 		"tools": tools,
 		"share_col_hand_to_rows": share_col_hand_to_rows,
 		"share_tail_hand_to_head_mid": share_tail_hand_to_head_mid,
@@ -407,6 +509,7 @@ static func calculate_with_summary(
 	var col_summary: Array = summary.get("col", [{}, {}, {}])
 	var xi_bonus: int = summary.get("xi_bonus", 0)
 	var xi_override: Dictionary = summary.get("xi_override", {})
+	var xi_max_mult: bool = summary.get("xi_max_mult", false)
 
 	var score_head: bool = not seal_lord_effects.get("skip_head", false)
 	var score_mid: bool = not seal_lord_effects.get("skip_mid", false)
@@ -469,7 +572,7 @@ static func calculate_with_summary(
 	var total_raw: int = result.head_score + result.mid_score + result.tail_score + col_total
 
 	# ── Global xi ×mult ──
-	result.global_xi_x_stack = ScoreXiHandler.get_global_xi_x_stack(xi_result, xi_bonus, xi_override)
+	result.global_xi_x_stack = ScoreXiHandler.get_global_xi_x_stack(xi_result, xi_bonus, xi_override, xi_max_mult)
 
 	# ── Group-level xi ──
 	if xi_result and xi_result.has_any():

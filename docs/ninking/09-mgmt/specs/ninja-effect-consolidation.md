@@ -4,7 +4,7 @@
 
 ## 问题
 
-当前 `owned_ninjas: Array[Dictionary]` 每次出牌被完整遍历 **至少 7 次**，每次做同样的 `.get("effect", {})` 字典解析，且解析逻辑散布在 5 个文件中。同时 3 种工具类效果（extra_plays/death_save/wild）**悬空未处理**（extra_redraws 已随换牌系统移除）。
+当前 `owned_ninjas: Array[Dictionary]` 每次出牌被完整遍历 **至少 7 次**，每次做同样的 `.get("effect", {})` 字典解析，且解析逻辑散布在 5 个文件中。同时 2 种工具类效果（extra_plays/wild）**悬空未处理**（extra_redraws 已随换牌系统移除；death_save 已随土遁改造删除）。
 
 ## 方案（审阅修正版）
 
@@ -27,7 +27,7 @@
 - `_compute_per_group_ninja_effects()` 改用 `summary.per_group`
 
 ### Phase 1e — 工具效果可见性
-- `analyze_effects()` 中收集 extra_plays/death_save 到 `summary.tools`（extra_redraws 已随换牌系统移除）
+- `analyze_effects()` 中收集 extra_plays 到 `summary.tools`（extra_redraws 已随换牌系统移除；death_save 已随土遁改造删除）
 
 ## 数据结构
 
@@ -54,7 +54,6 @@
     scaling_ninjas: Array[Dictionary],   # 引用 gs.owned_ninjas 元素
     tools: {                             # 悬空效果
         extra_plays: int,
-        death_save: bool,
     },
     # 原始数据（非聚合，供调试/验证用）
     _version: 1,

@@ -75,6 +75,12 @@ API 速查 → `docs/card-framework-usage-guide.md`。扩展类：`NinKingCard` 
 
 API 速查 → `docs/tween-library-reference.md`。
 
+## Shader 特效
+
+> **铁律：优先 `GlobalShaders.xxx()`，减少手写 `ShaderMaterial.new()` + `load()`。** 外部只调 `GlobalShaders`，不直接调 `ShaderFX` 或子系统。所有 `.gdshader` 资源统一放在 `shaders/` 目录下。
+
+API 速查 → `docs/shader-library-reference.md`。
+
 ## 主场景与 Debug 场景同步
 
 > **铁律：修改主场景（`ninking_main.tscn` / `ninking_launcher.tscn`）时，若 Debug 场景（`debug_ninking_main.tscn`）中存在相同节点/脚本/布局/信号绑定，必须同步修改 Debug 场景，保持两者一致。**
