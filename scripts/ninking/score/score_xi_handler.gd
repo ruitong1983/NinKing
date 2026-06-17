@@ -15,7 +15,8 @@ extends RefCounted
 ##             昇龍(×3), 背水(×4), 貧打(×4), 陣眼(×3), 均爵(×3), 三等(×5), 满堂(×5),
 ##             三合(×6), 双合(×4), 一合(×2)
 ## xi_bonus is added to each multiplier (e.g. 喜鹊 +1).
-static func get_global_xi_x_stack(xi_result: XiDetector.XiResult, xi_bonus: int = 0, xi_override: Dictionary = {}) -> Array[int]:
+## xi_max_mult: 龙之眼 — 多个喜时全部按最高倍率统一（仅影响全局喜栈，不影响组级喜）。
+static func get_global_xi_x_stack(xi_result: XiDetector.XiResult, xi_bonus: int = 0, xi_override: Dictionary = {}, xi_max_mult: bool = false) -> Array[int]:
 	var stack: Array[int] = []
 	if not xi_result or not xi_result.has_any():
 		return stack
@@ -34,6 +35,15 @@ static func get_global_xi_x_stack(xi_result: XiDetector.XiResult, xi_bonus: int 
 			var x_with_bonus: int = x_val + xi_bonus
 			if x_with_bonus > 1:
 				stack.append(x_with_bonus)
+
+	# 龙之眼: 多个喜按最高倍率统一 (仅全局喜栈，不影响 apply_group_xi 中的组级喜)
+	if xi_max_mult and stack.size() > 1:
+		var max_x: int = 0
+		for x: int in stack:
+			if x > max_x:
+				max_x = x
+		for i: int in stack.size():
+			stack[i] = max_x
 
 	return stack
 

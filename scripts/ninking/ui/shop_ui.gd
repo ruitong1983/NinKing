@@ -120,7 +120,7 @@ func _apply_ink_wash_theme() -> void:
 	# ── Stage: washi paper ──
 	stage_bg.color = COLOR_PAPER
 	# Remove edge-fade shader (paper doesn't fade to ink)
-	stage_bg.material = null
+	GlobalShaders.clear_edge_fade(stage_bg)
 
 	# ── TitleBar: darkened paper background + sumi ink text ──
 	var title_style := StyleBoxFlat.new()

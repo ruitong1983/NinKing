@@ -382,11 +382,10 @@ func _on_play_pressed() -> void:
 	var baseline_result: ScoreResult = ScoreCalculator.calculate(
 		head_cards, mid_cards, tail_cards,
 		head_eval, mid_eval, tail_eval,
-		col_evals, [], _star_chart_levels, xi_result, {}, 0
 	)
 
-	# ── Main: selected ninjas ──
-	var result: ScoreResult = ScoreCalculator.calculate(
+		# ── Main: selected ninjas ──
+		var result: ScoreResult = ScoreCalculator.calculate(
 		head_cards, mid_cards, tail_cards,
 		head_eval, mid_eval, tail_eval,
 		col_evals, _selected_ninjas, _star_chart_levels, xi_result, {}, 0
@@ -451,8 +450,8 @@ func _row_data(row: int) -> Array[CardData.PlayingCard]:
 
 
 func _cards_on_table() -> int:
-	var count := 0
-	for cd in _slot_data:
+func _eval_column(idx: int, head: Array, mid: Array, tail: Array) -> HandEvaluator3.EvalResult:
+	return HandEvaluator3.evaluate([head[idx], mid[idx], tail[idx]])
 		if cd != null:
 			count += 1
 	return count

@@ -477,9 +477,9 @@ footer a:hover { color: var(--gold); }
   <h3>📋 最近更新</h3>
   <!-- RECENT_UPDATES_PLACEHOLDER -->
 <ul>
-  <li><span class="date">2026-06-17</span><span class="tag tag-docs">docs</span>docs: 新增 §9 GitHub Pages 部署说明到 html-visualization-guide</li>
+  <li><span class="date">2026-06-17</span><span class="tag tag-xi">xi</span>remove: 删除黑龙/赤凤 — 与喜系统冲突</li>
 </ul>
-<p style="font-size:11px;color:var(--text-dim);margin-top:6px">最新提交 · 部署于 2026-06-17 17:13</p>
+<p style="font-size:11px;color:var(--text-dim);margin-top:6px">最新提交 · 部署于 2026-06-17 18:20</p>
 </div>
 
 <!-- ═══ Tab Bar ═══ -->
@@ -927,11 +927,10 @@ const NINJAS = [
     "category": null,
     "name": "龙之眼",
     "rarity": "rare",
-    "cost": 12,
-    "desc": "四张喜时每多一张×2（上限2次）",
+    "cost": 18,
+    "desc": "多个喜触发时全部按最高喜倍率结算",
     "effect": {
-      "x_mult_per_extra_card": 2,
-      "x_extra_cap": 2
+      "xi_max_mult_stack": true
     }
   },
   {

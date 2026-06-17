@@ -5211,7 +5211,7 @@
       "ninja_effects": [
         {
           "group": "all",
-          "chips": 30,
+          "chips": 50,
           "mult": 0,
           "x_mult": []
         }
@@ -5269,14 +5269,7 @@
       "ninja_ids": [
         "n_x02"
       ],
-      "ninja_effects": [
-        {
-          "group": "all",
-          "chips": 5,
-          "mult": 0,
-          "x_mult": []
-        }
-      ],
+      "ninja_effects": [],
       "xi_bonus": 0,
       "xi_override": {},
       "gold": 0,
@@ -5333,7 +5326,7 @@
       "ninja_effects": [
         {
           "group": "all",
-          "chips": 30,
+          "chips": 50,
           "mult": 0,
           "x_mult": []
         }
@@ -5394,7 +5387,7 @@
       "ninja_effects": [
         {
           "group": "all",
-          "chips": 30,
+          "chips": 50,
           "mult": 0,
           "x_mult": []
         }
@@ -5455,7 +5448,7 @@
       "ninja_effects": [
         {
           "group": "all",
-          "chips": 30,
+          "chips": 50,
           "mult": 0,
           "x_mult": []
         }
@@ -5469,27 +5462,25 @@
       "id": "n_x03_T1_baseline",
       "cards": {
         "head": [
-          "♠2",
-          "♠5",
-          "♠9"
+          "♥2",
+          "♦5",
+          "♥9"
         ],
         "mid": [
           "♥3",
-          "♥6",
-          "♥8"
+          "♦6",
+          "♥10"
         ],
         "tail": [
-          "♦2",
-          "♦5",
-          "♦9"
+          "♦4",
+          "♥8",
+          "♦Q"
         ]
       },
       "ninja_ids": [],
       "ninja_effects": [],
       "xi_bonus": 0,
-      "xi_override": {
-        "三清": 3
-      },
+      "xi_override": {},
       "gold": 0,
       "seal_lord": {}
     },
@@ -5497,19 +5488,19 @@
       "id": "n_x03_T1_with_ninja",
       "cards": {
         "head": [
-          "♠2",
-          "♠5",
-          "♠9"
+          "♥2",
+          "♦5",
+          "♥9"
         ],
         "mid": [
           "♥3",
-          "♥6",
-          "♥8"
+          "♦6",
+          "♥10"
         ],
         "tail": [
-          "♦2",
-          "♦5",
-          "♦9"
+          "♦4",
+          "♥8",
+          "♦Q"
         ]
       },
       "ninja_ids": [
@@ -5517,9 +5508,7 @@
       ],
       "ninja_effects": [],
       "xi_bonus": 0,
-      "xi_override": {
-        "三清": 3
-      },
+      "xi_override": {},
       "gold": 0,
       "seal_lord": {}
     },
@@ -5528,26 +5517,24 @@
       "cards": {
         "head": [
           "♠2",
-          "♠5",
+          "♣5",
           "♠9"
         ],
         "mid": [
           "♠3",
-          "♠6",
-          "♠8"
+          "♣6",
+          "♠10"
         ],
         "tail": [
-          "♣2",
-          "♣5",
-          "♣9"
+          "♣4",
+          "♠8",
+          "♣Q"
         ]
       },
       "ninja_ids": [],
       "ninja_effects": [],
       "xi_bonus": 0,
-      "xi_override": {
-        "三清": 3
-      },
+      "xi_override": {},
       "gold": 0,
       "seal_lord": {}
     },
@@ -5556,18 +5543,18 @@
       "cards": {
         "head": [
           "♠2",
-          "♠5",
+          "♣5",
           "♠9"
         ],
         "mid": [
           "♠3",
-          "♠6",
-          "♠8"
+          "♣6",
+          "♠10"
         ],
         "tail": [
-          "♣2",
-          "♣5",
-          "♣9"
+          "♣4",
+          "♠8",
+          "♣Q"
         ]
       },
       "ninja_ids": [
@@ -5575,9 +5562,7 @@
       ],
       "ninja_effects": [],
       "xi_bonus": 0,
-      "xi_override": {
-        "三清": 3
-      },
+      "xi_override": {},
       "gold": 0,
       "seal_lord": {}
     },
@@ -5586,26 +5571,24 @@
       "cards": {
         "head": [
           "♠2",
-          "♥7",
-          "♦J"
+          "♥5",
+          "♣9"
         ],
         "mid": [
-          "♣4",
-          "♠9",
-          "♥Q"
+          "♦3",
+          "♠6",
+          "♥J"
         ],
         "tail": [
-          "♣3",
-          "♠6",
-          "♥K"
+          "♣4",
+          "♥8",
+          "♦Q"
         ]
       },
       "ninja_ids": [],
       "ninja_effects": [],
       "xi_bonus": 0,
-      "xi_override": {
-        "三清": 3
-      },
+      "xi_override": {},
       "gold": 0,
       "seal_lord": {}
     },
@@ -5614,18 +5597,18 @@
       "cards": {
         "head": [
           "♠2",
-          "♥7",
-          "♦J"
+          "♥5",
+          "♣9"
         ],
         "mid": [
-          "♣4",
-          "♠9",
-          "♥Q"
+          "♦3",
+          "♠6",
+          "♥J"
         ],
         "tail": [
-          "♣3",
-          "♠6",
-          "♥K"
+          "♣4",
+          "♥8",
+          "♦Q"
         ]
       },
       "ninja_ids": [
@@ -5633,9 +5616,7 @@
       ],
       "ninja_effects": [],
       "xi_bonus": 0,
-      "xi_override": {
-        "三清": 3
-      },
+      "xi_override": {},
       "gold": 0,
       "seal_lord": {}
     },
@@ -5644,26 +5625,24 @@
       "cards": {
         "head": [
           "♥2",
-          "♥5",
+          "♦5",
           "♥9"
         ],
         "mid": [
-          "♦3",
+          "♥3",
           "♦6",
-          "♦8"
+          "♥10"
         ],
         "tail": [
-          "♥A",
-          "♥Q",
-          "♥7"
+          "♠4",
+          "♣8",
+          "♠Q"
         ]
       },
       "ninja_ids": [],
       "ninja_effects": [],
       "xi_bonus": 0,
-      "xi_override": {
-        "三清": 3
-      },
+      "xi_override": {},
       "gold": 0,
       "seal_lord": {}
     },
@@ -5672,18 +5651,18 @@
       "cards": {
         "head": [
           "♥2",
-          "♥5",
+          "♦5",
           "♥9"
         ],
         "mid": [
-          "♦3",
+          "♥3",
           "♦6",
-          "♦8"
+          "♥10"
         ],
         "tail": [
-          "♥A",
-          "♥Q",
-          "♥7"
+          "♠4",
+          "♣8",
+          "♠Q"
         ]
       },
       "ninja_ids": [
@@ -5691,9 +5670,7 @@
       ],
       "ninja_effects": [],
       "xi_bonus": 0,
-      "xi_override": {
-        "三清": 3
-      },
+      "xi_override": {},
       "gold": 0,
       "seal_lord": {}
     },
@@ -5701,27 +5678,25 @@
       "id": "n_x03_T5_baseline",
       "cards": {
         "head": [
-          "♠2",
-          "♠5",
+          "♥2",
+          "♦5",
           "♠9"
         ],
         "mid": [
           "♥3",
-          "♥6",
-          "♥8"
+          "♠6",
+          "♣10"
         ],
         "tail": [
           "♦4",
-          "♦7",
-          "♦J"
+          "♠8",
+          "♣Q"
         ]
       },
       "ninja_ids": [],
       "ninja_effects": [],
       "xi_bonus": 0,
-      "xi_override": {
-        "三清": 3
-      },
+      "xi_override": {},
       "gold": 0,
       "seal_lord": {}
     },
@@ -5729,19 +5704,19 @@
       "id": "n_x03_T5_with_ninja",
       "cards": {
         "head": [
-          "♠2",
-          "♠5",
+          "♥2",
+          "♦5",
           "♠9"
         ],
         "mid": [
           "♥3",
-          "♥6",
-          "♥8"
+          "♠6",
+          "♣10"
         ],
         "tail": [
           "♦4",
-          "♦7",
-          "♦J"
+          "♠8",
+          "♣Q"
         ]
       },
       "ninja_ids": [
@@ -5749,67 +5724,7 @@
       ],
       "ninja_effects": [],
       "xi_bonus": 0,
-      "xi_override": {
-        "三清": 3
-      },
-      "gold": 0,
-      "seal_lord": {}
-    },
-    {
-      "id": "n_x03_T6_baseline",
-      "cards": {
-        "head": [
-          "♠2",
-          "♠5",
-          "♠9"
-        ],
-        "mid": [
-          "♠3",
-          "♠6",
-          "♠8"
-        ],
-        "tail": [
-          "♠4",
-          "♠7",
-          "♠J"
-        ]
-      },
-      "ninja_ids": [],
-      "ninja_effects": [],
-      "xi_bonus": 0,
-      "xi_override": {
-        "三清": 3
-      },
-      "gold": 0,
-      "seal_lord": {}
-    },
-    {
-      "id": "n_x03_T6_with_ninja",
-      "cards": {
-        "head": [
-          "♠2",
-          "♠5",
-          "♠9"
-        ],
-        "mid": [
-          "♠3",
-          "♠6",
-          "♠8"
-        ],
-        "tail": [
-          "♠4",
-          "♠7",
-          "♠J"
-        ]
-      },
-      "ninja_ids": [
-        "n_x03"
-      ],
-      "ninja_effects": [],
-      "xi_bonus": 0,
-      "xi_override": {
-        "三清": 3
-      },
+      "xi_override": {},
       "gold": 0,
       "seal_lord": {}
     },
@@ -7778,6 +7693,243 @@
       "seal_lord": {}
     },
     {
+      "id": "n_t01_T1_baseline",
+      "cards": {
+        "head": [
+          "♠2",
+          "♠3",
+          "♠4"
+        ],
+        "mid": [
+          "♠5",
+          "♠6",
+          "♠7"
+        ],
+        "tail": [
+          "♠8",
+          "♠9",
+          "♠10"
+        ]
+      },
+      "ninja_ids": [],
+      "ninja_effects": [],
+      "xi_bonus": 0,
+      "xi_override": {},
+      "gold": 0,
+      "seal_lord": {}
+    },
+    {
+      "id": "n_t01_T1_with_ninja",
+      "cards": {
+        "head": [
+          "♠2",
+          "♠3",
+          "♠4"
+        ],
+        "mid": [
+          "♠5",
+          "♠6",
+          "♠7"
+        ],
+        "tail": [
+          "♠8",
+          "♠9",
+          "♠10"
+        ]
+      },
+      "ninja_ids": [
+        "n_t01"
+      ],
+      "ninja_effects": [
+        {
+          "group": "all",
+          "chips": 0,
+          "mult": 8,
+          "x_mult": []
+        }
+      ],
+      "xi_bonus": 0,
+      "xi_override": {},
+      "gold": 0,
+      "seal_lord": {}
+    },
+    {
+      "id": "n_t01_T2_baseline",
+      "cards": {
+        "head": [
+          "♠2",
+          "♠3",
+          "♠4"
+        ],
+        "mid": [
+          "♠J",
+          "♥J",
+          "♦J"
+        ],
+        "tail": [
+          "♣3",
+          "♥7",
+          "♦9"
+        ]
+      },
+      "ninja_ids": [],
+      "ninja_effects": [],
+      "xi_bonus": 0,
+      "xi_override": {},
+      "gold": 0,
+      "seal_lord": {}
+    },
+    {
+      "id": "n_t01_T2_with_ninja",
+      "cards": {
+        "head": [
+          "♠2",
+          "♠3",
+          "♠4"
+        ],
+        "mid": [
+          "♠J",
+          "♥J",
+          "♦J"
+        ],
+        "tail": [
+          "♣3",
+          "♥7",
+          "♦9"
+        ]
+      },
+      "ninja_ids": [
+        "n_t01"
+      ],
+      "ninja_effects": [
+        {
+          "group": "h",
+          "chips": 0,
+          "mult": 8,
+          "x_mult": []
+        }
+      ],
+      "xi_bonus": 0,
+      "xi_override": {},
+      "gold": 0,
+      "seal_lord": {}
+    },
+    {
+      "id": "n_t01_T3_baseline",
+      "cards": {
+        "head": [
+          "♠2",
+          "♠5",
+          "♠9"
+        ],
+        "mid": [
+          "♠3",
+          "♠7",
+          "♠J"
+        ],
+        "tail": [
+          "♠4",
+          "♠8",
+          "♠K"
+        ]
+      },
+      "ninja_ids": [],
+      "ninja_effects": [],
+      "xi_bonus": 0,
+      "xi_override": {},
+      "gold": 0,
+      "seal_lord": {}
+    },
+    {
+      "id": "n_t01_T3_with_ninja",
+      "cards": {
+        "head": [
+          "♠2",
+          "♠5",
+          "♠9"
+        ],
+        "mid": [
+          "♠3",
+          "♠7",
+          "♠J"
+        ],
+        "tail": [
+          "♠4",
+          "♠8",
+          "♠K"
+        ]
+      },
+      "ninja_ids": [
+        "n_t01"
+      ],
+      "ninja_effects": [],
+      "xi_bonus": 0,
+      "xi_override": {},
+      "gold": 0,
+      "seal_lord": {}
+    },
+    {
+      "id": "n_t01_T4_baseline",
+      "cards": {
+        "head": [
+          "♥2",
+          "♥3",
+          "♥4"
+        ],
+        "mid": [
+          "♥5",
+          "♥6",
+          "♥7"
+        ],
+        "tail": [
+          "♦8",
+          "♦9",
+          "♦10"
+        ]
+      },
+      "ninja_ids": [],
+      "ninja_effects": [],
+      "xi_bonus": 0,
+      "xi_override": {},
+      "gold": 0,
+      "seal_lord": {}
+    },
+    {
+      "id": "n_t01_T4_with_ninja",
+      "cards": {
+        "head": [
+          "♥2",
+          "♥3",
+          "♥4"
+        ],
+        "mid": [
+          "♥5",
+          "♥6",
+          "♥7"
+        ],
+        "tail": [
+          "♦8",
+          "♦9",
+          "♦10"
+        ]
+      },
+      "ninja_ids": [
+        "n_t01"
+      ],
+      "ninja_effects": [
+        {
+          "group": "all",
+          "chips": 0,
+          "mult": 8,
+          "x_mult": []
+        }
+      ],
+      "xi_bonus": 0,
+      "xi_override": {},
+      "gold": 0,
+      "seal_lord": {}
+    },
+    {
       "id": "n_t02_T1_baseline",
       "cards": {
         "head": [
@@ -8801,6 +8953,243 @@
           "group": "all",
           "chips": 0,
           "mult": 3,
+          "x_mult": []
+        }
+      ],
+      "xi_bonus": 0,
+      "xi_override": {},
+      "gold": 0,
+      "seal_lord": {}
+    },
+    {
+      "id": "n_t06_T1_baseline",
+      "cards": {
+        "head": [
+          "♠2",
+          "♠5",
+          "♠9"
+        ],
+        "mid": [
+          "♠3",
+          "♠7",
+          "♠J"
+        ],
+        "tail": [
+          "♠4",
+          "♠8",
+          "♠K"
+        ]
+      },
+      "ninja_ids": [],
+      "ninja_effects": [],
+      "xi_bonus": 0,
+      "xi_override": {},
+      "gold": 0,
+      "seal_lord": {}
+    },
+    {
+      "id": "n_t06_T1_with_ninja",
+      "cards": {
+        "head": [
+          "♠2",
+          "♠5",
+          "♠9"
+        ],
+        "mid": [
+          "♠3",
+          "♠7",
+          "♠J"
+        ],
+        "tail": [
+          "♠4",
+          "♠8",
+          "♠K"
+        ]
+      },
+      "ninja_ids": [
+        "n_t06"
+      ],
+      "ninja_effects": [
+        {
+          "group": "all",
+          "chips": 0,
+          "mult": 5,
+          "x_mult": []
+        }
+      ],
+      "xi_bonus": 0,
+      "xi_override": {},
+      "gold": 0,
+      "seal_lord": {}
+    },
+    {
+      "id": "n_t06_T2_baseline",
+      "cards": {
+        "head": [
+          "♠2",
+          "♠5",
+          "♠9"
+        ],
+        "mid": [
+          "♠J",
+          "♥J",
+          "♦J"
+        ],
+        "tail": [
+          "♣3",
+          "♥7",
+          "♦9"
+        ]
+      },
+      "ninja_ids": [],
+      "ninja_effects": [],
+      "xi_bonus": 0,
+      "xi_override": {},
+      "gold": 0,
+      "seal_lord": {}
+    },
+    {
+      "id": "n_t06_T2_with_ninja",
+      "cards": {
+        "head": [
+          "♠2",
+          "♠5",
+          "♠9"
+        ],
+        "mid": [
+          "♠J",
+          "♥J",
+          "♦J"
+        ],
+        "tail": [
+          "♣3",
+          "♥7",
+          "♦9"
+        ]
+      },
+      "ninja_ids": [
+        "n_t06"
+      ],
+      "ninja_effects": [
+        {
+          "group": "h",
+          "chips": 0,
+          "mult": 5,
+          "x_mult": []
+        }
+      ],
+      "xi_bonus": 0,
+      "xi_override": {},
+      "gold": 0,
+      "seal_lord": {}
+    },
+    {
+      "id": "n_t06_T3_baseline",
+      "cards": {
+        "head": [
+          "♠2",
+          "♥3",
+          "♦4"
+        ],
+        "mid": [
+          "♠5",
+          "♥6",
+          "♦7"
+        ],
+        "tail": [
+          "♠8",
+          "♥9",
+          "♦10"
+        ]
+      },
+      "ninja_ids": [],
+      "ninja_effects": [],
+      "xi_bonus": 0,
+      "xi_override": {},
+      "gold": 0,
+      "seal_lord": {}
+    },
+    {
+      "id": "n_t06_T3_with_ninja",
+      "cards": {
+        "head": [
+          "♠2",
+          "♥3",
+          "♦4"
+        ],
+        "mid": [
+          "♠5",
+          "♥6",
+          "♦7"
+        ],
+        "tail": [
+          "♠8",
+          "♥9",
+          "♦10"
+        ]
+      },
+      "ninja_ids": [
+        "n_t06"
+      ],
+      "ninja_effects": [],
+      "xi_bonus": 0,
+      "xi_override": {},
+      "gold": 0,
+      "seal_lord": {}
+    },
+    {
+      "id": "n_t06_T4_baseline",
+      "cards": {
+        "head": [
+          "♠2",
+          "♠5",
+          "♠9"
+        ],
+        "mid": [
+          "♠3",
+          "♠7",
+          "♠J"
+        ],
+        "tail": [
+          "♣4",
+          "♣8",
+          "♣K"
+        ]
+      },
+      "ninja_ids": [],
+      "ninja_effects": [],
+      "xi_bonus": 0,
+      "xi_override": {},
+      "gold": 0,
+      "seal_lord": {}
+    },
+    {
+      "id": "n_t06_T4_with_ninja",
+      "cards": {
+        "head": [
+          "♠2",
+          "♠5",
+          "♠9"
+        ],
+        "mid": [
+          "♠3",
+          "♠7",
+          "♠J"
+        ],
+        "tail": [
+          "♣4",
+          "♣8",
+          "♣K"
+        ]
+      },
+      "ninja_ids": [
+        "n_t06"
+      ],
+      "ninja_effects": [
+        {
+          "group": "all",
+          "chips": 0,
+          "mult": 5,
           "x_mult": []
         }
       ],

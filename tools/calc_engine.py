@@ -429,7 +429,7 @@ def tc(all_rows, cid, cname, tno, desc, hs, ms, ts, ne=None, xi_bonus=0, xi_over
     t = [pc(x) for x in ts]
 
     # CSV rows
-    r0 = calc(h, m, t, no_ninja())
+    r0 = calc(h, m, t, no_ninja())  # baseline always strict
     all_rows.append(mkrow('baseline', cid, cname, tno, desc + '无忍', hs, ms, ts, r0, no_ninja()))
     r1 = calc(h, m, t, ne, xi_bonus=xi_bonus, xi_override=xi_override, duplicate_hand_x2=duplicate_hand_x2)
     all_rows.append(mkrow('with_ninja', cid, cname, tno, desc, hs, ms, ts, r1, ne, xi_bonus=xi_bonus))

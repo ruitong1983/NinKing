@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Replace embedded CSV data in ninja-test-viewer.html"""
+"""Replace embedded CSV data in ninja-test-viewer.html (both sections)"""
 import csv
 import os
 
@@ -18,31 +18,39 @@ html_path = os.path.join(BASE, 'docs/ninking/testing/ninja-test-viewer.html')
 with open(html_path, 'r', encoding='utf-8') as f:
     html = f.read()
 
-# Find embed markers
+# Find embed markers — replace ALL occurrences
 start_marker = '// Embedded CSV data (ninja-test-full.csv, UTF-8 BOM removed for JS)'
-end_marker = '\t`;'
+# End marker: backtick+semicolon (closing template literal)
+end_marker = '`;'
 
-start_pos = html.find(start_marker)
-end_pos = html.find(end_marker, start_pos) + 3  # include \t`;
+replace_count = 0
+search_start = 0
+while True:
+    start_pos = html.find(start_marker, search_start)
+    if start_pos == -1:
+        break
 
-if start_pos == -1:
-    print('ERROR: start marker not found')
-    exit(1)
-if end_pos == -1:
-    print('ERROR: end marker not found')
-    exit(1)
+    # Find the backtick+semicolon after the data
+    # We need to find the first `; after start_pos (after the marker and header)
+    end_marker_pos = html.find(end_marker, start_pos + len(start_marker))
+    if end_marker_pos == -1:
+        print('ERROR: end marker (`;) not found')
+        exit(1)
+    end_pos = end_marker_pos + 2  # include `;
 
-# Build new embed content
-lines = [start_marker]
-for row in rows:
-    csv_line = ','.join(row)
-    lines.append('\t' + csv_line)
+    # Build new embed content
+    lines = [start_marker]
+    for row in rows:
+        csv_line = ','.join(row)
+        lines.append('\t' + csv_line)
 
-new_embed = '\n'.join(lines) + '\n\t`;'
+    new_embed = '\n'.join(lines) + '\n\t`;'
 
-html_new = html[:start_pos] + new_embed + html[end_pos:]
+    html = html[:start_pos] + new_embed + html[end_pos:]
+    replace_count += 1
+    search_start = start_pos + len(new_embed)  # continue after this replacement
 
 with open(html_path, 'w', encoding='utf-8') as f:
-    f.write(html_new)
+    f.write(html)
 
-print(f'Replaced {len(rows)} rows of embedded CSV data')
+print(f'Replaced {replace_count} section(s) with {len(rows)} rows each')

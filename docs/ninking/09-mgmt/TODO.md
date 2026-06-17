@@ -320,6 +320,7 @@
 | T3 | **Phase 3: Seal Lord 测试** | 4 对（skip_head / scatter_king / hungry_ghost / tail_x2），Python 定义 + Godot 验证 | **P1** | ⬜ |
 | T4 | **Phase 4: 多忍者测试** | 24 对（4 层 stack × 6 组合 + 2 经济），叠加顺序+取舍验证 | **P1** | ⬜ |
 | T5 | **Phase 5: 集成** | review_test_data.py 同时处理 CSV + JSON，统一回归入口 | P2 | ⬜ |
+| T6 | **龙之眼重设计 — 测试数据清理+重建** | 旧逻辑 `x_mult_per_extra_card` 的 T1-T6 测试全部失效，需清理所有测试文件(CSV/JSON)中的龙之眼用例并重建新效果验证用例 | **P1** | ⬜ |
 
 ---
 
@@ -377,6 +378,20 @@
 
 ---
 
+## 🎨 Phase J — 外部 Shader 资源集成
+
+> **方案审阅通过, 2026-06-17** | **Spec:** [`specs/shader-external-integration.md`](specs/shader-external-integration.md)
+> **核心:** 利用 ShaderLib 下载资源和 ShaderV 函数库，增强卡牌箔片闪光 + 溶解动画 + VFX 工具集。不涉及 GlobalShaders 框架改动。
+> **前置:** Phase G（计分动效）+ F1（忍者补齐）完成后插空进行
+
+| # | 任务 | 说明 | 优先级 | 状态 |
+|---|------|------|--------|------|
+| J1 | **箔片闪光增强 — fake3d_flash 新增 flash_type=3** | 将 `balatro_foil_card_effect` 的有机液态箔片算法移植入 fake3d_flash.gdshader。新增 `group_uniforms foil_uniforms`（9 uniform + 4 sampler2D）。注意 TIME 统一基准、alpha 裁剪隔离、GL Compatibility uniform 数验证。fake3d_legendary.tres 设 `flash_type=3` | `shaders/fake3d/fake3d_flash.gdshader` + `resources/materials/fake3d_legendary.tres` | **P2** | ⬜ |
+| J2 | **溶解动画增强 — dissolve2d 加 noise_scroll_speed** | dissolve2d.gdshader 加 `uniform float noise_scroll_speed`（默认 0），fragment() 噪声纹理采样 UV 加 TIME 驱动偏移动画。DissolveFX.apply() 透传参数。GlobalShaders.dissolve_out() 默认传 {noise_scroll_speed: 0.5} 启用动态火焰飘动感。无需程序化噪声嵌入。| `shaders/fake3d/dissolve2d.gdshader` + `scripts/shader/dissolve_fx.gd` | **P2** | ⬜ |
+| J3 | **`#include` 路径验证** | Phase 2 前置：创建最小验证 shader `shaders/test_include.gdshader`，确认 `#include "res://addons/shaderV/tools/remap.gdshaderinc"` 在 canvas_item + GL Compatibility 下编译通过。通过后删除验证文件 | `shaders/test_include.gdshader`（临时） | **P2** | ⬜ |
+| J4 | **色差 VFX 工具集**（G/F1 后） | 从 ShaderV 复制 chromaticAberration 到 `shaders/utils/`（剥离 textureLod 分支）。新建 `shaders/effects/boss_reveal.gdshader`，用 `#include` 引入色差，用于 Boss 揭示入场效果。通过 `GlobalShaders.create_material_from_path()` 直接加载 | `shaders/utils/chromatic_aberration.gdshaderinc`(新) + `shaders/effects/boss_reveal.gdshader`(新) | **P3** | ⬜ |
+| J5 | **文档同步** | shader-library-reference.md §3.1 加 `shaders/utils/` + `shaders/effects/` 目录；§5.1 工作流加 `#include` 路径验证步骤；§5.3 外部库手册补充 ShaderLib/ShaderV 更新使用说明；`shaders/shaderlib/` 未使用文件加注释 `// @status: NOT_INTEGRATED` | `docs/shader-library-reference.md` | **P2** | ⬜ |
+
 ## 🔒 Phase D-E — 远期（暂缓）
 
 | # | 任务 | 说明 | 状态 |
@@ -413,6 +428,8 @@ Phase F1 ──→ Phase F2 ──→ Phase F3 ──→ Phase H ──→ Phase
  H1 = 消除 6/7 冗余遍历
  H6 = Phase 2 设计就绪
  I1 = 运行时类 + 5 阶段 Pipeline
+ J1-J2 = 箔片闪光加强 + 溶解动态
+ J4 = 色差 VFX 工具集
 ```
 
 ---
@@ -521,3 +538,4 @@ Phase F1 ──→ Phase F2 ──→ Phase F3 ──→ Phase H ──→ Phase
 | 2026-06-16 | ✨ **忍者牌稀有度闪光材质效果调优**: 边框纹理 resize fix(_resize_to_card() 500x700 to 125x175); Uncommon 静态转缓慢银光(speed=0.5/int=0.35); Rare 降速降强度(speed=1.0/int=0.3); Legendary 多次降强度(1.0 to 0.6 to 0.45)+呼吸范围同步调低; 所有参数三文件同步(.tres+RARITY_FLASH_PARAMS+脉冲范围)。附: 恢复缺失 card_preview.gd。|
 | 2026-06-15 | 📐 **全部 6 项代码质量任务实施完成** 🎉: C30 创建 `score_helpers.gd`(含 `include_seal` 参数) + 两处调用替换; C31 `ScoreResult`→`score_result.gd`(更新 5 引用文件); C32 `Arrangement`→`arrangement.gd`(更新 4 引用文件); C33 `CardVisualComposer.create_tooltip_stylebox()`+ 替换两处; C34 `ContinuePanel`→`continue_panel.tscn`(新建脚本 `continue_panel.gd`); C35 `CardDetailPopup`→`card_detail_popup.tscn`(节点预置于场景)。净消除 ~100 行重复代码, 新增 3 文件 + 2 场景。|
 | 2026-06-17 | 📋 **Kenney UI 素材包双方向评估 + 执行计划**: 创建 `20-kenney-ui-pack-evaluation.md`（少年漫画/治愈漫画完整匹配度矩阵）。创建执行计划，含方向决策框架、方案 A（光标+维持少年漫画）、方案 B（治愈系 5 阶段过渡）。V52 + K1-K7 加入 TODO。详见 `.claude/plans/delightful-forging-cocke.md`。 |
+| 2026-06-17 | 📋 **方案审阅+Grill: 外部 Shader 资源集成**: 审阅 3 外部库（ShaderLib/ShaderV/gdquest）→ 选定箔片闪光增强(flash_type=3) + 溶解 UV 滚动 + 色差工具集 3 方向。跳过全息卡(vertex冲突)/悬停(已覆盖)/阴影(过度工程)。J1-J5 共 5 项加入 TODO Phase J。Spec: `specs/shader-external-integration.md` |

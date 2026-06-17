@@ -58,17 +58,11 @@ func _ready() -> void:
 	NinKingGameState.xi_triggered.connect(_on_xi_triggered)
 
 	# A3: Ink-bleed edge fade — left panel right edge blends into background
-	var fade_shader: Shader = preload("res://scripts/ninking/ui/panel_edge_fade.gdshader")
-	var make_fade := func(node: Node) -> void:
-		var m := ShaderMaterial.new()
-		m.shader = fade_shader
-		m.set_shader_parameter("fade_start", 0.64)
-		node.material = m
-	make_fade.call(ui.panel_bg)
-	make_fade.call(ui.left_panel.get_node("HandTypePanel"))
-	make_fade.call(ui.left_panel.get_node("ScorePanel"))
-	make_fade.call(ui.left_panel.get_node("MatchPanel"))
-	make_fade.call(ui.left_panel.get_node("AntePanel"))
+	GlobalShaders.apply_edge_fade(ui.panel_bg)
+	GlobalShaders.apply_edge_fade(ui.left_panel.get_node("HandTypePanel"))
+	GlobalShaders.apply_edge_fade(ui.left_panel.get_node("ScorePanel"))
+	GlobalShaders.apply_edge_fade(ui.left_panel.get_node("MatchPanel"))
+	GlobalShaders.apply_edge_fade(ui.left_panel.get_node("AntePanel"))
 
 	_on_state_changed(NinKingGameState.current_state)
 	ui.restore_ui_state()

@@ -316,7 +316,7 @@
 
 ---
 
-## 十、VFX 与 Tween 系统
+## 十、VFX 与 Tween/Shader 系统
 
 ### 10.1 `.tscn` 引用的 shader / `scripts/tween/tween_fx.gd` / `global_tweens.gd`
 
@@ -325,6 +325,14 @@
 | `docs/tween-library-reference.md` | Tween API 参考 | 新增/修改 Tween 方法时同步 |
 | `docs/vfx-system-design.md` | VFX 框架设计 | VFX 系统变更时同步 |
 | `05-art/16-art-direction-principles.md` | 美术方向 — VFX 风格 | 视觉效果风格变更时同步 |
+
+### 10.2 `scripts/shader/global_shaders.gd` + `shader_fx.gd` + 各子系统
+
+| 影响文档 | 说明 | 同步要点 |
+|---------|------|---------|
+| `docs/shader-library-reference.md` | Shader API 参考 | 新增/修改 Shader 子系统/API 时**必须同步** |
+| `05-art/16-art-direction-principles.md` | 美术方向 — VFX 风格 | 新 Shader 效果引入时同步 |
+| 本表（DOCUMENT_MAP.md） | 文档依赖映射 | 新增 Shader 子系统时加一行
 
 ---
 
@@ -386,6 +394,7 @@
 | `testing/automated-formula-testing.md` | `tools/gen_test_v2.py`, `tools/calc_engine.py`, `ninja-test-full.csv` |
 | `testing/ninja-test-plan.md` | —（规划文档） |
 | `docs/tween-library-reference.md` | `scripts/tween/*.gd` |
+| `docs/shader-library-reference.md` | `scripts/shader/*.gd` + `shaders/*.gdshader` |
 | `docs/vfx-system-design.md` | `scripts/tween/*.gd` |
 | `docs/card-framework-usage-guide.md` | Card-Framework addon |
 | `scene-tree-visualizer-methodology.md` | `tools/tscn_parser.py` |

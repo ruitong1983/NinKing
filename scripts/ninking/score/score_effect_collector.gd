@@ -20,12 +20,36 @@ static func collect_ninja_per_group(
 	head_cards: Array, mid_cards: Array, tail_cards: Array,
 	head_eval: HandEvaluator3.EvalResult, mid_eval: HandEvaluator3.EvalResult, tail_eval: HandEvaluator3.EvalResult,
 	head_ninja: Dictionary, mid_ninja: Dictionary, tail_ninja: Dictionary,
-	gold: int
+	gold: int,
+	xi_result = null
 ) -> void:
 	var groups: Array[String] = ninja_affected_groups(effect,
 		head_type, mid_type, tail_type,
 		head_cards, mid_cards, tail_cards,
 		head_eval, mid_eval, tail_eval)
+
+	# Xi-only condition: check xi_result before applying
+	var cond_xi: String = effect.get("condition", {}).get("xi", "")
+	if cond_xi != "" and not effect.get("condition", {}).has("hand_type") and not effect.get("condition", {}).has("group"):
+		if xi_result == null or not xi_result.has_any() or cond_xi not in xi_result.triggered:
+			return  # Xi not triggered — skip effect entirely
+		# Xi triggered — groups is empty (from ninja_affected_groups), fallback below will apply to all rows
+
+	# ── has_2_and_ace: global condition — 9 cards contain both rank 2 and Ace → ×5 ──
+	if effect.get("condition", {}).get("has_2_and_ace", false):
+		var has_two: bool = false
+		var has_ace: bool = false
+		for c: CardData.PlayingCard in head_cards + mid_cards + tail_cards:
+			if c.rank == CardData.Rank.TWO: has_two = true
+			if c.rank == CardData.Rank.ACE: has_ace = true
+		if has_two and has_ace:
+			var xv: int = effect.get("x_mult", 1)
+			if xv > 1:
+				head_ninja.x_stack.append(xv)
+				mid_ninja.x_stack.append(xv)
+				tail_ninja.x_stack.append(xv)
+		return
+
 
 	var chips: int = effect.get("add_chips", 0)
 	var mult: int = effect.get("add_mult", 0)
@@ -221,7 +245,8 @@ static func _collect_ninja_for_column(
 	effect: Dictionary,
 	col_type: CardData.HandType3,
 	col_ninja: Dictionary,
-	gold: int
+	gold: int,
+	xi_result = null
 ) -> void:
 	# Pyramid effect — rows only, skip for columns
 	if effect.get("pyramid_x3", false):
@@ -236,8 +261,20 @@ static func _collect_ninja_for_column(
 	if cond.get("group", "") != "":
 		return
 
-	# Xi-only condition (no hand_type) → handled at global level, skip columns
-	if cond.has("xi") and not cond.has("hand_type"):
+	# Xi-only condition (no hand_type) → check xi_result and apply chips to column
+	if cond.has("xi") and not cond.has("hand_type") and not cond.has("group"):
+		var cond_xi_col: String = cond.get("xi", "")
+		if cond_xi_col == "":
+			return
+		if xi_result == null or not xi_result.has_any() or cond_xi_col not in xi_result.triggered:
+			return  # Xi not triggered — skip
+		# Xi triggered — apply chips to this column
+		var xi_chips_col: int = effect.get("add_chips", 0)
+		if xi_chips_col > 0:
+			col_ninja.chips += xi_chips_col
+		var xi_mult_col: int = effect.get("add_mult", 0)
+		if xi_mult_col > 0:
+			col_ninja.mult += xi_mult_col
 		return
 
 	# No condition → unconditional, apply to column

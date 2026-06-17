@@ -111,7 +111,6 @@ no_ninja()  # 用于不触发测试
 
 # 特殊参数
 xi_bonus=1        # 喜鹊：每喜×mult +1
-xi_override={'三清': 3}  # 清一色：三清×3
 ```
 
 #### Step 4: 重生成 CSV

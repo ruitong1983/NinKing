@@ -1,6 +1,6 @@
 # NinKing 设计文档索引
 
-> **最后更新:** 2026-06-17 (同步忍者牌标签分类) | **关联:** [`09-mgmt/TODO.md`](09-mgmt/TODO.md)
+> **最后更新:** 2026-06-17 (同步忍者牌标签分类 + Shader 库文档索引) | **关联:** [`09-mgmt/TODO.md`](09-mgmt/TODO.md)
 > **目录结构:** 文档按以下 9 分类存放。每个文档只能归到一个分类，README 提供跨分类索引。
 
 ---
@@ -49,6 +49,7 @@
 | [`17-font-design-plan.md`](05-art/17-font-design-plan.md) | **字体设计方案:** 漫画ゴシック体选型/获取/命名/导入/配置 |
 | [`18-audio-asset-matching-guide.md`](05-art/18-audio-asset-matching-guide.md) | **音效匹配指南:** Anime Game 素材包 → NinKing 需求逐项映射 |
 | [`19-image-asset-matching-guide.md`](05-art/19-image-asset-matching-guide.md) | **图像素材匹配指南:** 现成包匹配 + AI 兜底生成混合策略、三层分类、5 阶段流程 |
+| [`20-kenney-ui-pack-evaluation.md`](05-art/20-kenney-ui-pack-evaluation.md) | **Kenney UI 素材包双方向评估:** 少年漫画/治愈漫画下的完整匹配度矩阵及实施方案 |
 
 ## ⚙️ 技术架构 (06-tech/)
 
@@ -107,4 +108,5 @@
 |------|------|
 | [`../card-framework-usage-guide.md`](../card-framework-usage-guide.md) | Card-Framework API 速查 |
 | [`../tween-library-reference.md`](../tween-library-reference.md) | Tween 三库 API + 选库决策树 |
+| [`../shader-library-reference.md`](../shader-library-reference.md) | GlobalShaders Shader 库 API + 各 shader 参数说明 |
 | [`../vfx-system-design.md`](../vfx-system-design.md) | VFX 底层框架 API |

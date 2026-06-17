@@ -176,9 +176,9 @@ const ALL_NINJAS: Array[Dictionary] = [
 	},
 	{
 		"id": "n_x06", "tags": ["倍率X"], "name": "龙之眼",
-		"effect": {"x_mult_per_extra_card": 2, "x_extra_cap": 2},
-		"cost": 12, "rarity": "rare",
-		"desc": "四张喜时每多一张×2（上限2次）"
+		"effect": {"xi_max_mult_stack": true},
+		"cost": 18, "rarity": "rare",
+		"desc": "多个喜触发时全部按最高喜倍率结算"
 	},
 
 	# ─── 成长修炼 (0) — 已迁移 ───
