@@ -66,6 +66,8 @@ func _run_scoring_animation() -> void:
 	if ninja_contribs.is_empty():
 		ninja_contribs = _compute_ninja_contributions(play_data)
 
+	# ── Round-robin pool for cat meow SFX (彩蛋) ──
+	var _unplayed_cats: Array[AudioStream] = SB.CAT_MEOWS.duplicate()
 
 	# ═══ Phase 1: Per-dun sequential reveal ═══
 	var dun_evals: Array = [
@@ -127,7 +129,12 @@ func _run_scoring_animation() -> void:
 					GlobalTweens.ninja_trigger(ninja_card)
 					GlobalTweens.screen_shake(0.04, 0.02)
 					GlobalTweens.burst_particles(ninja_card.global_position + ninja_card.size * 0.5, "sparkle")
-					GlobalTweens.play_sfx(SB.NINJA_ACTIVATE)
+					# ── Random cat meow (round-robin) ──
+					if _unplayed_cats.is_empty():
+						_unplayed_cats = SB.CAT_MEOWS.duplicate()
+					var _cat_idx: int = randi() % _unplayed_cats.size()
+					GlobalTweens.play_sfx(_unplayed_cats[_cat_idx])
+					_unplayed_cats.remove_at(_cat_idx)
 					await tree.create_timer(0.05).timeout
 					_float_ninja_text(ninja_card, nc.chips, nc.mult)
 				await tree.create_timer(0.22).timeout
@@ -495,7 +502,7 @@ func _compute_ninja_contributions(play_data: Dictionary) -> Array[Dictionary]:
 			if xi_result == null or not xi_result.has_any() or xi_cond not in xi_result.triggered:
 				continue
 
-		var groups: Array[String] = ScoreCalculator.ninja_affected_groups(
+		var groups: Array[String] = ScoreEffectCollector.ninja_affected_groups(
 			effect, head_type, mid_type, tail_type,
 			head_cards, mid_cards, tail_cards,
 			dun_evals[0], dun_evals[1], dun_evals[2]

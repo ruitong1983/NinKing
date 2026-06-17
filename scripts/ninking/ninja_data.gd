@@ -2,9 +2,16 @@ class_name NinjaData
 extends RefCounted
 
 ## Full ninja card pool for NinKing v3.2 (integer scoring).
-## 45 active + 2 deferred = 47 defined.
-## Changes from v3.1: all values integer; ×1.3→×2, ×1.5→×2, ×2.5→×3;
-##   喜鹊 +0.3→+1, 忍法帖 +0.2→+1, 藏锋 scale recalculated, 清一色×3.
+## 43 active + 2 deferred = 45 defined.
+## Tags (7 types): 筹码 / 倍率+ / 倍率X / 经济 / 操控 / 成长 / 特殊
+##   - 筹码: add_chips 系
+##   - 倍率+: add_mult 系
+##   - 倍率X: x_mult / ×倍 系
+##   - 经济: 金币产出 / 钱→数值转化
+##   - 操控: 出牌/首击×2/死亡保底
+##   - 成长: 累积型（含重置风险）
+##   - 特殊: 规则变更 / 传说 / 条件时间窗口
+## Changes from v3.2: category:String → tags:Array[String] (multi-tag)
 ##
 ## Shop generation → NinjaPool. Scaling engine → NinjaScaling.
 
@@ -15,45 +22,45 @@ extends RefCounted
 const ALL_NINJAS: Array[Dictionary] = [
 	# ─── 通用加成 (6) ───
 	{
-		"id": "n_001", "category": "universal", "name": "手里剑",
+		"id": "n_001", "tags": ["筹码"], "name": "手里剑",
 		"effect": {"add_chips": 10},
 		"cost": 3, "rarity": "common",
 		"desc": "+10 筹码"
 	},
 	{
-		"id": "n_002", "category": "universal", "name": "苦无",
+		"id": "n_002", "tags": ["倍率+"], "name": "苦无",
 		"effect": {"add_mult": 4},
 		"cost": 4, "rarity": "common",
 		"desc": "+4 倍率"
 	},
 	{
-		"id": "n_003", "category": "universal", "name": "忍刀",
+		"id": "n_003", "tags": ["筹码", "倍率+"], "name": "忍刀",
 		"effect": {"add_chips": 15, "add_mult": 2},
 		"cost": 5, "rarity": "common",
 		"desc": "+15 筹码, +2 倍率"
 	},
 	{
-		"id": "n_004", "category": "universal", "name": "重刃",
+		"id": "n_004", "tags": ["筹码"], "name": "重刃",
 		"effect": {"add_chips": 20},
 		"cost": 4, "rarity": "common",
 		"desc": "+20 筹码"
 	},
 	{
-		"id": "n_005", "category": "universal", "name": "影缝",
+		"id": "n_005", "tags": ["倍率+"], "name": "影缝",
 		"effect": {"add_mult": 10},
 		"cost": 8, "rarity": "uncommon",
 		"desc": "+10 倍率"
 	},
 	{
-		"id": "n_006", "category": "universal", "name": "奥义之卷",
+		"id": "n_006", "tags": ["筹码", "倍率+"], "name": "奥义之卷",
 		"effect": {"add_chips": 30, "add_mult": 10},
 		"cost": 14, "rarity": "rare",
 		"desc": "+30筹码 +10倍率"
 	},
 
-	# ─── 组别定向 (6) ───
+	# ─── 组别定向 (10) ───
 	{
-		"id": "n_g01", "category": "group_target", "name": "虎头",
+		"id": "n_g01", "tags": ["倍率+"], "name": "虎头",
 		"effect": {
 			"add_mult": 5,
 			"condition": {"group": "head", "at_most_hand_type": 1}
@@ -62,7 +69,7 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"desc": "影为散牌或对子时 +5 倍率"
 	},
 	{
-		"id": "n_g02", "category": "group_target", "name": "龙尾",
+		"id": "n_g02", "tags": ["倍率X"], "name": "龙尾",
 		"effect": {
 			"x_mult": 2,
 			"condition": {"group": "tail", "at_least_hand_type": 4}
@@ -71,7 +78,7 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"desc": "滅为同花顺或豹子时 ×2"
 	},
 	{
-		"id": "n_g03", "category": "group_target", "name": "中流砥柱",
+		"id": "n_g03", "tags": ["筹码"], "name": "中流砥柱",
 		"effect": {
 			"add_chips": 50,
 			"condition": {"group": "mid"}
@@ -80,66 +87,81 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"desc": "瞬 +50 筹码"
 	},
 	{
-		"id": "n_g04", "category": "group_target", "name": "藏锋",
+		"id": "n_g04", "tags": ["操控"], "name": "藏锋",
 		"effect": {
-			"x_mult_per_head_weakness": true
+			"extra_plays": 2
+		},
+		"cost": 10, "rarity": "rare",
+		"desc": "+2 出牌次数"
+	},
+	{
+		"id": "n_g05", "tags": ["倍率X"], "name": "双头蛇",
+		"effect": {
+			"duplicate_hand_x2": true
 		},
 		"cost": 8, "rarity": "rare",
-		"desc": "影越弱滅越强: 散×3 对×2 其余×1",
-		"head_weakness_scale": {
-			"0": 3,
-			"1": 2,
-			"2": 1,
-			"3": 1,
-			"4": 1,
-			"5": 1,
-		}
+		"desc": "行+列同牌型计分×2"
 	},
 	{
-		"id": "n_g05", "category": "group_target", "name": "双头蛇",
-		"effect": {
-			"add_chips": 40,
-			"condition": {"group": "head_or_mid", "at_least_hand_type": 2}
-		},
-		"cost": 5, "rarity": "uncommon",
-		"desc": "影或瞬≥顺子时 +40 筹码"
-	},
-	{
-		"id": "n_g06", "category": "group_target", "name": "金字塔",
+		"id": "n_g06", "tags": ["倍率X"], "name": "金字塔",
 		"effect": {"pyramid_x3": true},
 		"cost": 10, "rarity": "rare",
 		"desc": "各组牌型高于前组时该组×3（影无条件）"
 	},
+	{
+		"id": "n_g07", "tags": ["倍率X"], "name": "三清道人",
+		"effect": {
+			"x_mult": 2,
+			"condition": {"hand_type": 3}
+		},
+		"cost": 7, "rarity": "uncommon",
+		"desc": "同花组计分×2"
+	},
+	{
+		"id": "n_g08", "tags": ["倍率X"], "name": "龙脉",
+		"effect": {
+			"x_mult": 2,
+			"condition": {"hand_type": 2}
+		},
+		"cost": 8, "rarity": "uncommon",
+		"desc": "顺子组计分×2"
+	},
+	{
+		"id": "n_s05", "tags": ["倍率X"], "name": "天华",
+		"effect": {"x_mult": 4, "condition": {"hand_type": 4}},
+		"cost": 11, "rarity": "rare",
+		"desc": "同花顺组计分×4"
+	},
+	{
+		"id": "n_s06", "tags": ["倍率X"], "name": "王座",
+		"effect": {"x_mult": 5, "condition": {"hand_type": 5}},
+		"cost": 12, "rarity": "rare",
+		"desc": "豹子组计分×5"
+	},
 
 	# ─── 规则变更 (2, 互斥) ───
 	{
-		"id": "n_r02", "category": "rule_change", "name": "均衡之印",
-		"effect": {"constraint_override": "equal", "equal_x_mult": 2},
+		"id": "n_r02", "tags": ["筹码", "特殊"], "name": "均衡之印",
+		"effect": {"all_non_scatter_add_chips": 50},
 		"cost": 7, "rarity": "rare",
-		"desc": "三组必须同牌型，各组×2",
-		"mutex_group": "rule"
+		"desc": "三行非散排时所有行列组 +50 筹码",
 	},
 	{
-		"id": "n_r03", "category": "rule_change", "name": "独尊之印",
-		"effect": {
-			"x_mult": 2,
-			"condition": {"group": "tail"},
-			"constraint_override": "head_mid_min_pair"
-		},
+		"id": "n_r03", "tags": ["倍率X", "特殊"], "name": "独尊之印",
+		"effect": {"tail_only_x3": true},
 		"cost": 9, "rarity": "rare",
-		"desc": "滅×2，影和瞬必须≥对子",
-		"mutex_group": "rule"
+		"desc": "前两行不计分，只对第三行计分×3",
 	},
 
 	# ─── 喜之强化 (6 — 2 deferred) ───
 	{
-		"id": "n_x01", "category": "xi_enhance", "name": "喜鹊",
+		"id": "n_x01", "tags": ["倍率X"], "name": "喜鹊",
 		"effect": {"xi_x_bonus": 1},
 		"cost": 4, "rarity": "uncommon",
 		"desc": "每个喜的×倍率效果 +1"
 	},
 	{
-		"id": "n_x02", "category": "xi_enhance", "name": "四张猎人",
+		"id": "n_x02", "tags": ["筹码"], "name": "四张猎人",
 		"effect": {
 			"add_chips": 30, "condition": {"xi": "四张"},
 			"else_chips": 5
@@ -148,114 +170,61 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"desc": "四张出现时 +30 筹码，否则 +5 筹码"
 	},
 	{
-		"id": "n_x03", "category": "xi_enhance", "name": "清一色",
+		"id": "n_x03", "tags": ["倍率X"], "name": "清一色",
 		"effect": {"xi_override": {"三清": 3}},
 		"cost": 5, "rarity": "uncommon",
 		"desc": "三清时 ×3（替代默认×2）"
 	},
 	{
-		"id": "n_x04", "category": "xi_enhance", "name": "黑龙",
+		"id": "n_x04", "tags": ["倍率X"], "name": "黑龙",
 		"effect": {"x_mult": 2, "condition": {"xi": "全黑"}},
 		"cost": 8, "rarity": "rare",
 		"desc": "全黑触发时再 ×2",
 		"deferred": true
 	},
 	{
-		"id": "n_x05", "category": "xi_enhance", "name": "赤凤",
+		"id": "n_x05", "tags": ["倍率X"], "name": "赤凤",
 		"effect": {"x_mult": 2, "condition": {"xi": "全红"}},
 		"cost": 8, "rarity": "rare",
 		"desc": "全红触发时再 ×2",
 		"deferred": true
 	},
 	{
-		"id": "n_x06", "category": "xi_enhance", "name": "龙之眼",
+		"id": "n_x06", "tags": ["倍率X"], "name": "龙之眼",
 		"effect": {"x_mult_per_extra_card": 2, "x_extra_cap": 2},
 		"cost": 12, "rarity": "rare",
 		"desc": "四张喜时每多一张×2（上限2次）"
 	},
 
-	# ─── 成长修炼 (5) ───
-	{
-		"id": "n_s01", "category": "scaling", "name": "修行者",
-		"effect": {"add_mult": 0},
-		"cost": 6, "rarity": "uncommon",
-		"desc": "每出牌 +1 倍率（永久累积）",
-		"scaling": {"trigger": "on_play", "add_mult": 1}
-	},
-	{
-		"id": "n_s02", "category": "scaling", "name": "三清道人",
-		"effect": {"add_chips": 0},
-		"cost": 7, "rarity": "uncommon",
-		"desc": "每打出三清 +25 筹码（永久累积）",
-		"scaling": {
-			"trigger": "on_play",
-			"add_chips": 25,
-			"condition": {"xi": "三清"}
-		}
-	},
-	{
-		"id": "n_s03", "category": "scaling", "name": "龙脉",
-		"effect": {"add_chips": 0},
-		"cost": 8, "rarity": "uncommon",
-		"desc": "滅为同花顺时 +30 筹码（永久累积）",
-		"scaling": {
-			"trigger": "on_play",
-			"add_chips": 30,
-			"condition": {"group": "tail", "hand_type": 4}
-		}
-	},
-	{
-		"id": "n_s05", "category": "scaling", "name": "头悬梁",
-		"effect": {"add_mult": 0},
-		"cost": 5, "rarity": "uncommon",
-		"desc": "影为散牌+3倍率，否则重置",
-		"scaling": {
-			"trigger": "on_play",
-			"add_mult": 3,
-			"condition": {"group": "head", "hand_type": 0},
-			"reset_on_fail": true
-		}
-	},
-	{
-		"id": "n_s06", "category": "scaling", "name": "尾刺骨",
-		"effect": {"add_mult": 0},
-		"cost": 6, "rarity": "uncommon",
-		"desc": "滅为同花顺/豹子+5倍率，否则重置",
-		"scaling": {
-			"trigger": "on_play",
-			"add_mult": 5,
-			"condition": {"group": "tail", "at_least_hand_type": 4},
-			"reset_on_fail": true
-		}
-	},
+	# ─── 成长修炼 (0) — 已迁移 ───
 
-	# ─── 经济 (6) ───
+	# ─── 经济 (5 — n_e03 俭约已删除) ───
 	{
-		"id": "n_e01", "category": "economy", "name": "福神",
+		"id": "n_e01", "tags": ["经济"], "name": "福神",
 		"effect": {"gold_per_xi": 2},
 		"cost": 6, "rarity": "uncommon",
 		"desc": "出牌后每触发一个喜 +$2"
 	},
 	{
-		"id": "n_e02", "category": "group_target", "name": "金尾",
+		"id": "n_e02", "tags": ["倍率X"], "name": "金尾",
 		"effect": {"x_mult": 2, "condition": {"group": "tail"}},
 		"cost": 6, "rarity": "uncommon",
 		"desc": "滅组计分×2"
 	},
 	{
-		"id": "n_e04", "category": "economy", "name": "利息之印",
+		"id": "n_e04", "tags": ["经济"], "name": "利息之印",
 		"effect": {"interest_cap_bonus": 5},
 		"cost": 7, "rarity": "uncommon",
 		"desc": "利息上限 +$5"
 	},
 	{
-		"id": "n_e05", "category": "economy", "name": "金剛力",
+		"id": "n_e05", "tags": ["倍率+", "经济"], "name": "金剛力",
 		"effect": {"mult_per_gold": 1, "mult_gold_step": 5, "mult_gold_cap": 10},
 		"cost": 8, "rarity": "rare",
 		"desc": "每持有$5 +1倍率（上限+10）"
 	},
 	{
-		"id": "n_e06", "category": "economy", "name": "黄金律",
+		"id": "n_e06", "tags": ["倍率X", "经济"], "name": "黄金律",
 		"effect": {"x_per_gold": 2, "x_gold_step": 15, "x_gold_cap": 3},
 		"cost": 14, "rarity": "rare",
 		"desc": "每$15持有×2（最多触发3次）"
@@ -263,25 +232,25 @@ const ALL_NINJAS: Array[Dictionary] = [
 
 	# ─── 忍法 (4) ───
 	{
-		"id": "n_t01", "category": "tools", "name": "火遁",
+		"id": "n_t01", "tags": ["操控"], "name": "火遁",
 		"effect": {"extra_plays": 1},
 		"cost": 8, "rarity": "uncommon",
 		"desc": "+1 出牌次数"
 	},
 	{
-		"id": "n_t02", "category": "tools", "name": "水遁",
-		"effect": {"extra_redraws": 1},
+		"id": "n_t02", "tags": ["倍率+"], "name": "水遁",
+		"effect": {"add_mult": 5, "condition": {"hand_type": 2}},
 		"cost": 6, "rarity": "uncommon",
-		"desc": "+1 手替え次数"
+		"desc": "顺子组+5 倍率"
 	},
 	{
-		"id": "n_t05", "category": "tools", "name": "疾风",
-		"effect": {"first_play_x2": true},
+		"id": "n_t05", "tags": ["倍率+"], "name": "风遁",
+		"effect": {"add_mult": 3, "condition": {"hand_type": 1}},
 		"cost": 7, "rarity": "uncommon",
-		"desc": "首回合出牌得分×2"
+		"desc": "对子组+3 倍率"
 	},
 	{
-		"id": "n_t06", "category": "tools", "name": "土遁",
+		"id": "n_t06", "tags": ["特殊"], "name": "土遁",
 		"effect": {"death_save": true},
 		"cost": 10, "rarity": "rare",
 		"desc": "战败保留金币重开本结界（1局1次）"
@@ -289,7 +258,7 @@ const ALL_NINJAS: Array[Dictionary] = [
 
 	# ─── 传说 (3) ───
 	{
-		"id": "n_l01", "category": "legendary", "name": "天下人",
+		"id": "n_l01", "tags": ["特殊"], "name": "天下人",
 		"effect": {
 			"share_col_hand_to_rows": true
 		},
@@ -297,7 +266,7 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"desc": "非散牌列的牌型加成分摊到三行"
 	},
 	{
-		"id": "n_l02", "category": "legendary", "name": "幻术大师",
+		"id": "n_l02", "tags": ["特殊"], "name": "幻术大师",
 		"effect": {
 			"only_one_play": true,
 			"share_tail_hand_to_head_mid": true
@@ -306,15 +275,15 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"desc": "仅1次出牌，滅的牌型加成（筹码+倍率）分摊到影和瞬"
 	},
 	{
-		"id": "n_l03", "category": "legendary", "name": "影武者",
+		"id": "n_l03", "tags": ["特殊"], "name": "影武者",
 		"effect": {"random_group_x3": true},
 		"cost": 999, "rarity": "legendary",
 		"desc": "每次出牌随机 1 组获得 ×3"
 	},
 
-	# ─── 组别定向 (1) — 成双 (原忍法·换 重设) ───
+	# ─── 组别定向 (1) — 成双 ───
 	{
-		"id": "n_d01", "category": "group_target", "name": "成双",
+		"id": "n_d01", "tags": ["筹码"], "name": "成双",
 		"effect": {
 			"pair_even_chips": 8,
 			"condition": {"hand_type": 1}
@@ -323,15 +292,15 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"desc": "对子牌型时，组内每张偶数数字牌 +8 筹码"
 	},
 	{
-		"id": "n_t07", "category": "tools", "name": "赌命",
+		"id": "n_t07", "tags": ["操控", "倍率X"], "name": "赌命",
 		"effect": {"extra_plays": -1, "x_mult": 2},
 		"cost": 7, "rarity": "uncommon",
 		"desc": "出牌次数-1，三行三列均×2"
 	},
 
-	# ─── 跨组联动 (2) — 新增 ───
+	# ─── 跨组联动 (2) ───
 	{
-		"id": "n_c01", "category": "cross_link", "name": "镜像",
+		"id": "n_c01", "tags": ["倍率X"], "name": "镜像",
 		"effect": {
 			"x_mult": 2,
 			"condition": {"head_tail_same_type": true}
@@ -340,7 +309,7 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"desc": "影牌型 = 滅牌型时 ×2"
 	},
 	{
-		"id": "n_c02", "category": "cross_link", "name": "铁索连环",
+		"id": "n_c02", "tags": ["筹码", "倍率+"], "name": "铁索连环",
 		"effect": {
 			"add_chips": 15, "add_mult": 3,
 			"condition": {"any_two_groups_same_type": true}
@@ -349,18 +318,24 @@ const ALL_NINJAS: Array[Dictionary] = [
 		"desc": "两组同牌型→全组+15筹码+3倍率"
 	},
 
-	# ─── 点数/人牌 (2) — 新增 ───
+	# ─── 点数/人牌 (3) ───
 	{
-		"id": "n_f01", "category": "face_card", "name": "影之眷顾",
+		"id": "n_f01", "tags": ["筹码"], "name": "影之眷顾",
 		"effect": {"add_chips_per_face": 3},
 		"cost": 5, "rarity": "common",
 		"desc": "手中每张 J/Q/K +3 筹码"
 	},
 	{
-		"id": "n_f02", "category": "face_card", "name": "王牌侍从",
+		"id": "n_f02", "tags": ["倍率+"], "name": "王牌侍从",
 		"effect": {"add_mult_per_ace": 5, "ace_mult_cap": 20},
 		"cost": 5, "rarity": "uncommon",
 		"desc": "手中每张 Ace +5 倍率（上限 +20）"
+	},
+	{
+		"id": "n_f03", "tags": ["筹码", "倍率+"], "name": "独行者",
+		"effect": {"ace_chips": 30, "ace_mult": 3, "condition": {"group_has_ace": true}},
+		"cost": 6, "rarity": "uncommon",
+		"desc": "组内含 A 时该组 +30筹码 +3倍率"
 	},
 ]
 
@@ -381,7 +356,7 @@ static func _get_effect_subtype_suffix(ninja_id: String, effect: Dictionary) -> 
 ## Starter set for Phase A testing (updated v3.2)
 const STARTER_IDS: Array[String] = [
 	"n_001", "n_002", "n_g01", "n_g02", "n_r02",
-	"n_x01", "n_s01", "n_s06", "n_e01", "n_t02",
+	"n_x01", "n_s06", "n_e01", "n_t02",
 ]
 
 

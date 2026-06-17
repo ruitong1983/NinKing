@@ -2,7 +2,7 @@
 
 > 日期: 2026-06-14
 > 基准文档: `11-ninja-cards.md` (45张) / `references/ninking-balatro-gap-analysis.md` / `references/balatro-joker-design.md` (150张) / `references/balatro-game-design-cf1.md`
-> 现有数据: `scripts/ninking/ninja_data.gd` (47 条定义, 44 active + 2 deferred + 1 手替え)
+> 现有数据: `scripts/ninking/ninja_data.gd` (47 条定义, 45 active + 2 deferred — 水遁改造后手替え维度已移除)
 > 目标: 45 → ~80 张，10 维度全覆盖
 
 ---
@@ -161,7 +161,7 @@
 | ID | 名称 | 品质 | 效果 | 售价 |
 |-----|------|------|------|------|
 | n_t07 | 忍法·空蝉 | 稀有 | +1 手牌上限 | $7 |
-| n_t08 | 风魔之遁 | 稀有 | +2手替え, -1手牌上限 | $6 |
+| n_t08 | 风魔之遁 | ❌ 已废弃（依赖手替え系统） | — | — |
 | n_t09 | 时间之印 | 普通 | 每剩余1次出牌+5 mult | $4 |
 
 ---

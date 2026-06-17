@@ -2,12 +2,12 @@
 
 [ext_resource type="Theme" uid="uid://bqb2i07k0v8jt" path="res://assets/themes/manga_theme.tres" id="1_pgq0x"]
 [ext_resource type="PackedScene" uid="uid://c7u8hryloq7hy" path="res://addons/card-framework/card_manager.tscn" id="2_ff38i"]
-[ext_resource type="Script" uid="uid://bs0iqxh63utdk" path="res://scripts/ninking/ui/game_manager.gd" id="2_pgq0x"]
-[ext_resource type="Script" uid="uid://csla30fhhqlyj" path="res://scripts/ninking/ui/ui_manager.gd" id="2_ui_mgr"]
-[ext_resource type="Texture2D" uid="uid://deelue8r4tqif" path="res://assets/images/background/table_bg.png" id="3_tblbg"]
+[ext_resource type="Script" uid="uid://ba3r5kv3bxlmg" path="res://scripts/ninking/ui/game_manager.gd" id="2_pgq0x"]
+[ext_resource type="Script" uid="uid://dgk1vdi44nj6m" path="res://scripts/ninking/ui/ui_manager.gd" id="2_ui_mgr"]
+[ext_resource type="Texture2D" uid="uid://cmh6fgxip28j3" path="res://assets/images/background/table_bg.png" id="3_tblbg"]
 [ext_resource type="PackedScene" uid="uid://4jkp5mgq3d6t" path="res://scenes/ninking/ninking_card_factory.tscn" id="4_ensa0"]
 [ext_resource type="Shader" uid="uid://v8sl5wp6qlqi" path="res://scripts/ninking/ui/panel_edge_fade.gdshader" id="5_shader_fade"]
-[ext_resource type="Script" uid="uid://btor5q756bk78" path="res://scripts/ninking/ui/hand_card_container.gd" id="8_pgq0x"]
+[ext_resource type="Script" uid="uid://dkduntlls22m2" path="res://scripts/ninking/ui/hand_card_container.gd" id="8_pgq0x"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_match_fade"]
 shader = ExtResource("5_shader_fade")
@@ -389,18 +389,15 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Row影" type="Control" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox" unique_id=895098955]
-layout_mode = 0
-offset_left = 0
-offset_top = 0
-offset_right = 352
-offset_bottom = 44
+anchors_preset = 0
+offset_right = 352.0
+offset_bottom = 44.0
 
 [node name="ShadowDun" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/Row影" unique_id=1139223347]
 layout_mode = 0
-offset_left = 0
-offset_top = 2
-offset_right = 46
-offset_bottom = 42
+offset_top = 2.0
+offset_right = 46.0
+offset_bottom = 42.0
 theme_override_colors/font_color = Color(0.883, 0.776, 0.749, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.6)
 theme_override_constants/outline_size = 2
@@ -411,10 +408,10 @@ horizontal_alignment = 1
 [node name="ShadowType" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/Row影" unique_id=2100000007]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 50
-offset_top = 4
-offset_right = 115
-offset_bottom = 42
+offset_left = 50.0
+offset_top = 4.0
+offset_right = 115.0
+offset_bottom = 42.0
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
 theme_override_font_sizes/font_size = 26
 text = "-"
@@ -423,37 +420,35 @@ vertical_alignment = 1
 [node name="ShadowLv" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/Row影" unique_id=1676807902]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 110
-offset_top = 10
-offset_right = 160
-offset_bottom = 36
+offset_left = 110.0
+offset_top = 10.0
+offset_right = 160.0
+offset_bottom = 36.0
 theme_override_font_sizes/font_size = 20
 vertical_alignment = 1
 
 [node name="ShadowScore" type="RichTextLabel" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/Row影" unique_id=2100000090]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 170
-offset_top = 10
-offset_right = 350
-offset_bottom = 50
+offset_left = 170.0
+offset_top = 10.0
+offset_right = 350.0
+offset_bottom = 50.0
 theme_override_font_sizes/normal_font_size = 24
 bbcode_enabled = true
 scroll_active = false
 
 [node name="Row瞬" type="Control" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox" unique_id=1057916796]
-layout_mode = 0
-offset_left = 0
-offset_top = 60
-offset_right = 352
-offset_bottom = 104
+anchors_preset = 0
+offset_top = 60.0
+offset_right = 352.0
+offset_bottom = 104.0
 
 [node name="FlashDun" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/Row瞬" unique_id=746929036]
 layout_mode = 0
-offset_left = 0
-offset_top = 2
-offset_right = 46
-offset_bottom = 42
+offset_top = 2.0
+offset_right = 46.0
+offset_bottom = 42.0
 theme_override_colors/font_color = Color(0.899, 0.549, 0.611, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.6)
 theme_override_constants/outline_size = 2
@@ -464,10 +459,10 @@ horizontal_alignment = 1
 [node name="FlashType" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/Row瞬" unique_id=2100000008]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 50
-offset_top = 4
-offset_right = 115
-offset_bottom = 42
+offset_left = 50.0
+offset_top = 4.0
+offset_right = 115.0
+offset_bottom = 42.0
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
 theme_override_font_sizes/font_size = 26
 text = "-"
@@ -476,37 +471,35 @@ vertical_alignment = 1
 [node name="FlashLv" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/Row瞬" unique_id=1506506505]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 110
-offset_top = 10
-offset_right = 160
-offset_bottom = 36
+offset_left = 110.0
+offset_top = 10.0
+offset_right = 160.0
+offset_bottom = 36.0
 theme_override_font_sizes/font_size = 20
 vertical_alignment = 1
 
 [node name="FlashScore" type="RichTextLabel" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/Row瞬" unique_id=204413155]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 170
-offset_top = 10
-offset_right = 350
-offset_bottom = 50
+offset_left = 170.0
+offset_top = 10.0
+offset_right = 350.0
+offset_bottom = 50.0
 theme_override_font_sizes/normal_font_size = 24
 bbcode_enabled = true
 scroll_active = false
 
 [node name="Row滅" type="Control" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox" unique_id=576148200]
-layout_mode = 0
-offset_left = 0
-offset_top = 120
-offset_right = 352
-offset_bottom = 164
+anchors_preset = 0
+offset_top = 120.0
+offset_right = 352.0
+offset_bottom = 164.0
 
 [node name="DestroyDun" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/Row滅" unique_id=1391911146]
 layout_mode = 0
-offset_left = 0
-offset_top = 2
-offset_right = 46
-offset_bottom = 42
+offset_top = 2.0
+offset_right = 46.0
+offset_bottom = 42.0
 theme_override_colors/font_color = Color(0.888, 0.241, 0.161, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.6)
 theme_override_constants/outline_size = 2
@@ -517,10 +510,10 @@ horizontal_alignment = 1
 [node name="DestroyType" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/Row滅" unique_id=2100000009]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 54
-offset_top = 4
-offset_right = 119
-offset_bottom = 42
+offset_left = 54.0
+offset_top = 4.0
+offset_right = 119.0
+offset_bottom = 42.0
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
 theme_override_font_sizes/font_size = 26
 text = "-"
@@ -529,46 +522,43 @@ vertical_alignment = 1
 [node name="DestroyLv" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/Row滅" unique_id=623945523]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 110
-offset_top = 10
-offset_right = 160
-offset_bottom = 36
+offset_left = 110.0
+offset_top = 10.0
+offset_right = 160.0
+offset_bottom = 36.0
 theme_override_font_sizes/font_size = 20
 vertical_alignment = 1
 
 [node name="DestroyScore" type="RichTextLabel" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/Row滅" unique_id=102999569]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 170
-offset_top = 10
-offset_right = 350
-offset_bottom = 50
+offset_left = 170.0
+offset_top = 10.0
+offset_right = 350.0
+offset_bottom = 50.0
 theme_override_font_sizes/normal_font_size = 24
 bbcode_enabled = true
 scroll_active = false
 
 [node name="ColDivider" type="ColorRect" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox" unique_id=1867054622]
 layout_mode = 0
-offset_left = 0
-offset_top = 180
-offset_right = 352
-offset_bottom = 182
+offset_top = 180.0
+offset_right = 352.0
+offset_bottom = 182.0
 color = Color(0.941, 0.929, 0.894, 0.15)
 
 [node name="ColumnBar" type="Control" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox" unique_id=1356283316]
-layout_mode = 0
-offset_left = 0
-offset_top = 190
-offset_right = 352
-offset_bottom = 220
+anchors_preset = 0
+offset_top = 190.0
+offset_right = 352.0
+offset_bottom = 220.0
 
 [node name="LeftColType" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/ColumnBar" unique_id=2017182209]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 0
-offset_top = 3
-offset_right = 100
-offset_bottom = 24
+offset_top = 3.0
+offset_right = 100.0
+offset_bottom = 24.0
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
 theme_override_font_sizes/font_size = 20
 text = "-"
@@ -577,10 +567,10 @@ horizontal_alignment = 1
 [node name="MidColType" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/ColumnBar" unique_id=2122532094]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 110
-offset_top = 3
-offset_right = 210
-offset_bottom = 24
+offset_left = 110.0
+offset_top = 3.0
+offset_right = 210.0
+offset_bottom = 24.0
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
 theme_override_font_sizes/font_size = 20
 text = "-"
@@ -589,10 +579,10 @@ horizontal_alignment = 1
 [node name="RightColType" type="Label" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/ColumnBar" unique_id=1275736371]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 220
-offset_top = 3
-offset_right = 320
-offset_bottom = 24
+offset_left = 220.0
+offset_top = 3.0
+offset_right = 320.0
+offset_bottom = 24.0
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
 theme_override_font_sizes/font_size = 20
 text = "-"
@@ -602,10 +592,9 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
-offset_left = 0
-offset_top = 3
-offset_right = 26
-offset_bottom = 24
+offset_top = 3.0
+offset_right = 26.0
+offset_bottom = 24.0
 theme_override_colors/font_color = Color(0.627, 0.627, 0.627, 1)
 theme_override_font_sizes/font_size = 14
 text = "左"
@@ -614,20 +603,18 @@ text = "左"
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
-offset_left = 0
-offset_top = 3
-offset_right = 40
-offset_bottom = 24
+offset_top = 3.0
+offset_right = 40.0
+offset_bottom = 24.0
 theme_override_font_sizes/font_size = 13
 
 [node name="LeftColScore" type="RichTextLabel" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/ColumnBar" unique_id=1679740097]
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
-offset_left = 0
-offset_top = 3
-offset_right = 50
-offset_bottom = 24
+offset_top = 3.0
+offset_right = 50.0
+offset_bottom = 24.0
 theme_override_font_sizes/normal_font_size = 13
 bbcode_enabled = true
 scroll_active = false
@@ -636,10 +623,10 @@ scroll_active = false
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
-offset_left = 110
-offset_top = 3
-offset_right = 136
-offset_bottom = 24
+offset_left = 110.0
+offset_top = 3.0
+offset_right = 136.0
+offset_bottom = 24.0
 theme_override_colors/font_color = Color(0.627, 0.627, 0.627, 1)
 theme_override_font_sizes/font_size = 14
 text = "中"
@@ -648,20 +635,20 @@ text = "中"
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
-offset_left = 110
-offset_top = 3
-offset_right = 150
-offset_bottom = 24
+offset_left = 110.0
+offset_top = 3.0
+offset_right = 150.0
+offset_bottom = 24.0
 theme_override_font_sizes/font_size = 13
 
 [node name="MidColScore" type="RichTextLabel" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/ColumnBar" unique_id=1381910367]
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
-offset_left = 110
-offset_top = 3
-offset_right = 160
-offset_bottom = 24
+offset_left = 110.0
+offset_top = 3.0
+offset_right = 160.0
+offset_bottom = 24.0
 theme_override_font_sizes/normal_font_size = 13
 bbcode_enabled = true
 scroll_active = false
@@ -670,10 +657,10 @@ scroll_active = false
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
-offset_left = 220
-offset_top = 3
-offset_right = 246
-offset_bottom = 24
+offset_left = 220.0
+offset_top = 3.0
+offset_right = 246.0
+offset_bottom = 24.0
 theme_override_colors/font_color = Color(0.627, 0.627, 0.627, 1)
 theme_override_font_sizes/font_size = 14
 text = "右"
@@ -682,20 +669,20 @@ text = "右"
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
-offset_left = 220
-offset_top = 3
-offset_right = 260
-offset_bottom = 24
+offset_left = 220.0
+offset_top = 3.0
+offset_right = 260.0
+offset_bottom = 24.0
 theme_override_font_sizes/font_size = 13
 
 [node name="RightColScore" type="RichTextLabel" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/HandTypeVBox/ColumnBar" unique_id=1188808210]
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
-offset_left = 220
-offset_top = 3
-offset_right = 270
-offset_bottom = 24
+offset_left = 220.0
+offset_top = 3.0
+offset_right = 270.0
+offset_bottom = 24.0
 theme_override_font_sizes/normal_font_size = 13
 bbcode_enabled = true
 scroll_active = false
@@ -1148,13 +1135,6 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
 theme_override_font_sizes/font_size = 24
 text = "牌堆: 0 张"
-
-[node name="DiscardCountLabel" type="Label" parent="UIManager/DeckViewer/CardPanel/CountRow" unique_id=1979001650]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.478, 0.478, 0.416, 1)
-theme_override_font_sizes/font_size = 24
-text = "手替札: 0 张"
 
 [node name="CardScroll" type="ScrollContainer" parent="UIManager/DeckViewer/CardPanel" unique_id=319951289]
 layout_mode = 0

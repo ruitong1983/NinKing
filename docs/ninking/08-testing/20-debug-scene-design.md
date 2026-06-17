@@ -1,6 +1,6 @@
 # Debug 计分测试场景
 
-> **建立日期:** 2026-06-12 | **最后更新:** 2026-06-16 | **关联场景:** `debug_ninking_main.tscn` + `debug_controller.gd` + `debug_panel.gd`
+> **建立日期:** 2026-06-12 | **最后更新:** 2026-06-17 | **关联场景:** `debug_ninking_main.tscn` + `debug_controller.gd` + `debug_panel.gd`
 > **风格权威:** 独立于主场景，零侵入设计。场景结构已与 `ninking_main.tscn` 对齐命名和层级。
 
 ## §1 概述
@@ -43,6 +43,7 @@ NinKingDebug (Control) [debug_controller.gd]
 ├── GameBg (TextureRect)                    ← table_bg.png 全屏背景
 ├── CardManager (CardManager)               ← Card-Framework 核心（含 NinKingCardFactory）
 ├── DeckBtn (Button)                        ← "牌库: 52"（右下角，仅展示）
+├── ScoreDetailBtn [%ScoreDetailBtn] (Button) ← "计分详情"（左下角，z=10）
 │
 ├── MainVBox (VBoxContainer, full rect)
 │   │
@@ -111,6 +112,16 @@ NinKingDebug (Control) [debug_controller.gd]
     │       │       ← 同组续行: [spacer] + 按钮×N (左对齐)
     │       │       ← 全部模式: 纯按钮 11 列
     │       └── BtnRow → [开始] [取消]
+│
+└── ScoreDetailPanel [%ScoreDetailPanel] (Control, 1100×840, centered, hidden, z=25) [debug_score_detail.gd]
+    ├── PanelBg (Panel, #141A23 95%, gold border)
+    └── MainVBox (VBoxContainer, sep=8)
+        ├── TitleLabel ("计分公式详情", #D4A843, fs=22)
+        ├── ScrollContainer (stretch=1)
+        │   └── DetailVBox [%DetailVBox] (VBoxContainer, sep=10)  ← 程序化填充
+        └── BottomBar (HBoxContainer, sep=12)
+            ├── NinjaSummary [%NinjaSummary] (Label, 忍者效果摘要)
+            └── CloseBtn [%CloseBtn] (Button, "关闭 ✕", 100×36)
 ```
 
 ## §4.1 主场景 ↔ Debug 场景对照
@@ -152,6 +163,8 @@ NinKingDebug (Control) [debug_controller.gd]
 | DebugPanel + ScrollContainer + DebugVBox | Debug | 右侧调试控制面板（卡牌托盘/星图/忍者选择） |
 | DebugBtn (Launcher) | 主场景 Launcher | 进入 Debug 的入口按钮 |
 | NinjaSelector | Debug | 忍者选择弹窗 |
+| ScoreDetailPanel | Debug | 计分公式详情覆盖面板（1100×840 居中，蓝色chips + 红色mult） |
+| ScoreDetailBtn | Debug | 左下角 "计分详情" 按钮 |
 | ToggleBtn | Debug | DebugPanel 折叠按钮 |
 
 ### §4.1.4 修改决策速查
@@ -239,7 +252,21 @@ NinKingDebug (Control) [debug_controller.gd]
 
 > ⚠️ 实现细节：Label 必须显式设置 `mouse_filter = Control.MOUSE_FILTER_STOP`，否则嵌套在 VBoxContainer → HBoxContainer 中时 `mouse_entered` 信号不会可靠触发。
 
-### 5.6 其他操作
+### 5.6 计分详情面板
+
+```
+计分完成后 → 左下角 [计分详情] 按钮出现
+    → 点击打开 ScoreDetailPanel 覆盖层 (z=25, 1100×840 居中)
+    → 显示内容：
+        ├── 🃏 牌组 3×3 网格（左/中/右列 × 影/瞬/滅行）
+        ├── 基线 vs 忍者效果 双列对比
+        │   ├── 筹码(蓝) + 倍率(红) 同行展示
+        │   └── 各组/各列计分公式
+        └── 📊 变化对比（原始分/列乘/喜乘/最终分 delta）
+    → [关闭 ✕] 或点击外部 → 隐藏面板 → 按钮重新出现
+```
+
+### 5.7 其他操作
 
 | 按钮 | 行为 |
 |------|------|
@@ -273,6 +300,7 @@ NinKingDebug (Control) [debug_controller.gd]
 | `debug_card_tray.gd` | `scripts/ninking/debug/` | 右侧卡牌托盘 (GridContainer, 13列) |
 | `debug_panel.gd` | `scripts/ninking/debug/` | DebugPanel 折叠/展开控制 |
 | `debug_ninja_selector.gd` | `scripts/ninking/debug/` | 忍者选择弹窗 |
+| `debug_score_detail.gd` | `scripts/ninking/debug/` | 计分公式详情面板 |
 | `main_menu.gd` | `scripts/ninking/ui/` | +4 行 Debug 按钮接线 |
 | `ninking_launcher.tscn` | `scenes/ninking/` | + DebugBtn 节点 |
 

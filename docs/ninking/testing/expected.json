@@ -6035,10 +6035,8 @@
         "ench_mult": 0,
         "ninja_mult": 0,
         "mult_total": 1,
-        "ninja_x_stack": [
-          3
-        ],
-        "score": 72
+        "ninja_x_stack": [],
+        "score": 24
       },
       "col_scores": [
         87,
@@ -6046,9 +6044,9 @@
         150
       ],
       "col_total": 237,
-      "total_raw": 361,
+      "total_raw": 313,
       "global_xi_x_prod": 1,
-      "final_score": 361
+      "final_score": 313
     },
     {
       "id": "n_g04_T2_baseline",
@@ -6161,10 +6159,8 @@
         "ench_mult": 0,
         "ninja_mult": 0,
         "mult_total": 1,
-        "ninja_x_stack": [
-          2
-        ],
-        "score": 48
+        "ninja_x_stack": [],
+        "score": 24
       },
       "col_scores": [
         160,
@@ -6172,9 +6168,9 @@
         0
       ],
       "col_total": 160,
-      "total_raw": 282,
+      "total_raw": 258,
       "global_xi_x_prod": 1,
-      "final_score": 282
+      "final_score": 258
     },
     {
       "id": "n_g04_T3_baseline",
@@ -6667,10 +6663,8 @@
         "ench_mult": 0,
         "ninja_mult": 0,
         "mult_total": 4,
-        "ninja_x_stack": [
-          3
-        ],
-        "score": 1248
+        "ninja_x_stack": [],
+        "score": 416
       },
       "col_scores": [
         590,
@@ -6678,21 +6672,153 @@
         472
       ],
       "col_total": 1462,
-      "total_raw": 3478,
+      "total_raw": 2646,
       "global_xi_x_prod": 6,
-      "final_score": 20868
+      "final_score": 15876
     },
     {
       "id": "n_g05_T1_baseline",
       "hand_types": {
+        "head": 3,
+        "mid": 3,
+        "tail": 3
+      },
+      "col_types": [
+        4,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全黑",
+        "全同花",
+        "三清"
+      ],
+      "head": {
+        "card_chips": 16,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 46,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 368
+      },
+      "mid": {
+        "card_chips": 20,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 50,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 400
+      },
+      "tail": {
+        "card_chips": 22,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 52,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 416
+      },
+      "col_scores": [
+        590,
+        400,
+        472
+      ],
+      "col_total": 1462,
+      "total_raw": 2646,
+      "global_xi_x_prod": 6,
+      "final_score": 15876
+    },
+    {
+      "id": "n_g05_T1_with_ninja",
+      "hand_types": {
+        "head": 3,
+        "mid": 3,
+        "tail": 3
+      },
+      "col_types": [
+        4,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全黑",
+        "全同花",
+        "三清"
+      ],
+      "head": {
+        "card_chips": 16,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 46,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 368
+      },
+      "mid": {
+        "card_chips": 20,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 50,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 400
+      },
+      "tail": {
+        "card_chips": 22,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 52,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 416
+      },
+      "col_scores": [
+        590,
+        400,
+        472
+      ],
+      "col_total": 1462,
+      "total_raw": 2646,
+      "global_xi_x_prod": 6,
+      "final_score": 15876
+    },
+    {
+      "id": "n_g05_T2_baseline",
+      "hand_types": {
         "head": 0,
-        "mid": 2,
+        "mid": 0,
         "tail": 0
       },
       "col_types": [
+        2,
         0,
-        0,
-        0
+        2
       ],
       "xi_list": [],
       "head": {
@@ -6707,6 +6833,256 @@
         "mult_total": 1,
         "ninja_x_stack": [],
         "score": 24
+      },
+      "mid": {
+        "card_chips": 23,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 28,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 28
+      },
+      "tail": {
+        "card_chips": 19,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 24,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 24
+      },
+      "col_scores": [
+        87,
+        0,
+        150
+      ],
+      "col_total": 237,
+      "total_raw": 313,
+      "global_xi_x_prod": 1,
+      "final_score": 313
+    },
+    {
+      "id": "n_g05_T2_with_ninja",
+      "hand_types": {
+        "head": 0,
+        "mid": 0,
+        "tail": 0
+      },
+      "col_types": [
+        2,
+        0,
+        2
+      ],
+      "xi_list": [],
+      "head": {
+        "card_chips": 19,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 24,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 24
+      },
+      "mid": {
+        "card_chips": 23,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 28,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 28
+      },
+      "tail": {
+        "card_chips": 19,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 24,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 24
+      },
+      "col_scores": [
+        87,
+        0,
+        150
+      ],
+      "col_total": 237,
+      "total_raw": 313,
+      "global_xi_x_prod": 1,
+      "final_score": 313
+    },
+    {
+      "id": "n_g05_T3_baseline",
+      "hand_types": {
+        "head": 5,
+        "mid": 5,
+        "tail": 0
+      },
+      "col_types": [
+        0,
+        0,
+        0
+      ],
+      "xi_list": [],
+      "head": {
+        "card_chips": 30,
+        "hand_chips": 100,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 130,
+        "hand_mult": 8,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 8,
+        "ninja_x_stack": [],
+        "score": 1040
+      },
+      "mid": {
+        "card_chips": 9,
+        "hand_chips": 100,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 109,
+        "hand_mult": 8,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 8,
+        "ninja_x_stack": [],
+        "score": 872
+      },
+      "tail": {
+        "card_chips": 21,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 26,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 26
+      },
+      "col_scores": [
+        0,
+        0,
+        0
+      ],
+      "col_total": 0,
+      "total_raw": 1938,
+      "global_xi_x_prod": 1,
+      "final_score": 1938
+    },
+    {
+      "id": "n_g05_T3_with_ninja",
+      "hand_types": {
+        "head": 5,
+        "mid": 5,
+        "tail": 0
+      },
+      "col_types": [
+        0,
+        0,
+        0
+      ],
+      "xi_list": [],
+      "head": {
+        "card_chips": 30,
+        "hand_chips": 100,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 130,
+        "hand_mult": 8,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 8,
+        "ninja_x_stack": [],
+        "score": 1040
+      },
+      "mid": {
+        "card_chips": 9,
+        "hand_chips": 100,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 109,
+        "hand_mult": 8,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 8,
+        "ninja_x_stack": [],
+        "score": 872
+      },
+      "tail": {
+        "card_chips": 21,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 26,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 26
+      },
+      "col_scores": [
+        0,
+        0,
+        0
+      ],
+      "col_total": 0,
+      "total_raw": 1938,
+      "global_xi_x_prod": 1,
+      "final_score": 1938
+    },
+    {
+      "id": "n_g05_T4_baseline",
+      "hand_types": {
+        "head": 2,
+        "mid": 2,
+        "tail": 2
+      },
+      "col_types": [
+        3,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全顺"
+      ],
+      "head": {
+        "card_chips": 9,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 29,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 3,
+        "ninja_x_stack": [],
+        "score": 87
       },
       "mid": {
         "card_chips": 18,
@@ -6722,103 +7098,43 @@
         "score": 114
       },
       "tail": {
-        "card_chips": 22,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 27,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 27
-      },
-      "col_scores": [
-        0,
-        0,
-        0
-      ],
-      "col_total": 0,
-      "total_raw": 165,
-      "global_xi_x_prod": 1,
-      "final_score": 165
-    },
-    {
-      "id": "n_g05_T1_with_ninja",
-      "hand_types": {
-        "head": 0,
-        "mid": 2,
-        "tail": 0
-      },
-      "col_types": [
-        0,
-        0,
-        0
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "mid": {
-        "card_chips": 18,
+        "card_chips": 27,
         "hand_chips": 20,
         "ench_chips": 0,
-        "ninja_chips": 40,
-        "chips_total": 78,
+        "ninja_chips": 0,
+        "chips_total": 47,
         "hand_mult": 3,
         "ench_mult": 0,
         "ninja_mult": 0,
         "mult_total": 3,
         "ninja_x_stack": [],
-        "score": 234
-      },
-      "tail": {
-        "card_chips": 22,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 27,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 27
+        "score": 141
       },
       "col_scores": [
-        0,
-        0,
-        0
+        180,
+        192,
+        204
       ],
-      "col_total": 0,
-      "total_raw": 285,
-      "global_xi_x_prod": 1,
-      "final_score": 285
+      "col_total": 576,
+      "total_raw": 918,
+      "global_xi_x_prod": 2,
+      "final_score": 1836
     },
     {
-      "id": "n_g05_T2_baseline",
+      "id": "n_g05_T4_with_ninja",
       "hand_types": {
         "head": 2,
-        "mid": 0,
-        "tail": 0
+        "mid": 2,
+        "tail": 2
       },
       "col_types": [
         3,
-        0,
-        0
+        3,
+        3
       ],
-      "xi_list": [],
+      "xi_list": [
+        "全顺"
+      ],
       "head": {
         "card_chips": 9,
         "hand_chips": 20,
@@ -6833,252 +7149,190 @@
         "score": 87
       },
       "mid": {
-        "card_chips": 26,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 31,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 31
-      },
-      "tail": {
-        "card_chips": 25,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 30,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 30
-      },
-      "col_scores": [
-        180,
-        0,
-        0
-      ],
-      "col_total": 180,
-      "total_raw": 328,
-      "global_xi_x_prod": 1,
-      "final_score": 328
-    },
-    {
-      "id": "n_g05_T2_with_ninja",
-      "hand_types": {
-        "head": 2,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        3,
-        0,
-        0
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 9,
+        "card_chips": 18,
         "hand_chips": 20,
         "ench_chips": 0,
-        "ninja_chips": 40,
-        "chips_total": 69,
+        "ninja_chips": 0,
+        "chips_total": 38,
         "hand_mult": 3,
         "ench_mult": 0,
         "ninja_mult": 0,
         "mult_total": 3,
         "ninja_x_stack": [],
-        "score": 207
-      },
-      "mid": {
-        "card_chips": 26,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 31,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 31
+        "score": 114
       },
       "tail": {
-        "card_chips": 25,
-        "hand_chips": 5,
+        "card_chips": 27,
+        "hand_chips": 20,
         "ench_chips": 0,
         "ninja_chips": 0,
-        "chips_total": 30,
-        "hand_mult": 1,
+        "chips_total": 47,
+        "hand_mult": 3,
         "ench_mult": 0,
         "ninja_mult": 0,
-        "mult_total": 1,
+        "mult_total": 3,
         "ninja_x_stack": [],
-        "score": 30
+        "score": 141
       },
       "col_scores": [
         180,
-        0,
+        192,
+        204
+      ],
+      "col_total": 576,
+      "total_raw": 918,
+      "global_xi_x_prod": 2,
+      "final_score": 1836
+    },
+    {
+      "id": "n_g05_T5_baseline",
+      "hand_types": {
+        "head": 5,
+        "mid": 2,
+        "tail": 0
+      },
+      "col_types": [
+        3,
+        3,
         0
       ],
-      "col_total": 180,
-      "total_raw": 448,
+      "xi_list": [],
+      "head": {
+        "card_chips": 30,
+        "hand_chips": 100,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 130,
+        "hand_mult": 8,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 8,
+        "ninja_x_stack": [],
+        "score": 1040
+      },
+      "mid": {
+        "card_chips": 18,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 38,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 3,
+        "ninja_x_stack": [],
+        "score": 114
+      },
+      "tail": {
+        "card_chips": 20,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 25,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 25
+      },
+      "col_scores": [
+        188,
+        216,
+        0
+      ],
+      "col_total": 404,
+      "total_raw": 1583,
       "global_xi_x_prod": 1,
-      "final_score": 448
+      "final_score": 1583
     },
     {
-      "id": "n_g05_T3_baseline",
+      "id": "n_g05_T5_with_ninja",
       "hand_types": {
-        "head": 0,
-        "mid": 0,
+        "head": 5,
+        "mid": 2,
         "tail": 0
       },
       "col_types": [
-        2,
-        0,
-        2
+        3,
+        3,
+        0
       ],
       "xi_list": [],
       "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
+        "card_chips": 30,
+        "hand_chips": 100,
         "ench_chips": 0,
         "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
+        "chips_total": 130,
+        "hand_mult": 8,
         "ench_mult": 0,
         "ninja_mult": 0,
-        "mult_total": 1,
+        "mult_total": 8,
         "ninja_x_stack": [],
-        "score": 24
+        "score": 1040
       },
       "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
+        "card_chips": 18,
+        "hand_chips": 20,
         "ench_chips": 0,
         "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
+        "chips_total": 38,
+        "hand_mult": 3,
         "ench_mult": 0,
         "ninja_mult": 0,
-        "mult_total": 1,
+        "mult_total": 3,
         "ninja_x_stack": [],
-        "score": 28
+        "score": 114
       },
       "tail": {
-        "card_chips": 19,
+        "card_chips": 20,
         "hand_chips": 5,
         "ench_chips": 0,
         "ninja_chips": 0,
-        "chips_total": 24,
+        "chips_total": 25,
         "hand_mult": 1,
         "ench_mult": 0,
         "ninja_mult": 0,
         "mult_total": 1,
         "ninja_x_stack": [],
-        "score": 24
+        "score": 25
       },
       "col_scores": [
-        87,
-        0,
-        150
+        188,
+        216,
+        0
       ],
-      "col_total": 237,
-      "total_raw": 313,
+      "col_total": 404,
+      "total_raw": 1583,
       "global_xi_x_prod": 1,
-      "final_score": 313
+      "final_score": 1583
     },
     {
-      "id": "n_g05_T3_with_ninja",
+      "id": "n_g05_T6_baseline",
       "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 28
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "col_scores": [
-        87,
-        0,
-        150
-      ],
-      "col_total": 237,
-      "total_raw": 313,
-      "global_xi_x_prod": 1,
-      "final_score": 313
-    },
-    {
-      "id": "n_g05_T4_baseline",
-      "hand_types": {
-        "head": 0,
+        "head": 3,
         "mid": 3,
         "tail": 0
       },
       "col_types": [
-        2,
+        0,
         2,
         2
       ],
       "xi_list": [],
       "head": {
         "card_chips": 19,
-        "hand_chips": 5,
+        "hand_chips": 30,
         "ench_chips": 0,
         "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
+        "chips_total": 49,
+        "hand_mult": 4,
         "ench_mult": 0,
         "ninja_mult": 0,
-        "mult_total": 1,
+        "mult_total": 4,
         "ninja_x_stack": [],
-        "score": 24
+        "score": 196
       },
       "mid": {
         "card_chips": 21,
@@ -7094,341 +7348,89 @@
         "score": 204
       },
       "tail": {
-        "card_chips": 23,
+        "card_chips": 24,
         "hand_chips": 5,
         "ench_chips": 0,
         "ninja_chips": 0,
-        "chips_total": 28,
+        "chips_total": 29,
         "hand_mult": 1,
         "ench_mult": 0,
         "ninja_mult": 0,
         "mult_total": 1,
         "ninja_x_stack": [],
-        "score": 28
+        "score": 29
       },
       "col_scores": [
-        87,
+        0,
         132,
         150
       ],
-      "col_total": 369,
-      "total_raw": 625,
+      "col_total": 282,
+      "total_raw": 711,
       "global_xi_x_prod": 1,
-      "final_score": 625
+      "final_score": 711
     },
     {
-      "id": "n_g05_T4_with_ninja",
+      "id": "n_g05_T6_with_ninja",
       "hand_types": {
-        "head": 0,
+        "head": 3,
         "mid": 3,
         "tail": 0
       },
       "col_types": [
-        2,
+        0,
         2,
         2
       ],
       "xi_list": [],
       "head": {
         "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "mid": {
-        "card_chips": 21,
         "hand_chips": 30,
         "ench_chips": 0,
-        "ninja_chips": 40,
-        "chips_total": 91,
+        "ninja_chips": 0,
+        "chips_total": 49,
         "hand_mult": 4,
         "ench_mult": 0,
         "ninja_mult": 0,
         "mult_total": 4,
         "ninja_x_stack": [],
-        "score": 364
+        "score": 196
+      },
+      "mid": {
+        "card_chips": 21,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 51,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 204
       },
       "tail": {
-        "card_chips": 23,
+        "card_chips": 24,
         "hand_chips": 5,
         "ench_chips": 0,
         "ninja_chips": 0,
-        "chips_total": 28,
+        "chips_total": 29,
         "hand_mult": 1,
         "ench_mult": 0,
         "ninja_mult": 0,
         "mult_total": 1,
         "ninja_x_stack": [],
-        "score": 28
+        "score": 29
       },
       "col_scores": [
-        87,
+        0,
         132,
         150
       ],
-      "col_total": 369,
-      "total_raw": 785,
+      "col_total": 282,
+      "total_raw": 711,
       "global_xi_x_prod": 1,
-      "final_score": 785
-    },
-    {
-      "id": "n_g05_T5_baseline",
-      "hand_types": {
-        "head": 4,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        0,
-        0,
-        0
-      ],
-      "xi_list": [
-        "顺清打头"
-      ],
-      "head": {
-        "card_chips": 31,
-        "hand_chips": 50,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 81,
-        "hand_mult": 5,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 5,
-        "ninja_x_stack": [],
-        "score": 810
-      },
-      "mid": {
-        "card_chips": 16,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 21,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 21
-      },
-      "tail": {
-        "card_chips": 21,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 26,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 26
-      },
-      "col_scores": [
-        0,
-        0,
-        0
-      ],
-      "col_total": 0,
-      "total_raw": 857,
-      "global_xi_x_prod": 1,
-      "final_score": 857
-    },
-    {
-      "id": "n_g05_T5_with_ninja",
-      "hand_types": {
-        "head": 4,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        0,
-        0,
-        0
-      ],
-      "xi_list": [
-        "顺清打头"
-      ],
-      "head": {
-        "card_chips": 31,
-        "hand_chips": 50,
-        "ench_chips": 0,
-        "ninja_chips": 40,
-        "chips_total": 121,
-        "hand_mult": 5,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 5,
-        "ninja_x_stack": [],
-        "score": 1210
-      },
-      "mid": {
-        "card_chips": 16,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 21,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 21
-      },
-      "tail": {
-        "card_chips": 21,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 26,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 26
-      },
-      "col_scores": [
-        0,
-        0,
-        0
-      ],
-      "col_total": 0,
-      "total_raw": 1257,
-      "global_xi_x_prod": 1,
-      "final_score": 1257
-    },
-    {
-      "id": "n_g05_T6_baseline",
-      "hand_types": {
-        "head": 5,
-        "mid": 1,
-        "tail": 0
-      },
-      "col_types": [
-        0,
-        0,
-        0
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 30,
-        "hand_chips": 100,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 130,
-        "hand_mult": 8,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 8,
-        "ninja_x_stack": [],
-        "score": 1040
-      },
-      "mid": {
-        "card_chips": 11,
-        "hand_chips": 10,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 21,
-        "hand_mult": 2,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 2,
-        "ninja_x_stack": [],
-        "score": 42
-      },
-      "tail": {
-        "card_chips": 21,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 26,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 26
-      },
-      "col_scores": [
-        0,
-        0,
-        0
-      ],
-      "col_total": 0,
-      "total_raw": 1108,
-      "global_xi_x_prod": 1,
-      "final_score": 1108
-    },
-    {
-      "id": "n_g05_T6_with_ninja",
-      "hand_types": {
-        "head": 5,
-        "mid": 1,
-        "tail": 0
-      },
-      "col_types": [
-        0,
-        0,
-        0
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 30,
-        "hand_chips": 100,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 130,
-        "hand_mult": 8,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 8,
-        "ninja_x_stack": [],
-        "score": 1040
-      },
-      "mid": {
-        "card_chips": 11,
-        "hand_chips": 10,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 21,
-        "hand_mult": 2,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 2,
-        "ninja_x_stack": [],
-        "score": 42
-      },
-      "tail": {
-        "card_chips": 21,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 26,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 26
-      },
-      "col_scores": [
-        0,
-        0,
-        0
-      ],
-      "col_total": 0,
-      "total_raw": 1108,
-      "global_xi_x_prod": 1,
-      "final_score": 1108
+      "final_score": 711
     },
     {
       "id": "n_g06_T1_baseline",
@@ -8207,6 +8209,2158 @@
       "total_raw": 1648,
       "global_xi_x_prod": 2,
       "final_score": 3296
+    },
+    {
+      "id": "n_g07_T1_baseline",
+      "hand_types": {
+        "head": 3,
+        "mid": 3,
+        "tail": 3
+      },
+      "col_types": [
+        2,
+        0,
+        0
+      ],
+      "xi_list": [
+        "全黑",
+        "三清"
+      ],
+      "head": {
+        "card_chips": 16,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 46,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 368
+      },
+      "mid": {
+        "card_chips": 20,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 50,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 400
+      },
+      "tail": {
+        "card_chips": 22,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 52,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 416
+      },
+      "col_scores": [
+        174,
+        0,
+        0
+      ],
+      "col_total": 174,
+      "total_raw": 1358,
+      "global_xi_x_prod": 2,
+      "final_score": 2716
+    },
+    {
+      "id": "n_g07_T1_with_ninja",
+      "hand_types": {
+        "head": 3,
+        "mid": 3,
+        "tail": 3
+      },
+      "col_types": [
+        2,
+        0,
+        0
+      ],
+      "xi_list": [
+        "全黑",
+        "三清"
+      ],
+      "head": {
+        "card_chips": 16,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 46,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [
+          2
+        ],
+        "score": 736
+      },
+      "mid": {
+        "card_chips": 20,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 50,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [
+          2
+        ],
+        "score": 800
+      },
+      "tail": {
+        "card_chips": 22,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 52,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [
+          2
+        ],
+        "score": 832
+      },
+      "col_scores": [
+        348,
+        0,
+        0
+      ],
+      "col_total": 348,
+      "total_raw": 2716,
+      "global_xi_x_prod": 2,
+      "final_score": 5432
+    },
+    {
+      "id": "n_g07_T2_baseline",
+      "hand_types": {
+        "head": 3,
+        "mid": 3,
+        "tail": 3
+      },
+      "col_types": [
+        2,
+        2,
+        0
+      ],
+      "xi_list": [
+        "三清"
+      ],
+      "head": {
+        "card_chips": 16,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 46,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 368
+      },
+      "mid": {
+        "card_chips": 19,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 49,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 392
+      },
+      "tail": {
+        "card_chips": 21,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 51,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 408
+      },
+      "col_scores": [
+        174,
+        228,
+        0
+      ],
+      "col_total": 402,
+      "total_raw": 1570,
+      "global_xi_x_prod": 1,
+      "final_score": 1570
+    },
+    {
+      "id": "n_g07_T2_with_ninja",
+      "hand_types": {
+        "head": 3,
+        "mid": 3,
+        "tail": 3
+      },
+      "col_types": [
+        2,
+        2,
+        0
+      ],
+      "xi_list": [
+        "三清"
+      ],
+      "head": {
+        "card_chips": 16,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 46,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [
+          2
+        ],
+        "score": 736
+      },
+      "mid": {
+        "card_chips": 19,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 49,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [
+          2
+        ],
+        "score": 784
+      },
+      "tail": {
+        "card_chips": 21,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 51,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [
+          2
+        ],
+        "score": 816
+      },
+      "col_scores": [
+        348,
+        456,
+        0
+      ],
+      "col_total": 804,
+      "total_raw": 3140,
+      "global_xi_x_prod": 1,
+      "final_score": 3140
+    },
+    {
+      "id": "n_g07_T3_baseline",
+      "hand_types": {
+        "head": 2,
+        "mid": 2,
+        "tail": 2
+      },
+      "col_types": [
+        3,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全顺"
+      ],
+      "head": {
+        "card_chips": 9,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 29,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 3,
+        "ninja_x_stack": [],
+        "score": 87
+      },
+      "mid": {
+        "card_chips": 18,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 38,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 3,
+        "ninja_x_stack": [],
+        "score": 114
+      },
+      "tail": {
+        "card_chips": 27,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 47,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 3,
+        "ninja_x_stack": [],
+        "score": 141
+      },
+      "col_scores": [
+        180,
+        192,
+        204
+      ],
+      "col_total": 576,
+      "total_raw": 918,
+      "global_xi_x_prod": 2,
+      "final_score": 1836
+    },
+    {
+      "id": "n_g07_T3_with_ninja",
+      "hand_types": {
+        "head": 2,
+        "mid": 2,
+        "tail": 2
+      },
+      "col_types": [
+        3,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全顺"
+      ],
+      "head": {
+        "card_chips": 9,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 29,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 3,
+        "ninja_x_stack": [],
+        "score": 87
+      },
+      "mid": {
+        "card_chips": 18,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 38,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 3,
+        "ninja_x_stack": [],
+        "score": 114
+      },
+      "tail": {
+        "card_chips": 27,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 47,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 3,
+        "ninja_x_stack": [],
+        "score": 141
+      },
+      "col_scores": [
+        180,
+        192,
+        204
+      ],
+      "col_total": 576,
+      "total_raw": 918,
+      "global_xi_x_prod": 2,
+      "final_score": 1836
+    },
+    {
+      "id": "n_g07_T4_baseline",
+      "hand_types": {
+        "head": 3,
+        "mid": 3,
+        "tail": 3
+      },
+      "col_types": [
+        4,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全黑",
+        "全同花",
+        "三清"
+      ],
+      "head": {
+        "card_chips": 16,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 46,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 368
+      },
+      "mid": {
+        "card_chips": 20,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 50,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 400
+      },
+      "tail": {
+        "card_chips": 22,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 52,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 416
+      },
+      "col_scores": [
+        590,
+        400,
+        472
+      ],
+      "col_total": 1462,
+      "total_raw": 2646,
+      "global_xi_x_prod": 6,
+      "final_score": 15876
+    },
+    {
+      "id": "n_g07_T4_with_ninja",
+      "hand_types": {
+        "head": 3,
+        "mid": 3,
+        "tail": 3
+      },
+      "col_types": [
+        4,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全黑",
+        "全同花",
+        "三清"
+      ],
+      "head": {
+        "card_chips": 16,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 46,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [
+          2
+        ],
+        "score": 736
+      },
+      "mid": {
+        "card_chips": 20,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 50,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [
+          2
+        ],
+        "score": 800
+      },
+      "tail": {
+        "card_chips": 22,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 52,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [
+          2
+        ],
+        "score": 832
+      },
+      "col_scores": [
+        1180,
+        800,
+        944
+      ],
+      "col_total": 2924,
+      "total_raw": 5292,
+      "global_xi_x_prod": 6,
+      "final_score": 31752
+    },
+    {
+      "id": "n_g08_T1_baseline",
+      "hand_types": {
+        "head": 2,
+        "mid": 2,
+        "tail": 2
+      },
+      "col_types": [
+        3,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全顺"
+      ],
+      "head": {
+        "card_chips": 9,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 29,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 3,
+        "ninja_x_stack": [],
+        "score": 87
+      },
+      "mid": {
+        "card_chips": 18,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 38,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 3,
+        "ninja_x_stack": [],
+        "score": 114
+      },
+      "tail": {
+        "card_chips": 27,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 47,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 3,
+        "ninja_x_stack": [],
+        "score": 141
+      },
+      "col_scores": [
+        180,
+        192,
+        204
+      ],
+      "col_total": 576,
+      "total_raw": 918,
+      "global_xi_x_prod": 2,
+      "final_score": 1836
+    },
+    {
+      "id": "n_g08_T1_with_ninja",
+      "hand_types": {
+        "head": 2,
+        "mid": 2,
+        "tail": 2
+      },
+      "col_types": [
+        3,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全顺"
+      ],
+      "head": {
+        "card_chips": 9,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 29,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 3,
+        "ninja_x_stack": [
+          2
+        ],
+        "score": 174
+      },
+      "mid": {
+        "card_chips": 18,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 38,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 3,
+        "ninja_x_stack": [
+          2
+        ],
+        "score": 228
+      },
+      "tail": {
+        "card_chips": 27,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 47,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 3,
+        "ninja_x_stack": [
+          2
+        ],
+        "score": 282
+      },
+      "col_scores": [
+        360,
+        384,
+        408
+      ],
+      "col_total": 1152,
+      "total_raw": 1836,
+      "global_xi_x_prod": 2,
+      "final_score": 3672
+    },
+    {
+      "id": "n_g08_T2_baseline",
+      "hand_types": {
+        "head": 0,
+        "mid": 0,
+        "tail": 0
+      },
+      "col_types": [
+        2,
+        2,
+        0
+      ],
+      "xi_list": [],
+      "head": {
+        "card_chips": 16,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 21,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 21
+      },
+      "mid": {
+        "card_chips": 19,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 24,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 24
+      },
+      "tail": {
+        "card_chips": 21,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 26,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 26
+      },
+      "col_scores": [
+        87,
+        114,
+        0
+      ],
+      "col_total": 201,
+      "total_raw": 272,
+      "global_xi_x_prod": 1,
+      "final_score": 272
+    },
+    {
+      "id": "n_g08_T2_with_ninja",
+      "hand_types": {
+        "head": 0,
+        "mid": 0,
+        "tail": 0
+      },
+      "col_types": [
+        2,
+        2,
+        0
+      ],
+      "xi_list": [],
+      "head": {
+        "card_chips": 16,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 21,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [
+          2
+        ],
+        "score": 42
+      },
+      "mid": {
+        "card_chips": 19,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 24,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [
+          2
+        ],
+        "score": 48
+      },
+      "tail": {
+        "card_chips": 21,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 26,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [
+          2
+        ],
+        "score": 52
+      },
+      "col_scores": [
+        174,
+        228,
+        0
+      ],
+      "col_total": 402,
+      "total_raw": 544,
+      "global_xi_x_prod": 1,
+      "final_score": 544
+    },
+    {
+      "id": "n_g08_T3_baseline",
+      "hand_types": {
+        "head": 3,
+        "mid": 3,
+        "tail": 3
+      },
+      "col_types": [
+        4,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全黑",
+        "全同花",
+        "三清"
+      ],
+      "head": {
+        "card_chips": 16,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 46,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 368
+      },
+      "mid": {
+        "card_chips": 20,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 50,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 400
+      },
+      "tail": {
+        "card_chips": 22,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 52,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 416
+      },
+      "col_scores": [
+        590,
+        400,
+        472
+      ],
+      "col_total": 1462,
+      "total_raw": 2646,
+      "global_xi_x_prod": 6,
+      "final_score": 15876
+    },
+    {
+      "id": "n_g08_T3_with_ninja",
+      "hand_types": {
+        "head": 3,
+        "mid": 3,
+        "tail": 3
+      },
+      "col_types": [
+        4,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全黑",
+        "全同花",
+        "三清"
+      ],
+      "head": {
+        "card_chips": 16,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 46,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 368
+      },
+      "mid": {
+        "card_chips": 20,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 50,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 400
+      },
+      "tail": {
+        "card_chips": 22,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 52,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 416
+      },
+      "col_scores": [
+        590,
+        400,
+        472
+      ],
+      "col_total": 1462,
+      "total_raw": 2646,
+      "global_xi_x_prod": 6,
+      "final_score": 15876
+    },
+    {
+      "id": "n_g08_T4_baseline",
+      "hand_types": {
+        "head": 4,
+        "mid": 4,
+        "tail": 4
+      },
+      "col_types": [
+        3,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全黑",
+        "全顺",
+        "全同花",
+        "三清",
+        "三顺清",
+        "顺清打头"
+      ],
+      "head": {
+        "card_chips": 9,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 59,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 3540
+      },
+      "mid": {
+        "card_chips": 18,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 68,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 2040
+      },
+      "tail": {
+        "card_chips": 27,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 77,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 2310
+      },
+      "col_scores": [
+        1080,
+        1152,
+        1224
+      ],
+      "col_total": 3456,
+      "total_raw": 11346,
+      "global_xi_x_prod": 12,
+      "final_score": 136152
+    },
+    {
+      "id": "n_g08_T4_with_ninja",
+      "hand_types": {
+        "head": 4,
+        "mid": 4,
+        "tail": 4
+      },
+      "col_types": [
+        3,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全黑",
+        "全顺",
+        "全同花",
+        "三清",
+        "三顺清",
+        "顺清打头"
+      ],
+      "head": {
+        "card_chips": 9,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 59,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [
+          2
+        ],
+        "score": 7080
+      },
+      "mid": {
+        "card_chips": 18,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 68,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [
+          2
+        ],
+        "score": 4080
+      },
+      "tail": {
+        "card_chips": 27,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 77,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [
+          2
+        ],
+        "score": 4620
+      },
+      "col_scores": [
+        2160,
+        2304,
+        2448
+      ],
+      "col_total": 6912,
+      "total_raw": 22692,
+      "global_xi_x_prod": 12,
+      "final_score": 272304
+    },
+    {
+      "id": "n_s05_T1_baseline",
+      "hand_types": {
+        "head": 4,
+        "mid": 4,
+        "tail": 4
+      },
+      "col_types": [
+        0,
+        2,
+        1
+      ],
+      "xi_list": [
+        "三清",
+        "三顺清",
+        "顺清打头"
+      ],
+      "head": {
+        "card_chips": 30,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 80,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 4800
+      },
+      "mid": {
+        "card_chips": 30,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 80,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 2400
+      },
+      "tail": {
+        "card_chips": 31,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 81,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 2430
+      },
+      "col_scores": [
+        0,
+        900,
+        480
+      ],
+      "col_total": 1380,
+      "total_raw": 11010,
+      "global_xi_x_prod": 1,
+      "final_score": 11010
+    },
+    {
+      "id": "n_s05_T1_with_ninja",
+      "hand_types": {
+        "head": 4,
+        "mid": 4,
+        "tail": 4
+      },
+      "col_types": [
+        0,
+        2,
+        1
+      ],
+      "xi_list": [
+        "三清",
+        "三顺清",
+        "顺清打头"
+      ],
+      "head": {
+        "card_chips": 30,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 80,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [
+          4
+        ],
+        "score": 19200
+      },
+      "mid": {
+        "card_chips": 30,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 80,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [
+          4
+        ],
+        "score": 9600
+      },
+      "tail": {
+        "card_chips": 31,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 81,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [
+          4
+        ],
+        "score": 9720
+      },
+      "col_scores": [
+        0,
+        3600,
+        1920
+      ],
+      "col_total": 5520,
+      "total_raw": 44040,
+      "global_xi_x_prod": 1,
+      "final_score": 44040
+    },
+    {
+      "id": "n_s05_T2_baseline",
+      "hand_types": {
+        "head": 4,
+        "mid": 4,
+        "tail": 4
+      },
+      "col_types": [
+        5,
+        5,
+        5
+      ],
+      "xi_list": [
+        "三清",
+        "三顺清",
+        "顺清打头",
+        "全三条"
+      ],
+      "head": {
+        "card_chips": 9,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 59,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 3540
+      },
+      "mid": {
+        "card_chips": 9,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 59,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 1770
+      },
+      "tail": {
+        "card_chips": 9,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 59,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 1770
+      },
+      "col_scores": [
+        5088,
+        5232,
+        5376
+      ],
+      "col_total": 15696,
+      "total_raw": 22776,
+      "global_xi_x_prod": 4,
+      "final_score": 91104
+    },
+    {
+      "id": "n_s05_T2_with_ninja",
+      "hand_types": {
+        "head": 4,
+        "mid": 4,
+        "tail": 4
+      },
+      "col_types": [
+        5,
+        5,
+        5
+      ],
+      "xi_list": [
+        "三清",
+        "三顺清",
+        "顺清打头",
+        "全三条"
+      ],
+      "head": {
+        "card_chips": 9,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 59,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [
+          4
+        ],
+        "score": 14160
+      },
+      "mid": {
+        "card_chips": 9,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 59,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [
+          4
+        ],
+        "score": 7080
+      },
+      "tail": {
+        "card_chips": 9,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 59,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [
+          4
+        ],
+        "score": 7080
+      },
+      "col_scores": [
+        20352,
+        20928,
+        21504
+      ],
+      "col_total": 62784,
+      "total_raw": 91104,
+      "global_xi_x_prod": 4,
+      "final_score": 364416
+    },
+    {
+      "id": "n_s05_T3_baseline",
+      "hand_types": {
+        "head": 5,
+        "mid": 3,
+        "tail": 4
+      },
+      "col_types": [
+        0,
+        0,
+        0
+      ],
+      "xi_list": [],
+      "head": {
+        "card_chips": 30,
+        "hand_chips": 100,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 130,
+        "hand_mult": 8,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 8,
+        "ninja_x_stack": [],
+        "score": 1040
+      },
+      "mid": {
+        "card_chips": 19,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 49,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 196
+      },
+      "tail": {
+        "card_chips": 31,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 81,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 405
+      },
+      "col_scores": [
+        0,
+        0,
+        0
+      ],
+      "col_total": 0,
+      "total_raw": 1641,
+      "global_xi_x_prod": 1,
+      "final_score": 1641
+    },
+    {
+      "id": "n_s05_T3_with_ninja",
+      "hand_types": {
+        "head": 5,
+        "mid": 3,
+        "tail": 4
+      },
+      "col_types": [
+        0,
+        0,
+        0
+      ],
+      "xi_list": [],
+      "head": {
+        "card_chips": 30,
+        "hand_chips": 100,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 130,
+        "hand_mult": 8,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 8,
+        "ninja_x_stack": [],
+        "score": 1040
+      },
+      "mid": {
+        "card_chips": 19,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 49,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 196
+      },
+      "tail": {
+        "card_chips": 31,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 81,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 405
+      },
+      "col_scores": [
+        0,
+        0,
+        0
+      ],
+      "col_total": 0,
+      "total_raw": 1641,
+      "global_xi_x_prod": 1,
+      "final_score": 1641
+    },
+    {
+      "id": "n_s05_T4_baseline",
+      "hand_types": {
+        "head": 4,
+        "mid": 3,
+        "tail": 4
+      },
+      "col_types": [
+        3,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全黑",
+        "全同花",
+        "三清",
+        "顺清打头"
+      ],
+      "head": {
+        "card_chips": 30,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 80,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 1600
+      },
+      "mid": {
+        "card_chips": 23,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 53,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 424
+      },
+      "tail": {
+        "card_chips": 12,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 62,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 620
+      },
+      "col_scores": [
+        424,
+        440,
+        376
+      ],
+      "col_total": 1240,
+      "total_raw": 3884,
+      "global_xi_x_prod": 6,
+      "final_score": 23304
+    },
+    {
+      "id": "n_s05_T4_with_ninja",
+      "hand_types": {
+        "head": 4,
+        "mid": 3,
+        "tail": 4
+      },
+      "col_types": [
+        3,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全黑",
+        "全同花",
+        "三清",
+        "顺清打头"
+      ],
+      "head": {
+        "card_chips": 30,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 80,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [
+          4
+        ],
+        "score": 6400
+      },
+      "mid": {
+        "card_chips": 23,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 53,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [
+          4
+        ],
+        "score": 1696
+      },
+      "tail": {
+        "card_chips": 12,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 62,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [
+          4
+        ],
+        "score": 2480
+      },
+      "col_scores": [
+        1696,
+        1760,
+        1504
+      ],
+      "col_total": 4960,
+      "total_raw": 15536,
+      "global_xi_x_prod": 6,
+      "final_score": 93216
+    },
+    {
+      "id": "n_s06_T1_baseline",
+      "hand_types": {
+        "head": 5,
+        "mid": 5,
+        "tail": 5
+      },
+      "col_types": [
+        0,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全三条"
+      ],
+      "head": {
+        "card_chips": 30,
+        "hand_chips": 100,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 130,
+        "hand_mult": 8,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 8,
+        "ninja_x_stack": [],
+        "score": 1040
+      },
+      "mid": {
+        "card_chips": 9,
+        "hand_chips": 100,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 109,
+        "hand_mult": 8,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 8,
+        "ninja_x_stack": [],
+        "score": 872
+      },
+      "tail": {
+        "card_chips": 15,
+        "hand_chips": 100,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 115,
+        "hand_mult": 8,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 8,
+        "ninja_x_stack": [],
+        "score": 920
+      },
+      "col_scores": [
+        0,
+        192,
+        192
+      ],
+      "col_total": 384,
+      "total_raw": 3216,
+      "global_xi_x_prod": 4,
+      "final_score": 12864
+    },
+    {
+      "id": "n_s06_T1_with_ninja",
+      "hand_types": {
+        "head": 5,
+        "mid": 5,
+        "tail": 5
+      },
+      "col_types": [
+        0,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全三条"
+      ],
+      "head": {
+        "card_chips": 30,
+        "hand_chips": 100,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 130,
+        "hand_mult": 8,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 8,
+        "ninja_x_stack": [
+          5
+        ],
+        "score": 5200
+      },
+      "mid": {
+        "card_chips": 9,
+        "hand_chips": 100,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 109,
+        "hand_mult": 8,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 8,
+        "ninja_x_stack": [
+          5
+        ],
+        "score": 4360
+      },
+      "tail": {
+        "card_chips": 15,
+        "hand_chips": 100,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 115,
+        "hand_mult": 8,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 8,
+        "ninja_x_stack": [
+          5
+        ],
+        "score": 4600
+      },
+      "col_scores": [
+        0,
+        960,
+        960
+      ],
+      "col_total": 1920,
+      "total_raw": 16080,
+      "global_xi_x_prod": 4,
+      "final_score": 64320
+    },
+    {
+      "id": "n_s06_T2_baseline",
+      "hand_types": {
+        "head": 5,
+        "mid": 5,
+        "tail": 5
+      },
+      "col_types": [
+        0,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全三条"
+      ],
+      "head": {
+        "card_chips": 30,
+        "hand_chips": 100,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 130,
+        "hand_mult": 8,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 8,
+        "ninja_x_stack": [],
+        "score": 1040
+      },
+      "mid": {
+        "card_chips": 9,
+        "hand_chips": 100,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 109,
+        "hand_mult": 8,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 8,
+        "ninja_x_stack": [],
+        "score": 872
+      },
+      "tail": {
+        "card_chips": 15,
+        "hand_chips": 100,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 115,
+        "hand_mult": 8,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 8,
+        "ninja_x_stack": [],
+        "score": 920
+      },
+      "col_scores": [
+        0,
+        192,
+        192
+      ],
+      "col_total": 384,
+      "total_raw": 3216,
+      "global_xi_x_prod": 4,
+      "final_score": 12864
+    },
+    {
+      "id": "n_s06_T2_with_ninja",
+      "hand_types": {
+        "head": 5,
+        "mid": 5,
+        "tail": 5
+      },
+      "col_types": [
+        0,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全三条"
+      ],
+      "head": {
+        "card_chips": 30,
+        "hand_chips": 100,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 130,
+        "hand_mult": 8,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 8,
+        "ninja_x_stack": [
+          5
+        ],
+        "score": 5200
+      },
+      "mid": {
+        "card_chips": 9,
+        "hand_chips": 100,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 109,
+        "hand_mult": 8,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 8,
+        "ninja_x_stack": [
+          5
+        ],
+        "score": 4360
+      },
+      "tail": {
+        "card_chips": 15,
+        "hand_chips": 100,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 115,
+        "hand_mult": 8,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 8,
+        "ninja_x_stack": [
+          5
+        ],
+        "score": 4600
+      },
+      "col_scores": [
+        0,
+        960,
+        960
+      ],
+      "col_total": 1920,
+      "total_raw": 16080,
+      "global_xi_x_prod": 4,
+      "final_score": 64320
+    },
+    {
+      "id": "n_s06_T3_baseline",
+      "hand_types": {
+        "head": 4,
+        "mid": 4,
+        "tail": 4
+      },
+      "col_types": [
+        2,
+        2,
+        2
+      ],
+      "xi_list": [
+        "三清",
+        "三顺清",
+        "顺清打头"
+      ],
+      "head": {
+        "card_chips": 30,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 80,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 4800
+      },
+      "mid": {
+        "card_chips": 30,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 80,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 2400
+      },
+      "tail": {
+        "card_chips": 29,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 79,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 2370
+      },
+      "col_scores": [
+        882,
+        900,
+        900
+      ],
+      "col_total": 2682,
+      "total_raw": 12252,
+      "global_xi_x_prod": 1,
+      "final_score": 12252
+    },
+    {
+      "id": "n_s06_T3_with_ninja",
+      "hand_types": {
+        "head": 4,
+        "mid": 4,
+        "tail": 4
+      },
+      "col_types": [
+        2,
+        2,
+        2
+      ],
+      "xi_list": [
+        "三清",
+        "三顺清",
+        "顺清打头"
+      ],
+      "head": {
+        "card_chips": 30,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 80,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 4800
+      },
+      "mid": {
+        "card_chips": 30,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 80,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 2400
+      },
+      "tail": {
+        "card_chips": 29,
+        "hand_chips": 50,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 79,
+        "hand_mult": 5,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 2370
+      },
+      "col_scores": [
+        882,
+        900,
+        900
+      ],
+      "col_total": 2682,
+      "total_raw": 12252,
+      "global_xi_x_prod": 1,
+      "final_score": 12252
+    },
+    {
+      "id": "n_s06_T4_baseline",
+      "hand_types": {
+        "head": 1,
+        "mid": 1,
+        "tail": 1
+      },
+      "col_types": [
+        0,
+        0,
+        0
+      ],
+      "xi_list": [
+        "全黑"
+      ],
+      "head": {
+        "card_chips": 30,
+        "hand_chips": 10,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 40,
+        "hand_mult": 2,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 2,
+        "ninja_x_stack": [],
+        "score": 80
+      },
+      "mid": {
+        "card_chips": 30,
+        "hand_chips": 10,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 40,
+        "hand_mult": 2,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 2,
+        "ninja_x_stack": [],
+        "score": 80
+      },
+      "tail": {
+        "card_chips": 24,
+        "hand_chips": 10,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 34,
+        "hand_mult": 2,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 2,
+        "ninja_x_stack": [],
+        "score": 68
+      },
+      "col_scores": [
+        0,
+        0,
+        0
+      ],
+      "col_total": 0,
+      "total_raw": 228,
+      "global_xi_x_prod": 2,
+      "final_score": 456
+    },
+    {
+      "id": "n_s06_T4_with_ninja",
+      "hand_types": {
+        "head": 1,
+        "mid": 1,
+        "tail": 1
+      },
+      "col_types": [
+        0,
+        0,
+        0
+      ],
+      "xi_list": [
+        "全黑"
+      ],
+      "head": {
+        "card_chips": 30,
+        "hand_chips": 10,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 40,
+        "hand_mult": 2,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 2,
+        "ninja_x_stack": [
+          5
+        ],
+        "score": 400
+      },
+      "mid": {
+        "card_chips": 30,
+        "hand_chips": 10,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 40,
+        "hand_mult": 2,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 2,
+        "ninja_x_stack": [
+          5
+        ],
+        "score": 400
+      },
+      "tail": {
+        "card_chips": 24,
+        "hand_chips": 10,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 34,
+        "hand_mult": 2,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 2,
+        "ninja_x_stack": [
+          5
+        ],
+        "score": 340
+      },
+      "col_scores": [
+        0,
+        0,
+        0
+      ],
+      "col_total": 0,
+      "total_raw": 1140,
+      "global_xi_x_prod": 2,
+      "final_score": 2280
     },
     {
       "id": "n_x01_T1_baseline",
@@ -13852,6 +16006,1152 @@
       "final_score": 27510
     },
     {
+      "id": "n_f03_T1_baseline",
+      "hand_types": {
+        "head": 0,
+        "mid": 0,
+        "tail": 0
+      },
+      "col_types": [
+        0,
+        2,
+        0
+      ],
+      "xi_list": [],
+      "head": {
+        "card_chips": 25,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 30,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 30
+      },
+      "mid": {
+        "card_chips": 21,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 26,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 26
+      },
+      "tail": {
+        "card_chips": 19,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 24,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 24
+      },
+      "col_scores": [
+        0,
+        114,
+        0
+      ],
+      "col_total": 114,
+      "total_raw": 194,
+      "global_xi_x_prod": 1,
+      "final_score": 194
+    },
+    {
+      "id": "n_f03_T1_with_ninja",
+      "hand_types": {
+        "head": 0,
+        "mid": 0,
+        "tail": 0
+      },
+      "col_types": [
+        0,
+        2,
+        0
+      ],
+      "xi_list": [],
+      "head": {
+        "card_chips": 25,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 30,
+        "chips_total": 60,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 3,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 240
+      },
+      "mid": {
+        "card_chips": 21,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 26,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 26
+      },
+      "tail": {
+        "card_chips": 19,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 24,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 24
+      },
+      "col_scores": [
+        0,
+        114,
+        0
+      ],
+      "col_total": 114,
+      "total_raw": 404,
+      "global_xi_x_prod": 1,
+      "final_score": 404
+    },
+    {
+      "id": "n_f03_T2_baseline",
+      "hand_types": {
+        "head": 0,
+        "mid": 0,
+        "tail": 0
+      },
+      "col_types": [
+        0,
+        0,
+        0
+      ],
+      "xi_list": [],
+      "head": {
+        "card_chips": 25,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 30,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 30
+      },
+      "mid": {
+        "card_chips": 25,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 30,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 30
+      },
+      "tail": {
+        "card_chips": 19,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 24,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 24
+      },
+      "col_scores": [
+        0,
+        0,
+        0
+      ],
+      "col_total": 0,
+      "total_raw": 84,
+      "global_xi_x_prod": 1,
+      "final_score": 84
+    },
+    {
+      "id": "n_f03_T2_with_ninja",
+      "hand_types": {
+        "head": 0,
+        "mid": 0,
+        "tail": 0
+      },
+      "col_types": [
+        0,
+        0,
+        0
+      ],
+      "xi_list": [],
+      "head": {
+        "card_chips": 25,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 30,
+        "chips_total": 60,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 3,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 240
+      },
+      "mid": {
+        "card_chips": 25,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 30,
+        "chips_total": 60,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 3,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 240
+      },
+      "tail": {
+        "card_chips": 19,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 24,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 24
+      },
+      "col_scores": [
+        0,
+        0,
+        0
+      ],
+      "col_total": 0,
+      "total_raw": 504,
+      "global_xi_x_prod": 1,
+      "final_score": 504
+    },
+    {
+      "id": "n_f03_T3_baseline",
+      "hand_types": {
+        "head": 0,
+        "mid": 0,
+        "tail": 0
+      },
+      "col_types": [
+        2,
+        2,
+        0
+      ],
+      "xi_list": [],
+      "head": {
+        "card_chips": 16,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 21,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 21
+      },
+      "mid": {
+        "card_chips": 21,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 26,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 26
+      },
+      "tail": {
+        "card_chips": 19,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 24,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 24
+      },
+      "col_scores": [
+        87,
+        114,
+        0
+      ],
+      "col_total": 201,
+      "total_raw": 272,
+      "global_xi_x_prod": 1,
+      "final_score": 272
+    },
+    {
+      "id": "n_f03_T3_with_ninja",
+      "hand_types": {
+        "head": 0,
+        "mid": 0,
+        "tail": 0
+      },
+      "col_types": [
+        2,
+        2,
+        0
+      ],
+      "xi_list": [],
+      "head": {
+        "card_chips": 16,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 21,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 21
+      },
+      "mid": {
+        "card_chips": 21,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 26,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 26
+      },
+      "tail": {
+        "card_chips": 19,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 24,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 24
+      },
+      "col_scores": [
+        87,
+        114,
+        0
+      ],
+      "col_total": 201,
+      "total_raw": 272,
+      "global_xi_x_prod": 1,
+      "final_score": 272
+    },
+    {
+      "id": "n_f03_T4_baseline",
+      "hand_types": {
+        "head": 5,
+        "mid": 1,
+        "tail": 2
+      },
+      "col_types": [
+        1,
+        0,
+        0
+      ],
+      "xi_list": [
+        "四张"
+      ],
+      "head": {
+        "card_chips": 33,
+        "hand_chips": 100,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 133,
+        "hand_mult": 8,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 8,
+        "ninja_x_stack": [],
+        "score": 1064
+      },
+      "mid": {
+        "card_chips": 31,
+        "hand_chips": 10,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 41,
+        "hand_mult": 2,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 2,
+        "ninja_x_stack": [],
+        "score": 82
+      },
+      "tail": {
+        "card_chips": 30,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 50,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 3,
+        "ninja_x_stack": [],
+        "score": 150
+      },
+      "col_scores": [
+        84,
+        0,
+        0
+      ],
+      "col_total": 84,
+      "total_raw": 1380,
+      "global_xi_x_prod": 5,
+      "final_score": 6900
+    },
+    {
+      "id": "n_f03_T4_with_ninja",
+      "hand_types": {
+        "head": 5,
+        "mid": 1,
+        "tail": 2
+      },
+      "col_types": [
+        1,
+        0,
+        0
+      ],
+      "xi_list": [
+        "四张"
+      ],
+      "head": {
+        "card_chips": 33,
+        "hand_chips": 100,
+        "ench_chips": 0,
+        "ninja_chips": 30,
+        "chips_total": 163,
+        "hand_mult": 8,
+        "ench_mult": 0,
+        "ninja_mult": 3,
+        "mult_total": 11,
+        "ninja_x_stack": [],
+        "score": 1793
+      },
+      "mid": {
+        "card_chips": 31,
+        "hand_chips": 10,
+        "ench_chips": 0,
+        "ninja_chips": 30,
+        "chips_total": 71,
+        "hand_mult": 2,
+        "ench_mult": 0,
+        "ninja_mult": 3,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 355
+      },
+      "tail": {
+        "card_chips": 30,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 30,
+        "chips_total": 80,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 3,
+        "mult_total": 6,
+        "ninja_x_stack": [],
+        "score": 480
+      },
+      "col_scores": [
+        360,
+        0,
+        0
+      ],
+      "col_total": 360,
+      "total_raw": 2988,
+      "global_xi_x_prod": 5,
+      "final_score": 14940
+    },
+    {
+      "id": "n_f03_T5_baseline",
+      "hand_types": {
+        "head": 3,
+        "mid": 3,
+        "tail": 3
+      },
+      "col_types": [
+        3,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全黑",
+        "全同花",
+        "三清"
+      ],
+      "head": {
+        "card_chips": 25,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 55,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 440
+      },
+      "mid": {
+        "card_chips": 20,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 50,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 400
+      },
+      "tail": {
+        "card_chips": 22,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 52,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 416
+      },
+      "col_scores": [
+        384,
+        400,
+        472
+      ],
+      "col_total": 1256,
+      "total_raw": 2512,
+      "global_xi_x_prod": 6,
+      "final_score": 15072
+    },
+    {
+      "id": "n_f03_T5_with_ninja",
+      "hand_types": {
+        "head": 3,
+        "mid": 3,
+        "tail": 3
+      },
+      "col_types": [
+        3,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全黑",
+        "全同花",
+        "三清"
+      ],
+      "head": {
+        "card_chips": 25,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 30,
+        "chips_total": 85,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 3,
+        "mult_total": 7,
+        "ninja_x_stack": [],
+        "score": 1190
+      },
+      "mid": {
+        "card_chips": 20,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 30,
+        "chips_total": 80,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 3,
+        "mult_total": 7,
+        "ninja_x_stack": [],
+        "score": 1120
+      },
+      "tail": {
+        "card_chips": 22,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 30,
+        "chips_total": 82,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 3,
+        "mult_total": 7,
+        "ninja_x_stack": [],
+        "score": 1148
+      },
+      "col_scores": [
+        1092,
+        1120,
+        1246
+      ],
+      "col_total": 3458,
+      "total_raw": 6916,
+      "global_xi_x_prod": 6,
+      "final_score": 41496
+    },
+    {
+      "id": "n_t02_T1_baseline",
+      "hand_types": {
+        "head": 2,
+        "mid": 2,
+        "tail": 2
+      },
+      "col_types": [
+        3,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全顺"
+      ],
+      "head": {
+        "card_chips": 9,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 29,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 3,
+        "ninja_x_stack": [],
+        "score": 87
+      },
+      "mid": {
+        "card_chips": 18,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 38,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 3,
+        "ninja_x_stack": [],
+        "score": 114
+      },
+      "tail": {
+        "card_chips": 27,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 47,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 3,
+        "ninja_x_stack": [],
+        "score": 141
+      },
+      "col_scores": [
+        180,
+        192,
+        204
+      ],
+      "col_total": 576,
+      "total_raw": 918,
+      "global_xi_x_prod": 2,
+      "final_score": 1836
+    },
+    {
+      "id": "n_t02_T1_with_ninja",
+      "hand_types": {
+        "head": 2,
+        "mid": 2,
+        "tail": 2
+      },
+      "col_types": [
+        3,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全顺"
+      ],
+      "head": {
+        "card_chips": 9,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 29,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 5,
+        "mult_total": 8,
+        "ninja_x_stack": [],
+        "score": 232
+      },
+      "mid": {
+        "card_chips": 18,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 38,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 5,
+        "mult_total": 8,
+        "ninja_x_stack": [],
+        "score": 304
+      },
+      "tail": {
+        "card_chips": 27,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 47,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 5,
+        "mult_total": 8,
+        "ninja_x_stack": [],
+        "score": 376
+      },
+      "col_scores": [
+        405,
+        432,
+        459
+      ],
+      "col_total": 1296,
+      "total_raw": 2208,
+      "global_xi_x_prod": 2,
+      "final_score": 4416
+    },
+    {
+      "id": "n_t02_T2_baseline",
+      "hand_types": {
+        "head": 2,
+        "mid": 3,
+        "tail": 0
+      },
+      "col_types": [
+        0,
+        0,
+        0
+      ],
+      "xi_list": [],
+      "head": {
+        "card_chips": 30,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 50,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 3,
+        "ninja_x_stack": [],
+        "score": 150
+      },
+      "mid": {
+        "card_chips": 20,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 50,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 200
+      },
+      "tail": {
+        "card_chips": 16,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 21,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 21
+      },
+      "col_scores": [
+        0,
+        0,
+        0
+      ],
+      "col_total": 0,
+      "total_raw": 371,
+      "global_xi_x_prod": 1,
+      "final_score": 371
+    },
+    {
+      "id": "n_t02_T2_with_ninja",
+      "hand_types": {
+        "head": 2,
+        "mid": 3,
+        "tail": 0
+      },
+      "col_types": [
+        0,
+        0,
+        0
+      ],
+      "xi_list": [],
+      "head": {
+        "card_chips": 30,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 50,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 5,
+        "mult_total": 8,
+        "ninja_x_stack": [],
+        "score": 400
+      },
+      "mid": {
+        "card_chips": 20,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 50,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 200
+      },
+      "tail": {
+        "card_chips": 16,
+        "hand_chips": 5,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 21,
+        "hand_mult": 1,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 21
+      },
+      "col_scores": [
+        0,
+        0,
+        0
+      ],
+      "col_total": 0,
+      "total_raw": 621,
+      "global_xi_x_prod": 1,
+      "final_score": 621
+    },
+    {
+      "id": "n_t02_T3_baseline",
+      "hand_types": {
+        "head": 3,
+        "mid": 3,
+        "tail": 3
+      },
+      "col_types": [
+        4,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全黑",
+        "全同花",
+        "三清"
+      ],
+      "head": {
+        "card_chips": 16,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 46,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 368
+      },
+      "mid": {
+        "card_chips": 20,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 50,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 400
+      },
+      "tail": {
+        "card_chips": 22,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 52,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 416
+      },
+      "col_scores": [
+        590,
+        400,
+        472
+      ],
+      "col_total": 1462,
+      "total_raw": 2646,
+      "global_xi_x_prod": 6,
+      "final_score": 15876
+    },
+    {
+      "id": "n_t02_T3_with_ninja",
+      "hand_types": {
+        "head": 3,
+        "mid": 3,
+        "tail": 3
+      },
+      "col_types": [
+        4,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全黑",
+        "全同花",
+        "三清"
+      ],
+      "head": {
+        "card_chips": 16,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 46,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 368
+      },
+      "mid": {
+        "card_chips": 20,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 50,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 400
+      },
+      "tail": {
+        "card_chips": 22,
+        "hand_chips": 30,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 52,
+        "hand_mult": 4,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 4,
+        "ninja_x_stack": [],
+        "score": 416
+      },
+      "col_scores": [
+        590,
+        400,
+        472
+      ],
+      "col_total": 1462,
+      "total_raw": 2646,
+      "global_xi_x_prod": 6,
+      "final_score": 15876
+    },
+    {
+      "id": "n_t02_T4_baseline",
+      "hand_types": {
+        "head": 2,
+        "mid": 2,
+        "tail": 2
+      },
+      "col_types": [
+        3,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全黑",
+        "全顺"
+      ],
+      "head": {
+        "card_chips": 9,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 29,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 3,
+        "ninja_x_stack": [],
+        "score": 87
+      },
+      "mid": {
+        "card_chips": 18,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 38,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 3,
+        "ninja_x_stack": [],
+        "score": 114
+      },
+      "tail": {
+        "card_chips": 27,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 47,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 3,
+        "ninja_x_stack": [],
+        "score": 141
+      },
+      "col_scores": [
+        180,
+        192,
+        204
+      ],
+      "col_total": 576,
+      "total_raw": 918,
+      "global_xi_x_prod": 4,
+      "final_score": 3672
+    },
+    {
+      "id": "n_t02_T4_with_ninja",
+      "hand_types": {
+        "head": 2,
+        "mid": 2,
+        "tail": 2
+      },
+      "col_types": [
+        3,
+        3,
+        3
+      ],
+      "xi_list": [
+        "全黑",
+        "全顺"
+      ],
+      "head": {
+        "card_chips": 9,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 29,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 5,
+        "mult_total": 8,
+        "ninja_x_stack": [],
+        "score": 232
+      },
+      "mid": {
+        "card_chips": 18,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 38,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 5,
+        "mult_total": 8,
+        "ninja_x_stack": [],
+        "score": 304
+      },
+      "tail": {
+        "card_chips": 27,
+        "hand_chips": 20,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 47,
+        "hand_mult": 3,
+        "ench_mult": 0,
+        "ninja_mult": 5,
+        "mult_total": 8,
+        "ninja_x_stack": [],
+        "score": 376
+      },
+      "col_scores": [
+        405,
+        432,
+        459
+      ],
+      "col_total": 1296,
+      "total_raw": 2208,
+      "global_xi_x_prod": 4,
+      "final_score": 8832
+    },
+    {
       "id": "n_r02_T1_baseline",
       "hand_types": {
         "head": 1,
@@ -15026,147 +18326,154 @@
     {
       "id": "n_t05_T1_baseline",
       "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
+        "head": 1,
+        "mid": 1,
+        "tail": 1
       },
       "col_types": [
-        2,
-        0,
-        2
+        3,
+        3,
+        3
       ],
       "xi_list": [],
       "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
+        "card_chips": 9,
+        "hand_chips": 10,
         "ench_chips": 0,
         "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
+        "chips_total": 19,
+        "hand_mult": 2,
         "ench_mult": 0,
         "ninja_mult": 0,
-        "mult_total": 1,
+        "mult_total": 2,
         "ninja_x_stack": [],
-        "score": 24
+        "score": 38
       },
       "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
+        "card_chips": 13,
+        "hand_chips": 10,
         "ench_chips": 0,
         "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
+        "chips_total": 23,
+        "hand_mult": 2,
         "ench_mult": 0,
         "ninja_mult": 0,
-        "mult_total": 1,
+        "mult_total": 2,
         "ninja_x_stack": [],
-        "score": 28
+        "score": 46
       },
       "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
+        "card_chips": 29,
+        "hand_chips": 10,
         "ench_chips": 0,
         "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
+        "chips_total": 39,
+        "hand_mult": 2,
         "ench_mult": 0,
         "ninja_mult": 0,
-        "mult_total": 1,
+        "mult_total": 2,
         "ninja_x_stack": [],
-        "score": 24
+        "score": 78
       },
       "col_scores": [
-        87,
-        0,
-        150
+        180,
+        180,
+        204
       ],
-      "col_total": 237,
-      "total_raw": 313,
+      "col_total": 564,
+      "total_raw": 726,
       "global_xi_x_prod": 1,
-      "final_score": 313
+      "final_score": 726
     },
     {
       "id": "n_t05_T1_with_ninja",
       "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
+        "head": 1,
+        "mid": 1,
+        "tail": 1
       },
       "col_types": [
-        2,
-        0,
-        2
+        3,
+        3,
+        3
       ],
       "xi_list": [],
       "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
+        "card_chips": 9,
+        "hand_chips": 10,
         "ench_chips": 0,
         "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
+        "chips_total": 19,
+        "hand_mult": 2,
         "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [
-          2
-        ],
-        "score": 48
+        "ninja_mult": 3,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 95
       },
       "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
+        "card_chips": 13,
+        "hand_chips": 10,
         "ench_chips": 0,
         "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
+        "chips_total": 23,
+        "hand_mult": 2,
         "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [
-          2
-        ],
-        "score": 56
+        "ninja_mult": 3,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 115
       },
       "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
+        "card_chips": 29,
+        "hand_chips": 10,
         "ench_chips": 0,
         "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
+        "chips_total": 39,
+        "hand_mult": 2,
         "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [
-          2
-        ],
-        "score": 48
+        "ninja_mult": 3,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 195
       },
       "col_scores": [
-        174,
-        0,
-        300
+        315,
+        315,
+        357
       ],
-      "col_total": 474,
-      "total_raw": 626,
+      "col_total": 987,
+      "total_raw": 1392,
       "global_xi_x_prod": 1,
-      "final_score": 626
+      "final_score": 1392
     },
     {
       "id": "n_t05_T2_baseline",
       "hand_types": {
-        "head": 5,
-        "mid": 4,
-        "tail": 3
+        "head": 1,
+        "mid": 5,
+        "tail": 0
       },
       "col_types": [
-        0,
-        0,
-        0
+        3,
+        3,
+        3
       ],
       "xi_list": [],
       "head": {
+        "card_chips": 9,
+        "hand_chips": 10,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 19,
+        "hand_mult": 2,
+        "ench_mult": 0,
+        "ninja_mult": 0,
+        "mult_total": 2,
+        "ninja_x_stack": [],
+        "score": 38
+      },
+      "mid": {
         "card_chips": 30,
         "hand_chips": 100,
         "ench_chips": 0,
@@ -15179,56 +18486,56 @@
         "ninja_x_stack": [],
         "score": 1040
       },
-      "mid": {
-        "card_chips": 31,
-        "hand_chips": 50,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 81,
-        "hand_mult": 5,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 5,
-        "ninja_x_stack": [],
-        "score": 405
-      },
       "tail": {
         "card_chips": 19,
-        "hand_chips": 30,
+        "hand_chips": 5,
         "ench_chips": 0,
         "ninja_chips": 0,
-        "chips_total": 49,
-        "hand_mult": 4,
+        "chips_total": 24,
+        "hand_mult": 1,
         "ench_mult": 0,
         "ninja_mult": 0,
-        "mult_total": 4,
+        "mult_total": 1,
         "ninja_x_stack": [],
-        "score": 196
+        "score": 24
       },
       "col_scores": [
-        0,
-        0,
-        0
+        180,
+        196,
+        216
       ],
-      "col_total": 0,
-      "total_raw": 1641,
+      "col_total": 592,
+      "total_raw": 1694,
       "global_xi_x_prod": 1,
-      "final_score": 1641
+      "final_score": 1694
     },
     {
       "id": "n_t05_T2_with_ninja",
       "hand_types": {
-        "head": 5,
-        "mid": 4,
-        "tail": 3
+        "head": 1,
+        "mid": 5,
+        "tail": 0
       },
       "col_types": [
-        0,
-        0,
-        0
+        3,
+        3,
+        3
       ],
       "xi_list": [],
       "head": {
+        "card_chips": 9,
+        "hand_chips": 10,
+        "ench_chips": 0,
+        "ninja_chips": 0,
+        "chips_total": 19,
+        "hand_mult": 2,
+        "ench_mult": 0,
+        "ninja_mult": 3,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 95
+      },
+      "mid": {
         "card_chips": 30,
         "hand_chips": 100,
         "ench_chips": 0,
@@ -15238,50 +18545,31 @@
         "ench_mult": 0,
         "ninja_mult": 0,
         "mult_total": 8,
-        "ninja_x_stack": [
-          2
-        ],
-        "score": 2080
-      },
-      "mid": {
-        "card_chips": 31,
-        "hand_chips": 50,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 81,
-        "hand_mult": 5,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 5,
-        "ninja_x_stack": [
-          2
-        ],
-        "score": 810
+        "ninja_x_stack": [],
+        "score": 1040
       },
       "tail": {
         "card_chips": 19,
-        "hand_chips": 30,
+        "hand_chips": 5,
         "ench_chips": 0,
         "ninja_chips": 0,
-        "chips_total": 49,
-        "hand_mult": 4,
+        "chips_total": 24,
+        "hand_mult": 1,
         "ench_mult": 0,
         "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [
-          2
-        ],
-        "score": 392
+        "mult_total": 1,
+        "ninja_x_stack": [],
+        "score": 24
       },
       "col_scores": [
-        0,
-        0,
-        0
+        180,
+        196,
+        216
       ],
-      "col_total": 0,
-      "total_raw": 3282,
+      "col_total": 592,
+      "total_raw": 1751,
       "global_xi_x_prod": 1,
-      "final_score": 3282
+      "final_score": 1751
     },
     {
       "id": "n_t05_T3_baseline",
@@ -15376,10 +18664,8 @@
         "ench_mult": 0,
         "ninja_mult": 0,
         "mult_total": 4,
-        "ninja_x_stack": [
-          2
-        ],
-        "score": 736
+        "ninja_x_stack": [],
+        "score": 368
       },
       "mid": {
         "card_chips": 20,
@@ -15391,10 +18677,8 @@
         "ench_mult": 0,
         "ninja_mult": 0,
         "mult_total": 4,
-        "ninja_x_stack": [
-          2
-        ],
-        "score": 800
+        "ninja_x_stack": [],
+        "score": 400
       },
       "tail": {
         "card_chips": 22,
@@ -15406,154 +18690,146 @@
         "ench_mult": 0,
         "ninja_mult": 0,
         "mult_total": 4,
-        "ninja_x_stack": [
-          2
-        ],
-        "score": 832
+        "ninja_x_stack": [],
+        "score": 416
       },
       "col_scores": [
-        1180,
-        800,
-        944
+        590,
+        400,
+        472
       ],
-      "col_total": 2924,
-      "total_raw": 5292,
+      "col_total": 1462,
+      "total_raw": 2646,
       "global_xi_x_prod": 6,
-      "final_score": 31752
+      "final_score": 15876
     },
     {
       "id": "n_t05_T4_baseline",
       "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
+        "head": 1,
+        "mid": 1,
+        "tail": 1
       },
       "col_types": [
-        5,
-        5,
-        5
+        3,
+        3,
+        3
       ],
       "xi_list": [
-        "全三条"
+        "全黑"
       ],
       "head": {
-        "card_chips": 20,
-        "hand_chips": 5,
+        "card_chips": 7,
+        "hand_chips": 10,
         "ench_chips": 0,
         "ninja_chips": 0,
-        "chips_total": 25,
-        "hand_mult": 1,
+        "chips_total": 17,
+        "hand_mult": 2,
         "ench_mult": 0,
         "ninja_mult": 0,
-        "mult_total": 1,
+        "mult_total": 2,
         "ninja_x_stack": [],
-        "score": 25
+        "score": 34
       },
       "mid": {
-        "card_chips": 20,
-        "hand_chips": 5,
+        "card_chips": 16,
+        "hand_chips": 10,
         "ench_chips": 0,
         "ninja_chips": 0,
-        "chips_total": 25,
-        "hand_mult": 1,
+        "chips_total": 26,
+        "hand_mult": 2,
         "ench_mult": 0,
         "ninja_mult": 0,
-        "mult_total": 1,
+        "mult_total": 2,
         "ninja_x_stack": [],
-        "score": 25
+        "score": 52
       },
       "tail": {
-        "card_chips": 20,
-        "hand_chips": 5,
+        "card_chips": 25,
+        "hand_chips": 10,
         "ench_chips": 0,
         "ninja_chips": 0,
-        "chips_total": 25,
-        "hand_mult": 1,
+        "chips_total": 35,
+        "hand_mult": 2,
         "ench_mult": 0,
         "ninja_mult": 0,
-        "mult_total": 1,
+        "mult_total": 2,
         "ninja_x_stack": [],
-        "score": 25
+        "score": 70
       },
       "col_scores": [
-        872,
-        968,
-        1040
+        180,
+        192,
+        180
       ],
-      "col_total": 2880,
-      "total_raw": 2955,
-      "global_xi_x_prod": 4,
-      "final_score": 11820
+      "col_total": 552,
+      "total_raw": 708,
+      "global_xi_x_prod": 2,
+      "final_score": 1416
     },
     {
       "id": "n_t05_T4_with_ninja",
       "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
+        "head": 1,
+        "mid": 1,
+        "tail": 1
       },
       "col_types": [
-        5,
-        5,
-        5
+        3,
+        3,
+        3
       ],
       "xi_list": [
-        "全三条"
+        "全黑"
       ],
       "head": {
-        "card_chips": 20,
-        "hand_chips": 5,
+        "card_chips": 7,
+        "hand_chips": 10,
         "ench_chips": 0,
         "ninja_chips": 0,
-        "chips_total": 25,
-        "hand_mult": 1,
+        "chips_total": 17,
+        "hand_mult": 2,
         "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [
-          2
-        ],
-        "score": 50
+        "ninja_mult": 3,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 85
       },
       "mid": {
-        "card_chips": 20,
-        "hand_chips": 5,
+        "card_chips": 16,
+        "hand_chips": 10,
         "ench_chips": 0,
         "ninja_chips": 0,
-        "chips_total": 25,
-        "hand_mult": 1,
+        "chips_total": 26,
+        "hand_mult": 2,
         "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [
-          2
-        ],
-        "score": 50
+        "ninja_mult": 3,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 130
       },
       "tail": {
-        "card_chips": 20,
-        "hand_chips": 5,
+        "card_chips": 25,
+        "hand_chips": 10,
         "ench_chips": 0,
         "ninja_chips": 0,
-        "chips_total": 25,
-        "hand_mult": 1,
+        "chips_total": 35,
+        "hand_mult": 2,
         "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [
-          2
-        ],
-        "score": 50
+        "ninja_mult": 3,
+        "mult_total": 5,
+        "ninja_x_stack": [],
+        "score": 175
       },
       "col_scores": [
-        1744,
-        1936,
-        2080
+        315,
+        336,
+        315
       ],
-      "col_total": 5760,
-      "total_raw": 5910,
-      "global_xi_x_prod": 4,
-      "final_score": 23640
+      "col_total": 966,
+      "total_raw": 1356,
+      "global_xi_x_prod": 2,
+      "final_score": 2712
     },
     {
       "id": "n_l01_T1_baseline",
@@ -16838,3014 +20114,6 @@
       "total_raw": 6438,
       "global_xi_x_prod": 6,
       "final_score": 38628
-    },
-    {
-      "id": "n_s02_T1_baseline",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 28
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "col_scores": [
-        87,
-        0,
-        150
-      ],
-      "col_total": 237,
-      "total_raw": 313,
-      "global_xi_x_prod": 1,
-      "final_score": 313
-    },
-    {
-      "id": "n_s02_T1_with_ninja",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 50,
-        "chips_total": 74,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 74
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 50,
-        "chips_total": 78,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 78
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 50,
-        "chips_total": 74,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 74
-      },
-      "col_scores": [
-        237,
-        0,
-        300
-      ],
-      "col_total": 537,
-      "total_raw": 763,
-      "global_xi_x_prod": 1,
-      "final_score": 763
-    },
-    {
-      "id": "n_s02_T2_baseline",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 28
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "col_scores": [
-        87,
-        0,
-        150
-      ],
-      "col_total": 237,
-      "total_raw": 313,
-      "global_xi_x_prod": 1,
-      "final_score": 313
-    },
-    {
-      "id": "n_s02_T2_with_ninja",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 100,
-        "chips_total": 124,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 124
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 100,
-        "chips_total": 128,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 128
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 100,
-        "chips_total": 124,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 124
-      },
-      "col_scores": [
-        387,
-        0,
-        450
-      ],
-      "col_total": 837,
-      "total_raw": 1213,
-      "global_xi_x_prod": 1,
-      "final_score": 1213
-    },
-    {
-      "id": "n_s02_T3_baseline",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 28
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "col_scores": [
-        87,
-        0,
-        150
-      ],
-      "col_total": 237,
-      "total_raw": 313,
-      "global_xi_x_prod": 1,
-      "final_score": 313
-    },
-    {
-      "id": "n_s02_T3_with_ninja",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 28
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "col_scores": [
-        87,
-        0,
-        150
-      ],
-      "col_total": 237,
-      "total_raw": 313,
-      "global_xi_x_prod": 1,
-      "final_score": 313
-    },
-    {
-      "id": "n_s02_T4_baseline",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 28
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "col_scores": [
-        87,
-        0,
-        150
-      ],
-      "col_total": 237,
-      "total_raw": 313,
-      "global_xi_x_prod": 1,
-      "final_score": 313
-    },
-    {
-      "id": "n_s02_T4_with_ninja",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 75,
-        "chips_total": 99,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 99
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 75,
-        "chips_total": 103,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 103
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 75,
-        "chips_total": 99,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 99
-      },
-      "col_scores": [
-        312,
-        0,
-        375
-      ],
-      "col_total": 687,
-      "total_raw": 988,
-      "global_xi_x_prod": 1,
-      "final_score": 988
-    },
-    {
-      "id": "n_s02_T5_baseline",
-      "hand_types": {
-        "head": 5,
-        "mid": 3,
-        "tail": 4
-      },
-      "col_types": [
-        0,
-        0,
-        0
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 30,
-        "hand_chips": 100,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 130,
-        "hand_mult": 8,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 8,
-        "ninja_x_stack": [],
-        "score": 1040
-      },
-      "mid": {
-        "card_chips": 19,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 49,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 196
-      },
-      "tail": {
-        "card_chips": 31,
-        "hand_chips": 50,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 81,
-        "hand_mult": 5,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 5,
-        "ninja_x_stack": [],
-        "score": 405
-      },
-      "col_scores": [
-        0,
-        0,
-        0
-      ],
-      "col_total": 0,
-      "total_raw": 1641,
-      "global_xi_x_prod": 1,
-      "final_score": 1641
-    },
-    {
-      "id": "n_s02_T5_with_ninja",
-      "hand_types": {
-        "head": 5,
-        "mid": 3,
-        "tail": 4
-      },
-      "col_types": [
-        0,
-        0,
-        0
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 30,
-        "hand_chips": 100,
-        "ench_chips": 0,
-        "ninja_chips": 100,
-        "chips_total": 230,
-        "hand_mult": 8,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 8,
-        "ninja_x_stack": [],
-        "score": 1840
-      },
-      "mid": {
-        "card_chips": 19,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 100,
-        "chips_total": 149,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 596
-      },
-      "tail": {
-        "card_chips": 31,
-        "hand_chips": 50,
-        "ench_chips": 0,
-        "ninja_chips": 100,
-        "chips_total": 181,
-        "hand_mult": 5,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 5,
-        "ninja_x_stack": [],
-        "score": 905
-      },
-      "col_scores": [
-        0,
-        0,
-        0
-      ],
-      "col_total": 0,
-      "total_raw": 3341,
-      "global_xi_x_prod": 1,
-      "final_score": 3341
-    },
-    {
-      "id": "n_s02_T6_baseline",
-      "hand_types": {
-        "head": 3,
-        "mid": 3,
-        "tail": 3
-      },
-      "col_types": [
-        4,
-        3,
-        3
-      ],
-      "xi_list": [
-        "全黑",
-        "全同花",
-        "三清"
-      ],
-      "head": {
-        "card_chips": 16,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 46,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 368
-      },
-      "mid": {
-        "card_chips": 20,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 50,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 400
-      },
-      "tail": {
-        "card_chips": 22,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 52,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 416
-      },
-      "col_scores": [
-        590,
-        400,
-        472
-      ],
-      "col_total": 1462,
-      "total_raw": 2646,
-      "global_xi_x_prod": 6,
-      "final_score": 15876
-    },
-    {
-      "id": "n_s02_T6_with_ninja",
-      "hand_types": {
-        "head": 3,
-        "mid": 3,
-        "tail": 3
-      },
-      "col_types": [
-        4,
-        3,
-        3
-      ],
-      "xi_list": [
-        "全黑",
-        "全同花",
-        "三清"
-      ],
-      "head": {
-        "card_chips": 16,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 100,
-        "chips_total": 146,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 1168
-      },
-      "mid": {
-        "card_chips": 20,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 100,
-        "chips_total": 150,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 1200
-      },
-      "tail": {
-        "card_chips": 22,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 100,
-        "chips_total": 152,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 1216
-      },
-      "col_scores": [
-        1590,
-        1200,
-        1272
-      ],
-      "col_total": 4062,
-      "total_raw": 7646,
-      "global_xi_x_prod": 6,
-      "final_score": 45876
-    },
-    {
-      "id": "n_s03_T1_baseline",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 28
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "col_scores": [
-        87,
-        0,
-        150
-      ],
-      "col_total": 237,
-      "total_raw": 313,
-      "global_xi_x_prod": 1,
-      "final_score": 313
-    },
-    {
-      "id": "n_s03_T1_with_ninja",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 60,
-        "chips_total": 84,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 84
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 60,
-        "chips_total": 88,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 88
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 60,
-        "chips_total": 84,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 84
-      },
-      "col_scores": [
-        267,
-        0,
-        330
-      ],
-      "col_total": 597,
-      "total_raw": 853,
-      "global_xi_x_prod": 1,
-      "final_score": 853
-    },
-    {
-      "id": "n_s03_T2_baseline",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 28
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "col_scores": [
-        87,
-        0,
-        150
-      ],
-      "col_total": 237,
-      "total_raw": 313,
-      "global_xi_x_prod": 1,
-      "final_score": 313
-    },
-    {
-      "id": "n_s03_T2_with_ninja",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 120,
-        "chips_total": 144,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 144
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 120,
-        "chips_total": 148,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 148
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 120,
-        "chips_total": 144,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 144
-      },
-      "col_scores": [
-        447,
-        0,
-        510
-      ],
-      "col_total": 957,
-      "total_raw": 1393,
-      "global_xi_x_prod": 1,
-      "final_score": 1393
-    },
-    {
-      "id": "n_s03_T3_baseline",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 28
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "col_scores": [
-        87,
-        0,
-        150
-      ],
-      "col_total": 237,
-      "total_raw": 313,
-      "global_xi_x_prod": 1,
-      "final_score": 313
-    },
-    {
-      "id": "n_s03_T3_with_ninja",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 28
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "col_scores": [
-        87,
-        0,
-        150
-      ],
-      "col_total": 237,
-      "total_raw": 313,
-      "global_xi_x_prod": 1,
-      "final_score": 313
-    },
-    {
-      "id": "n_s03_T4_baseline",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 28
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "col_scores": [
-        87,
-        0,
-        150
-      ],
-      "col_total": 237,
-      "total_raw": 313,
-      "global_xi_x_prod": 1,
-      "final_score": 313
-    },
-    {
-      "id": "n_s03_T4_with_ninja",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 90,
-        "chips_total": 114,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 114
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 90,
-        "chips_total": 118,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 118
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 90,
-        "chips_total": 114,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 114
-      },
-      "col_scores": [
-        357,
-        0,
-        420
-      ],
-      "col_total": 777,
-      "total_raw": 1123,
-      "global_xi_x_prod": 1,
-      "final_score": 1123
-    },
-    {
-      "id": "n_s03_T5_baseline",
-      "hand_types": {
-        "head": 5,
-        "mid": 3,
-        "tail": 4
-      },
-      "col_types": [
-        3,
-        0,
-        0
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 30,
-        "hand_chips": 100,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 130,
-        "hand_mult": 8,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 8,
-        "ninja_x_stack": [],
-        "score": 1040
-      },
-      "mid": {
-        "card_chips": 19,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 49,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 196
-      },
-      "tail": {
-        "card_chips": 31,
-        "hand_chips": 50,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 81,
-        "hand_mult": 5,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 5,
-        "ninja_x_stack": [],
-        "score": 405
-      },
-      "col_scores": [
-        212,
-        0,
-        0
-      ],
-      "col_total": 212,
-      "total_raw": 1853,
-      "global_xi_x_prod": 1,
-      "final_score": 1853
-    },
-    {
-      "id": "n_s03_T5_with_ninja",
-      "hand_types": {
-        "head": 5,
-        "mid": 3,
-        "tail": 4
-      },
-      "col_types": [
-        3,
-        0,
-        0
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 30,
-        "hand_chips": 100,
-        "ench_chips": 0,
-        "ninja_chips": 120,
-        "chips_total": 250,
-        "hand_mult": 8,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 8,
-        "ninja_x_stack": [],
-        "score": 2000
-      },
-      "mid": {
-        "card_chips": 19,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 120,
-        "chips_total": 169,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 676
-      },
-      "tail": {
-        "card_chips": 31,
-        "hand_chips": 50,
-        "ench_chips": 0,
-        "ninja_chips": 120,
-        "chips_total": 201,
-        "hand_mult": 5,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 5,
-        "ninja_x_stack": [],
-        "score": 1005
-      },
-      "col_scores": [
-        692,
-        0,
-        0
-      ],
-      "col_total": 692,
-      "total_raw": 4373,
-      "global_xi_x_prod": 1,
-      "final_score": 4373
-    },
-    {
-      "id": "n_s03_T6_baseline",
-      "hand_types": {
-        "head": 3,
-        "mid": 3,
-        "tail": 3
-      },
-      "col_types": [
-        4,
-        3,
-        3
-      ],
-      "xi_list": [
-        "全黑",
-        "全同花",
-        "三清"
-      ],
-      "head": {
-        "card_chips": 16,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 46,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 368
-      },
-      "mid": {
-        "card_chips": 20,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 50,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 400
-      },
-      "tail": {
-        "card_chips": 22,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 52,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 416
-      },
-      "col_scores": [
-        590,
-        400,
-        472
-      ],
-      "col_total": 1462,
-      "total_raw": 2646,
-      "global_xi_x_prod": 6,
-      "final_score": 15876
-    },
-    {
-      "id": "n_s03_T6_with_ninja",
-      "hand_types": {
-        "head": 3,
-        "mid": 3,
-        "tail": 3
-      },
-      "col_types": [
-        4,
-        3,
-        3
-      ],
-      "xi_list": [
-        "全黑",
-        "全同花",
-        "三清"
-      ],
-      "head": {
-        "card_chips": 16,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 120,
-        "chips_total": 166,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 1328
-      },
-      "mid": {
-        "card_chips": 20,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 120,
-        "chips_total": 170,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 1360
-      },
-      "tail": {
-        "card_chips": 22,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 120,
-        "chips_total": 172,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 1376
-      },
-      "col_scores": [
-        1790,
-        1360,
-        1432
-      ],
-      "col_total": 4582,
-      "total_raw": 8646,
-      "global_xi_x_prod": 6,
-      "final_score": 51876
-    },
-    {
-      "id": "n_s05_T1_baseline",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 28
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "col_scores": [
-        87,
-        0,
-        150
-      ],
-      "col_total": 237,
-      "total_raw": 313,
-      "global_xi_x_prod": 1,
-      "final_score": 313
-    },
-    {
-      "id": "n_s05_T1_with_ninja",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 9,
-        "mult_total": 10,
-        "ninja_x_stack": [],
-        "score": 240
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 9,
-        "mult_total": 10,
-        "ninja_x_stack": [],
-        "score": 280
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 9,
-        "mult_total": 10,
-        "ninja_x_stack": [],
-        "score": 240
-      },
-      "col_scores": [
-        348,
-        0,
-        600
-      ],
-      "col_total": 948,
-      "total_raw": 1708,
-      "global_xi_x_prod": 1,
-      "final_score": 1708
-    },
-    {
-      "id": "n_s05_T2_baseline",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 28
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "col_scores": [
-        87,
-        0,
-        150
-      ],
-      "col_total": 237,
-      "total_raw": 313,
-      "global_xi_x_prod": 1,
-      "final_score": 313
-    },
-    {
-      "id": "n_s05_T2_with_ninja",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 18,
-        "mult_total": 19,
-        "ninja_x_stack": [],
-        "score": 456
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 18,
-        "mult_total": 19,
-        "ninja_x_stack": [],
-        "score": 532
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 18,
-        "mult_total": 19,
-        "ninja_x_stack": [],
-        "score": 456
-      },
-      "col_scores": [
-        609,
-        0,
-        1050
-      ],
-      "col_total": 1659,
-      "total_raw": 3103,
-      "global_xi_x_prod": 1,
-      "final_score": 3103
-    },
-    {
-      "id": "n_s05_T3_baseline",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 28
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "col_scores": [
-        87,
-        0,
-        150
-      ],
-      "col_total": 237,
-      "total_raw": 313,
-      "global_xi_x_prod": 1,
-      "final_score": 313
-    },
-    {
-      "id": "n_s05_T3_with_ninja",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 28
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "col_scores": [
-        87,
-        0,
-        150
-      ],
-      "col_total": 237,
-      "total_raw": 313,
-      "global_xi_x_prod": 1,
-      "final_score": 313
-    },
-    {
-      "id": "n_s05_T4_baseline",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 28
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "col_scores": [
-        87,
-        0,
-        150
-      ],
-      "col_total": 237,
-      "total_raw": 313,
-      "global_xi_x_prod": 1,
-      "final_score": 313
-    },
-    {
-      "id": "n_s05_T4_with_ninja",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 12,
-        "mult_total": 13,
-        "ninja_x_stack": [],
-        "score": 312
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 12,
-        "mult_total": 13,
-        "ninja_x_stack": [],
-        "score": 364
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 12,
-        "mult_total": 13,
-        "ninja_x_stack": [],
-        "score": 312
-      },
-      "col_scores": [
-        435,
-        0,
-        750
-      ],
-      "col_total": 1185,
-      "total_raw": 2173,
-      "global_xi_x_prod": 1,
-      "final_score": 2173
-    },
-    {
-      "id": "n_s05_T5_baseline",
-      "hand_types": {
-        "head": 0,
-        "mid": 5,
-        "tail": 3
-      },
-      "col_types": [
-        0,
-        0,
-        0
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 16,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 21,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 21
-      },
-      "mid": {
-        "card_chips": 30,
-        "hand_chips": 100,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 130,
-        "hand_mult": 8,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 8,
-        "ninja_x_stack": [],
-        "score": 1040
-      },
-      "tail": {
-        "card_chips": 20,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 50,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 200
-      },
-      "col_scores": [
-        0,
-        0,
-        0
-      ],
-      "col_total": 0,
-      "total_raw": 1261,
-      "global_xi_x_prod": 1,
-      "final_score": 1261
-    },
-    {
-      "id": "n_s05_T5_with_ninja",
-      "hand_types": {
-        "head": 0,
-        "mid": 5,
-        "tail": 3
-      },
-      "col_types": [
-        0,
-        0,
-        0
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 16,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 21,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 18,
-        "mult_total": 19,
-        "ninja_x_stack": [],
-        "score": 399
-      },
-      "mid": {
-        "card_chips": 30,
-        "hand_chips": 100,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 130,
-        "hand_mult": 8,
-        "ench_mult": 0,
-        "ninja_mult": 18,
-        "mult_total": 26,
-        "ninja_x_stack": [],
-        "score": 3380
-      },
-      "tail": {
-        "card_chips": 20,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 50,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 18,
-        "mult_total": 22,
-        "ninja_x_stack": [],
-        "score": 1100
-      },
-      "col_scores": [
-        0,
-        0,
-        0
-      ],
-      "col_total": 0,
-      "total_raw": 4879,
-      "global_xi_x_prod": 1,
-      "final_score": 4879
-    },
-    {
-      "id": "n_s05_T6_baseline",
-      "hand_types": {
-        "head": 3,
-        "mid": 3,
-        "tail": 3
-      },
-      "col_types": [
-        4,
-        3,
-        3
-      ],
-      "xi_list": [
-        "全黑",
-        "全同花",
-        "三清"
-      ],
-      "head": {
-        "card_chips": 16,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 46,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 368
-      },
-      "mid": {
-        "card_chips": 20,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 50,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 400
-      },
-      "tail": {
-        "card_chips": 22,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 52,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 416
-      },
-      "col_scores": [
-        590,
-        400,
-        472
-      ],
-      "col_total": 1462,
-      "total_raw": 2646,
-      "global_xi_x_prod": 6,
-      "final_score": 15876
-    },
-    {
-      "id": "n_s05_T6_with_ninja",
-      "hand_types": {
-        "head": 3,
-        "mid": 3,
-        "tail": 3
-      },
-      "col_types": [
-        4,
-        3,
-        3
-      ],
-      "xi_list": [
-        "全黑",
-        "全同花",
-        "三清"
-      ],
-      "head": {
-        "card_chips": 16,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 46,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 18,
-        "mult_total": 22,
-        "ninja_x_stack": [],
-        "score": 2024
-      },
-      "mid": {
-        "card_chips": 20,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 50,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 18,
-        "mult_total": 22,
-        "ninja_x_stack": [],
-        "score": 2200
-      },
-      "tail": {
-        "card_chips": 22,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 52,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 18,
-        "mult_total": 22,
-        "ninja_x_stack": [],
-        "score": 2288
-      },
-      "col_scores": [
-        2714,
-        2200,
-        2596
-      ],
-      "col_total": 7510,
-      "total_raw": 14022,
-      "global_xi_x_prod": 6,
-      "final_score": 84132
-    },
-    {
-      "id": "n_s06_T1_baseline",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 28
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "col_scores": [
-        87,
-        0,
-        150
-      ],
-      "col_total": 237,
-      "total_raw": 313,
-      "global_xi_x_prod": 1,
-      "final_score": 313
-    },
-    {
-      "id": "n_s06_T1_with_ninja",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 10,
-        "mult_total": 11,
-        "ninja_x_stack": [],
-        "score": 264
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 10,
-        "mult_total": 11,
-        "ninja_x_stack": [],
-        "score": 308
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 10,
-        "mult_total": 11,
-        "ninja_x_stack": [],
-        "score": 264
-      },
-      "col_scores": [
-        377,
-        0,
-        650
-      ],
-      "col_total": 1027,
-      "total_raw": 1863,
-      "global_xi_x_prod": 1,
-      "final_score": 1863
-    },
-    {
-      "id": "n_s06_T2_baseline",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 28
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "col_scores": [
-        87,
-        0,
-        150
-      ],
-      "col_total": 237,
-      "total_raw": 313,
-      "global_xi_x_prod": 1,
-      "final_score": 313
-    },
-    {
-      "id": "n_s06_T2_with_ninja",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 20,
-        "mult_total": 21,
-        "ninja_x_stack": [],
-        "score": 504
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 20,
-        "mult_total": 21,
-        "ninja_x_stack": [],
-        "score": 588
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 20,
-        "mult_total": 21,
-        "ninja_x_stack": [],
-        "score": 504
-      },
-      "col_scores": [
-        667,
-        0,
-        1150
-      ],
-      "col_total": 1817,
-      "total_raw": 3413,
-      "global_xi_x_prod": 1,
-      "final_score": 3413
-    },
-    {
-      "id": "n_s06_T3_baseline",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 28
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "col_scores": [
-        87,
-        0,
-        150
-      ],
-      "col_total": 237,
-      "total_raw": 313,
-      "global_xi_x_prod": 1,
-      "final_score": 313
-    },
-    {
-      "id": "n_s06_T3_with_ninja",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 28
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "col_scores": [
-        87,
-        0,
-        150
-      ],
-      "col_total": 237,
-      "total_raw": 313,
-      "global_xi_x_prod": 1,
-      "final_score": 313
-    },
-    {
-      "id": "n_s06_T4_baseline",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 28
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 1,
-        "ninja_x_stack": [],
-        "score": 24
-      },
-      "col_scores": [
-        87,
-        0,
-        150
-      ],
-      "col_total": 237,
-      "total_raw": 313,
-      "global_xi_x_prod": 1,
-      "final_score": 313
-    },
-    {
-      "id": "n_s06_T4_with_ninja",
-      "hand_types": {
-        "head": 0,
-        "mid": 0,
-        "tail": 0
-      },
-      "col_types": [
-        2,
-        0,
-        2
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 15,
-        "mult_total": 16,
-        "ninja_x_stack": [],
-        "score": 384
-      },
-      "mid": {
-        "card_chips": 23,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 28,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 15,
-        "mult_total": 16,
-        "ninja_x_stack": [],
-        "score": 448
-      },
-      "tail": {
-        "card_chips": 19,
-        "hand_chips": 5,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 24,
-        "hand_mult": 1,
-        "ench_mult": 0,
-        "ninja_mult": 15,
-        "mult_total": 16,
-        "ninja_x_stack": [],
-        "score": 384
-      },
-      "col_scores": [
-        522,
-        0,
-        900
-      ],
-      "col_total": 1422,
-      "total_raw": 2638,
-      "global_xi_x_prod": 1,
-      "final_score": 2638
-    },
-    {
-      "id": "n_s06_T5_baseline",
-      "hand_types": {
-        "head": 5,
-        "mid": 3,
-        "tail": 4
-      },
-      "col_types": [
-        3,
-        0,
-        0
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 30,
-        "hand_chips": 100,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 130,
-        "hand_mult": 8,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 8,
-        "ninja_x_stack": [],
-        "score": 1040
-      },
-      "mid": {
-        "card_chips": 19,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 49,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 196
-      },
-      "tail": {
-        "card_chips": 31,
-        "hand_chips": 50,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 81,
-        "hand_mult": 5,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 5,
-        "ninja_x_stack": [],
-        "score": 405
-      },
-      "col_scores": [
-        212,
-        0,
-        0
-      ],
-      "col_total": 212,
-      "total_raw": 1853,
-      "global_xi_x_prod": 1,
-      "final_score": 1853
-    },
-    {
-      "id": "n_s06_T5_with_ninja",
-      "hand_types": {
-        "head": 5,
-        "mid": 3,
-        "tail": 4
-      },
-      "col_types": [
-        3,
-        0,
-        0
-      ],
-      "xi_list": [],
-      "head": {
-        "card_chips": 30,
-        "hand_chips": 100,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 130,
-        "hand_mult": 8,
-        "ench_mult": 0,
-        "ninja_mult": 20,
-        "mult_total": 28,
-        "ninja_x_stack": [],
-        "score": 3640
-      },
-      "mid": {
-        "card_chips": 19,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 49,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 20,
-        "mult_total": 24,
-        "ninja_x_stack": [],
-        "score": 1176
-      },
-      "tail": {
-        "card_chips": 31,
-        "hand_chips": 50,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 81,
-        "hand_mult": 5,
-        "ench_mult": 0,
-        "ninja_mult": 20,
-        "mult_total": 25,
-        "ninja_x_stack": [],
-        "score": 2025
-      },
-      "col_scores": [
-        1272,
-        0,
-        0
-      ],
-      "col_total": 1272,
-      "total_raw": 8113,
-      "global_xi_x_prod": 1,
-      "final_score": 8113
-    },
-    {
-      "id": "n_s06_T6_baseline",
-      "hand_types": {
-        "head": 3,
-        "mid": 3,
-        "tail": 3
-      },
-      "col_types": [
-        4,
-        3,
-        3
-      ],
-      "xi_list": [
-        "全黑",
-        "全同花",
-        "三清"
-      ],
-      "head": {
-        "card_chips": 16,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 46,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 368
-      },
-      "mid": {
-        "card_chips": 20,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 50,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 400
-      },
-      "tail": {
-        "card_chips": 22,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 52,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 0,
-        "mult_total": 4,
-        "ninja_x_stack": [],
-        "score": 416
-      },
-      "col_scores": [
-        590,
-        400,
-        472
-      ],
-      "col_total": 1462,
-      "total_raw": 2646,
-      "global_xi_x_prod": 6,
-      "final_score": 15876
-    },
-    {
-      "id": "n_s06_T6_with_ninja",
-      "hand_types": {
-        "head": 3,
-        "mid": 3,
-        "tail": 3
-      },
-      "col_types": [
-        4,
-        3,
-        3
-      ],
-      "xi_list": [
-        "全黑",
-        "全同花",
-        "三清"
-      ],
-      "head": {
-        "card_chips": 16,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 46,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 20,
-        "mult_total": 24,
-        "ninja_x_stack": [],
-        "score": 2208
-      },
-      "mid": {
-        "card_chips": 20,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 50,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 20,
-        "mult_total": 24,
-        "ninja_x_stack": [],
-        "score": 2400
-      },
-      "tail": {
-        "card_chips": 22,
-        "hand_chips": 30,
-        "ench_chips": 0,
-        "ninja_chips": 0,
-        "chips_total": 52,
-        "hand_mult": 4,
-        "ench_mult": 0,
-        "ninja_mult": 20,
-        "mult_total": 24,
-        "ninja_x_stack": [],
-        "score": 2496
-      },
-      "col_scores": [
-        2950,
-        2400,
-        2832
-      ],
-      "col_total": 8182,
-      "total_raw": 15286,
-      "global_xi_x_prod": 6,
-      "final_score": 91716
     }
   ]
 }

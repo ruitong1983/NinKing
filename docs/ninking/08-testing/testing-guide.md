@@ -122,7 +122,6 @@ execute_game_script: "await get_tree().process_frame; _mcp_print('ok')"
 | 按钮 | scene text | unique_name | 说明 |
 |------|-----------|-------------|------|
 | 討伐 | `"討\n伐"` | `%PlayBtn` | 约束满足时可用 |
-| 换牌 | `"换\n牌"` (默认) / `"手替え(N/3)"` (换牌模式) | `%RedrawBtn` | 手替数>0时可用 |
 | 陣形 | `"陣\n形"` | `%AiRearrangeBtn` | PLAYING状态可用 |
 | 牌库 | `"牌库: N"` | `%DeckBtn` | 查看牌库面板 |
 | 进入商店 | `"进入商店"` | `%ToShopButton` | SEAL_COMPLETE 时可见 |
@@ -222,11 +221,6 @@ execute_game_script: "_mcp_print('state=' + str(NinKingGameState.current_state))
 find_ui_elements: type_filter="Button"
 // 找到 text 含"討"的按钮
 simulate_mouse_click: x=<x> y=<y>
-
-// === 换牌 ===
-// 1. 点击"换\n牌"按钮 → 进入换牌模式
-// 2. 点击 1-3 张要丢弃的手牌 (需要通过 find_ui_elements 或坐标定位)
-// 3. 再次点击同一按钮（此时文本变为"手替え(N/3)"）→ 确认换牌
 
 // === 陣形 ===
 // 找到 text="陣\n形" 的按钮 → 点击

@@ -2,14 +2,15 @@
 
 [ext_resource type="Theme" uid="uid://bqb2i07k0v8jt" path="res://assets/themes/manga_theme.tres" id="1_theme"]
 [ext_resource type="PackedScene" uid="uid://c7u8hryloq7hy" path="res://addons/card-framework/card_manager.tscn" id="2_cm"]
-[ext_resource type="Texture2D" uid="uid://cmh6fgxip28j3" path="res://assets/images/background/table_bg.png" id="3_bg"]
+[ext_resource type="Texture2D" uid="uid://deelue8r4tqif" path="res://assets/images/background/table_bg.png" id="3_bg"]
 [ext_resource type="PackedScene" uid="uid://4jkp5mgq3d6t" path="res://scenes/ninking/ninking_card_factory.tscn" id="4_factory"]
 [ext_resource type="Shader" uid="uid://v8sl5wp6qlqi" path="res://scripts/ninking/ui/panel_edge_fade.gdshader" id="5_shader"]
-[ext_resource type="Script" uid="uid://dgug0lj2v2uoh" path="res://scripts/ninking/debug/debug_card_tray.gd" id="7_tray"]
-[ext_resource type="Script" uid="uid://urvcvxvssicb" path="res://scripts/ninking/debug/debug_panel.gd" id="8_rwsde"]
-[ext_resource type="Script" uid="uid://b5wb4af5a6w1a" path="res://scripts/ninking/debug/debug_controller.gd" id="9_ctrl"]
-[ext_resource type="Script" uid="uid://dkduntlls22m2" path="res://scripts/ninking/ui/hand_card_container.gd" id="10_hcc"]
-[ext_resource type="Script" uid="uid://c56l87nvs3gi5" path="res://scripts/ninking/debug/debug_ninja_selector.gd" id="11_sel_script"]
+[ext_resource type="Script" uid="uid://plki4nqvse4n" path="res://scripts/ninking/debug/debug_card_tray.gd" id="7_tray"]
+[ext_resource type="Script" uid="uid://dlyk22r2thr0n" path="res://scripts/ninking/debug/debug_panel.gd" id="8_rwsde"]
+[ext_resource type="Script" uid="uid://bvwoeasc8o6eb" path="res://scripts/ninking/debug/debug_controller.gd" id="9_ctrl"]
+[ext_resource type="Script" uid="uid://btor5q756bk78" path="res://scripts/ninking/ui/hand_card_container.gd" id="10_hcc"]
+[ext_resource type="PackedScene" uid="uid://dkdy7pt5uve0" path="res://scenes/ninking/debug_score_detail.tscn" id="11_enlh0"]
+[ext_resource type="Script" uid="uid://bhsy8ww8j2k2n" path="res://scripts/ninking/debug/debug_ninja_selector.gd" id="11_sel_script"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_match_fade"]
 shader = ExtResource("5_shader")
@@ -150,8 +151,6 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 1.0
-offset_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("1_theme")
@@ -902,7 +901,7 @@ anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -350.0
+offset_left = -420.0
 grow_horizontal = 0
 grow_vertical = 2
 mouse_filter = 1
@@ -1148,3 +1147,39 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(1, 1, 1, 0.85)
 theme_override_font_sizes/font_size = 24
 text = "牌库: 52"
+
+[node name="ScoreDetailBtn" type="Button" parent="." unique_id=2130493552]
+unique_name_in_owner = true
+z_index = 10
+custom_minimum_size = Vector2(180, 48)
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -206.0
+offset_top = -91.0
+offset_right = -26.0
+offset_bottom = -43.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 22
+text = "计分详情"
+
+[node name="ScoreDetailPanel" parent="." unique_id=911843213 instance=ExtResource("11_enlh0")]
+unique_name_in_owner = true
+z_index = 25
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -550.0
+offset_top = -540.0
+offset_right = 530.0
+offset_bottom = 540.0
+grow_horizontal = 2
+grow_vertical = 2

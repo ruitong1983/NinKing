@@ -150,7 +150,7 @@ func _ready() -> void:
 	deck_viewer_ctrl = DeckViewerController.new()
 	deck_viewer_ctrl.setup(
 		%DeckBtn, %DeckViewer, %CloseBtn,
-		%DrawCountLabel, %DiscardCountLabel,
+		%DrawCountLabel,
 		%DeckCardGrid, %ViewerBg
 	)
 
@@ -498,12 +498,12 @@ func restore_ui_state() -> void:
 	refresh_ninjas(gs.owned_ninjas, gs.max_ninja_slots)
 	var dm: DeckManager = NinKingGameState.deck_manager
 	if dm != null:
-		deck_viewer_ctrl.update_deck_count(dm.draw_pile.size(), dm.discard_pile.size())
+		deck_viewer_ctrl.update_deck_count(dm.draw_pile.size())
 
 
 # ══════════════════════════════════════════
 # Deck display — delegated to DeckViewerController
 # ══════════════════════════════════════════
 
-func update_deck_count(draw_count: int, discard_count: int) -> void:
-	deck_viewer_ctrl.update_deck_count(draw_count, discard_count)
+func update_deck_count(draw_count: int) -> void:
+	deck_viewer_ctrl.update_deck_count(draw_count)

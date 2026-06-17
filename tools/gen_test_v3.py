@@ -60,7 +60,7 @@ def detect_xi(h, m, t, he, me, te):
     if all(v==3 for v in rc.values()): xi.append('全三条')
     return xi
 
-def calc(cs_h, cs_m, cs_t, ne, xi_bonus=0, xi_override=None):
+def calc(cs_h, cs_m, cs_t, ne, xi_bonus=0, xi_override=None, duplicate_hand_x2=False):
     he = eval_group(cs_h)
     me = eval_group(cs_m)
     te = eval_group(cs_t)
@@ -99,6 +99,15 @@ def calc(cs_h, cs_m, cs_t, ne, xi_bonus=0, xi_override=None):
     if '三顺清' in xi_list: hs*=ssq; ms*=ssq; ts*=ssq
     shq = 2 + xi_bonus
     if '顺清打头' in xi_list: hs*=shq
+
+    # 双头蛇: 相同牌型计分×2
+    if duplicate_hand_x2:
+        all_types = [hk, mk, tk, c0t, c1t, c2t]
+        tc2 = {}
+        for hv in all_types: tc2[hv] = tc2.get(hv, 0) + 1
+        if tc2.get(hk, 0) >= 2: hs *= 2
+        if tc2.get(mk, 0) >= 2: ms *= 2
+        if tc2.get(tk, 0) >= 2: ts *= 2
 
     raw = hs + ms + ts
     final = max(raw, 1)
@@ -175,14 +184,14 @@ def ne_partial(**kwargs):
         base[k] = g
     return base
 
-def tc(cid, cname, tno, desc, hs, ms, ts, ne=None, xi_bonus=0, xi_override=None):
+def tc(cid, cname, tno, desc, hs, ms, ts, ne=None, xi_bonus=0, xi_override=None, duplicate_hand_x2=False):
     if ne is None: ne = no_ninja()
     h = [pc(x) for x in hs]
     m = [pc(x) for x in ms]
     t = [pc(x) for x in ts]
     r0 = calc(h,m,t,no_ninja())
     ALL.append(mkrow('baseline',cid,cname,tno,desc+'无忍',hs,ms,ts,r0,no_ninja()))
-    r1 = calc(h,m,t,ne, xi_bonus=xi_bonus, xi_override=xi_override)
+    r1 = calc(h,m,t,ne, xi_bonus=xi_bonus, xi_override=xi_override, duplicate_hand_x2=duplicate_hand_x2)
     ALL.append(mkrow('with_ninja',cid,cname,tno,desc,hs,ms,ts,r1,ne, xi_bonus=xi_bonus))
     return r1['final'] - r0['final']
 
@@ -305,15 +314,15 @@ total_delta += tc('n_g03','中流砥柱','T7','中顺+50c[X]', *SET_X, ne_partia
 total_delta += tc('n_g03','中流砥柱','T8','中同花+50c[Y]', *SET_Y, ne_partial(m={'c':50}))
 total_delta += tc('n_g03','中流砥柱','T9','中对子+50c[Z]', *SET_Z, ne_partial(m={'c':50}))
 
-# n_g04 藏锋 head弱→tail×倍率
-total_delta += tc('n_g04','藏锋','T7','头豹×1尾不变[X]', *SET_X, no_ninja())                    # head豹(5)→×1
-total_delta += tc('n_g04','藏锋','T8','头对×2尾[Z]', *SET_Z, ne_partial(t={'x':[2]}))           # head对(1)→×2 ✅
-total_delta += tc('n_g04','藏锋','T9','头同花×1尾不变[W]', *SET_W, no_ninja())                  # head同花(3)→×1
+# n_g04 藏锋 +2出牌次数（无计分影响，所有测试δ=0）
+total_delta += tc('n_g04','藏锋','T7','无条件+2出牌[X]', *SET_X, no_ninja())
+total_delta += tc('n_g04','藏锋','T8','无条件+2出牌[Z]', *SET_Z, no_ninja())
+total_delta += tc('n_g04','藏锋','T9','无条件+2出牌[W]', *SET_W, no_ninja())
 
-# n_g05 双头蛇 head_or_mid≥顺子→+40c
-total_delta += tc('n_g05','双头蛇','T7','中顺触发+40c中[X]', *SET_X, ne_partial(m={'c':40}))    # mid顺(2)≥2 ✅
-total_delta += tc('n_g05','双头蛇','T8','中对头对不触发[Z]', *SET_Z, no_ninja())                 # 都<2 ❌
-total_delta += tc('n_g05','双头蛇','T9','头同花触发+40c头[W]', *SET_W, ne_partial(h={'c':40}))  # head同花(3)≥2 ✅
+# n_g05 双头蛇 行+列相同牌型计分×2
+total_delta += tc('n_g05','双头蛇','T7','豹+顺+同花顺(皆不同)[X]', *SET_X, no_ninja(), duplicate_hand_x2=True)  # 牌型全不同→无加倍
+total_delta += tc('n_g05','双头蛇','T8','对+对+对(全对)[Z]', *SET_Z, no_ninja(), duplicate_hand_x2=True)       # 三行全对→行×4
+total_delta += tc('n_g05','双头蛇','T9','同花+同花+同花(全同花)[W]', *SET_W, no_ninja(), duplicate_hand_x2=True)  # 三行全同花→行×4
 
 # n_g06 金字塔 strict_ascending→×2
 total_delta += tc('n_g06','金字塔','T7','头散<中顺<尾同花顺×2', *SET_P, ne_all(x=[2]))  # 0<2<4 ✅
@@ -368,7 +377,7 @@ total_delta += tc('n_f02','王牌侍从','T8','2A+10m[Z]', *SET_Z, ne_all(m=10))
 total_delta += tc('n_f02','王牌侍从','T9','0A+0m[Q]', *SET_Q, no_ninja())             # 无A
 
 
-# ==================== Batch 5: 规则变更+传说+疾风 (4 cards) ====================
+# ==================== Batch 5: 规则变更+传说+风遁 (4 cards) ====================
 
 # n_r02 均衡之印 三组同牌型→×2
 total_delta += tc('n_r02','均衡之印','T7','三组对子×2[Z]', *SET_Z, ne_all(x=[2]))       # 三对→同型 ✅
@@ -380,15 +389,31 @@ total_delta += tc('n_r03','独尊之印','T7','头中对中触发×2尾[Z]', *SE
 total_delta += tc('n_r03','独尊之印','T8','头豹+中顺触发×2尾[X]', *SET_X, ne_partial(t={'x':[2]})) # head豹+mid顺 ✅
 total_delta += tc('n_r03','独尊之印','T9','头同花+中同花触发×2尾[W]', *SET_W, ne_partial(t={'x':[2]})) # head同花+mid同花 ✅
 
-# n_t05 疾风 首回合×2 (all trigger)
-total_delta += tc('n_t05','疾风','T7','豹+顺+同花顺×2[X]', *SET_X, ne_all(x=[2]))
-total_delta += tc('n_t05','疾风','T8','三同花+喜×2[Y]', *SET_Y, ne_all(x=[2]))
-total_delta += tc('n_t05','疾风','T9','全对子×2[Z]', *SET_Z, ne_all(x=[2]))
+# n_t05 风遁 hand_type=1→+3m (改造: 首回合×2→对子+倍率)
+total_delta += tc('n_t05','风遁','T7','豹+顺+同花顺不触发[X]', *SET_X, no_ninja())    # none is 对子(1)
+total_delta += tc('n_t05','风遁','T8','三同花不触发[Y]', *SET_Y, no_ninja())           # all 同花(3) ❌
+total_delta += tc('n_t05','风遁','T9','全对子+3m[Z]', *SET_Z, ne_all(m=3))              # all 对子(1) ✅
+
+# n_t02 水遁 hand_type=2→+5m (改造: 原手替え→顺子+倍率)
+total_delta += tc('n_t02','水遁','T7','中顺+5m[X]', *SET_X, ne_partial(m={'m':5}))    # mid顺(2) ✅
+total_delta += tc('n_t02','水遁','T8','三同花不触发[Y]', *SET_Y, no_ninja())           # 全同花(3) ❌
+total_delta += tc('n_t02','水遁','T9','全对子不触发[Z]', *SET_Z, no_ninja())           # 全对子(1) ❌
 
 # n_l01 天下人 ×2 all (all trigger)
 total_delta += tc('n_l01','天下人','T7','豹+顺+同花顺×2[X]', *SET_X, ne_all(x=[2]))
 total_delta += tc('n_l01','天下人','T8','三同花+喜×2[Y]', *SET_Y, ne_all(x=[2]))
 total_delta += tc('n_l01','天下人','T9','全对子×2[Z]', *SET_Z, ne_all(x=[2]))
+
+# n_g07 三清道人 hand_type=3→×2 (extended)
+total_delta += tc('n_g07','三清道人','T7','同花组×2+全黑[W]', *SET_W, ne_all(x=[2]))
+total_delta += tc('n_g07','三清道人','T8','顺子组不触[Q]', *SET_Q, no_ninja())
+total_delta += tc('n_g07','三清道人','T9','全对子不触[Z]', *SET_Z, no_ninja())
+
+# n_g08 龙脉 hand_type=2→×2 (extended)
+total_delta += tc('n_g08','龙脉','T7','三组顺子+全黑',
+    ['♠2','♠3','♠4'], ['♠5','♠6','♠7'], ['♠8','♠9','♠10'], ne_all(x=[2]))
+total_delta += tc('n_g08','龙脉','T8','同花组不触[W]', *SET_W, no_ninja())
+total_delta += tc('n_g08','龙脉','T9','全对子不触[Z]', *SET_Z, no_ninja())
 
 
 # ==================== Batch 6: 成长修炼 (5 cards) ====================
@@ -408,15 +433,17 @@ total_delta += tc('n_s03','龙脉','T7','尾同花顺累积5次+150c[X]', *SET_X
 total_delta += tc('n_s03','龙脉','T8','尾同花顺累积8次+240c[U2]', *SET_U2, ne_all(c=240))
 total_delta += tc('n_s03','龙脉','T9','尾对子未累积[Z]', *SET_Z, no_ninja())
 
-# n_s05 头悬梁 +3m/头散play (累积模拟)
-total_delta += tc('n_s05','头悬梁','T7','头散累积5次+15m[P]', *SET_P, ne_all(m=15))
-total_delta += tc('n_s05','头悬梁','T8','头散累积10次+30m[Q]', *SET_Q, ne_all(m=30))
-total_delta += tc('n_s05','头悬梁','T9','头同花未累积[W]', *SET_W, no_ninja())
+# n_s05 天华 hand_type=4→×4 (extended)
+total_delta += tc('n_s05','天华','T7','尾同花顺×4[P]', *SET_P, ne_partial(t={'x':[4]}))
+total_delta += tc('n_s05','天华','T8','全对子不触[Z]', *SET_Z, no_ninja())
+total_delta += tc('n_s05','天华','T9','三组同花顺+全黑[Y]',
+    ['♠J','♠Q','♠K'], ['♠10','♠A','♠2'], ['♠3','♠4','♠5'], ne_all(x=[4]))
 
-# n_s06 尾刺骨 +5m/尾≥同花顺play (累积模拟)
-total_delta += tc('n_s06','尾刺骨','T7','尾同花顺累积3次+15m[X]', *SET_X, ne_all(m=15))
-total_delta += tc('n_s06','尾刺骨','T8','尾同花顺累积6次+30m[U2]', *SET_U2, ne_all(m=30))
-total_delta += tc('n_s06','尾刺骨','T9','尾对子未累积[Z]', *SET_Z, no_ninja())
+# n_s06 王座 hand_type=5→×5 (extended)
+total_delta += tc('n_s06','王座','T7','头豹×5[X]', *SET_X, ne_partial(h={'x':[5]}))
+total_delta += tc('n_s06','王座','T8','全对子不触[Z]', *SET_Z, no_ninja())
+total_delta += tc('n_s06','王座','T9','三组豹子+全三条[V2]',
+    ['♠J','♥J','♦J'], ['♠3','♥3','♦3'], ['♣5','♥5','♦5'], ne_all(x=[5]))
 
 
 # ════════════════════════════════════════
@@ -452,15 +479,15 @@ for i in range(0, len(ALL), 2):
     # 不触发集（应Δ=0）
     no_effect = {
         ('n_g01','T8'),('n_g02','T8'),('n_g02','T9'),
-        ('n_g04','T7'),('n_g04','T9'),
-        ('n_g05','T8'),
+        ('n_g04','T7'),('n_g04','T8'),('n_g04','T9'),
+        ('n_g05','T7'),
         ('n_g06','T8'),('n_g06','T9'),
         ('n_x03','T9'),
         ('n_x06','T9'),
         ('n_c01','T8'),('n_c02','T9'),
         ('n_f01','T9'),('n_f02','T9'),
         ('n_r02','T9'),
-        ('n_s02','T9'),('n_s03','T9'),('n_s05','T9'),('n_s06','T9'),
+        ('n_s02','T9'),('n_s03','T9'),
     }
 
     ne = (cid, tno) in no_effect

@@ -72,7 +72,7 @@ static func _compute_per_group_ninja_effects(gs: Node) -> Dictionary:
 	# Dummy result structs — ScoreCalculator.ninja_affected_groups only needs hand types
 	for ninja: Dictionary in gs.owned_ninjas:
 		var effect: Dictionary = ninja.get("effect", {})
-		ScoreCalculator.collect_ninja_per_group(
+		ScoreEffectCollector.collect_ninja_per_group(
 			effect,
 			head_type, mid_type, tail_type,
 			head_cards, mid_cards, tail_cards,

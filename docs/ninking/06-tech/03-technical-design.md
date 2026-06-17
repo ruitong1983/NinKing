@@ -70,8 +70,6 @@
               │       │  │  │                           │
               │  swap │  │  execute_play()              │
               │  cards│  │  (讨伐 3次)                 │
-              │       │  │  execute_redraw()            │
-              │       │  │  (手替え 2次)                │
               │       │  └──────────┐                    │
               │       │             ▼                    │
               │       │         SCORING                  │
@@ -253,7 +251,6 @@ Shop (Control) [shop_ui.gd]       ← 改为 shop_panel.tscn (场景片段)
 | `state_changed` | `new_state: State` | 状态切换 |
 | `score_updated` | `current: int, target: int` | 计分后 |
 | `plays_changed` | `remaining: int` | 出牌次数变化 |
-| `redraws_changed` | `remaining: int` | 手替え次数变化 |
 | `gold_changed` | `amount: int` | 金币变化 |
 | `hand_updated` | `hand: Array` | 手牌变化 (9张, 已排序) |
 | `arrangement_changed` | `arrangement: Arrangement` | AI 重排/原地重评估后（影/瞬/滅 分组变化） |
@@ -552,15 +549,14 @@ NinKingGameState (Node, Autoload)
 ├── current_arrangement, current_col_evals
 ├── start_new_run() / continue_run() / has_saved_run()
 ├── auto_arrange() / re_evaluate_arrangement() / get_scoring_rules()
-├── swap_cards() / execute_play() / execute_redraw()
+├── swap_cards() / execute_play()
 ├── go_to_shop() / continue_from_shop() / skip_seal()
-└── Signals: state_changed, score_updated, plays_changed, redraws_changed, gold_changed,
+└── Signals: state_changed, score_updated, plays_changed, gold_changed,
     hand_updated, arrangement_changed, seal_started, xi_triggered
 
 SealController (RefCounted, 静态方法)
 ├── execute_play(gs) / prepare_play(gs) / finalize_play(gs, data) — 出牌流程
 ├── swap_cards(gs, idx1, idx2) — 交换（原地重评估，不触发 AI 重排）
-├── execute_redraw(gs, indices) — 手替え（触发 auto_arrange）
 ├── go_to_shop(gs) / continue_from_shop(gs) / skip_seal(gs, tag_reward)
 ├── _complete_seal(gs) — 过关奖励 + 利息
 ├── _collect_play_gold(gs, cards, xi) — 经济效果统一结算

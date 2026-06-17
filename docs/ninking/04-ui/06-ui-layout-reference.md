@@ -163,7 +163,6 @@ NinKingMain (Control) 1920×1080                      [game_manager.gd]
     │       │   └── CloseBtn (Button) [%CloseBtn]       "✕"
     │       ├── CountRow (HBoxContainer)
     │       │   ├── DrawCountLabel (Label) [%DrawCountLabel] "牌堆: 0 张"
-    │       │   └── DiscardCountLabel (Label) [%DiscardCountLabel] "手替札: 0 张"
     │       └── CardScroll (ScrollContainer)
     │           └── DeckCardGrid (GridContainer) [%DeckCardGrid] 13 列
     │

@@ -1,10 +1,11 @@
 # NinKing 音效设计计划
 
-> **建立日期:** 2026-06-10 | **最后更新:** 2026-06-10 (V23 匹配完成)
+> **建立日期:** 2026-06-10 | **最后更新:** 2026-06-17
 > **关联:** [`../09-mgmt/TODO.md`](../09-mgmt/TODO.md) · [`sound_bank.gd`](../../scripts/config/sound_bank.gd) · [`18-audio-asset-matching-guide.md`](18-audio-asset-matching-guide.md)
 > **用途:** 指导音效素材寻找、替换、新增、代码接线的完整工作计划。
 >
 > **✅ V23 素材替换状态:** 20/20 音效已从 Epic Stock Media「Anime Game」包自动匹配并转换为 OGG。详见 §10 执行记录。
+> **🎮 彩蛋: `cat/`** — 2026-06-17 新增 15 个猫叫音效 (OGG)，随机替换 NINJA_ACTIVATE 作为计分触发放猫叫彩蛋。详见 §11。
 
 ---
 
@@ -66,7 +67,8 @@
 | BGM | 2 首 FanKing 占位 (WAV) | 4 首忍者主题 OGG（菜单 + 游戏 3 段变奏 + 商店） |
 | 游戏 SFX | ✅ **已替换** — 17 个动画 SFX (OGG) 来自 Anime Game Pack | 全替换为动画 SFX（日常操作 chiptune + 情绪节点动画戏剧音） |
 | UI SFX | ✅ **已替换** — 3 个动画 SFX (OGG) 来自 Anime Game Pack | 保留 3 个 + 新增 3 个 |
-| **总计 SFX** | **20/20 ✅**（P0 11 + P1 9） | **25-30**（替换 20 + 待新增 5-10 P2/P3） |
+| **彩蛋 SFX** | ✅ **已就绪** — 15 个猫叫音效 (OGG) 来自 Freesound/Dragon Studio 等 | 随机替换 NINJA_ACTIVATE（计分触发放猫叫） |
+| **总计 SFX** | **35/35 ✅**（核心 20 + P2 8 + 彩蛋 15，部分 @pending） | **35+**（持续补充） |
 
 ### SoundBank 常量重命名（忍者主题）
 
@@ -321,6 +323,24 @@
 | S25 | 鸿运触发 | `lucky_jingle.ogg` | Lucky 20% +mult / 6.7% +gold | `lucky chime`, `jackpot`, `slot win` | `score_calculator` Phase B | 鸿运是"中奖"，听觉应有过山车感 |
 | S26 | 放逐销毁 | `banish_fire.ogg` | 放逐令销毁牌 | `fire vanish`, `burn`, `disappear` | Phase B | 销毁操作有重量感 |
 
+    │
+    ├── cat/
+    │   ├── beetpro-meou-cat-sound-effect-18-11098.ogg          # 猫叫彩蛋
+    │   ├── dragon-studio-cartoon-cat-meow-487661.ogg           # 猫叫彩蛋
+    │   ├── dragon-studio-cat-meow-401729.ogg                   # 猫叫彩蛋
+    │   ├── freesound_community-cat-meow-6226.ogg               # 猫叫彩蛋
+    │   ├── ribhavagrawal-cat-meowing-type-01-293291.ogg        # 猫叫彩蛋
+    │   ├── ribhavagrawal-cat-meowing-type-02-293290.ogg        # 猫叫彩蛋
+    │   ├── soulfuljamtracks-cat-meow-1-fx-323465.ogg           # 猫叫彩蛋
+    │   ├── soulfuljamtracks-cat-meow-6-fx-323468_cut.ogg       # 猫叫彩蛋（已裁剪）
+    │   ├── sound_garage-cat-meow-11-fx-306193.ogg              # 猫叫彩蛋
+    │   ├── sound_garage-cat-meow-12-fx-306191_cut.ogg          # 猫叫彩蛋（已裁剪）
+    │   ├── soundreality-cat-meow-fx-461188_cut.ogg             # 猫叫彩蛋（已裁剪）
+    │   ├── virtual_vibes-real-cat-sound-effect-383821_cut.ogg  # 猫叫彩蛋（已裁剪）
+    │   ├── yodguard-cute-soft-cat-meow-3-535482.ogg            # 猫叫彩蛋
+    │   ├── yodguard-cute-soft-cat-meow-4-535483.ogg            # 猫叫彩蛋
+    │   └── yoursperfectguy-cute-puppy-sound-effect-sfx-1-336356_cut.ogg  # 猫叫彩蛋（已裁剪）
+    │
 ---
 
 ### P3 — 润色（远期，若干）
@@ -460,7 +480,8 @@ BGM1 主菜单: start_menu_bgm.wav (26s) 仍是旧 FanKing 占位，需替换为
 | `animation_handler.gd` | `_sfx_tick(pitch)` | `SB.COUNT_TICK` | BounceScore milestone 驱动，pitch 递升 |
 | `animation_handler.gd` | 喜弹出 | `SB.XI_TRIGGER` / `SB.XI_FANFARE` | 单喜 trigger，双喜+ fanfare |
 | `animation_handler.gd` | 胜败判定 | `SB.SEAL_CLEAR` / `SB.SEAL_FAIL` | 过关/失败 |
-| `animation_handler.gd` | 忍者牌激活 | `SB.NINJA_ACTIVATE` | C18 |
+| `animation_handler.gd` | 忍者牌激活（每张忍牌触发） | `SB.CAT_MEOWS[rand_idx]` round-robin 随机猫叫 | 替换 NINJA_ACTIVATE，详情见 §11 |
+| `animation_handler.gd` | 三段汇总全局提示 | `SB.NINJA_ACTIVATE` | 保留原冲击音，与猫叫区分 |
 | `hand_interaction.gd` | 卡牌选中 | `SB.SELECT` | C20 |
 | `hand_interaction.gd` | 交换完成(点击+拖拽) | `SB.SWAP` | ~0.1s 极短 |
 | `ninja_bar_node.gd` | 忍者弹入/移除 | `SB.DEAL` / `SB.SEAL_FAIL` / `SB.SWAP` | 弹入/移除/重排 |
@@ -503,8 +524,7 @@ BGM1 主菜单: start_menu_bgm.wav (26s) 仍是旧 FanKing 占位，需替换为
 
 | 常量 | 文件 | 说明 |
 |------|------|------|
-| `DISCARD` | `discard.ogg` (→legacy) | 手替え取消，保留以备复用 |
-| `REDRAW_POP` | `redraw_pop.ogg` (→legacy) | 手替え取消，保留以备复用 |
+（手替え系统已全线移除，DISCARD/REDRAW_POP 音效一并归档）
 
 ---
 
@@ -643,3 +663,57 @@ assets/audio/
 | `draw.ogg` | → 可能合并入 `deal.ogg`（发牌时同时可用） |
 
 ---
+
+## §11 🎮 彩蛋：计分猫叫音效
+
+> **实装日期:** 2026-06-17 | **设计:** Grill 9 轮 → review-plan 审阅通过 → 实装
+> **关联:** [`sound_bank.gd`](../../scripts/config/sound_bank.gd) · [`animation_handler.gd`](../../scripts/ninking/ui/animation_handler.gd)
+> **素材来源:** Freesound / Dragon Studio / SoundGarage / SoulfulJamTracks 等，CC0 许可
+
+### 设计目标
+
+- 计分时每张忍者牌触发 → 播放随机猫叫代替原 `NINJA_ACTIVATE`
+- 同一次评分流程内不重复（round-robin），播完 15 只后重置
+- 三段汇总后的全局忍者提示（`animation_handler.gd:285`）**保留原 `NINJA_ACTIVATE`**
+
+### 实现细节
+
+| 组件 | 内容 |
+|------|------|
+| **素材** | `assets/audio/sound/cat/` — 15 个 `.ogg`（原始 MP3/WAV 已清除） |
+| **常量** | `sound_bank.gd` → `CAT_MEOWS: Array[AudioStream]` |
+| **音效池** | `animation_handler._run_scoring_animation()` 顶部声明 `_unplayed_cats = SB.CAT_MEOWS.duplicate()` |
+| **播放** | 每张忍牌循环内 → `if _unplayed_cats.is_empty(): _unplayed_cats = SB.CAT_MEOWS.duplicate()` → `randi()` 选索引 → `play_sfx()` → `remove_at()` |
+| **重叠** | fire-and-forget（同原 `NINJA_ACTIVATE`），多张连发时放任重叠 |
+| **全局提示** | `animation_handler.gd:285` 三段汇总后 → 保留 `GlobalTweens.play_sfx(SB.NINJA_ACTIVATE)` |
+
+### 维护指南
+
+- **新增猫叫音效**：将 `.ogg` 放入 `assets/audio/sound/cat/` → 在 `sound_bank.gd` 的 `CAT_MEOWS` 数组中追加 `preload` 行
+- **移除猫叫音效**：从目录删除文件 → 从 `CAT_MEOWS` 数组移除对应行 → 在 Godot 编辑器中 Reimport 目录
+- **替换为其他彩蛋**：只需替换 `assets/audio/sound/cat/` 下的文件（保持 `.ogg` 格式），无需改代码
+
+### 素材清单
+
+15 个猫叫文件，来源如下：
+
+| # | 文件名 | 来源 | 说明 |
+|---|--------|------|------|
+| 1 | `beetpro-meou-cat-sound-effect-18-11098.ogg` | BeetPro | 标准猫叫 |
+| 2 | `dragon-studio-cartoon-cat-meow-487661.ogg` | Dragon Studio | 卡通猫叫 |
+| 3 | `dragon-studio-cat-meow-401729.ogg` | Dragon Studio | 真实猫叫 |
+| 4 | `freesound_community-cat-meow-6226.ogg` | Freesound Community | 社区猫叫 |
+| 5 | `ribhavagrawal-cat-meowing-type-01-293291.ogg` | Ribhav Agrawal | 类型 1 |
+| 6 | `ribhavagrawal-cat-meowing-type-02-293290.ogg` | Ribhav Agrawal | 类型 2 |
+| 7 | `soulfuljamtracks-cat-meow-1-fx-323465.ogg` | SoulfulJamTracks | 猫叫 1 |
+| 8 | `soulfuljamtracks-cat-meow-6-fx-323468_cut.ogg` | SoulfulJamTracks | 猫叫 6（已裁剪） |
+| 9 | `sound_garage-cat-meow-11-fx-306193.ogg` | Sound Garage | 猫叫 11 |
+| 10 | `sound_garage-cat-meow-12-fx-306191_cut.ogg` | Sound Garage | 猫叫 12（已裁剪） |
+| 11 | `soundreality-cat-meow-fx-461188_cut.ogg` | SoundReality | 猫叫（已裁剪） |
+| 12 | `virtual_vibes-real-cat-sound-effect-383821_cut.ogg` | Virtual Vibes | 真实猫叫（已裁剪） |
+| 13 | `yodguard-cute-soft-cat-meow-3-535482.ogg` | YodGuard | 软猫叫 3 |
+| 14 | `yodguard-cute-soft-cat-meow-4-535483.ogg` | YodGuard | 软猫叫 4 |
+| 15 | `yoursperfectguy-cute-puppy-sound-effect-sfx-1-336356_cut.ogg` | YoursPerfectGuy | ~~狗叫~~ 实际是猫叫（已裁剪） |
+
+> **注:** `_cut` 后缀文件为原始素材裁剪了前导静音/尾音，时长约 1s。
+> **许可:** 全部为 CC0 / 免费可商用，发布前确认各平台署名要求。

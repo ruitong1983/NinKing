@@ -48,6 +48,17 @@ var _anim_handler: AnimationHandler
 var _ui_proxy: DebugUiProxy
 @onready var _star_chart_container: VBoxContainer = %StarChartContainer
 
+# Score detail panel
+@onready var _score_detail_panel: Control = %ScoreDetailPanel
+@onready var _detail_btn: Button = %ScoreDetailBtn
+var _last_baseline_result: ScoreResult = null
+var _last_ninja_result: ScoreResult = null
+var _last_head_cards: Array[CardData.PlayingCard] = []
+var _last_mid_cards: Array[CardData.PlayingCard] = []
+var _last_tail_cards: Array[CardData.PlayingCard] = []
+var _last_col_evals: Array = []
+var _last_xi_result = null
+
 
 func _ready() -> void:
 	_full_deck = CardData.create_standard_deck()
@@ -117,6 +128,9 @@ func _ready() -> void:
 
 	_anim_handler = AnimationHandler.new()
 	_anim_handler.setup(_ui_proxy, func(): pass)
+
+	_detail_btn.pressed.connect(_on_detail_open)
+	_score_detail_panel.close_requested.connect(_on_detail_close)
 
 	_reset_ui()
 	_update_button_states()
@@ -314,6 +328,7 @@ func _on_deal_pressed() -> void:
 	_rebuild_grid_display()
 	_update_button_states()
 	_preview_dun_labels()
+	_invalidate_detail()
 	_set_status("已发牌 — 9 张牌进入手牌区")
 
 
@@ -363,11 +378,28 @@ func _on_play_pressed() -> void:
 
 	var xi_result := XiDetector.detect(head_cards, mid_cards, tail_cards, head_eval, mid_eval, tail_eval)
 
+	# ── Baseline: empty ninjas ──
+	var baseline_result: ScoreResult = ScoreCalculator.calculate(
+		head_cards, mid_cards, tail_cards,
+		head_eval, mid_eval, tail_eval,
+		col_evals, [], _star_chart_levels, xi_result, {}, 0
+	)
+
+	# ── Main: selected ninjas ──
 	var result: ScoreResult = ScoreCalculator.calculate(
 		head_cards, mid_cards, tail_cards,
 		head_eval, mid_eval, tail_eval,
 		col_evals, _selected_ninjas, _star_chart_levels, xi_result, {}, 0
 	)
+
+	# ── Store for detail panel ──
+	_last_baseline_result = baseline_result
+	_last_ninja_result = result
+	_last_head_cards = head_cards.duplicate()
+	_last_mid_cards = mid_cards.duplicate()
+	_last_tail_cards = tail_cards.duplicate()
+	_last_col_evals = col_evals.duplicate()
+	_last_xi_result = xi_result
 
 	# ── Build play_data and trigger scoring animation ──
 	var play_data: Dictionary = {
@@ -400,6 +432,7 @@ func _on_play_pressed() -> void:
 	_anim_handler.current_play_data = play_data
 	await _anim_handler.run_scoring()
 	_update_score_display(result, head_eval, mid_eval, tail_eval, col_evals, xi_result)
+	_detail_btn.visible = true
 	_set_status("动画完成 — 总分: %d" % result.total_score)
 
 
@@ -614,6 +647,7 @@ func _fmt_chips_x_mult_preview(hand_type: CardData.HandType3) -> String:
 func _on_clear_pressed() -> void:
 	_clear_all_cards()
 	_reset_ui()
+	_invalidate_detail()
 	_set_status("已清空牌桌")
 
 
@@ -628,6 +662,7 @@ func _on_random_pressed() -> void:
 	_rebuild_grid_display()
 	_update_button_states()
 	_preview_dun_labels()
+	_invalidate_detail()
 	_set_status("已随机发 9 张牌，点击「討伐」查看分数")
 
 
@@ -738,3 +773,33 @@ func _update_button_states() -> void:
 	_ai_btn.disabled = (count != 9)
 	%DealBtn.disabled = (_selected_queue.size() != 9)
 	_deck_btn.text = "牌库: %d" % (_full_deck.size() - count)
+
+
+# ══════════════════════════════════════════
+# Score detail panel + button management
+# ══════════════════════════════════════════
+
+func _on_detail_open() -> void:
+	_detail_btn.visible = false
+	_score_detail_panel.show_detail(
+		_last_baseline_result, _last_ninja_result,
+		_last_head_cards, _last_mid_cards, _last_tail_cards,
+		_last_col_evals, _last_xi_result,
+		_star_chart_levels, _selected_ninjas
+	)
+
+
+func _on_detail_close() -> void:
+	_detail_btn.visible = true
+
+
+func _invalidate_detail() -> void:
+	_score_detail_panel.hide_detail()
+	_detail_btn.visible = false
+	_last_baseline_result = null
+	_last_ninja_result = null
+	_last_head_cards.clear()
+	_last_mid_cards.clear()
+	_last_tail_cards.clear()
+	_last_col_evals.clear()
+	_last_xi_result = null

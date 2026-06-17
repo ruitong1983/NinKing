@@ -243,7 +243,7 @@ func _on_back_to_menu_pressed() -> void:
 func _update_deck_display() -> void:
 	var dm: DeckManager = NinKingGameState.deck_manager
 	if dm != null:
-		ui.update_deck_count(dm.draw_pile.size(), dm.discard_pile.size())
+		ui.update_deck_count(dm.draw_pile.size())
 
 
 # ══════════════════════════════════════════

@@ -1,34 +1,20 @@
 extends Control
 ## Debug 忍者選択弹窗 — 弹出 Grid 列表显示全部忍者，多选 0-5 个。
 ## 左键选择/取消忍者，右键弹出 CardDetailPopup 查看卡牌详情。
-## 排序模式：类型（默认）、稀有度、全部。
+## 排序模式：标签（默认）、稀有度、全部。
 
 signal ninjas_selected(selected_ninjas: Array[Dictionary])
 signal cancelled()
 
-enum SortMode { CATEGORY, RARITY, NONE }
+enum SortMode { TAG, RARITY, NONE }
 
 const TARGET_COLS: int = 11
 const GRID_H_SEP: int = 6
 const MAX_SELECT: int = 5
 var _card_width: float = 100.0
 
-const CATEGORY_NAMES: Dictionary = {
-	"universal": "通用加成",
-	"group_target": "组别定向",
-	"rule_change": "规则变更",
-	"xi_enhance": "喜之强化",
-	"scaling": "成长修炼",
-	"economy": "经济",
-	"tools": "忍法",
-	"legendary": "传说",
-	"cross_link": "跨组联动",
-	"face_card": "点数/人牌",
-}
-
-const CATEGORY_ORDER: Array[String] = [
-	"universal", "group_target", "rule_change", "xi_enhance",
-	"scaling", "economy", "tools", "cross_link", "face_card", "legendary",
+const TAG_ORDER: Array[String] = [
+	"筹码", "倍率+", "倍率X", "经济", "操控", "成长", "特殊",
 ]
 
 const RARITY_ORDER: Array[String] = ["common", "uncommon", "rare", "legendary"]
@@ -43,7 +29,7 @@ const RARITY_NAMES: Dictionary = {
 var _all_ninjas: Array[Dictionary] = []
 var _selected: Array[Dictionary] = []
 var _toggle_btns: Array[Button] = []
-var _current_sort: SortMode = SortMode.CATEGORY
+var _current_sort: SortMode = SortMode.TAG
 
 @onready var _grid: GridContainer = %NinjaGrid
 @onready var _confirm_btn: Button = %ConfirmBtn
@@ -57,7 +43,7 @@ var _current_sort: SortMode = SortMode.CATEGORY
 func _ready() -> void:
 	_confirm_btn.pressed.connect(_on_confirm)
 	_cancel_btn.pressed.connect(_on_cancel)
-	_category_btn.toggled.connect(_on_sort_toggled.bind(SortMode.CATEGORY))
+	_category_btn.toggled.connect(_on_sort_toggled.bind(SortMode.TAG))
 	_rarity_btn.toggled.connect(_on_sort_toggled.bind(SortMode.RARITY))
 	_all_btn.toggled.connect(_on_sort_toggled.bind(SortMode.NONE))
 
@@ -65,7 +51,7 @@ func _ready() -> void:
 func open(ninja_pool: Array[Dictionary], pre_selected: Array[Dictionary]) -> void:
 	_all_ninjas = ninja_pool
 	_selected = pre_selected.duplicate()
-	_current_sort = SortMode.CATEGORY
+	_current_sort = SortMode.TAG
 	_sync_sort_buttons()
 	visible = true
 	_build_grid.call_deferred()
@@ -77,14 +63,16 @@ func hide_selector() -> void:
 
 func _get_sorted_ninjas() -> Array[Dictionary]:
 	match _current_sort:
-		SortMode.CATEGORY:
+		SortMode.TAG:
 			var result: Array[Dictionary] = []
-			for cat: String in CATEGORY_ORDER:
+			for tag: String in TAG_ORDER:
 				for ninja: Dictionary in _all_ninjas:
-					if ninja.get("category", "") == cat:
+					var tags: Array = ninja.get("tags", [])
+					if tags.size() > 0 and tags[0] == tag:
 						result.append(ninja)
 			for ninja: Dictionary in _all_ninjas:
-				if not CATEGORY_ORDER.has(ninja.get("category", "")):
+				var tags: Array = ninja.get("tags", [])
+				if tags.size() == 0 or not TAG_ORDER.has(tags[0]):
 					result.append(ninja)
 			return result
 		SortMode.RARITY:
@@ -112,7 +100,7 @@ func _on_sort_toggled(toggled_on: bool, mode: SortMode) -> void:
 
 func _active_sort_button() -> Button:
 	match _current_sort:
-		SortMode.CATEGORY:
+		SortMode.TAG:
 			return _category_btn
 		SortMode.RARITY:
 			return _rarity_btn
@@ -121,7 +109,7 @@ func _active_sort_button() -> Button:
 
 
 func _sync_sort_buttons() -> void:
-	_category_btn.set_pressed_no_signal(_current_sort == SortMode.CATEGORY)
+	_category_btn.set_pressed_no_signal(_current_sort == SortMode.TAG)
 	_rarity_btn.set_pressed_no_signal(_current_sort == SortMode.RARITY)
 	_all_btn.set_pressed_no_signal(_current_sort == SortMode.NONE)
 
@@ -140,8 +128,9 @@ func _calc_columns() -> int:
 
 func _grid_group_key(ninja: Dictionary) -> String:
 	match _current_sort:
-		SortMode.CATEGORY:
-			return ninja.get("category", "")
+		SortMode.TAG:
+			var tags: Array = ninja.get("tags", [])
+			return tags[0] if tags.size() > 0 else ""
 		SortMode.RARITY:
 			return ninja.get("rarity", "common")
 		_:
@@ -229,8 +218,8 @@ func _pad_grid_row(cells: int) -> int:
 func _add_group_header(key: String, cells: int) -> int:
 	var text: String = ""
 	match _current_sort:
-		SortMode.CATEGORY:
-			text = CATEGORY_NAMES.get(key, key)
+		SortMode.TAG:
+			text = key  # tag keys ARE Chinese display names
 		SortMode.RARITY:
 			text = RARITY_NAMES.get(key, key)
 

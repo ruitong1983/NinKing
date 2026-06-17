@@ -469,7 +469,7 @@ footer a:hover { color: var(--gold); }
 <!-- ═══ Header ═══ -->
 <header>
   <h1>🏯 NinKing 参考手册 <small id="card-count"></small></h1>
-  <p class="subtitle">基于 <span id="data-date">2026-06-16</span> · 忍者牌 / 喜系统 / 场景树 · 点击卡牌查看详情 · ESC 清空搜索</p>
+  <p class="subtitle">基于 <span id="data-date">2026-06-17</span> · 忍者牌 / 喜系统 / 场景树 · 点击卡牌查看详情 · ESC 清空搜索</p>
 </header>
 
 <!-- ═══ Recent Updates (auto-injected by tools/inject_recent_updates.py) ═══ -->
@@ -477,9 +477,9 @@ footer a:hover { color: var(--gold); }
   <h3>📋 最近更新</h3>
   <!-- RECENT_UPDATES_PLACEHOLDER -->
 <ul>
-  <li><span class="date">2026-06-16</span><span class="tag tag-fix">fix</span>chore: update ninja_card_viewer.html + fix Python 3.8 compat in extract scripts</li>
+  <li><span class="date">2026-06-17</span><span class="tag tag-docs">docs</span>refactor: 拆分 score_calculator 为模块化架构 + 全量文档同步</li>
 </ul>
-<p style="font-size:11px;color:var(--text-dim);margin-top:6px">最新提交 · 部署于 2026-06-16 22:12</p>
+<p style="font-size:11px;color:var(--text-dim);margin-top:6px">最新提交 · 部署于 2026-06-17 14:06</p>
 </div>
 
 <!-- ═══ Tab Bar ═══ -->
@@ -662,7 +662,7 @@ footer a:hover { color: var(--gold); }
 const NINJAS = [
   {
     "id": "n_001",
-    "category": "universal",
+    "category": null,
     "name": "手里剑",
     "rarity": "common",
     "cost": 3,
@@ -673,7 +673,7 @@ const NINJAS = [
   },
   {
     "id": "n_002",
-    "category": "universal",
+    "category": null,
     "name": "苦无",
     "rarity": "common",
     "cost": 4,
@@ -684,7 +684,7 @@ const NINJAS = [
   },
   {
     "id": "n_003",
-    "category": "universal",
+    "category": null,
     "name": "忍刀",
     "rarity": "common",
     "cost": 5,
@@ -696,7 +696,7 @@ const NINJAS = [
   },
   {
     "id": "n_004",
-    "category": "universal",
+    "category": null,
     "name": "重刃",
     "rarity": "common",
     "cost": 4,
@@ -707,7 +707,7 @@ const NINJAS = [
   },
   {
     "id": "n_005",
-    "category": "universal",
+    "category": null,
     "name": "影缝",
     "rarity": "uncommon",
     "cost": 8,
@@ -718,7 +718,7 @@ const NINJAS = [
   },
   {
     "id": "n_006",
-    "category": "universal",
+    "category": null,
     "name": "奥义之卷",
     "rarity": "rare",
     "cost": 14,
@@ -730,7 +730,7 @@ const NINJAS = [
   },
   {
     "id": "n_g01",
-    "category": "group_target",
+    "category": null,
     "name": "虎头",
     "rarity": "uncommon",
     "cost": 5,
@@ -745,7 +745,7 @@ const NINJAS = [
   },
   {
     "id": "n_g02",
-    "category": "group_target",
+    "category": null,
     "name": "龙尾",
     "rarity": "rare",
     "cost": 12,
@@ -760,7 +760,7 @@ const NINJAS = [
   },
   {
     "id": "n_g03",
-    "category": "group_target",
+    "category": null,
     "name": "中流砥柱",
     "rarity": "uncommon",
     "cost": 6,
@@ -774,41 +774,29 @@ const NINJAS = [
   },
   {
     "id": "n_g04",
-    "category": "group_target",
+    "category": null,
     "name": "藏锋",
     "rarity": "rare",
-    "cost": 8,
-    "desc": "影越弱滅越强: 散×3 对×2 其余×1",
+    "cost": 10,
+    "desc": "+2 出牌次数",
     "effect": {
-      "x_mult_per_head_weakness": true
-    },
-    "head_weakness_scale": {
-      "0": 3,
-      "1": 2,
-      "2": 1,
-      "3": 1,
-      "4": 1,
-      "5": 1
+      "extra_plays": 2
     }
   },
   {
     "id": "n_g05",
-    "category": "group_target",
+    "category": null,
     "name": "双头蛇",
-    "rarity": "uncommon",
-    "cost": 5,
-    "desc": "影或瞬≥顺子时 +40 筹码",
+    "rarity": "rare",
+    "cost": 8,
+    "desc": "行+列同牌型计分×2",
     "effect": {
-      "add_chips": 40,
-      "condition": {
-        "group": "head_or_mid",
-        "at_least_hand_type": 2
-      }
+      "duplicate_hand_x2": true
     }
   },
   {
     "id": "n_g06",
-    "category": "group_target",
+    "category": null,
     "name": "金字塔",
     "rarity": "rare",
     "cost": 10,
@@ -818,37 +806,86 @@ const NINJAS = [
     }
   },
   {
-    "id": "n_r02",
-    "category": "rule_change",
-    "name": "均衡之印",
-    "rarity": "rare",
+    "id": "n_g07",
+    "category": null,
+    "name": "三清道人",
+    "rarity": "uncommon",
     "cost": 7,
-    "desc": "三组必须同牌型，各组×2",
-    "effect": {
-      "constraint_override": "equal",
-      "equal_x_mult": 2
-    },
-    "mutex_group": "rule"
-  },
-  {
-    "id": "n_r03",
-    "category": "rule_change",
-    "name": "独尊之印",
-    "rarity": "rare",
-    "cost": 9,
-    "desc": "滅×2，影和瞬必须≥对子",
+    "desc": "同花组计分×2",
     "effect": {
       "x_mult": 2,
       "condition": {
-        "group": "tail"
-      },
-      "constraint_override": "head_mid_min_pair"
-    },
-    "mutex_group": "rule"
+        "hand_type": 3
+      }
+    }
+  },
+  {
+    "id": "n_g08",
+    "category": null,
+    "name": "龙脉",
+    "rarity": "uncommon",
+    "cost": 8,
+    "desc": "顺子组计分×2",
+    "effect": {
+      "x_mult": 2,
+      "condition": {
+        "hand_type": 2
+      }
+    }
+  },
+  {
+    "id": "n_s05",
+    "category": null,
+    "name": "天华",
+    "rarity": "rare",
+    "cost": 11,
+    "desc": "同花顺组计分×4",
+    "effect": {
+      "x_mult": 4,
+      "condition": {
+        "hand_type": 4
+      }
+    }
+  },
+  {
+    "id": "n_s06",
+    "category": null,
+    "name": "王座",
+    "rarity": "rare",
+    "cost": 12,
+    "desc": "豹子组计分×5",
+    "effect": {
+      "x_mult": 5,
+      "condition": {
+        "hand_type": 5
+      }
+    }
+  },
+  {
+    "id": "n_r02",
+    "category": null,
+    "name": "均衡之印",
+    "rarity": "rare",
+    "cost": 7,
+    "desc": "三行非散排时所有行列组 +50 筹码",
+    "effect": {
+      "all_non_scatter_add_chips": 50
+    }
+  },
+  {
+    "id": "n_r03",
+    "category": null,
+    "name": "独尊之印",
+    "rarity": "rare",
+    "cost": 9,
+    "desc": "前两行不计分，只对第三行计分×3",
+    "effect": {
+      "tail_only_x3": true
+    }
   },
   {
     "id": "n_x01",
-    "category": "xi_enhance",
+    "category": null,
     "name": "喜鹊",
     "rarity": "uncommon",
     "cost": 4,
@@ -859,7 +896,7 @@ const NINJAS = [
   },
   {
     "id": "n_x02",
-    "category": "xi_enhance",
+    "category": null,
     "name": "四张猎人",
     "rarity": "uncommon",
     "cost": 4,
@@ -874,7 +911,7 @@ const NINJAS = [
   },
   {
     "id": "n_x03",
-    "category": "xi_enhance",
+    "category": null,
     "name": "清一色",
     "rarity": "uncommon",
     "cost": 5,
@@ -887,7 +924,7 @@ const NINJAS = [
   },
   {
     "id": "n_x04",
-    "category": "xi_enhance",
+    "category": null,
     "name": "黑龙",
     "rarity": "rare",
     "cost": 8,
@@ -902,7 +939,7 @@ const NINJAS = [
   },
   {
     "id": "n_x05",
-    "category": "xi_enhance",
+    "category": null,
     "name": "赤凤",
     "rarity": "rare",
     "cost": 8,
@@ -917,7 +954,7 @@ const NINJAS = [
   },
   {
     "id": "n_x06",
-    "category": "xi_enhance",
+    "category": null,
     "name": "龙之眼",
     "rarity": "rare",
     "cost": 12,
@@ -928,100 +965,8 @@ const NINJAS = [
     }
   },
   {
-    "id": "n_s01",
-    "category": "scaling",
-    "name": "修行者",
-    "rarity": "uncommon",
-    "cost": 6,
-    "desc": "每出牌 +1 倍率（永久累积）",
-    "effect": {
-      "add_mult": 0
-    },
-    "scaling": {
-      "trigger": "on_play",
-      "add_mult": 1
-    }
-  },
-  {
-    "id": "n_s02",
-    "category": "scaling",
-    "name": "三清道人",
-    "rarity": "uncommon",
-    "cost": 7,
-    "desc": "每打出三清 +25 筹码（永久累积）",
-    "effect": {
-      "add_chips": 0
-    },
-    "scaling": {
-      "trigger": "on_play",
-      "add_chips": 25,
-      "condition": {
-        "xi": "三清"
-      }
-    }
-  },
-  {
-    "id": "n_s03",
-    "category": "scaling",
-    "name": "龙脉",
-    "rarity": "uncommon",
-    "cost": 8,
-    "desc": "滅为同花顺时 +30 筹码（永久累积）",
-    "effect": {
-      "add_chips": 0
-    },
-    "scaling": {
-      "trigger": "on_play",
-      "add_chips": 30,
-      "condition": {
-        "group": "tail",
-        "hand_type": 4
-      }
-    }
-  },
-  {
-    "id": "n_s05",
-    "category": "scaling",
-    "name": "头悬梁",
-    "rarity": "uncommon",
-    "cost": 5,
-    "desc": "影为散牌+3倍率，否则重置",
-    "effect": {
-      "add_mult": 0
-    },
-    "scaling": {
-      "trigger": "on_play",
-      "add_mult": 3,
-      "condition": {
-        "group": "head",
-        "hand_type": 0
-      },
-      "reset_on_fail": true
-    }
-  },
-  {
-    "id": "n_s06",
-    "category": "scaling",
-    "name": "尾刺骨",
-    "rarity": "uncommon",
-    "cost": 6,
-    "desc": "滅为同花顺/豹子+5倍率，否则重置",
-    "effect": {
-      "add_mult": 0
-    },
-    "scaling": {
-      "trigger": "on_play",
-      "add_mult": 5,
-      "condition": {
-        "group": "tail",
-        "at_least_hand_type": 4
-      },
-      "reset_on_fail": true
-    }
-  },
-  {
     "id": "n_e01",
-    "category": "economy",
+    "category": null,
     "name": "福神",
     "rarity": "uncommon",
     "cost": 6,
@@ -1032,7 +977,7 @@ const NINJAS = [
   },
   {
     "id": "n_e02",
-    "category": "group_target",
+    "category": null,
     "name": "金尾",
     "rarity": "uncommon",
     "cost": 6,
@@ -1046,7 +991,7 @@ const NINJAS = [
   },
   {
     "id": "n_e04",
-    "category": "economy",
+    "category": null,
     "name": "利息之印",
     "rarity": "uncommon",
     "cost": 7,
@@ -1057,7 +1002,7 @@ const NINJAS = [
   },
   {
     "id": "n_e05",
-    "category": "economy",
+    "category": null,
     "name": "金剛力",
     "rarity": "rare",
     "cost": 8,
@@ -1070,7 +1015,7 @@ const NINJAS = [
   },
   {
     "id": "n_e06",
-    "category": "economy",
+    "category": null,
     "name": "黄金律",
     "rarity": "rare",
     "cost": 14,
@@ -1083,7 +1028,7 @@ const NINJAS = [
   },
   {
     "id": "n_t01",
-    "category": "tools",
+    "category": null,
     "name": "火遁",
     "rarity": "uncommon",
     "cost": 8,
@@ -1094,40 +1039,49 @@ const NINJAS = [
   },
   {
     "id": "n_t02",
-    "category": "tools",
+    "category": null,
     "name": "水遁",
     "rarity": "uncommon",
     "cost": 6,
-    "desc": "+1 手替え次数",
+    "desc": "顺子组+5 倍率",
     "effect": {
-      "extra_redraws": 1
+      "add_mult": 5,
+      "condition": {
+        "hand_type": 2
+      }
     }
   },
   {
     "id": "n_t05",
-    "category": "tools",
-    "name": "疾风",
+    "category": null,
+    "name": "风遁",
     "rarity": "uncommon",
     "cost": 7,
-    "desc": "首回合出牌得分×2",
+    "desc": "对子组+3 倍率",
     "effect": {
-      "first_play_x2": true
+      "add_mult": 3,
+      "condition": {
+        "hand_type": 1
+      }
     }
   },
   {
     "id": "n_t06",
-    "category": "tools",
+    "category": null,
     "name": "土遁",
     "rarity": "rare",
     "cost": 10,
-    "desc": "战败保留金币重开本结界（1局1次）",
+    "desc": "同花组+5 倍率",
     "effect": {
-      "death_save": true
+      "add_mult": 5,
+      "condition": {
+        "hand_type": 3
+      }
     }
   },
   {
     "id": "n_l01",
-    "category": "legendary",
+    "category": null,
     "name": "天下人",
     "rarity": "legendary",
     "cost": 999,
@@ -1138,7 +1092,7 @@ const NINJAS = [
   },
   {
     "id": "n_l02",
-    "category": "legendary",
+    "category": null,
     "name": "幻术大师",
     "rarity": "legendary",
     "cost": 999,
@@ -1150,7 +1104,7 @@ const NINJAS = [
   },
   {
     "id": "n_l03",
-    "category": "legendary",
+    "category": null,
     "name": "影武者",
     "rarity": "legendary",
     "cost": 999,
@@ -1161,7 +1115,7 @@ const NINJAS = [
   },
   {
     "id": "n_d01",
-    "category": "group_target",
+    "category": null,
     "name": "成双",
     "rarity": "common",
     "cost": 4,
@@ -1175,7 +1129,7 @@ const NINJAS = [
   },
   {
     "id": "n_t07",
-    "category": "tools",
+    "category": null,
     "name": "赌命",
     "rarity": "uncommon",
     "cost": 7,
@@ -1187,7 +1141,7 @@ const NINJAS = [
   },
   {
     "id": "n_c01",
-    "category": "cross_link",
+    "category": null,
     "name": "镜像",
     "rarity": "uncommon",
     "cost": 6,
@@ -1201,7 +1155,7 @@ const NINJAS = [
   },
   {
     "id": "n_c02",
-    "category": "cross_link",
+    "category": null,
     "name": "铁索连环",
     "rarity": "uncommon",
     "cost": 6,
@@ -1216,7 +1170,7 @@ const NINJAS = [
   },
   {
     "id": "n_f01",
-    "category": "face_card",
+    "category": null,
     "name": "影之眷顾",
     "rarity": "common",
     "cost": 5,
@@ -1227,7 +1181,7 @@ const NINJAS = [
   },
   {
     "id": "n_f02",
-    "category": "face_card",
+    "category": null,
     "name": "王牌侍从",
     "rarity": "uncommon",
     "cost": 5,
@@ -1235,6 +1189,21 @@ const NINJAS = [
     "effect": {
       "add_mult_per_ace": 5,
       "ace_mult_cap": 20
+    }
+  },
+  {
+    "id": "n_f03",
+    "category": null,
+    "name": "独行者",
+    "rarity": "uncommon",
+    "cost": 6,
+    "desc": "组内含 A 时该组 +30筹码 +3倍率",
+    "effect": {
+      "ace_chips": 30,
+      "ace_mult": 3,
+      "condition": {
+        "group_has_ace": true
+      }
     }
   }
 ];  // ── auto-extracted ──
@@ -1331,7 +1300,7 @@ function renderXiTables() {
 const CATEGORY_LABELS = {
   universal: "通用加成", group_target: "组别定向", rule_change: "规则变更",
   xi_enhance: "喜之强化", scaling: "成长修炼", economy: "经济",
-  tools: "忍法", legendary: "传说", redraw: "手替え激励",
+  tools: "忍法", legendary: "传说",
   cross_link: "联动", face_card: "点数强化"
 };
 const CATEGORY_ORDER = ["universal","group_target","rule_change","xi_enhance","scaling","economy","tools","redraw","cross_link","face_card","legendary"];
@@ -1437,8 +1406,8 @@ function render() {
     if (eff.condition) {
       detailRows.push(["条件", JSON.stringify(eff.condition)]);
     }
-    if (n.head_weakness_scale) {
-      detailRows.push(["藏锋缩放", JSON.stringify(n.head_weakness_scale)]);
+    if (n.effect && n.effect.extra_plays) {
+      detailRows.push(["出牌次数", "+" + n.effect.extra_plays]);
     }
 
     const detailHtml = detailRows.map(r =>
@@ -1590,10 +1559,6 @@ const SCENES = {
                       children: [
 {
                           type: 'Label', name: 'DrawCountLabel',
-                          unique: true
-                        },
-{
-                          type: 'Label', name: 'DiscardCountLabel',
                           unique: true
                         },
                       ],
@@ -2570,6 +2535,10 @@ const SCENES = {
               type: 'ColorRect', name: 'SelectorBg'
             },
           ],
+        },
+{
+          type: 'Button', name: 'ScoreDetailBtn',
+          unique: true
         },
       ],
     },
