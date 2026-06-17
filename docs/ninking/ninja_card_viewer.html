@@ -477,9 +477,9 @@ footer a:hover { color: var(--gold); }
   <h3>📋 最近更新</h3>
   <!-- RECENT_UPDATES_PLACEHOLDER -->
 <ul>
-  <li><span class="date">2026-06-17</span><span class="tag tag-docs">docs</span>chore: 添加 .claude/skills/ git 跟踪规则到 CLAUDE.md</li>
+  <li><span class="date">2026-06-17</span><span class="tag tag-docs">docs</span>refactor: 拆分 score_calculator 为模块化架构 + 全量文档同步</li>
 </ul>
-<p style="font-size:11px;color:var(--text-dim);margin-top:6px">最新提交 · 部署于 2026-06-17 14:04</p>
+<p style="font-size:11px;color:var(--text-dim);margin-top:6px">最新提交 · 部署于 2026-06-17 14:06</p>
 </div>
 
 <!-- ═══ Tab Bar ═══ -->
@@ -1071,9 +1071,12 @@ const NINJAS = [
     "name": "土遁",
     "rarity": "rare",
     "cost": 10,
-    "desc": "战败保留金币重开本结界（1局1次）",
+    "desc": "同花组+5 倍率",
     "effect": {
-      "death_save": true
+      "add_mult": 5,
+      "condition": {
+        "hand_type": 3
+      }
     }
   },
   {
