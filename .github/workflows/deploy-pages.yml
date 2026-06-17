@@ -39,6 +39,9 @@ jobs:
       - name: Inject recent commits into HTML
         run: python tools/inject_recent_updates.py docs/ninking/ninja_card_viewer.html
 
+      - name: Copy card images into docs/ for Pages deployment
+        run: mkdir -p docs/assets/images/cards/ninjas && cp -r assets/images/cards/ninjas/*.png docs/assets/images/cards/ninjas/
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
