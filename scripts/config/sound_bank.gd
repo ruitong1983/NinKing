@@ -58,6 +58,25 @@ const GLASS_BREAK: AudioStream    = preload("res://assets/audio/sound/game/glass
 const LUCKY_JINGLE: AudioStream   = preload("res://assets/audio/sound/game/lucky_jingle.ogg")   ## @pending 鸿运触发
 const BANISH_FIRE: AudioStream    = preload("res://assets/audio/sound/game/banish_fire.ogg")    ## @pending 放逐销毁
 
+# ─── 猫叫 SFX (彩蛋) ───
+const CAT_MEOWS: Array[AudioStream] = [
+	preload("res://assets/audio/sound/cat/beetpro-meou-cat-sound-effect-18-11098.ogg"),
+	preload("res://assets/audio/sound/cat/dragon-studio-cartoon-cat-meow-487661.ogg"),
+	preload("res://assets/audio/sound/cat/dragon-studio-cat-meow-401729.ogg"),
+	preload("res://assets/audio/sound/cat/freesound_community-cat-meow-6226.ogg"),
+	preload("res://assets/audio/sound/cat/ribhavagrawal-cat-meowing-type-01-293291.ogg"),
+	preload("res://assets/audio/sound/cat/ribhavagrawal-cat-meowing-type-02-293290.ogg"),
+	preload("res://assets/audio/sound/cat/soulfuljamtracks-cat-meow-1-fx-323465.ogg"),
+	preload("res://assets/audio/sound/cat/soulfuljamtracks-cat-meow-6-fx-323468_cut.ogg"),
+	preload("res://assets/audio/sound/cat/sound_garage-cat-meow-11-fx-306193.ogg"),
+	preload("res://assets/audio/sound/cat/sound_garage-cat-meow-12-fx-306191_cut.ogg"),
+	preload("res://assets/audio/sound/cat/soundreality-cat-meow-fx-461188_cut.ogg"),
+	preload("res://assets/audio/sound/cat/virtual_vibes-real-cat-sound-effect-383821_cut.ogg"),
+	preload("res://assets/audio/sound/cat/yodguard-cute-soft-cat-meow-3-535482.ogg"),
+	preload("res://assets/audio/sound/cat/yodguard-cute-soft-cat-meow-4-535483.ogg"),
+	preload("res://assets/audio/sound/cat/yoursperfectguy-cute-puppy-sound-effect-sfx-1-336356_cut.ogg"),
+]
+
 # ─── 旧名 alias (FanKing 遗留，deprecated) ───
 # 待所有引用迁移后删除
 const DRAW: AudioStream       = DEAL          ## @deprecated 改用 DEAL

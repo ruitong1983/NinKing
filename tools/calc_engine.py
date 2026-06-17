@@ -118,7 +118,7 @@ def detect_xi(h, m, t, he, me, te):
 # 核心计分 (v5.0 列加法化)
 # ════════════════════════════════
 
-def calc(cs_h, cs_m, cs_t, ne, xi_bonus=0, xi_override=None):
+def calc(cs_h, cs_m, cs_t, ne, xi_bonus=0, xi_override=None, duplicate_hand_x2=False):
     """v5.0: 行独立计分 + 列独立计分(chips×mult) → 加法合成 → 全局喜×mult"""
     he = eval_group(cs_h)
     me = eval_group(cs_m)
@@ -197,6 +197,24 @@ def calc(cs_h, cs_m, cs_t, ne, xi_bonus=0, xi_override=None):
     shq = 2 + xi_bonus
     if '顺清打头' in xi_list:
         hs *= shq
+
+    # ── 双头蛇: 相同牌型计分×2 ──
+    if duplicate_hand_x2:
+        all_types = [hk, mk, tk] + c_types
+        type_count = {}
+        for ht_val in all_types:
+            type_count[ht_val] = type_count.get(ht_val, 0) + 1
+        if type_count.get(hk, 0) >= 2:
+            hs *= 2
+        if type_count.get(mk, 0) >= 2:
+            ms *= 2
+        if type_count.get(tk, 0) >= 2:
+            ts *= 2
+        col_total = 0
+        for j in range(3):
+            if type_count.get(c_types[j], 0) >= 2 and col_scores[j] > 0:
+                col_scores[j] *= 2
+            col_total += col_scores[j]
 
     # ── Total raw (rows + columns) ──
     raw = hs + ms + ts + col_total
@@ -402,7 +420,7 @@ def ne_to_effects(ne):
 # Test case helper: baseline + with_ninja pair
 # ════════════════════════════════
 
-def tc(all_rows, cid, cname, tno, desc, hs, ms, ts, ne=None, xi_bonus=0, xi_override=None):
+def tc(all_rows, cid, cname, tno, desc, hs, ms, ts, ne=None, xi_bonus=0, xi_override=None, duplicate_hand_x2=False):
     """Append baseline + with_ninja rows to all_rows. Also builds PAYLOAD. Returns delta."""
     if ne is None:
         ne = no_ninja()
@@ -413,7 +431,7 @@ def tc(all_rows, cid, cname, tno, desc, hs, ms, ts, ne=None, xi_bonus=0, xi_over
     # CSV rows
     r0 = calc(h, m, t, no_ninja())
     all_rows.append(mkrow('baseline', cid, cname, tno, desc + '无忍', hs, ms, ts, r0, no_ninja()))
-    r1 = calc(h, m, t, ne, xi_bonus=xi_bonus, xi_override=xi_override)
+    r1 = calc(h, m, t, ne, xi_bonus=xi_bonus, xi_override=xi_override, duplicate_hand_x2=duplicate_hand_x2)
     all_rows.append(mkrow('with_ninja', cid, cname, tno, desc, hs, ms, ts, r1, ne, xi_bonus=xi_bonus))
 
     # Payload entries

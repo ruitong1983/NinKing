@@ -144,7 +144,7 @@ python tools/extract_ninja_data.py
 | 字段 | 说明 |
 |------|------|
 | `id` | 卡牌 ID（n_001 ~ n_f02） |
-| `category` | 效果维度（universal / group_target / xi_enhance / scaling / economy 等） |
+| `tags` | 效果标签数组（筹码 / 倍率+ / 倍率X / 经济 / 操控 / 成长 / 特殊） |
 | `name` | 卡牌名称 |
 | `rarity` | 稀有度（common / uncommon / rare / legendary） |
 | `cost` | 售价（传说牌为 999） |
@@ -156,7 +156,7 @@ python tools/extract_ninja_data.py
 
 ### 4.5 页面功能
 
-- **筛选**：按稀有度 × 效果维度交叉筛选
+- **筛选**：按稀有度 × 标签交叉筛选
 - **搜索**：实时搜索名称/ID/描述（ESC 清空）
 - **排序**：ID / 名称 / 费用 ↑↓ / 稀有度
 - **展开详情**：点击卡牌查看效果参数、条件、成长数据

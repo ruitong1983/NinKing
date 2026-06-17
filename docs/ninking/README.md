@@ -1,6 +1,6 @@
 # NinKing 设计文档索引
 
-> **最后更新:** 2026-06-16 | **关联:** [`09-mgmt/TODO.md`](09-mgmt/TODO.md)
+> **最后更新:** 2026-06-17 (同步忍者牌标签分类) | **关联:** [`09-mgmt/TODO.md`](09-mgmt/TODO.md)
 > **目录结构:** 文档按以下 9 分类存放。每个文档只能归到一个分类，README 提供跨分类索引。
 
 ---
@@ -16,7 +16,7 @@
 
 | 文档 | 内容 |
 |------|------|
-| [`11-ninja-cards.md`](02-cards/11-ninja-cards.md) | **忍者牌完整参考:** 分类/效果/价格/条件、45 张忍者牌定义、设计原则 |
+| [`11-ninja-cards.md`](02-cards/11-ninja-cards.md) | **忍者牌完整参考:** 7 类标签/效果/价格/条件、43 张忍者牌定义、设计原则 |
 | [`12-consumable-cards.md`](02-cards/12-consumable-cards.md) | **消耗品独立参考:** 15 附魔 + 6 星图 + 4 秘仪 |
 | [`22-display-card-base-spec.md`](02-cards/22-display-card-base-spec.md) | **NinjaCard 规格书:** 统一忍者卡场景 (忍者栏+商店)、交互行为 |
 | [`23-ninja-card-expansion-plan.md`](02-cards/23-ninja-card-expansion-plan.md) | **忍者牌扩展方案:** 45→80 张三阶段补齐计划 |

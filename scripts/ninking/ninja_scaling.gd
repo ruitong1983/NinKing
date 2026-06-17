@@ -6,10 +6,10 @@ extends RefCounted
 ## Called from SealController.finalize_play() (B10).
 ##
 ## 5 scaling ninjas: n_s01(修行者), n_s02(三清道人), n_s03(龙脉),
-##   n_s05(头悬梁), n_s06(尾刺骨). n_s04(忍法帖) deleted (on_redraw removed).
+##   n_s05(天华), n_s06(王座). n_s04(忍法帖) deleted.
 
 
-## Process scaling ninja effects after each play or redraw.
+## Process scaling ninja effects after each play.
 ## Modifies ninja effect values in-place.
 static func process_scaling(ninjas: Array[Dictionary], trigger_type: String,
 		context: Dictionary = {}) -> void:

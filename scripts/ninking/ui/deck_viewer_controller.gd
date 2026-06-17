@@ -3,29 +3,21 @@ extends RefCounted
 
 ## Manages the deck viewer popup — grid display, open/close, card sorting.
 ## Extracted from UIManager to keep file under 300 lines.
+## 换牌系统已移除: DiscardCountLabel 已删除，discard_count 参数一并清理。
 
 var deck_btn: Button
 var deck_viewer: Control
 var deck_close_btn: Button
 var deck_draw_count_label: Label
-var deck_discard_count_label: Label
 var deck_card_grid: GridContainer
 var viewer_bg: ColorRect
 
 
-func setup(
-		_btn: Button,
-		_viewer: Control,
-		_close_btn: Button,
-		_draw_label: Label,
-		_discard_label: Label,
-		_grid: GridContainer,
-		_bg: ColorRect) -> void:
+func setup(_btn: Button, _viewer: Control, _close_btn: Button, _draw_label: Label, _grid: GridContainer, _bg: ColorRect) -> void:
 	deck_btn = _btn
 	deck_viewer = _viewer
 	deck_close_btn = _close_btn
 	deck_draw_count_label = _draw_label
-	deck_discard_count_label = _discard_label
 	deck_card_grid = _grid
 	viewer_bg = _bg
 
@@ -34,7 +26,7 @@ func setup(
 	viewer_bg.gui_input.connect(_on_deck_bg_input)
 
 
-func update_deck_count(draw_count: int, _discard_count: int) -> void:
+func update_deck_count(draw_count: int) -> void:
 	deck_btn.text = "牌库: %d" % draw_count
 
 
@@ -64,7 +56,6 @@ func _build_deck_viewer_grid() -> void:
 		return
 
 	deck_draw_count_label.text = "牌堆: %d 张" % dm.draw_pile.size()
-	deck_discard_count_label.text = "手替札: %d 张" % dm.discard_pile.size()
 
 	var sorted_cards: Array[CardData.PlayingCard] = dm.draw_pile.duplicate()
 	sorted_cards.sort_custom(_compare_cards)

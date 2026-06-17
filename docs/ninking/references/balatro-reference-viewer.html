@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Balatro 完整参考手册</title>
+<style>
+:root {
+  --bg:#0f0f23; --card:#1a1a3e; --text:#e0e0e0; --border:#2a2a5a;
+  --common:#8a8a8a; --uncommon:#4a90d9; --rare:#d94a4a; --legendary:#d98a1a;
+  --chips:#3a7bd5; --mult:#d54040; --xmult:#b040d5; --economy:#40b540;
+  --deck:#d5a040; --gen:#40a0d5; --control:#d57040; --retrigger:#b5408a;
+  --special:#8a8a40; --copy:#d94a4a; --accent:#ffd93d;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background:var(--bg); color:var(--text); height:100vh; display:flex; overflow:hidden;
+}
+
+/* ===== Sidebar ===== */
+.sidebar {
+  width:200px; flex-shrink:0; background:var(--card); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; height:100vh;
+}
+.sb-header {
+  padding:16px 14px 12px; text-align:center; border-bottom:1px solid var(--border); flex-shrink:0;
+}
+.sb-header h2 { font-size:1em; background:linear-gradient(135deg,#ff6b6b,#ffd93d); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.sb-header .sb-sub { font-size:.65em; color:#555; margin-top:2px; }
+.sb-nav { flex:1; overflow-y:auto; padding:6px 0; }
+.sb-nav::-webkit-scrollbar { width:3px; }
+.sb-nav::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+.sb-item {
+  display:flex; align-items:center; gap:8px; padding:9px 14px; cursor:pointer; color:#888;
+  font-size:.8em; transition:.15s; border-left:3px solid transparent; user-select:none;
+}
+.sb-item:hover { background:rgba(255,255,255,.04); color:#ccc; }
+.sb-item.active { color:var(--accent); border-left-color:var(--accent); background:rgba(255,217,61,.06); }
+.sb-item .sb-count { margin-left:auto; font-size:.75em; color:#444; }
+.sb-divider { height:1px; background:var(--border); margin:4px 14px; }
+
+/* ===== Main ===== */
+.main {
+  flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0;
+}
+.main-header {
+  padding:14px 24px; border-bottom:1px solid var(--border); flex-shrink:0;
+  background:var(--bg);
+}
+.main-header h1 { font-size:1.4em; }
+.main-header .sub { font-size:.75em; color:#666; margin-top:2px; }
+.main-body {
+  flex:1; overflow-y:auto; padding:20px 24px 40px;
+}
+.main-body::-webkit-scrollbar { width:6px; }
+.main-body::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
+/* ===== View: hidden by default ===== */
+.view { display:none; }
+.view.active { display:block; }
+
+/* ===== Joker filters ===== */
+.filters {
+  display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; padding:8px 12px;
+  background:var(--card); border-radius:8px; border:1px solid var(--border);
+}
+.filters .f-btn {
+  padding:3px 12px; border-radius:16px; border:1px solid #444; background:transparent;
+  color:var(--text); cursor:pointer; font-size:.78em; transition:.15s;
+}
+.filters .f-btn:hover { border-color:#fff; }
+.filters .f-btn.on { background:#555; border-color:#555; }
+.filters input {
+  margin-left:auto; padding:3px 10px; border-radius:16px; border:1px solid #444;
+  background:var(--bg); color:var(--text); font-size:.78em; width:140px;
+}
+
+/* ===== Card grid ===== */
+.grid {
+  display:grid; gap:8px;
+}
+.grid.cols-3 { grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); }
+.grid.cols-2 { grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); }
+.grid.cols-1 { grid-template-columns:1fr; }
+.c {
+  background:var(--card); border-radius:8px; padding:12px 14px; border-left:3px solid #555;
+  transition:.15s; position:relative; overflow:hidden;
+}
+.c:hover { transform:translateY(-1px); box-shadow:0 3px 12px rgba(0,0,0,.3); }
+.c .r-tag { position:absolute; top:0; right:0; padding:1px 8px; font-size:.65em; border-radius:0 8px 0 6px; }
+.c .nm { font-size:.95em; font-weight:bold; margin-bottom:3px; }
+.c .eff { font-size:.8em; color:#bbb; line-height:1.4; }
+.c .meta { display:flex; gap:10px; margin-top:5px; font-size:.72em; color:#777; }
+.c .meta .price { color:var(--economy); }
+.c.common { border-left-color:var(--common); } .c.uncommon { border-left-color:var(--uncommon); }
+.c.rare { border-left-color:var(--rare); } .c.legendary { border-left-color:var(--legendary); }
+.r-tag.common { background:var(--common); } .r-tag.uncommon { background:var(--uncommon); }
+.r-tag.rare { background:var(--rare); } .r-tag.legendary { background:var(--legendary); }
+.r-tag { color:#fff; }
+
+/* ===== Planet cards ===== */
+.p-card {
+  background:var(--card); border-radius:8px; padding:12px 14px; border-left:3px solid var(--chips);
+  cursor:pointer; transition:.15s;
+}
+.p-card:hover { transform:translateY(-1px); box-shadow:0 3px 12px rgba(0,0,0,.3); border-left-color:var(--economy); }
+.p-card .pn { font-weight:bold; font-size:.95em; }
+.p-card .pf { font-size:.8em; color:#aaa; margin-top:3px; }
+.p-card .pl { font-size:.76em; color:#777; margin-top:2px; }
+.p-card .ph { font-size:.68em; color:#444; margin-top:4px; }
+
+/* ===== Modal ===== */
+.modal {
+  display:none; position:fixed; inset:0; z-index:999; background:rgba(0,0,0,.7);
+  backdrop-filter:blur(3px); justify-content:center; align-items:center;
+}
+.modal.show { display:flex; }
+.modal-bx {
+  background:var(--card); border-radius:12px; padding:24px 28px; max-width:650px; width:90%;
+  max-height:80vh; overflow-y:auto; border:1px solid var(--border); position:relative;
+}
+.modal-bx .close { position:absolute; top:10px; right:14px; font-size:1.4em; cursor:pointer; color:#888; }
+.modal-bx .close:hover { color:#fff; }
+.modal-bx h2 { font-size:1.3em; margin-bottom:2px; }
+.modal-bx .ms { color:#888; font-size:.85em; margin-bottom:14px; }
+.modal-bx table.lvt { width:100%; border-collapse:collapse; margin:10px 0 14px; font-size:.85em; }
+.modal-bx table.lvt th { background:var(--bg); padding:5px 8px; font-size:.82em; }
+.modal-bx table.lvt td { padding:4px 8px; text-align:center; border-bottom:1px solid var(--border); }
+.modal-bx table.lvt tr.hl { background:rgba(255,217,61,.07); }
+.modal-bx .rl { color:var(--accent); margin:12px 0 6px; font-size:.92em; }
+.modal-bx .rt { display:flex; flex-wrap:wrap; gap:5px; }
+.modal-bx .rt span {
+  padding:2px 8px; border-radius:10px; font-size:.74em; cursor:pointer;
+  background:var(--bg); border:1px solid var(--border); transition:.15s;
+}
+.modal-bx .rt span:hover { border-color:var(--accent); color:var(--accent); }
+
+/* ===== Table for boss/economy ===== */
+.tbl-wrap { overflow-x:auto; }
+table.tbl { width:100%; border-collapse:collapse; font-size:.82em; }
+table.tbl th, table.tbl td { padding:6px 10px; text-align:left; border-bottom:1px solid var(--border); }
+table.tbl th { background:var(--card); color:var(--accent); font-weight:600; position:sticky; top:0; }
+
+@media(max-width:768px) {
+  .sidebar { width:160px; }
+  .grid.cols-3 { grid-template-columns:1fr; }
+  .grid.cols-2 { grid-template-columns:1fr; }
+  .main-body { padding:12px 14px; }
+  .filters input { width:100px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== Sidebar ===== -->
+<nav class="sidebar">
+  <div class="sb-header">
+    <h2>🃏 Balatro</h2>
+    <div class="sb-sub">完整参考手册</div>
+  </div>
+  <div class="sb-nav" id="sbNav"></div>
+</nav>
+
+<!-- ===== Main ===== -->
+<div class="main">
+  <div class="main-header">
+    <h1 id="viewTitle">🎪 小丑牌</h1>
+    <div class="sub" id="viewSub">150 张 · 点击侧边栏分类切换</div>
+  </div>
+  <div class="main-body" id="mainBody">
+    <div id="viewContainer"></div>
+  </div>
+</div>
+
+<!-- ===== Modal ===== -->
+<div class="modal" id="modal">
+  <div class="modal-bx">
+    <span class="close" id="modalClose">&times;</span>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+// ======================== DATA ========================
+const R = {COMMON:'common', UNCOMMON:'uncommon', RARE:'rare', LEGENDARY:'legendary'};
+const rL = {common:'普通', uncommon:'罕见', rare:'稀有', legendary:'传奇'};
+
+const ENH = [
+  {n:'奖励', e:'Bonus', d:'+30 筹码', r:''},
+  {n:'倍率', e:'Mult', d:'+4 倍率', r:''},
+  {n:'幸运', e:'Lucky', d:'1/5 +20倍率，1/15 +$20', r:'概率'},
+  {n:'万能', e:'Wild', d:'视为所有花色', r:''},
+  {n:'玻璃', e:'Glass', d:'×2 倍率', r:'1/4 摧毁'},
+  {n:'石头', e:'Stone', d:'+50 筹码', r:'无花色点数'},
+  {n:'钢铁', e:'Steel', d:'手牌中 ×1.5 倍率', r:''},
+  {n:'黄金', e:'Gold', d:'回合结束手牌中 → $3', r:''},
+];
+const SEALS = [
+  {n:'金色', e:'Gold', d:'打出计分时 +$3'},
+  {n:'蓝色', e:'Blue', d:'回合结束 → 生成牌型星球牌'},
+  {n:'紫色', e:'Purple', d:'弃掉 → 生成塔罗牌'},
+  {n:'红色', e:'Red', d:'此牌额外触发一次'},
+];
+const EDS = [
+  {n:'闪箔', e:'Foil', d:'+50 筹码', c:'+$2'},
+  {n:'镭射', e:'Holographic', d:'+10 倍率', c:'+$3'},
+  {n:'多彩', e:'Polychrome', d:'×1.5 倍率', c:'+$5'},
+  {n:'负片', e:'Negative', d:'不占小丑槽位', c:'+$5'},
+];
+
+const TAROTS = [
+  {n:'教皇', e:'2 张 → 奖励牌', en:'The Hierophant'},
+  {n:'皇后', e:'2 张 → 倍率牌', en:'The Empress'},
+  {n:'魔术师', e:'2 张 → 幸运牌', en:'The Magician'},
+  {n:'恋人', e:'1 张 → 万能牌', en:'The Lovers'},
+  {n:'正义', e:'1 张 → 玻璃牌', en:'Justice'},
+  {n:'塔', e:'1 张 → 石头牌', en:'The Tower'},
+  {n:'战车', e:'1 张 → 钢铁牌', en:'The Chariot'},
+  {n:'恶魔', e:'1 张 → 黄金牌', en:'The Devil'},
+  {n:'世界', e:'3 张 → ♠', en:'The World'},
+  {n:'月亮', e:'3 张 → ♣', en:'The Moon'},
+  {n:'太阳', e:'3 张 → ♥', en:'The Sun'},
+  {n:'星星', e:'3 张 → ♦', en:'The Star'},
+  {n:'力量', e:'2 张点数 +1', en:'Strength'},
+  {n:'倒吊人', e:'摧毁 2 张', en:'The Hanged Man'},
+  {n:'死神', e:'复制 A→B', en:'Death'},
+  {n:'愚者', e:'生成上次使用的塔罗/星球牌', en:'The Fool'},
+  {n:'皇帝', e:'生成 2 张随机塔罗', en:'The Emperor'},
+  {n:'女祭司', e:'生成 2 张随机星球', en:'The High Priestess'},
+  {n:'隐者', e:'资金翻倍 (上限 $20)', en:'The Hermit'},
+  {n:'节制', e:'获得小丑售价总和 (上限 $50)', en:'Temperance'},
+  {n:'审判', e:'生成随机小丑', en:'Judgement'},
+  {n:'命运之轮', e:'1/4 给随机小丑添加版本', en:'Wheel of Fortune'},
+];
+
+const SPECS = [
+  {n:'咒语', e:'摧毁1张 + 4张增强数字牌', en:'Incantation'},
+  {n:'使魔', e:'摧毁1张 + 3张增强人头牌', en:'Familiar'},
+  {n:'严峻', e:'摧毁1张 + 2张增强A', en:'Grim'},
+  {n:'护身符', e:'1 张 + 金色蜡封', en:'Ouija'},
+  {n:'入迷', e:'1 张 + 蓝色蜡封', en:'The Soul'},
+  {n:'灵媒', e:'1 张 + 紫色蜡封', en:'Medium'},
+  {n:'既视感', e:'1 张 + 红色蜡封', en:'Deja Vu'},
+  {n:'光环', e:'1 张随机版本 (50%闪箔/35%镭射/15%多彩)', en:'Aura'},
+  {n:'神秘生物', e:'复制 1 张为 2 张', en:'Cryptid'},
+  {n:'符印', e:'所有手牌 → 同花色', en:'Sigil'},
+  {n:'占卜', e:'所有手牌 → 同点数, 手牌上限 -1', en:'Divination'},
+  {n:'火祭', e:'摧毁 5 张 + $20', en:'Immolate'},
+  {n:'生命十字章', e:'随机复制 1 小丑, 摧毁其他', en:'Ankh'},
+  {n:'妖法', e:'随机小丑多彩, 摧毁其他', en:'Ectoplasm'},
+  {n:'灵质', e:'随机小丑负片, 手牌上限 -1', en:'The Serpent'},
+  {n:'幽灵', e:'生成稀有小丑, 资金归零', en:'Wraith'},
+  {n:'灵魂', e:'生成传奇小丑 ⭐0.3%', en:'Soul'},
+  {n:'黑洞', e:'所有牌型 +1 级 ⭐0.3%', en:'Black Hole'},
+];
+
+const VOUCHERS = [
+  {n:'Overstock', d:'商店卡牌 +1', t:1},{n:'Overstock Plus', d:'商店卡牌再 +1', t:2},
+  {n:'Clearance Sale', d:'全店 75 折', t:1},{n:'Liquidation', d:'全店 5 折', t:2},
+  {n:'Hone', d:'版本频率 ×2', t:1},{n:'Glow Up', d:'版本频率 ×4', t:2},
+  {n:'Reroll Surplus', d:'重掷 -$2', t:1},{n:'Reroll Glut', d:'重掷再 -$2', t:2},
+  {n:'Crystal Ball', d:'消耗槽 +1', t:1},{n:'Omen Globe', d:'幻灵出在秘术包', t:2},
+  {n:'Telescope', d:'天体包始终最常用牌型', t:1},{n:'Observatory', d:'消耗槽星球牌 ×1.5', t:2},
+  {n:'Grabber', d:'出牌 +1', t:1},{n:'Nacho Tong', d:'出牌再 +1', t:2},
+  {n:'Wasteful', d:'弃牌 +1', t:1},{n:'Recycling', d:'弃牌再 +1', t:2},
+  {n:'Seed Money', d:'利息上限 $10', t:1},{n:'Money Tree', d:'利息上限 $20', t:2},
+  {n:'Blank', d:'无效果（但…）', t:1},{n:'Antimatter', d:'小丑槽 +1', t:2},
+  {n:'Magic Trick', d:'商店有游戏牌', t:1},{n:'Illusion', d:'游戏牌随机增强', t:2},
+  {n:'Hieroglyph', d:'底注 -1, 出牌 -1', t:1},{n:'Petroglyph', d:'底注 -1, 弃牌 -1', t:2},
+  {n:"Director's Cut", d:'$10 重掷 Boss', t:1},{n:'Retcon', d:'无限重掷 Boss', t:2},
+  {n:'Paint Brush', d:'手牌上限 +1', t:1},{n:'Palette', d:'手牌上限再 +1', t:2},
+];
+
+const BOSSES = [
+  {n:'房屋',d:'第1手牌背面朝上',g:'s'},{n:'车轮',d:'1/7 背面朝上',g:'s'},{n:'魚',d:'出牌后抽牌背面朝上',g:'s'},
+  {n:'标记',d:'人头牌背面朝上',g:'s'},{n:'钩子',d:'每出牌随机弃2张',g:'s'},{n:'巨蟒',d:'出牌/弃牌后抽3张',g:'s'},
+  {n:'灵媒',d:'必须出5张',g:'s'},{n:'水',d:'初始弃牌0',g:'s'},{n:'镣铐',d:'手牌上限 -1',g:'s'},
+  {n:'眼睛',d:'不可重复牌型',g:'s'},{n:'嘴巴',d:'只能出1种牌型',g:'s'},{n:'手臂',d:'降低牌型等级',g:'s'},
+  {n:'公牛',d:'最常牌型 → 资金归零',g:'s'},{n:'牙齿',d:'每出牌 -$1',g:'s'},{n:'支柱',d:'削弱本底注打出过的牌',g:'s'},
+  {n:'梅花',d:'削弱 ♣',g:'s'},{n:'挑衅',d:'削弱 ♠',g:'s'},{n:'窗口',d:'削弱 ♦',g:'s'},
+  {n:'头部',d:'削弱 ♥',g:'s'},{n:'植物',d:'削弱人头牌',g:'s'},{n:'针',d:'只能出1次, 分数减半',g:'s'},
+  {n:'燧石',d:'基础筹码倍率减半',g:'s'},{n:'围墙',d:'双倍分数',g:'s'},
+  {n:'琥珀之实',d:'翻转洗乱所有小丑',g:'f'},{n:'翠绿之叶',d:'所有牌削弱至售出1小丑',g:'f'},
+  {n:'绯红之心',d:'每出牌随机小丑失效',g:'f'},{n:'蔚蓝之铃',d:'迫使一张牌总被选中',g:'f'},
+  {n:'靛紫之杯',d:'三倍分数',g:'f'},
+];
+
+const DECKS = [
+  {n:'红牌组', en:'Red', b:'+1 出牌 +1 弃牌', d:''},{n:'蓝牌组', en:'Blue', b:'+1 出牌', d:''},
+  {n:'黄牌组', en:'Yellow', b:'起始 +$4', d:''},{n:'绿牌组', en:'Green', b:'每剩余出牌 +$2', d:'无利息'},
+  {n:'黑牌组', en:'Black', b:'+1 小丑槽', d:'-1 出牌'},{n:'方格牌组', en:'Checkered', b:'26♠+26♣', d:''},
+  {n:'魔术牌组', en:'Magic', b:'起始 2 愚者塔罗', d:''},{n:'皇冠牌组', en:'Zodiac', b:'起始 3 优惠券', d:''},
+  {n:'弃绝牌组', en:'Abandoned', b:'无面卡', d:''},{n:'彩绘牌组', en:'Painted', b:'+2 手牌上限', d:'-1 小丑槽'},
+  {n:'鬼牌组', en:'Ghost', b:'起始 Hex 幻灵', d:''},{n:'等离子牌组', en:'Plasma', b:'平衡筹码倍率', d:''},
+  {n:'凹凸牌组', en:'Anaglyph', b:'双倍负面标签', d:''},{n:'星云牌组', en:'Nebula', b:'起始望远镜券', d:'-1 消耗槽'},
+  {n:'狂欢牌组', en:'Erratic', b:'随机牌分布', d:''},
+];
+
+const STAKES = [
+  {n:'白注',e:'基础',en:'White'},{n:'红注',e:'小盲注无奖励',en:'Red'},
+  {n:'绿注',e:'分数提高',en:'Green'},{n:'黑注',e:'30% 永恒小丑',en:'Black'},
+  {n:'蓝注',e:'弃牌 -1',en:'Blue'},{n:'紫注',e:'分数提高',en:'Purple'},
+  {n:'橙注',e:'30% 易腐小丑',en:'Orange'},{n:'金注',e:'30% 租用小丑',en:'Gold'},
+];
+
+const TAGS = [
+  {n:'罕见标签',d:'下店免费罕见小丑'},{n:'稀有标签',d:'下店免费稀有小丑'},{n:'闪箔标签',d:'下店免费闪箔小丑'},
+  {n:'镭射标签',d:'下店免费镭射小丑'},{n:'多彩标签',d:'下店免费多彩小丑'},{n:'负片标签',d:'下店免费负片小丑'},
+  {n:'优惠券标签',d:'下店 +1 优惠券'},{n:'清仓标签',d:'初始牌+补充包免费'},{n:'重掷标签',d:'重掷 $0'},
+  {n:'超小丑包',d:'免费超小丑包'},{n:'超标准包',d:'免费超标准包'},{n:'超秘术包',d:'免费超秘术包'},
+  {n:'超天体包',d:'免费超天体包'},{n:'幻灵包标签',d:'免费幻灵包'},{n:'金钱标签',d:'生成 2 普通小丑'},
+  {n:'投资标签',d:'Boss后 +$25'},{n:'打牌标签',d:'牌型数 ×$1'},{n:'弃牌标签',d:'未用弃牌 ×$1'},
+  {n:'跳过标签',d:'跳过次数 ×$5'},{n:'经济标签',d:'资金翻倍 (上限 $40)'},{n:'牌型标签',d:'牌型 +3 级'},
+  {n:'手牌标签',d:'下关 +3 手牌上限'},{n:'复制标签',d:'复制下个标签'},{n:'重掷Boss标签',d:'重掷 Boss'},
+];
+
+const PLANETS = [
+  {n:'天王星',h:'高牌',c:5,g:10,m:1,mg:1,p:3},
+  {n:'海王星',h:'对子',c:10,g:15,m:2,mg:1,p:3},
+  {n:'冥王星',h:'两对',c:20,g:20,m:2,mg:1,p:3},
+  {n:'土星',h:'三条',c:30,g:20,m:3,mg:2,p:4},
+  {n:'水星',h:'顺子',c:30,g:30,m:4,mg:3,p:4},
+  {n:'木星',h:'同花',c:35,g:15,m:4,mg:2,p:4},
+  {n:'金星',h:'葫芦',c:40,g:25,m:4,mg:2,p:5},
+  {n:'火星',h:'四条',c:60,g:30,m:7,mg:3,p:5},
+  {n:'地球',h:'同花顺',c:100,g:40,m:8,mg:4,p:5},
+  {n:'木卫二',h:'五条',c:120,g:35,m:12,mg:3,p:6},
+  {n:'木卫三',h:'同花葫芦',c:140,g:40,m:14,mg:4,p:6},
+  {n:'木卫四',h:'同花五条',c:160,g:50,m:16,mg:3,p:6},
+];
+
+const CATS = {chips:'筹码',mult:'倍率+',xmult:'倍率×',economy:'经济',deck:'牌组操控',gen:'生成',control:'操控',retrigger:'重复',special:'特殊',copy:'复制'};
+
+const JOKERS = [
+  {n:'奸诈小丑',c:'chips',q:'common',e:'对子 → +50 筹码',p:'$3'},
+  {n:'聪敏小丑',c:'chips',q:'common',e:'两对 → +80 筹码',p:'$4'},
+  {n:'精明小丑',c:'chips',q:'common',e:'同花 → +80 筹码',p:'$4'},
+  {n:'狡猾小丑',c:'chips',q:'common',e:'三条 → +100 筹码',p:'$5'},
+  {n:'阴险小丑',c:'chips',q:'common',e:'顺子 → +80 筹码',p:'$4'},
+  {n:'恐怖面孔',c:'chips',q:'common',e:'人头牌 → +30 筹码/张',p:'$3'},
+  {n:'奇数托德',c:'chips',q:'common',e:'奇数牌 → +31 筹码/张',p:'$4'},
+  {n:'学者',c:'chips',q:'common',e:'A → +20 筹码 +4 倍率',p:'$4'},
+  {n:'蓝色小丑',c:'chips',q:'common',e:'牌每有1张 → +2 筹码',p:'$5'},
+  {n:'斗牛',c:'chips',q:'uncommon',e:'每持有 $1 → +2 筹码',p:'$7'},
+  {n:'石头小丑',c:'chips',q:'uncommon',e:'每张石头牌 → +25 筹码',p:'$5'},
+  {n:'箭头',c:'chips',q:'uncommon',e:'黑桃 → +50 筹码',p:'$5'},
+  {n:'小小丑',c:'chips',q:'rare',e:'打出2 → +8 筹码(累积)',p:'$4'},
+  {n:'特技演员',c:'chips',q:'rare',e:'+250 筹码 -2手牌上限',p:'$7'},
+  {n:'旗帜',c:'chips',q:'common',e:'每剩余弃牌 → +30 筹码',p:'$4'},
+  {n:'跑步选手',c:'chips',q:'common',e:'顺子 → 永久+15 筹码',p:'$4'},
+  {n:'冰淇淋',c:'chips',q:'common',e:'+100 筹码 每出牌-5',p:'$3'},
+  {n:'方形小丑',c:'chips',q:'common',e:'出4张 → 永久+4 筹码',p:'$4'},
+  {n:'城堡',c:'chips',q:'uncommon',e:'弃对应花色 → 永久+3 筹码',p:'$5'},
+  {n:'徒步者',c:'chips',q:'uncommon',e:'打出牌永久+5 筹码',p:'$5'},
+  {n:'小丑',c:'mult',q:'common',e:'+4 倍率',p:'$2'},
+  {n:'色欲小丑',c:'mult',q:'common',e:'♥ → +3 倍率',p:'$3'},
+  {n:'暴食小丑',c:'mult',q:'common',e:'♣ → +3 倍率',p:'$3'},
+  {n:'贪婪小丑',c:'mult',q:'common',e:'♦ → +3 倍率',p:'$3'},
+  {n:'愤怒小丑',c:'mult',q:'common',e:'♠ → +3 倍率',p:'$3'},
+  {n:'开心小丑',c:'mult',q:'common',e:'对子 → +8 倍率',p:'$3'},
+  {n:'疯狂小丑',c:'mult',q:'common',e:'两对 → +10 倍率',p:'$4'},
+  {n:'滑稽小丑',c:'mult',q:'common',e:'同花 → +10 倍率',p:'$4'},
+  {n:'古怪小丑',c:'mult',q:'common',e:'三条 → +12 倍率',p:'$5'},
+  {n:'狂野小丑',c:'mult',q:'common',e:'顺子 → +12 倍率',p:'$5'},
+  {n:'半张小丑',c:'mult',q:'common',e:'出牌≤3 → +20 倍率',p:'$4'},
+  {n:'印错小丑',c:'mult',q:'common',e:'随机 0~23 倍率',p:'$3'},
+  {n:'致胜之拳',c:'xmult',q:'common',e:'最小点数牌 ×2',p:'$4'},
+  {n:'偶数史蒂文',c:'mult',q:'common',e:'偶数牌 → +4 倍率',p:'$3'},
+  {n:'斐波那契',c:'mult',q:'uncommon',e:'A/2/3/5/8 → +8 倍率',p:'$5'},
+  {n:'微笑表情',c:'mult',q:'common',e:'人头牌 → +5 倍率',p:'$4'},
+  {n:'缟玛瑙',c:'mult',q:'uncommon',e:'♣ → +7 倍率',p:'$5'},
+  {n:'超新星',c:'mult',q:'common',e:'该牌型打出次数 → 倍率',p:'$4'},
+  {n:'绿色小丑',c:'mult',q:'common',e:'每出牌+1 弃牌-1',p:'$4'},
+  {n:'占卜师',c:'mult',q:'common',e:'每用塔罗牌 → 永久+1',p:'$4'},
+  {n:'红牌',c:'mult',q:'common',e:'跳过补充包 → 永久+3',p:'$4'},
+  {n:'搭乘巴士',c:'mult',q:'common',e:'不出人头牌 → 永久+1',p:'$4'},
+  {n:'抽象小丑',c:'mult',q:'common',e:'每有1小丑 → +3',p:'$4'},
+  {n:'侠盗',c:'mult',q:'common',e:'小丑总售价 → 倍率',p:'$4'},
+  {n:'仪式匕首',c:'xmult',q:'uncommon',e:'摧毁右小丑 +售价2倍(永久)',p:'$7'},
+  {n:'侵蚀',c:'mult',q:'uncommon',e:'牌每少1 → +4',p:'$6'},
+  {n:'射月',c:'mult',q:'common',e:'手牌中每张Q → +13',p:'$4'},
+  {n:'爆米花',c:'mult',q:'common',e:'+20 每回合-4',p:'$4'},
+  {n:'大麦克香蕉',c:'mult',q:'common',e:'+15 1/6自毁',p:'$3'},
+  {n:'提靴带',c:'mult',q:'uncommon',e:'每持有$5 → +2',p:'$7'},
+  {n:'抽认卡',c:'mult',q:'uncommon',e:'商店重掷1次 → 永久+2',p:'$5'},
+  {n:'备用裤子',c:'mult',q:'uncommon',e:'两对 → 永久+2',p:'$5'},
+  {n:'神秘之峰',c:'mult',q:'common',e:'弃牌0 → +15',p:'$5'},
+  {n:'卡文迪什',c:'xmult',q:'common',e:'×3 1/1000自毁',p:'$5'},
+  {n:'模具小丑',c:'xmult',q:'uncommon',e:'每空槽 → ×1',p:'$4'},
+  {n:'积分卡',c:'xmult',q:'uncommon',e:'第6次出牌 → ×4',p:'$7'},
+  {n:'星座',c:'xmult',q:'uncommon',e:'每用星球牌 → ×0.1(起始×1)',p:'$6'},
+  {n:'钢铁小丑',c:'xmult',q:'uncommon',e:'每张钢铁牌 → ×0.2(起始×1)',p:'$6'},
+  {n:'招财猫',c:'xmult',q:'uncommon',e:'幸运触发 → ×0.25(起始×1)',p:'$6'},
+  {n:'篝火',c:'xmult',q:'rare',e:'售出牌 → ×0.25 Boss重置',p:'$7'},
+  {n:'老千小丑',c:'xmult',q:'uncommon',e:'同牌型再次打出 → ×3',p:'$6'},
+  {n:'疯狂',c:'xmult',q:'uncommon',e:'选盲注 → ×0.5 随机毁1',p:'$7'},
+  {n:'全息影像',c:'xmult',q:'uncommon',e:'加牌 → ×0.25(起始×1)',p:'$6'},
+  {n:'吸血鬼',c:'xmult',q:'uncommon',e:'计分增强牌 → ×0.1 移除增强',p:'$7'},
+  {n:'方尖石塔',c:'xmult',q:'rare',e:'非最常用牌型 → ×0.2',p:'$7'},
+  {n:'玻璃小丑',c:'xmult',q:'uncommon',e:'摧毁玻璃牌 → ×0.75(起始×1)',p:'$5'},
+  {n:'棒球卡',c:'xmult',q:'rare',e:'每张罕见小丑 → ×1.5',p:'$7'},
+  {n:'驾驶执照',c:'xmult',q:'rare',e:'16+增强牌 → ×3',p:'$8'},
+  {n:'黑板',c:'xmult',q:'uncommon',e:'手牌全黑 → ×3',p:'$5'},
+  {n:'花盆',c:'xmult',q:'uncommon',e:'四花色各1 → ×3',p:'$6'},
+  {n:'古老小丑',c:'xmult',q:'uncommon',e:'对应花色 ×1.5(回合换)',p:'$6'},
+  {n:'血石',c:'xmult',q:'uncommon',e:'♥ 1/2 ×1.5',p:'$6'},
+  {n:'偶像',c:'xmult',q:'uncommon',e:'对应花色+点数 ×2(换)',p:'$7'},
+  {n:'男爵',c:'xmult',q:'rare',e:'手牌每张K ×1.5',p:'$8'},
+  {n:'二重奏',c:'xmult',q:'rare',e:'对子 → ×2',p:'$8'},
+  {n:'三重奏',c:'xmult',q:'rare',e:'三条 → ×3',p:'$8'},
+  {n:'一家人',c:'xmult',q:'rare',e:'四条 → ×4',p:'$8'},
+  {n:'秩序',c:'xmult',q:'rare',e:'顺子 → ×3',p:'$8'},
+  {n:'部落',c:'xmult',q:'rare',e:'同花 → ×2',p:'$8'},
+  {n:'拉面',c:'xmult',q:'uncommon',e:'×2 每弃1 -×0.01',p:'$5'},
+  {n:'照片',c:'xmult',q:'common',e:'第1张人头牌 → ×2',p:'$4'},
+  {n:'特里布莱',c:'xmult',q:'legendary',e:'K/Q计分 → ×2',p:'$20'},
+  {n:'杂技演员',c:'xmult',q:'uncommon',e:'最后1次出牌 → ×3',p:'$7'},
+  {n:'重影',c:'xmult',q:'uncommon',e:'♣+其他 → ×2',p:'$6'},
+  {n:'上路吧杰克',c:'xmult',q:'rare',e:'弃J → ×0.5/张',p:'$7'},
+  {n:'回溯',c:'xmult',q:'uncommon',e:'跳过盲注 → ×0.25(起始×1)',p:'$7'},
+  {n:'卡尼奥',c:'xmult',q:'legendary',e:'摧毁人头牌 → ×1',p:'$20'},
+  {n:'约里克',c:'xmult',q:'legendary',e:'弃23牌 → ×1',p:'$20'},
+  {n:'延迟满足',c:'economy',q:'common',e:'没用弃牌 → 每剩 $2',p:'$4'},
+  {n:'无面小丑',c:'economy',q:'common',e:'弃3+人头 → $5',p:'$4'},
+  {n:'黄金小丑',c:'economy',q:'common',e:'回合结束 $4',p:'$4'},
+  {n:'邮寄回扣',c:'economy',q:'common',e:'弃对应点数 → $5 (换)',p:'$5'},
+  {n:'9霄云外',c:'economy',q:'uncommon',e:'每张9 → 回合 $1',p:'$7'},
+  {n:'名片',c:'economy',q:'common',e:'人头计分 1/2 → $2',p:'$4'},
+  {n:'待办清单',c:'economy',q:'common',e:'打对应牌型 → $4 (换)',p:'$5'},
+  {n:'私人车位',c:'economy',q:'common',e:'手牌人头 1/2 → $1',p:'$5'},
+  {n:'卫星',c:'economy',q:'uncommon',e:'每星球种 → $1/回合',p:'$7'},
+  {n:'火箭',c:'economy',q:'uncommon',e:'$1/回合 每Boss+$2',p:'$6'},
+  {n:'冲向月球',c:'economy',q:'uncommon',e:'每$5 → +$1利息',p:'$7'},
+  {n:'璞玉',c:'economy',q:'uncommon',e:'♦ → $1',p:'$6'},
+  {n:'黄金门票',c:'economy',q:'common',e:'黄金牌 → $4',p:'$5'},
+  {n:'礼品卡',c:'economy',q:'uncommon',e:'所有售价+$1/回合',p:'$5'},
+  {n:'鸡蛋',c:'economy',q:'common',e:'自身售价+$3/回合',p:'$2'},
+  {n:'斗牛士',c:'economy',q:'uncommon',e:'Boss触发 → $8',p:'$7'},
+  {n:'交易卡',c:'economy',q:'uncommon',e:'首弃1 → 摧毁 $3',p:'$6'},
+  {n:'大理石小丑',c:'deck',q:'uncommon',e:'选盲注 → 加石头牌',p:'$5'},
+  {n:'DNA',c:'deck',q:'rare',e:'首出1 → 复制入牌组',p:'$8'},
+  {n:'第六感',c:'deck',q:'uncommon',e:'首出6 → 摧毁获幻灵',p:'$6'},
+  {n:'证书',c:'deck',q:'uncommon',e:'选盲注 → 随机蜡封牌',p:'$6'},
+  {n:'马戏团长',c:'deck',q:'uncommon',e:'小丑/塔罗/星球/幻灵复数',p:'$5'},
+  {n:'烧焦小丑',c:'deck',q:'rare',e:'升级首弃牌型',p:'$7'},
+  {n:'叠加态',c:'gen',q:'common',e:'A+顺子 → 随机塔罗',p:'$5'},
+  {n:'8号球',c:'gen',q:'common',e:'8计分 1/4 → 塔罗',p:'$4'},
+  {n:'幻觉',c:'gen',q:'common',e:'开补充包 1/2 → 塔罗',p:'$4'},
+  {n:'乌合之众',c:'gen',q:'common',e:'选盲注 → 2普通小丑',p:'$5'},
+  {n:'卡牌术士',c:'gen',q:'uncommon',e:'选盲注 → 随机塔罗',p:'$5'},
+  {n:'流浪者',c:'gen',q:'rare',e:'$≤4出牌 → 随机塔罗',p:'$8'},
+  {n:'通灵',c:'gen',q:'uncommon',e:'同花顺 → 随机幻灵',p:'$7'},
+  {n:'杂耍师',c:'control',q:'common',e:'手牌上限+1',p:'$4'},
+  {n:'醉汉',c:'control',q:'common',e:'弃牌+1',p:'$4'},
+  {n:'游吟诗人',c:'control',q:'uncommon',e:'+2手牌 -1出牌',p:'$6'},
+  {n:'快乐安迪',c:'control',q:'uncommon',e:'-1手牌 +3弃牌',p:'$6'},
+  {n:'窃贼',c:'control',q:'uncommon',e:'+3出牌 失去弃牌',p:'$7'},
+  {n:'黑龟豆',c:'control',q:'uncommon',e:'+5手牌 每回合-1',p:'$6'},
+  {n:'哑剧演员',c:'retrigger',q:'uncommon',e:'手牌所有牌能力再触发1次',p:'$6'},
+  {n:'黄昏',c:'retrigger',q:'uncommon',e:'最后出牌计分牌再触发1次',p:'$6'},
+  {n:'喜与悲',c:'retrigger',q:'uncommon',e:'人头牌再触发1次',p:'$6'},
+  {n:'未断选票',c:'retrigger',q:'common',e:'第1张计分牌再触发2次',p:'$4'},
+  {n:'烂脱口秀',c:'retrigger',q:'uncommon',e:'2/3/4/5再触发1次',p:'$6'},
+  {n:'苏打水',c:'retrigger',q:'uncommon',e:'10次出牌计分牌再触发',p:'$6'},
+  {n:'四指',c:'special',q:'uncommon',e:'同花/顺子可4张',p:'$7'},
+  {n:'捷径',c:'special',q:'uncommon',e:'顺子可隔1点',p:'$5'},
+  {n:'模糊小丑',c:'special',q:'uncommon',e:'♥=♦ ♠=♣',p:'$5'},
+  {n:'飞溅',c:'special',q:'common',e:'所有打出牌计分',p:'$4'},
+  {n:'幻视',c:'special',q:'uncommon',e:'所有牌＝人头牌',p:'$5'},
+  {n:'迈达斯面具',c:'special',q:'uncommon',e:'人头→黄金牌',p:'$6'},
+  {n:'信用卡',c:'special',q:'common',e:'可负债 -$20',p:'$4'},
+  {n:'混沌小丑',c:'special',q:'common',e:'进店免费重掷1次',p:'$4'},
+  {n:'六六大顺',c:'special',q:'uncommon',e:'所有概率翻倍',p:'$5'},
+  {n:'蓝图',c:'copy',q:'rare',e:'复制右侧小丑',p:'$10'},
+  {n:'头脑风暴',c:'copy',q:'rare',e:'复制最左小丑',p:'$10'},
+  {n:'隐形小丑',c:'copy',q:'rare',e:'2回合售出 → 随机复制',p:'$7'},
+  {n:'摔跤手',c:'copy',q:'uncommon',e:'售出 → 消除Boss',p:'$7'},
+  {n:'零糖可乐',c:'copy',q:'uncommon',e:'售出 → 双倍标签',p:'$6'},
+  {n:'希科',c:'copy',q:'legendary',e:'所有Boss消失',p:'$20'},
+  {n:'帕奇欧',c:'copy',q:'legendary',e:'离店 → 复制消耗牌负片',p:'$20'},
+  {n:'骷髅先生',c:'copy',q:'uncommon',e:'≥25%需求 → 不死自毁',p:'$5'},
+];
+
+// ======================== APP ========================
+const sections = [
+  {id:'jokers', icon:'🎪', label:'小丑牌', count:JOKERS.length},
+  {id:'planets', icon:'🪐', label:'星球卡', count:PLANETS.length},
+  {id:'tarot', icon:'🔮', label:'塔罗牌', count:TAROTS.length},
+  {id:'spectral', icon:'👻', label:'幻灵牌', count:SPECS.length},
+  {id:'enhance', icon:'✨', label:'附魔·蜡封·版本'},
+  {id:'vouchers', icon:'🎟️', label:'优惠券', count:VOUCHERS.length},
+  {id:'bosses', icon:'👹', label:'Boss 盲注', count:BOSSES.length},
+  {id:'decks', icon:'🃏', label:'牌组', count:DECKS.length},
+  {id:'stakes', icon:'⚔️', label:'难度', count:STAKES.length},
+  {id:'tags', icon:'🏷️', label:'标签', count:TAGS.length},
+  {id:'', icon:'', label:''}, // divider
+  {id:'economy', icon:'💰', label:'经济系统'},
+];
+
+// Render sidebar
+const sbNav = document.getElementById('sbNav');
+sections.forEach(s => {
+  if (!s.id) { const d = document.createElement('div'); d.className='sb-divider'; sbNav.appendChild(d); return; }
+  const a = document.createElement('div');
+  a.className='sb-item';
+  a.dataset.section = s.id;
+  const count = s.count ? `<span class="sb-count">${s.count}</span>` : '';
+  a.innerHTML = `${s.icon} ${s.label}${count}`;
+  a.addEventListener('click', () => switchView(s.id));
+  sbNav.appendChild(a);
+});
+
+// View title map
+const viewMeta = {};
+sections.forEach(s => { if (s.id) viewMeta[s.id] = s; });
+
+let currentView = 'jokers';
+
+function switchView(id) {
+  currentView = id;
+  // sidebar highlight
+  document.querySelectorAll('.sb-item').forEach(el => el.classList.toggle('active', el.dataset.section === id));
+  // update header
+  const meta = viewMeta[id];
+  document.getElementById('viewTitle').textContent = `${meta.icon} ${meta.label}`;
+  document.getElementById('viewSub').textContent = meta.count ? `${meta.count} 项 · 点击卡牌查看详情` : '点击卡牌查看详情';
+  // render
+  const c = document.getElementById('viewContainer');
+  c.innerHTML = '';
+  const fn = 'render_' + id;
+  if (typeof window[fn] === 'function') window[fn](c);
+  c.scrollTop = 0;
+}
+
+function render_jokers(container) {
+  // filters
+  const filters = document.createElement('div'); filters.className='filters';
+  const qAll = mkBtn('全部', 'q-all', true, filters);
+  const qs = ['common','uncommon','rare','legendary'];
+  const qLabels = {common:'普通', uncommon:'罕见', rare:'稀有', legendary:'传奇'};
+  const qBtns = qs.map(q => mkBtn(qLabels[q], 'q-'+q, true, filters));
+  const gap = document.createElement('span'); gap.style.cssText='color:#444;font-size:.78em;margin:0 0 0 10px;'; gap.textContent='分类:';
+  filters.appendChild(gap);
+  const cAll = mkBtn('全部', 'c-all', true, filters);
+  const cats = ['chips','mult','xmult','economy','deck','gen','control','retrigger','special','copy'];
+  const cBtns = cats.map(c => mkBtn(CATS[c], 'c-'+c, false, filters));
+  const search = document.createElement('input');
+  search.placeholder = '🔍 搜索...';
+  filters.appendChild(search);
+  container.appendChild(filters);
+
+  const grid = document.createElement('div'); grid.className='grid cols-3';
+  container.appendChild(grid);
+
+  function render() {
+    const sq = search.value.toLowerCase();
+    const qSet = new Set(); qBtns.forEach(b => { if (b.classList.contains('on')) qSet.add(b.dd.split('-')[1]); });
+    const cSet = new Set(); cBtns.forEach(b => { if (b.classList.contains('on')) cSet.add(b.dd.split('-')[1]); });
+    if (qAll.classList.contains('on')) qSet.clear();
+    if (cAll.classList.contains('on')) cSet.clear();
+    grid.innerHTML = JOKERS.map(j => {
+      if (qSet.size && !qSet.has(j.q)) return '';
+      if (cSet.size && !cSet.has(j.c)) return '';
+      if (sq && !(j.n.includes(sq) || j.e.includes(sq))) return '';
+      return `<div class="c ${j.q}"><span class="r-tag ${j.q}">${rL[j.q]}</span>
+        <div class="nm">${j.n}</div><div class="eff">${j.e}</div>
+        <div class="meta">${j.p ? `<span class="price">💰 ${j.p}</span>` : ''}</div></div>`;
+    }).join('');
+  }
+
+  filters.querySelectorAll('.f-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      if (b.dd === 'q-all') { qBtns.forEach(bb => bb.classList.remove('on')); b.classList.add('on'); }
+      else if (b.dd === 'c-all') { cBtns.forEach(bb => bb.classList.remove('on')); b.classList.add('on'); }
+      else if (b.dd.startsWith('q-')) { qAll.classList.remove('on'); b.classList.toggle('on'); if (!qBtns.some(bb => bb.classList.contains('on'))) qAll.classList.add('on'); }
+      else if (b.dd.startsWith('c-')) { cAll.classList.remove('on'); b.classList.toggle('on'); if (!cBtns.some(bb => bb.classList.contains('on'))) cAll.classList.add('on'); }
+      render();
+    });
+  });
+  search.addEventListener('input', render);
+  render();
+}
+
+function mkBtn(label, dd, on, parent) {
+  const b = document.createElement('button'); b.className='f-btn' + (on?' on':''); b.textContent = label; b.dd = dd;
+  parent.appendChild(b); return b;
+}
+
+function render_planets(container) {
+  const p = document.createElement('p');
+  p.style.cssText = 'color:#888;font-size:.82em;margin-bottom:12px;';
+  p.textContent = '每张星球卡对应一种牌型，使用时牌型提升 1 级。点击查看完整数值递进。';
+  container.appendChild(p);
+  const grid = document.createElement('div'); grid.className='grid cols-3';
+  grid.innerHTML = PLANETS.map((pl, i) => {
+    const l3c = pl.c + 3*pl.g, l3m = pl.m + 3*pl.mg;
+    return `<div class="p-card" data-idx="${i}">
+      <div class="pn">🪐 ${pl.n} <span style="color:#888;font-weight:normal;font-size:.82em">— ${pl.h}</span></div>
+      <div class="pf">${pl.c}+${pl.g}×Lv chips | ${pl.m}+${pl.mg}×Lv mult</div>
+      <div class="pl">Lv.1:${pl.c}+${pl.m}  Lv.2:${pl.c+pl.g}+${pl.m+pl.mg}  Lv.3:${l3c}+${l3m}</div>
+      <div class="ph">💰 $${pl.p} · 🖱️ 点击看详情</div>
+    </div>`;
+  }).join('');
+  grid.addEventListener('click', e => {
+    const card = e.target.closest('.p-card');
+    if (!card) return;
+    const idx = parseInt(card.dataset.idx);
+    if (!isNaN(idx)) showPlanetModal(idx);
+  });
+  container.appendChild(grid);
+}
+
+function showPlanetModal(idx) {
+  const p = PLANETS[idx]; if (!p) return;
+  const c = document.getElementById('modalContent');
+  let rows = '';
+  for (let lv = 1; lv <= 10; lv++) {
+    const ch = p.c + (lv-1)*p.g, mu = p.m + (lv-1)*p.mg;
+    rows += `<tr class="${lv<=3?'hl':''}"><td>Lv.${lv}</td><td>${ch}</td><td>${mu}</td><td>${ch*mu}</td></tr>`;
+  }
+  const kws = [p.h];
+  if (p.h==='高牌') kws.push('单张','散牌');
+  if (p.h==='对子') kws.push('对子');
+  if (p.h==='两对') kws.push('两对');
+  if (p.h==='三条') kws.push('三条');
+  if (p.h==='顺子') kws.push('顺');
+  if (p.h==='同花') kws.push('同花');
+  if (p.h==='葫芦') kws.push('葫芦');
+  if (p.h==='四条') kws.push('四条');
+  if (p.h==='同花顺') kws.push('同花顺');
+  if (p.h==='五条') kws.push('五条');
+  if (p.h==='同花葫芦') kws.push('同花葫芦');
+  if (p.h==='同花五条') kws.push('同花五条');
+
+  const rel = JOKERS.filter(j => kws.some(k => (j.e+j.n).includes(k)));
+  const catC = {chips:'var(--chips)',mult:'var(--mult)',xmult:'var(--xmult)',economy:'var(--economy)',deck:'var(--deck)',gen:'var(--gen)',control:'var(--control)',retrigger:'var(--retrigger)',special:'var(--special)',copy:'var(--copy)'};
+  c.innerHTML = `<h2>🪐 ${p.n}</h2><div class="ms">${p.h} · 基础 ${p.c}+${p.g}/Lv chips · ${p.m}+${p.mg}/Lv mult · 💰 $${p.p}</div>
+    <table class="lvt"><thead><tr><th>等级</th><th>筹码</th><th>倍率</th><th>chips×mult</th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="rl">🎪 关联小丑牌 (${rel.length})</div>
+    <div class="rt">${rel.map(j => `<span style="border-color:${catC[j.c]||'#555'}">${j.n}</span>`).join('')}</div>`;
+  document.getElementById('modal').classList.add('show');
+}
+
+function render_tarot(container) { renderSimple(TAROTS, '🔮', container, 2); }
+function render_spectral(container) { renderSimple(SPECS, '👻', container, 2); }
+function renderSimple(arr, icon, container, cols) {
+  const grid = document.createElement('div'); grid.className=`grid cols-${cols}`;
+  grid.innerHTML = arr.map(x => `<div class="c uncommon"><div class="nm">${icon} ${x.n}</div><div class="eff">${x.e}</div></div>`).join('');
+  container.appendChild(grid);
+}
+
+function render_enhance(container) {
+  container.innerHTML = `<h3 style="color:var(--accent);margin-bottom:8px;font-size:1em;">🃏 附魔增强</h3>
+  <div class="grid cols-2">${ENH.map(e => `<div class="c common"><div class="nm">${e.n} <span style="color:#888;font-weight:normal;font-size:.8em">${e.e}</span></div><div class="eff">${e.d}</div></div>`).join('')}</div>
+  <h3 style="color:var(--accent);margin:16px 0 8px;font-size:1em;">📦 蜡封</h3>
+  <div class="grid cols-2">${SEALS.map(s => `<div class="c uncommon"><div class="nm">${s.n} <span style="color:#888;font-weight:normal;font-size:.8em">${s.e}</span></div><div class="eff">${s.d}</div></div>`).join('')}</div>
+  <h3 style="color:var(--accent);margin:16px 0 8px;font-size:1em;">💎 版本</h3>
+  <div class="grid cols-2">${EDS.map(e => `<div class="c rare"><div class="nm">${e.n} <span style="color:#888;font-weight:normal;font-size:.8em">${e.e}</span></div><div class="eff">${e.d}</div><div class="meta"><span class="price">💰 ${e.c}</span></div></div>`).join('')}</div>`;
+}
+
+function render_vouchers(container) {
+  const grid = document.createElement('div'); grid.className='grid cols-2';
+  grid.innerHTML = VOUCHERS.map(v => {
+    const q = v.t === 1 ? 'common' : 'rare';
+    return `<div class="c ${q}"><span class="r-tag ${q}">${v.t===1?'基础':'升级'}</span><div class="nm">🎟️ ${v.n}</div><div class="eff">${v.d}</div><div class="meta"><span class="price">💰 $10</span></div></div>`;
+  }).join('');
+  container.appendChild(grid);
+}
+
+function render_bosses(container) {
+  const small = BOSSES.filter(b => b.g === 's');
+  const fin = BOSSES.filter(b => b.g === 'f');
+  container.innerHTML = `<h3 style="color:var(--accent);margin-bottom:8px;font-size:1em;">小型 Boss (${small.length})</h3>
+    ${small.map(b => `<div style="background:var(--card);border-radius:6px;padding:6px 10px;margin-bottom:4px;font-size:.82em;"><strong>${b.n}</strong>：${b.d}</div>`).join('')}
+    <h3 style="color:#ff6b6b;margin:14px 0 8px;font-size:1em;">最终 Boss (${fin.length})</h3>
+    ${fin.map(b => `<div style="background:var(--card);border-radius:6px;padding:6px 10px;margin-bottom:4px;font-size:.82em;border-left:2px solid var(--legendary);"><strong>${b.n}</strong>：${b.d}</div>`).join('')}`;
+}
+
+function render_decks(container) {
+  const grid = document.createElement('div'); grid.className='grid cols-2';
+  grid.innerHTML = DECKS.map(d => `<div class="c uncommon"><div class="nm">${d.n} <span style="color:#888;font-weight:normal;font-size:.8em">${d.en}</span></div><div class="eff">${d.b}</div></div>`).join('');
+  container.appendChild(grid);
+}
+
+function render_stakes(container) {
+  const grid = document.createElement('div'); grid.className='grid cols-2';
+  grid.innerHTML = STAKES.map(s => `<div class="c common"><div class="nm">${s.n} <span style="color:#888;font-weight:normal;font-size:.8em">${s.en}</span></div><div class="eff">${s.e}</div></div>`).join('');
+  container.appendChild(grid);
+}
+
+function render_tags(container) {
+  const grid = document.createElement('div'); grid.className='grid cols-2';
+  grid.innerHTML = TAGS.map(t => `<div class="c common"><div class="nm">🏷️ ${t.n}</div><div class="eff">${t.d}</div></div>`).join('');
+  container.appendChild(grid);
+}
+
+function render_economy(container) {
+  container.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+    <div class="c common"><div class="nm" style="color:var(--accent);">💵 基础收入</div><div class="eff" style="line-height:1.6;">
+      初始资金：$4<br>小盲注 $3 · 大盲注 $4 · Boss $5<br>剩余出牌 → $1/次<br>利息：每$5→$1，上限$5
+    </div></div>
+    <div class="c common"><div class="nm" style="color:var(--accent);">🏪 商店消费</div><div class="eff" style="line-height:1.6;">
+      普通小丑 $1-6 · 罕见 $4-8 · 稀有 $7-10<br>塔罗/星球 $3 · 幻灵 $4<br>补充包 $4/6/8 · 优惠券 $10<br>重掷 $5起步 +$1/次
+    </div></div>
+    <div class="c common"><div class="nm" style="color:var(--accent);">💰 利息成长线</div><div class="eff" style="line-height:1.6;">
+      基础：每$5→$1，上限$5<br>+Seed Money：上限$10<br>+Money Tree：上限$20<br>+冲向月球：利息翻倍<br>满配：每回合+$40
+    </div></div>
+    <div class="c common"><div class="nm" style="color:var(--accent);">⚡ 经济爆发点</div><div class="eff" style="line-height:1.6;">
+      隐者塔罗：资金翻倍(上限$20)<br>节制塔罗：小丑售价总和(上限$50)<br>火祭幻灵：$20<br>经济标签：翻倍(上限$40)<br>投资标签：Boss后$25
+    </div></div>
+  </div>`;
+}
+
+// ======================== MODAL ========================
+const modal = document.getElementById('modal');
+document.getElementById('modalClose').addEventListener('click', () => modal.classList.remove('show'));
+modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('show'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') modal.classList.remove('show'); });
+
+// ======================== INIT ========================
+switchView('jokers');
+</script>
+</body>
+</html>

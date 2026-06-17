@@ -20,11 +20,11 @@
 
 # 🧪 Godot MCP Pro 测试 → 先读 `docs/ninking/08-testing/testing-guide.md`
 
-> **调用 `mcp__godot-mcp-pro__play_scene` / `execute_game_script` / `find_ui_elements` / `simulate_mouse_click` / `get_game_screenshot` 做游戏测试前，必须先读此指南。**
+> **注意：运行时测试不自动执行。需要测试时，在回复中写出测试目标与预期结果，提醒用户手动操作并反馈结果，再根据反馈调整代码。**
 >
-> **触发：** 任何涉及运行时 MCP 工具的游戏测试操作。
-> **为什么：** 场景切换会销毁旧树上的 await timer（SEAL_INTRO 卡死等已知陷阱），按钮文本/场景结构/状态机必须对得上。
-> **不读的后果：** 卡在 Launcher 进不去主界面、find_ui_elements 返回空、按钮点不动 — 浪费 3-5 回合。
+> **触发：** 任何需要运行时验证（`play_scene` / `find_ui_elements` / `simulate_mouse_click` / `get_game_screenshot`）的场景。
+> **为什么：** 用户希望亲手验证效果，自动测试常因场景状态/按钮文本对不上卡住，浪费回合；用户自己操作更灵活，也能发现预期外的问题。
+> **参考记忆：** [[manual-test-invocation]]
 
 # ⚠️ 任务分派 — 动手前先查 Skill
 
@@ -84,8 +84,11 @@ API 速查 → `docs/tween-library-reference.md`。
 ## 设计文档同步
 
 > **铁律：** 涉及游戏机制/数值/UI布局/关卡/经济的设计变更时，同步更新 `docs/ninking/`。
+>
+> **必须对照 `docs/ninking/DOCUMENT_MAP.md`** 检查受影响的文档列表，逐项确认是否需要更新。未对照映射表的文档同步视为不完整。
 
 **设计文档索引 → `docs/ninking/README.md`**
+**文档依赖映射（必查）→ `docs/ninking/DOCUMENT_MAP.md`**
 
 ## HTML 可视化同步
 
@@ -104,3 +107,4 @@ API 速查 → `docs/tween-library-reference.md`。
 4. **函数/方法命名：** 必须 `snake_case`，私有加 `_` 前缀
 5. **变量命名：** 实例/局部/`@export`/`@onready` 必须 `snake_case`，常量 `CONSTANT_CASE`
 6. **Card-Framework 复用：** 所有卡牌拖拽/悬停/排列/堆叠必须基于 Card-Framework
+7. **文档同步：** 对照 `DOCUMENT_MAP.md` 确认受影响文档已同步，未同步的提交视为不完整

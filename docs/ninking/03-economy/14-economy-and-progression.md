@@ -1,5 +1,6 @@
 # NinKing 经济与进程
 
+> **最后更新: 2026-06-17** — 移除已删除的 n_e03 俭约。
 > **独立维护文档** — 金币经济、关卡奖励、利息、解锁进度的完整参数。
 > 关联文档: [`../02-cards/11-ninja-cards.md`](../02-cards/11-ninja-cards.md)（定价）、[`../02-cards/12-consumable-cards.md`](../02-cards/12-consumable-cards.md)（定价）、[`../01-gameplay/13-blinds-and-bosses.md`](../01-gameplay/13-blinds-and-bosses.md)（关卡）。
 
@@ -33,7 +34,6 @@
 | 镀金增强 (Enhancement.GOLD) | +$3 / 张 | 出牌时（所在组有镀金增强的牌） |
 | 金封印 (Seal.GOLD) | +$3 / 张 | 出牌时（带金封印的牌） |
 | n_e01 福神 | +$2 / 喜触发 | 出牌后（每触发 1 个喜模式） |
-| n_e03 俭约 | +$4 | 手替え ≤ 2 张时 |
 | n_e04 利息之印 | 利息上限 +$5 | 封印达成时 |
 
 > 所有产金效果在 `SealController._collect_play_gold()` 中统一结算。
