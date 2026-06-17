@@ -477,9 +477,9 @@ footer a:hover { color: var(--gold); }
   <h3>📋 最近更新</h3>
   <!-- RECENT_UPDATES_PLACEHOLDER -->
 <ul>
-  <li><span class="date">2026-06-17</span><span class="tag tag-docs">docs</span><span class="tag tag-ninja">ninja</span><span class="tag tag-scene">scene</span><span class="tag tag-xi">xi</span>docs(html): 同步忍者牌/喜系统/场景树数据到 ninja_card_viewer</li>
+  <li><span class="date">2026-06-17</span><span class="tag tag-fix">fix</span>fix(html): 同步 viewer 图片素材（n_r02/n_r03/n_s01/n_d02/n_l03）</li>
 </ul>
-<p style="font-size:11px;color:var(--text-dim);margin-top:6px">最新提交 · 部署于 2026-06-17 14:13</p>
+<p style="font-size:11px;color:var(--text-dim);margin-top:6px">最新提交 · 部署于 2026-06-17 14:17</p>
 </div>
 
 <!-- ═══ Tab Bar ═══ -->
@@ -1415,7 +1415,7 @@ function render() {
     ).join("");
 
     return `<div class="card rarity-${rarity}${deferred ? ' deferred' : ''}" data-id="${n.id}" onclick="toggleCard(this)">
-      <img class="card-img" src="./images/cards/${n.id}.png" alt="${escHtml(n.name)}" loading="lazy" onerror="this.style.display='none'">
+      <img class="card-img" src="../../assets/images/cards/ninjas/${n.id}.png" alt="${escHtml(n.name)}" loading="lazy" onerror="this.style.display='none'">
       <div class="card-name">${escHtml(n.name)}</div>
       <div class="card-id">${n.id}</div>
       <div class="card-badges">
