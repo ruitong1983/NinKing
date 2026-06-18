@@ -36,7 +36,7 @@ uniform sampler2D gradient_texture : filter_linear, repeat_enable;
 uniform sampler2D mask_texture : filter_linear_mipmap;
 /* 遮罩缩放比例 */
 uniform float mask_scale : hint_range(0.1, 5.0) = 1.0;
-/* 闪光移动速度 */ 
+/* 闪光移动速度 */
 uniform float speed : hint_range(0.1, 5.0) = 0.1;
 /* 条纹间距，值越大条纹越密集 */
 uniform float stripe_spacing : hint_range(0.1, 50.0) = 6.5;
@@ -47,12 +47,18 @@ uniform float stripe_offset : hint_range(0.0, 1.0) = 0.55;
 /* 控制闪光类型2时辉光材质的位置和大小 */
 uniform float gradient_offset : hint_range(0.0, 1.0) = 0.5;
 uniform float gradient_scale : hint_range(0.1, 3.0) = 1.414;
-/* 闪光随时间移动速度 */ 
+/* 闪光随时间移动速度 */
 uniform float move_speed : hint_range(0.0, 5.0) = 5.0;
 /* 闪光强度 */
 uniform float intensity : hint_range(0.0, 2.0) = 0.5;
 /* 闪光角度（0-360度） */
 uniform float angle : hint_range(0.0, 360.0) = 45.0;
+/* 单向循环（false=线性递增长滚，true=平滑三角波循环） */
+uniform bool one_way_loop = false;
+/* 循环方向（1.0=正向，-1.0=反向） */
+uniform float loop_direction : hint_range(-1.0, 1.0) = 1.0;
+/* 闪光软边（0.0=硬边，越大边缘越柔和） */
+uniform float softness : hint_range(0.0, 0.5, 0.01) = 0.0;
 
 varying flat vec2 o;
 varying vec3 p;
@@ -73,21 +79,21 @@ void vertex(){
 	float cos_b = cos(y_rot / 180.0 * PI);
 	float sin_c = sin(x_rot / 180.0 * PI);
 	float cos_c = cos(x_rot / 180.0 * PI);
-	
+
 	mat3 inv_rot_mat;
 	inv_rot_mat[0][0] = cos_b;
 	inv_rot_mat[0][1] = 0.0;
 	inv_rot_mat[0][2] = -sin_b;
-	
+
 	inv_rot_mat[1][0] = sin_b * sin_c;
 	inv_rot_mat[1][1] = cos_c;
 	inv_rot_mat[1][2] = cos_b * sin_c;
-	
+
 	inv_rot_mat[2][0] = sin_b * cos_c;
 	inv_rot_mat[2][1] = -sin_c;
 	inv_rot_mat[2][2] = cos_b * cos_c;
-	
-	
+
+
 	float t = tan(fov / 360.0 * PI);
 	p = inv_rot_mat * vec3((UV - 0.5), 0.5 / t);
 	float v = (0.5 / t) + 0.5;
@@ -100,15 +106,15 @@ void vertex(){
 
 void fragment(){
 	if (cull_back && p.z <= 0.0) discard;
-	
+
 	vec2 uv = (p.xy / p.z).xy - o;
 	COLOR = texture(TEXTURE, uv + 0.5);
 	COLOR.a *= step(max(abs(uv.x), abs(uv.y)), 0.5);
-	
+
 	//删除绿幕
 	float dis = distance(COLOR.rgb, delete_color);
 	if (dis <= delete_tolerance) COLOR.a = 0.0;
-	
+
 	//进行闪光效果范围筛选
 	float ddis = distance(COLOR.rgb, filter_color);
 	bool fil_cons = true;
@@ -119,34 +125,50 @@ void fragment(){
 	} else if (flash_filter_type == 2) {
 		if (ddis > filter_tolerance) fil_cons = false;
 	}
-	
+
 	// =====================
 	// 修改：闪光效果实现 - 现在基于旋转角度而非时间
 	// =====================
-	if (use_flash && COLOR.a > 0.0 && fil_cons) { 
+	if (use_flash && COLOR.a > 0.0 && fil_cons) {
 		// 计算闪光方向向量
 		float rad = radians(angle);
 		vec2 dir = vec2(cos(rad), sin(rad));
-		
+
 		// 只在非透明区域应用闪光效果
 		// 将x_rot和y_rot组合成一个控制因子，使闪光随3D旋转变化
 		float rotation_factor = (x_rot * sin(rad) - y_rot * cos(rad)) * speed; // 缩放因子使变化更平滑
-		// 随时间变化部分由move_speed控制: 速度为 move_speed * speed(周期/s)
-		rotation_factor += TIME * 2.0 * move_speed * speed;
-		
+		// 随时间变化部分 — 支持循环模式
+		float time_factor;
+		if (one_way_loop) {
+			// 单向循环：平滑三角波，无硬复位（防闪光卡顿）
+			float half = TIME * speed * 0.5;
+			float tri = 1.0 - abs(fract(half) * 2.0 - 1.0);
+			time_factor = mix(1.0 - tri, tri, loop_direction * 0.5 + 0.5);
+		} else {
+			// 线性递增（原有行为）
+			time_factor = TIME * 2.0 * move_speed;
+			time_factor *= sign(loop_direction);
+		}
+		rotation_factor += time_factor * speed;
+
 		// 处理遮罩UV坐标
 		vec2 mask_uv = (uv + 0.5); // 使用3D变换后的UV
 		mask_uv = (mask_uv - 0.5) * mask_scale + 0.5;
-		
+
 		// 采样遮罩纹理
 		float mask_alpha = texture(mask_texture, mask_uv).a;
-		
+
 		// 计算闪光条纹
 		float stripe = sin(dot(uv + 0.5, dir) * stripe_spacing + (rotation_factor + 2.0 * stripe_offset) * PI) * 0.5 + 0.5;
-		
+
 		// 增强条纹效果
 		float flash = pow(stripe, stripe_width) * intensity * mask_alpha;
-		
+
+		// 软边处理：softness>0 时用 smoothstep 柔化条纹边缘
+		if (softness > 0.005) {
+			flash = smoothstep(0.5 - softness, 0.5 + softness, stripe) * intensity * mask_alpha;
+		}
+
 		// 根据闪光类型应用不同的颜色效果
 		if (flash_type == 0) {
 			// 类型0：纯色光

@@ -429,7 +429,7 @@ func _update_column_types(hand: Array[CardData.PlayingCard]) -> void:
 # ColXiLabel — xi preview only (v2: column info moved to rows)
 # ══════════════════════════════════════════
 
-## Update top preview: 喜: 名×N  (or empty).
+## Update top preview: 喜: 名 (or empty).
 func _update_col_xi_preview(hand: Array[CardData.PlayingCard]) -> void:
 	if hand.size() < 9:
 		if _col_xi_label and is_instance_valid(_col_xi_label):
@@ -454,12 +454,7 @@ func _update_col_xi_preview(hand: Array[CardData.PlayingCard]) -> void:
 	var xi_parts: Array[String] = []
 	if xi_result != null and xi_result.has_any():
 		for xi_name: String in xi_result.triggered:
-			var x_val: int = 1
-			for defn: Dictionary in XiDetector.XI_DEFINITIONS:
-				if defn["name"] == xi_name:
-					x_val = defn["x_mult"]
-					break
-			xi_parts.append("%s×%d" % [xi_name, x_val])
+			xi_parts.append(xi_name)
 
 	if xi_parts.size() > 0:
 		_col_xi_label.text = "喜: " + "  ".join(xi_parts)

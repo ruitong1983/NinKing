@@ -28,15 +28,17 @@ static func collect_ninja_per_group(
 		head_cards, mid_cards, tail_cards,
 		head_eval, mid_eval, tail_eval)
 
+	var _c_cond: Dictionary = effect.get("condition", {})
+
 	# Xi-only condition: check xi_result before applying
-	var cond_xi: String = effect.get("condition", {}).get("xi", "")
-	if cond_xi != "" and not effect.get("condition", {}).has("hand_type") and not effect.get("condition", {}).has("group"):
+	var cond_xi: String = _c_cond.get("xi", "")
+	if cond_xi != "" and not _c_cond.has("hand_type") and not _c_cond.has("group"):
 		if xi_result == null or not xi_result.has_any() or cond_xi not in xi_result.triggered:
 			return  # Xi not triggered — skip effect entirely
 		# Xi triggered — groups is empty (from ninja_affected_groups), fallback below will apply to all rows
 
 	# ── has_2_and_ace: global condition — 9 cards contain both rank 2 and Ace → ×5 ──
-	if effect.get("condition", {}).get("has_2_and_ace", false):
+	if _c_cond.get("has_2_and_ace", false):
 		var has_two: bool = false
 		var has_ace: bool = false
 		for c: CardData.PlayingCard in head_cards + mid_cards + tail_cards:
@@ -107,7 +109,7 @@ static func collect_ninja_per_group(
 			target_p.chips += pair_even * even_count
 
 		# ─── group_has_ace: per-group Ace bonus (独行者) ───
-		var cond_g: Dictionary = effect.get("condition", {})
+		var cond_g: Dictionary = _c_cond
 		if cond_g.get("group_has_ace", false):
 			var ace_chips: int = effect.get("ace_chips", 0)
 			var ace_mult: int = effect.get("ace_mult", 0)
@@ -139,6 +141,9 @@ static func collect_ninja_per_group(
 					target_a.chips += ace_chips
 					target_a.mult += ace_mult
 
+# If a hand_type or group condition exists but didn't match → skip entirely
+	if groups.is_empty() and has_any_condition(_c_cond):
+		return
 # If this ninja has no group condition and no economy, it applies to ALL groups
 	var has_x_stack: bool = false
 	for xv: int in x_stack:
@@ -233,6 +238,14 @@ static func _check_cond_for_type(cond: Dictionary, hand_type: CardData.HandType3
 	if at_least != -1 and int(hand_type) < at_least:
 		return false
 	return true
+
+
+## Returns true if the condition targets specific groups/hand-types.
+## Used by callers to distinguish "no condition" (apply all) from "condition no match" (skip).
+static func has_any_condition(cond: Dictionary) -> bool:
+	return cond.has("hand_type") or cond.has("group") or cond.has("at_least_hand_type") or cond.has("at_most_hand_type")
+
+
 
 
 ## Collect ninja effects for a single column.

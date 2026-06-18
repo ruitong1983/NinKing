@@ -1,6 +1,6 @@
 class_name CardVisualComposer
 extends RefCounted
-## Static utility for composing card visuals (art + rarity frame + glow).
+## Static utility for composing card visuals (art + rarity frame + glow + flash).
 ##
 ## L1 — Atomic tools:
 ##   create_rarity_stylebox, create_frame_overlay,
@@ -8,6 +8,8 @@ extends RefCounted
 ##
 ## L2 — Convenience:
 ##   build_card_face
+## L3 — Flash shader card (TextureRect path with rarity flash material):
+##   build_card_face_with_flash, _load_and_setup_flash
 ##
 ## Design: B方案（节点组合，不合并像素），支持半透明/发光/描边效果。
 ## 双渲染路径：TextureRect（保留 Fake3D shader 挂载点）+ _draw（KEEP_ASPECT_COVERED）。
@@ -184,6 +186,80 @@ static func build_card_face(parent: Control, size: Vector2, texture: Texture2D,
 			panel.add_child(fo)
 
 	return panel
+
+
+# ══════════════════════════════════════════
+# L3 — 卡牌构建 + Flash 材质（卡牌弹窗/预览）
+# ══════════════════════════════════════════
+
+## Build a card face with flash shader material applied (TextureRect path).
+## Used by CardDetailPopup to show rarity-based foil/holo/polychrome effects.
+##
+## Returns a Dictionary with keys:
+##   "panel"      — Panel (parent container)
+##   "art_rect"   — TextureRect (ninja art with flash material, may be null)
+##   "frame_rect" — TextureRect (rarity frame overlay, may be null)
+##   "flash_mat"  — ShaderMaterial (shared flash material instance, may be null)
+##
+## The caller should use GlobalTweens.shader_pulse() on flash_mat for looping animation.
+static func build_card_face_with_flash(parent: Control, size: Vector2, texture: Texture2D,
+		rarity: String) -> Dictionary:
+	var panel := Panel.new()
+	panel.size = size
+	panel.mouse_filter = Control.MOUSE_FILTER_PASS
+	parent.add_child(panel)
+
+	# Background style
+	var frame_tex: Texture2D = AssetRegistry.load_frame_texture(rarity)
+	if frame_tex:
+		panel.add_theme_stylebox_override("panel", create_rarity_stylebox(rarity, "bg"))
+	else:
+		panel.add_theme_stylebox_override("panel", create_rarity_stylebox(rarity, "full"))
+
+	# Art TextureRect (shader-capable, before frame so frame renders on top)
+	var art_rect: TextureRect = null
+	if texture != null:
+		art_rect = compose_art_texture(panel, texture, size)
+
+	# Frame overlay
+	var frame_rect: TextureRect = null
+	if frame_tex:
+		frame_rect = create_frame_overlay(rarity)
+		if frame_rect:
+			panel.add_child(frame_rect)
+
+	# Load and apply flash material to both art + frame (shared instance)
+	var flash_mat: ShaderMaterial = _load_and_setup_flash(rarity)
+	if flash_mat:
+		if art_rect:
+			art_rect.material = flash_mat
+		if frame_rect:
+			frame_rect.material = flash_mat
+
+	return {
+		"panel": panel,
+		"art_rect": art_rect,
+		"frame_rect": frame_rect,
+		"flash_mat": flash_mat,
+	}
+
+
+## Load flash material for rarity, duplicate, set base shader params.
+## Returns null if no flash material for this rarity.
+static func _load_and_setup_flash(rarity: String) -> ShaderMaterial:
+	var path: String = AssetRegistry.FLASH_MATERIAL_PATHS.get(rarity, "")
+	if path.is_empty():
+		return null
+	var loaded := load(path) as ShaderMaterial
+	if loaded == null:
+		return null
+	var mat: ShaderMaterial = loaded.duplicate()
+	var par: Dictionary = AssetRegistry.RARITY_FLASH_PARAMS.get(rarity, {})
+	if par.has("one_way_loop"):
+		mat.set_shader_parameter("one_way_loop", par["one_way_loop"])
+	if par.has("softness"):
+		mat.set_shader_parameter("softness", par["softness"])
+	return mat
 
 
 # ══════════════════════════════════════════

@@ -2,7 +2,7 @@
 
 > **用途：** 每次代码变更后，对照此表检查受影响文档是否需要同步更新。
 > **原则：** 改代码前先查此表，改完代码后逐项同步。
-> **建立日期：** 2026-06-17 | 自动生成的 HTML 由 pre-commit hook 触发，不列在此表。
+> **建立日期：** 2026-06-17 | **最后更新：** 2026-06-18 | 自动生成的 HTML 由 pre-commit hook 触发，不列在此表。
 
 ---
 
@@ -100,6 +100,7 @@
 | `01-gameplay/06-complete-redesign.md` | 核心玩法 — 出牌流程 | 出牌流程/计分管线变更时同步 |
 | `03-economy/14-economy-and-progression.md` | 金币结算 | `_collect_play_gold()` 逻辑变更时同步 |
 | `06-tech/03-technical-design.md` | 技术架构 | 游戏状态机转运时同步 |
+| — `game_logger.gd` 日志 | 回放日志 — 5 处插桩 | 出牌/换牌/商店进入逻辑变更时同步更新日志调用 |
 
 ### 4.3 `scripts/ninking/shop_manager.gd`
 
@@ -285,6 +286,22 @@
 |---------|------|---------|
 | `testing/automated-formula-testing.md` | 测试方法论 | 计分计算引擎逻辑变更时同步 |
 
+### 7.5 `tools/simulation/`（`sim_engine.py` + `sim_runner.py` + `sim_config.py` + `sim_analyze.py`）
+
+| 影响文档 | 说明 | 同步要点 |
+|---------|------|---------|
+| **`08-testing/21-simulation-methodology.md`** | **关卡难度模拟报告** | 新增/修改模拟逻辑、预算模型、策略定义时**必须同步** |
+| `08-testing/data/` | 模拟输出（JSON/CSV/HTML） | 每次批量模拟后自动生成，需随代码更新 |
+| `01-gameplay/13-blinds-and-bosses.md` | 关卡阈值 | 模拟结论可用于验证/调整关卡目标值 |
+
+### 7.6 `tools/simulation/player_personality.py` + `sim_runner_personality.py`（玩家人格模型）
+
+| 影响文档 | 说明 | 同步要点 |
+|---------|------|---------|
+| **`08-testing/21-simulation-methodology.md`** §7 | **人格驱动模拟** | 新增/修改人格类型、决策逻辑时**必须同步** |
+| `08-testing/data_personality/` | 人格模拟输出（JSON） | 每次批量模拟后自动生成 |
+| `03-economy/14-economy-and-progression.md` | 经济系统 | 人格中的经济偏好影响商店经济循环验证 |
+
 ---
 
 ## 八、关卡与 Boss 设计
@@ -298,16 +315,40 @@
 
 ---
 
-## 九、存档与配置
+## 九、日志系统
 
-### 9.1 `scripts/ninking/save_manager.gd`
+### 9.0 `scripts/ninking/logging/game_logger.gd`
+
+> 新增文件时映射。无 class_name，通过 `const GameRunLogger = preload("...")` 引用。
+
+| 影响文档 | 说明 | 同步要点 |
+|---------|------|---------|
+| `docs/ninking/ninja-game-replay.html` | HTML 回放查看器 | 日志事件结构/序列化格式变更时**必须同步**HTML 查看器 |
+| `10-ops/logs-operations-guide.md` | 日志运维指南 | 事件表/JSON Schema/排查指南 — game_logger.gd 接口变更时同步 |
+| `09-mgmt/TODO.md` | 工作清单 — Phase L | 日志功能变更/新增/修复时同步 |
+| 本表（DOCUMENT_MAP.md） | 文档依赖映射 | 新增日志消费者（新插桩点）时同步 |
+
+### 9.1 日志调用的分布
+
+| 调用方文件 | 插桩事件 | 说明 |
+|-----------|---------|------|
+| `game_state.gd` | run_started, seal_started, cards_dealt, auto_arranged, game_over, victory | 6 处，覆盖 run 生命周期 + 状态转换 |
+| `seal_controller.gd` | play_prepared, play_executed, card_swapped, seal_completed, shop_entered | 5 处，覆盖每次出牌/交换/商店进入 |
+| `shop_manager.gd` | ninja_acquired, item_purchased | 2 处，覆盖商店购买 |
+| `debug_controller.gd` | cards_dealt, auto_arranged, play_prepared, play_executed, card_swapped, debug_layout_changed, game_over | 8 处，覆盖 Debug 场景全部操作 + 退出时落盘 |
+
+---
+
+## 十、存档与配置
+
+### 10.1 `scripts/ninking/save_manager.gd`
 
 | 影响文档 | 说明 | 同步要点 |
 |---------|------|---------|
 | **`07-data/game-save-schema.md`** | 存档格式 | 存档键名/结构/迁移逻辑变更时**必须同步** |
 | `06-tech/03-technical-design.md` | 技术架构 | 存档流程变更时同步 |
 
-### 9.2 `scripts/ninking/asset_registry.gd`
+### 10.2 `scripts/ninking/asset_registry.gd`
 
 | 影响文档 | 说明 | 同步要点 |
 |---------|------|---------|
@@ -316,7 +357,7 @@
 
 ---
 
-## 十、VFX 与 Tween/Shader 系统
+## 十一、VFX 与 Tween/Shader 系统
 
 ### 10.1 `.tscn` 引用的 shader / `scripts/tween/tween_fx.gd` / `global_tweens.gd`
 
@@ -336,7 +377,7 @@
 
 ---
 
-## 十一、音效
+## 十二、音效
 
 ### 11.1 `scripts/config/sound_bank.gd`
 
@@ -347,7 +388,7 @@
 
 ---
 
-## 十二、设计文档 — 自更新规则
+## 十三、设计文档 — 自更新规则
 
 以下文档本身不依赖具体代码文件，但当游戏设计变更时可能需要同步：
 
@@ -387,6 +428,7 @@
 | `05-art/18-audio-asset-matching-guide.md` | `sound_bank.gd` |
 | `05-art/19-image-asset-matching-guide.md` | `asset_registry.gd` |
 | `06-tech/03-technical-design.md` | `game_state.gd`, `seal_controller.gd`, `arrange_controller.gd`, 所有 UI 相关 |
+| `docs/ninking/ninja-game-replay.html` | `game_logger.gd` — 日志事件结构决定 HTML 解析逻辑 |
 | `06-tech/ui-signal-architecture.md` | `game_state.gd`（信号）, `ui_manager.gd`（API） |
 | `07-data/game-save-schema.md` | `save_manager.gd`, `game_state.gd` |
 | `08-testing/20-debug-scene-design.md` | `debug_ninking_main.tscn`, `debug_controller.gd`, `debug_panel.gd` |
@@ -411,3 +453,9 @@
 |------|------|
 | 2026-06-17 | 创建初始版本，覆盖全部 50+ 代码文件 → 30+ 文档映射 |
 | 2026-06-17 | 🔧 review-plan 审阅修复: 补 `debug/*.gd` 6文件(A1)、`shop_slot.gd`(A2)、`references/*.md`(A5)、`scene-tree-visualizer-methodology.md`(A4)；合并 §2.1(C1)；加 pre-commit warning(C2)；补全逆向索引 |
+| 2026-06-18 | 📝 **新增 §9 日志系统**: `game_logger.gd` 映射 + 插桩分布表 + 全文档节号后移；快速查找表加 `ninja-game-replay.html` |
+| 2026-06-18 | 🐛 **§9.1 插桩分布表更新**: debug_controller.gd 新增 `game_over` 插桩点（退出落盘），8 处 |
+| 2026-06-18 | 📗 **新增 §7.5**: `tools/simulation/` 模拟框架映射 → `08-testing/21-simulation-methodology.md`；`README.md` 追加引用 |
+| 2026-06-18 | 🧠 **新增 §7.6**: `player_personality.py` + `sim_runner_personality.py` 玩家人格模型映射；模拟报告同步更新
+| 2026-06-18 | 🐛 **save_manager.gd 修复 + GameOver 布局优化**: `.duplicate(true)` 修复只读字典崩溃；`06-ui-layout-reference.md`/`10-main-ui-design.md`/`11-main-overlay-design.md` 同步更新 GameOver ScoreSummary/BackToMenuButton 节点描述 |
+| 2026-06-18 | ✨ **CardDetailPopup 入场动效 + Flash 材质**: `asset_registry.gd` 新增共享 flash 常量；`card_visual_composer.gd` 新增 L3 `build_card_face_with_flash()`；`card_detail_popup.gd` rarity 分阶入场/退场动效 + 卡面 flash shader |

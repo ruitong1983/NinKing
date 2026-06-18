@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NinKing 关卡难度模拟 — 对子流 / extreme</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  body { font-family: -apple-system, "Microsoft YaHei", sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; background: #1a1a2e; color: #e0e0e0; }
+  h1 { color: #ffd700; border-bottom: 2px solid #ffd70044; padding-bottom: 8px; }
+  h2 { color: #a0d2ff; margin-top: 30px; }
+  .meta { color: #aaa; font-size: 14px; margin-bottom: 20px; }
+  .chart-container { background: #16213e; border-radius: 12px; padding: 20px; margin: 20px 0; }
+  table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+  th, td { padding: 8px 12px; text-align: right; border-bottom: 1px solid #333; }
+  th { background: #0f3460; color: #ffd700; }
+  tr:hover { background: #1a3a5c; }
+  .pass { color: #4caf50; }
+  .fail { color: #f44336; }
+  .warn { color: #ff9800; }
+  .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 20px 0; }
+  .card { background: #16213e; border-radius: 8px; padding: 16px; text-align: center; }
+  .card .num { font-size: 28px; font-weight: bold; color: #ffd700; }
+  .card .label { font-size: 12px; color: #aaa; margin-top: 4px; }
+  .note { font-size: 13px; color: #888; font-style: italic; margin-top: 20px; }
+</style>
+</head>
+<body>
+<h1>对子流 — 极限预算(80%)</h1>
+<div class="meta">
+  预算比例: 0.8 | 每场景 10 次模拟 | 共 8 结界 × 3 封印
+</div>
+
+<div class="summary">
+  <div class="card">
+    <div class="num">结界5</div>
+    <div class="label">平均到达结界</div>
+  </div>
+  <div class="card">
+    <div class="num">0/10</div>
+    <div class="label">结界8通关次数</div>
+  </div>
+  <div class="card">
+    <div class="num">0%</div>
+    <div class="label">结界8通过率</div>
+  </div>
+  <div class="card">
+    <div class="num">85.9%</div>
+    <div class="label">忍者平均触发率</div>
+  </div>
+</div>
+
+<div class="chart-container">
+  <canvas id="scoreChart"></canvas>
+</div>
+
+<table>
+  <tr>
+    <th>结界</th>
+    <th>目标</th>
+    <th>P10</th>
+    <th>P25</th>
+    <th>P50</th>
+    <th>P75</th>
+    <th>P90</th>
+    <th>通过率</th>
+    <th>忍者触发</th>
+  </tr>
+  <tr><td style='text-align:left'>结界1-修羅</td><td>15,000</td><td>21,143.1</td><td>23,761.5</td><td>30,802.5</td><td>38,939.25</td><td>55,298.09999999998</td><td class='pass'>100%</td><td>0%</td></tr>
+<tr><td style='text-align:left'>结界1-明王</td><td>25,000</td><td>29,617.800000000003</td><td>44,866.5</td><td>58,215.0</td><td>72,054.0</td><td>112,626.59999999995</td><td class='pass'>100%</td><td>100%</td></tr>
+<tr><td style='text-align:left'>结界1-夜叉</td><td>40,000</td><td>36,792.8</td><td>45,843.75</td><td>63,860.0</td><td>70,600.5</td><td>89,005.99999999999</td><td class='pass'>80%</td><td>92%</td></tr>
+<tr><td style='text-align:left'>结界2-修羅</td><td>40,000</td><td>45,906.6</td><td>64,618.5</td><td>132,081.0</td><td>243,873.0</td><td>269,252.4</td><td class='warn'>70%</td><td>90%</td></tr>
+<tr><td style='text-align:left'>结界2-明王</td><td>60,000</td><td>58,134.00000000001</td><td>74,426.0</td><td>149,790.0</td><td>163,452.0</td><td>174,117.6</td><td class='warn'>60%</td><td>95%</td></tr>
+<tr><td style='text-align:left'>结界2-夜叉</td><td>80,000</td><td>108,240.0</td><td>144,145.5</td><td>184,123.0</td><td>222,584.0</td><td>261,980.0</td><td class='warn'>50%</td><td>83%</td></tr>
+<tr><td style='text-align:left'>结界3-修羅</td><td>60,000</td><td>100,732.8</td><td>110,352.0</td><td>134,904.0</td><td>541,488.0</td><td>879,139.2000000001</td><td class='warn'>50%</td><td>88%</td></tr>
+<tr><td style='text-align:left'>结界3-明王</td><td>100,000</td><td>178,399.2</td><td>198,300.0</td><td>287,948.0</td><td>416,280.0</td><td>441,264.0</td><td class='warn'>50%</td><td>84%</td></tr>
+<tr><td style='text-align:left'>结界3-夜叉</td><td>150,000</td><td>132,163.2</td><td>139,896.0</td><td>434,560.0</td><td>551,358.0</td><td>10,631,100.0</td><td class='fail'>30%</td><td>91%</td></tr>
+<tr><td style='text-align:left'>结界4-修羅</td><td>100,000</td><td>227,439.2</td><td>309,794.0</td><td>447,052.0</td><td>632,175.0</td><td>743,248.8</td><td class='fail'>30%</td><td>98%</td></tr>
+<tr><td style='text-align:left'>结界4-明王</td><td>150,000</td><td>127,860.0</td><td>186,148.5</td><td>283,296.0</td><td>499,264.0</td><td>628,844.7999999999</td><td class='fail'>20%</td><td>93%</td></tr>
+<tr><td style='text-align:left'>结界4-夜叉</td><td>200,000</td><td>286,473.6</td><td>352,824.0</td><td>463,408.0</td><td>573,992.0</td><td>640,342.4</td><td class='fail'>20%</td><td>97%</td></tr>
+<tr><td style='text-align:left'>结界5-修羅</td><td>150,000</td><td>1,328,179.2000000002</td><td>1,775,520.0</td><td>2,521,088.0</td><td>3,266,656.0</td><td>3,713,996.8000000003</td><td class='fail'>20%</td><td>100%</td></tr>
+<tr><td style='text-align:left'>结界5-明王</td><td>200,000</td><td>455,500.8</td><td>623,664.0</td><td>903,936.0</td><td>1,184,208.0</td><td>1,352,371.2</td><td class='fail'>20%</td><td>97%</td></tr>
+<tr><td style='text-align:left'>结界5-夜叉</td><td>300,000</td><td>429,224.80000000005</td><td>441,070.0</td><td>460,812.0</td><td>480,554.0</td><td>492,399.2</td><td class='fail'>20%</td><td>93%</td></tr>
+<tr><td style='text-align:left'>结界6-修羅</td><td>200,000</td><td>164,977.6</td><td>170,044.0</td><td>178,488.0</td><td>186,932.0</td><td>191,998.4</td><td class='fail'>0%</td><td>73%</td></tr>
+
+</table>
+
+<div class="note">
+  * 对数刻度, P10-P90 色带显示分数分布范围<br>
+  * P50 < 目标 = 该关对半开策略来说偏难<br>
+  * 忍者触发率低说明买的忍者很少在实际发牌中生效<br>
+  * 星图/Boss/牌面增强均未模拟, 实际玩家分数会更高
+</div>
+
+<script>
+const labels = ["B1修", "B1明", "B1夜", "B2修", "B2明", "B2夜", "B3修", "B3明", "B3夜", "B4修", "B4明", "B4夜", "B5修", "B5明", "B5夜", "B6修"];
+const targets = [15000, 25000, 40000, 40000, 60000, 80000, 60000, 100000, 150000, 100000, 150000, 200000, 150000, 200000, 300000, 200000];
+const p10 = [21143.1, 29617.800000000003, 36792.8, 45906.6, 58134.00000000001, 108240.0, 100732.8, 178399.2, 132163.2, 227439.2, 127860.0, 286473.6, 1328179.2000000002, 455500.8, 429224.80000000005, 164977.6];
+const p25 = [23761.5, 44866.5, 45843.75, 64618.5, 74426.0, 144145.5, 110352.0, 198300.0, 139896.0, 309794.0, 186148.5, 352824.0, 1775520.0, 623664.0, 441070.0, 170044.0];
+const p50 = [30802.5, 58215.0, 63860.0, 132081.0, 149790.0, 184123.0, 134904.0, 287948.0, 434560.0, 447052.0, 283296.0, 463408.0, 2521088.0, 903936.0, 460812.0, 178488.0];
+const p75 = [38939.25, 72054.0, 70600.5, 243873.0, 163452.0, 222584.0, 541488.0, 416280.0, 551358.0, 632175.0, 499264.0, 573992.0, 3266656.0, 1184208.0, 480554.0, 186932.0];
+const p90 = [55298.09999999998, 112626.59999999995, 89005.99999999999, 269252.4, 174117.6, 261980.0, 879139.2000000001, 441264.0, 10631100.0, 743248.8, 628844.7999999999, 640342.4, 3713996.8000000003, 1352371.2, 492399.2, 191998.4];
+
+new Chart(document.getElementById('scoreChart'), {
+  type: 'line',
+  data: {
+    labels: labels,
+    datasets: [
+      {
+        label: '当前阈值',
+        data: targets,
+        borderColor: '#ff4444',
+        borderWidth: 2,
+        borderDash: [6, 3],
+        pointRadius: 0,
+        fill: false,
+      },
+      {
+        label: 'P75',
+        data: p75,
+        borderColor: '#ffd700',
+        borderWidth: 2,
+        pointRadius: 0,
+        fill: '-1',
+        backgroundColor: 'rgba(255, 215, 0, 0.08)',
+      },
+      {
+        label: 'P50 (中位数)',
+        data: p50,
+        borderColor: '#4caf50',
+        borderWidth: 2,
+        pointRadius: 0,
+        fill: '-1',
+        backgroundColor: 'rgba(76, 175, 80, 0.08)',
+      },
+      {
+        label: 'P25',
+        data: p25,
+        borderColor: '#2196f3',
+        borderWidth: 1,
+        borderDash: [3, 3],
+        pointRadius: 0,
+        fill: false,
+      },
+      {
+        label: 'P10',
+        data: p10,
+        borderColor: '#9c27b0',
+        borderWidth: 1,
+        borderDash: [3, 3],
+        pointRadius: 0,
+        fill: false,
+      },
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      title: { display: true, text: '每关分数分布 vs 当前阈值', color: '#e0e0e0' },
+      legend: { labels: { color: '#e0e0e0' } },
+    },
+    scales: {
+      x: { ticks: { color: '#aaa' } },
+      y: {
+        type: 'logarithmic',
+        title: { display: true, text: '分数 (对数刻度)', color: '#aaa' },
+        ticks: { color: '#aaa', callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'k' : v },
+        min: 10,
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>

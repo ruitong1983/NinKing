@@ -1,6 +1,6 @@
 # NinKing 工作清单
 
-> **最后更新:** 2026-06-17 | **当前 Phase:** F1（忍者牌补齐）+ G（计分动效实施完成）+ H（效果集中分析实施中）+ Kenney K1（待方向决策） | 本次: Kenney 双方向评估 + 执行计划入 TODO
+> **最后更新:** 2026-06-18 | **当前 Phase:** L（回放日志系统完成）+ F1（忍者牌补齐）+ H（效果集中分析实施中） | 本次: 模拟审查 v5.2 — 4项发现 + 阈值整体下调30%
 > **使用方式:** AI 每次会话开始时读取此文件。完成任务后更新状态。
 > **状态图例:** ⬜ 待做 | 🔵 进行中 | ✅ 已完成 | 🔒 暂缓 | ⛔ 已废弃
 
@@ -34,9 +34,12 @@
 | B6 | **商店入场动画竞态守卫** — `_play_entrance()` 加入口 `_entrance_active` 标志位 + `NinKingTween.play_shop_entrance()` 每个 `await` 后 `is_instance_valid(panel)` 守卫，防场景切换时访问已 free 节点崩溃 | `shop_ui.gd` + `nin_king_tween.gd` | **P0** | ✅ |
 | B7 | **商店入场 shake 改用 `shake_node(panel)`** — `screen_shake()` 依赖 Camera2D，商店场景(Control)无 Camera2D 会静默失败。改用 `GlobalTweens.shake_node(panel, 6.0, 0.15)` 震动面板 | `nin_king_tween.gd` | **P0** | ✅ |
 | B14 | **忍者栏拖拽失效** ✅ — 原手工拖拽 `get_global_rect().has_point()` 在 HBoxContainer 内误检 + TextureRect EXPAND_KEEP_SIZE 展示原始尺寸。整栏迁移至 card-framework：新建 `NinjaInventoryCard`(Card 子类) + `NinjaBarContainer`(CardContainer 子类，DropZone 垂直分区检测落点) + `ninja_bar_node.gd` 重写。删 `ninja_slot.gd`/`ninja_slot.tscn`。`ninja_bar_display.gd` 改用 NinjaInventoryCard。| `ninja_inventory_card.gd`(新) + `ninja_bar_container.gd`(新) + `ninja_bar_node.gd` + `ui_manager.gd` + `ninking_main.tscn` + `debug_ninking_main.tscn` + `debug_controller.gd` + `ninja_bar_display.gd` | **P0** | ✅ |
-| B15 | **计分动画忍者条件不匹配误触发** — `animation_handler.gd` `_compute_ninja_contributions()` 将 `ninja_affected_groups()` 返回的 `[]` 无条件当作"所有组"，未区分"条件不匹配"情况。导致对子限定型忍者(如虎头 n_g01)在同花顺行也错误触发动画。修复：添加 `has_condition` 判断，条件不匹配时 `continue` 跳过 | `scripts/ninking/ui/animation_handler.gd:576-578` | **P0** | ✅ |
+| B15 | **计分动画忍者条件不匹配误触发** — `ninja_affected_groups()` 返回 `[]` 的语义歧义（无条件→全组 vs 条件不匹配→无组）导致条件型忍者在不匹配的牌型上也触发动效和计分。原修复仅覆盖 `animation_handler.gd` 旧路径，遗漏 `score_calculator.gd` `analyze_effects()` 的 Phase H 预计算路径和 `score_effect_collector.gd` `collect_ninja_per_group()` 计分引擎路径。**完整修复** (2026-06-18)：三个调用处均添加条件存在判断，`groups.is_empty()` 且 `condition` 含 `hand_type`/`group` 时 `continue`/`return` 跳过 | `animation_handler.gd:518-525` + `score_calculator.gd:451-458` + `score_effect_collector.gd:142-145` | **P0** | ✅ |
 | B16 | **`ninja_affected_groups()` 不识别 `head_or_mid` 组值** — 双头蛇 n_g05 的 condition.group `"head_or_mid"` 未在单组匹配分支中识别，掉落 `return []` 导致被当作"所有组"。修复：添加 `head_or_mid` 多组检查分支，分别验证 head/mid 各自条件。同时影响计分(collect_ninja_per_group)和动画 | `scripts/ninking/score_calculator.gd:551-559` | **P0** | ✅ |
 | B17 | **手牌拖拽交换不生效** — 3 个隐藏 bug 逐步排查修复：① `_card_can_be_added` 同容器重排时满容量（9/9）误拒，修复为检查是否全部已存在则跳过容量检查；② `get_partition_index` 基类只返回列索引（0-2），需覆盖为行×COLS+列的网格索引（0-8）；③ `SealController.swap_cards` 内有 `gs.current_state != PLAYING` 守卫，Debug/MAIN_MENU 状态下不 emit `hand_swapped` 信号 → `swap_two_cards` 不触发，需在非 PLAYING 状态直接调用 | `ninking_card.gd` + `hand_card_container.gd` + `hand_display.gd` + `hand_interaction.gd` + `ui_manager.gd` | **P0** | ✅ |
+| B18 | **Debug 场景 讨伐按钮约束不满足时灰色样式不生效** — `_update_button_states()` 只检查牌数（≠9），不检查 head ≤ mid ≤ tail 约束。即使 `_on_play_pressed()` 中有约束检查阻止行为，按钮视觉上仍是启用状态（红色）。修复：`_update_button_states()` 牌数=9时增加 `Arrangement.is_legal()` 检查，不满足时 `play_btn.disabled = true` 触发 `theme_override_styles/disabled` 灰色样式 | `debug_controller.gd` | **P0** | ✅ |
+| B19 | **ScoreResult.chips_sum/mult_sum 未赋值 → debug 场景显示 "0 × 1 = 总分"** — 两个字段声明后全项目无任何代码赋值，debug_controller.gd:490 直接用它们格式化 `_score_label.text`，导致始终显示 `"0 × 1 = N"`。主场景不受影响（走 `_score_subtotal` 路径）。修复：`ScoreCalculator.calculate()` 和 `calculate_with_summary()` 中各加两行求和赋值 | `scripts/ninking/score/score_calculator.gd`（+4行） | **P0** | ✅ |
+| B20 | **barrier_config.gd 关卡分值同步 v5.1** — 设计文档和模拟器已更新 24 个 target 值，但游戏代码仍用旧 v3.3 值（B1 修羅 300→15K 等）。全量同步 `barrier_config.gd` 的 24 个封印 target 与 `sim_config.py`/`13-blinds-and-bosses.md` 一致 | `scripts/ninking/barrier_config.gd`（24 target + 版本注释） | **P0** | ✅ |
 
 ---
 
@@ -239,7 +242,21 @@
 
 ---
 
-## 🏗️ Phase E — 结算流程沉浸化 (2026-06-12 Grill 决策 ✅)
+## 🎯 Phase E — 结算流程沉浸化 (2026-06-12 Grill 决策 ✅)
+
+### ✅ E11: 模拟审查 v5.2 — 阈值整体下调 30% (2026-06-18)
+
+> **背景:** 实测 B1-修羅 15K 过难，审查发现 4 项模拟器疏漏。
+
+| # | 任务 | 说明 | 状态 |
+|---|------|------|:----:|
+| E11a | **散牌 chips 修正** — `sim_engine.py`/`calc_engine.py`/`gen_test_v3.py` H_CHIPS[0]: 5→0 | 3 文件 | ✅ |
+| E11b | **阈值整体下调 30%** — 24 封印 target ×0.7 向 5 取整 | `barrier_config.gd` + `sim_config.py` + 2 docs | ✅ |
+| E11c | **排列评分偏差记录** — 模拟器用总分、游戏用行分，差异已记入 §10 | 待修复 | ⬜ |
+| E11d | **交叉验证管道重建** — 三方对齐（sim_engine + calc_engine + ScoreCalculator）| 待办 | ⬜ |
+| E11e | **重跑模拟更新通过率** — `sim_runner.py 30` + `sim_runner_personality.py --all --runs 10` | 待办 | ⬜ |
+| E11f | **文档同步** — `21-simulation-methodology.md` §10 审查发现 + `13-blinds-and-bosses.md` 阈值表 | ✅ |
+| E11g | **阈值调整建议框架更新** — 方法论 §9 新增 30% 下调适配 | ✅ |
 
 > **Grill 8 轮决策 + review-plan 审阅通过。** 移除独立 LevelComplete（过关！+X 金币 + 进商店按钮）页面。计分动画结束后画面定格，金币飞入左面板 MatchPanel/GoldLabel（数值滚动 + 飘字），~1.5s 后自动进 Shop，任意点击/按键可跳过。
 
@@ -352,11 +369,7 @@
 |---|------|------|--------|------|
 | H1 | **`ScoreCalculator.analyze_effects()` 单次遍历** — 返回 Dictionary 汇总所有忍者效果（per_group/col/anim_contribs/gold/tools/scaling/constraint）| `scripts/ninking/score_calculator.gd` + `calculate_with_summary()` + `_row_score()`/`_apply_group_xi()` 提取 | **P0** | ✅ |
 | H2 | **SealController 消费 summary** — `prepare_play()` 调用一次 `analyze_effects()`，`_collect_play_gold()` 改用 summary.gold_on_play | `scripts/ninking/seal_controller.gd` | **P1** | ✅ |
-| H3 | **AnimationHandler 消费 summary** — 删除 `_compute_ninja_contributions()`（~65 行），改用 `summary.anim_contribs` | `scripts/ninking/ui/animation_handler.gd` | **P1** | 🔵 |
-| H4 | **ArrangeController 消费 summary** — `_compute_per_group_ninja_effects()` 改用 `summary.per_group` | `scripts/ninking/arrange_controller.gd` | **P2** | ⬜ |
-| H5 | **工具效果可见性** — `analyze_effects()` 中收集 extra_plays 等悬空效果到 `summary.tools`（extra_redraws 已随换牌系统移除；death_save 已随土遁改造删除） | `scripts/ninking/score_calculator.gd` | **P2** | ⬜ |
-| H6 | **Phase 2 预研文档** — 最终效果 pipeline（5 阶段）+ `NinjaCardInstance` 运行时类设计文档 | 文档 | **P2** | ⬜ |
-| H3 | **AnimationHandler 消费 summary** — 删除 `_compute_ninja_contributions()`（~65 行），改用 `summary.anim_contribs` | `scripts/ninking/ui/animation_handler.gd` | **P1** | ⬜ |
+| H3 | **AnimationHandler 消费 summary** — 删除 `_compute_ninja_contributions()`（~70 行），改用 `summary.anim_contribs` | `scripts/ninking/ui/animation_handler.gd` | **P1** | ✅ |
 | H4 | **ArrangeController 消费 summary** — `_compute_per_group_ninja_effects()` 改用 `summary.per_group` | `scripts/ninking/arrange_controller.gd` | **P2** | ⬜ |
 | H5 | **工具效果可见性** — `analyze_effects()` 中收集 extra_plays 等悬空效果到 `summary.tools`（extra_redraws 已随换牌系统移除；death_save 已随土遁改造删除） | `scripts/ninking/score_calculator.gd` | **P2** | ⬜ |
 | H6 | **Phase 2 预研文档** — 最终效果 pipeline（5 阶段）+ `NinjaCardInstance` 运行时类设计文档 | 文档 | **P2** | ⬜ |
@@ -391,6 +404,33 @@
 | J3 | **`#include` 路径验证** | Phase 2 前置：创建最小验证 shader `shaders/test_include.gdshader`，确认 `#include "res://addons/shaderV/tools/remap.gdshaderinc"` 在 canvas_item + GL Compatibility 下编译通过。通过后删除验证文件 | `shaders/test_include.gdshader`（临时） | **P2** | ⬜ |
 | J4 | **色差 VFX 工具集**（G/F1 后） | 从 ShaderV 复制 chromaticAberration 到 `shaders/utils/`（剥离 textureLod 分支）。新建 `shaders/effects/boss_reveal.gdshader`，用 `#include` 引入色差，用于 Boss 揭示入场效果。通过 `GlobalShaders.create_material_from_path()` 直接加载 | `shaders/utils/chromatic_aberration.gdshaderinc`(新) + `shaders/effects/boss_reveal.gdshader`(新) | **P3** | ⬜ |
 | J5 | **文档同步** | shader-library-reference.md §3.1 加 `shaders/utils/` + `shaders/effects/` 目录；§5.1 工作流加 `#include` 路径验证步骤；§5.3 外部库手册补充 ShaderLib/ShaderV 更新使用说明；`shaders/shaderlib/` 未使用文件加注释 `// @status: NOT_INTEGRATED` | `docs/shader-library-reference.md` | **P2** | ⬜ |
+
+## 🎬 Phase K — 外部 Shader 库引入整合
+
+> **方案审阅通过, 2026-06-18** | **来源:** `shaders/sources/SOURCES.md` — 已预存的原始 .gdshader 文件
+> **前置:** F1（忍者牌补齐）完成后插空执行。K0 子项可提前到 F1 同期做
+> **核心原则：**
+> - **优先扩展已有 shader，不重复造轮子** — `fake3d_flash` 补 3 uniform 即覆盖 robust_shine，不建 ShineFX
+> - **有状态的交互效果才建子系统** — 纯参数效果走 `FilterFX` 统一管线
+> - **遵守 VFX 框架** — 零项目依赖、自初始化、参数可覆盖、信号通知外部
+> - **漫画风方向约束** — 风格化 shader（CRT/old_movie/sketch/water_color）暂不引入
+
+| # | 任务 | 说明 | 优先级 | 状态 |
+|---|------|------|--------|------|
+| **K0** | **复用扩展（零新文件/最小改动，可提前到 F1 同期）** |
+| K0a | **`fake3d_flash.gdshader` 增强 — 补循环方向+软边** | 加 3 uniform: `one_way_loop`(单向循环)、`loop_direction`(正反向)、`softness`(闪光软边)。效果覆盖 `shaders/sources/robust_shine.gdshader` 全部能力。修改 1 个 `.gdshader` 文件。**不新建 ShineFX 子系统，不引入新 shader** | **P2** | ✅ |
+| K0b | **`GlowFX` 扩展 — 新增 `emissive_add` 闪烁模式** | `shaders/sources/blink.gdshader` 本质是 sin(TIME) 驱动的 RGB 加法辉光。在 GlowFX 新增 `emissive_add` 模式参数（纯加法叠加而非 glow 纹理）。调用方 `GlobalShaders.apply_glow(node, {mode: "emissive_add", blink_frequency: 2.0})`。效果覆盖 `shaders/sources/blink.gdshader`。不新建 BlinkFX | **P2** | ⬜ |
+| K0c | **`RippleFX` 新建** | 唯一真正需要新子系统的效果。波纹点击反馈 — 按钮按下/出牌区域选中。新建 `scripts/shader/ripple_fx.gd`(class_name RippleFX) + 复制 `shaders/sources/ripple.gdshader` → `shaders/effects/ripple.gdshader`。支持中心扰动/距离衰减/密度控制。`GlobalShaders` 注册 `apply_ripple()`/`clear_ripple()` | **P2** | ⬜ |
+| **K1** | **子系统新增（F1 完成后执行）** |
+| K1a | **`FilterFX` 新建 — 统一滤镜管线** | 1 shader 多模式设计：`shaders/filters/multi_filter.gdshader` 内含 `uniform int mode` 切换（0=灰度 1=暗角 2=颜色叠加 3=选色）。新建 `scripts/shader/filter_fx.gd`(class_name FilterFX)。覆盖 `grayscale`/`vignette`/`color_overlay`/`selective_color` 四种滤镜（源文件在 `shaders/sources/`）。`GlobalShaders` 注册 `apply_grayscale()`/`apply_vignette()`/`apply_overlay()`/`clear_filter()` | **P2** | ⬜ |
+| K1b | **Sprite 级色差效果注册** | Chromatic aberration 作为 Sprite 级别效果（非全屏）。复制 `shaders/sources/chromatic_aberration.gdshader` → `shaders/effects/chromatic_aberration.gdshader`。通过 `GlobalShaders.create_material_from_path()` 加载 + `tween_param()` 驱动强度。不需要新建子系统。全屏色差暂缓（当前漫画风不需要） | **P3** | ⬜ |
+| **K2** | **场景补全（按需排期）** |
+| K2a | **`GlitchFX` 新建 — 分裂故障特效** | 复制 `shaders/sources/split_glitch.gdshader` → `shaders/effects/split_glitch.gdshader`。新建 `scripts/shader/glitch_fx.gd`(class_name GlitchFX)。用于 Boss 登场/转场过渡。网格量化+动态扰动纹理 | **P3** | ⬜ |
+| K2b | **`ExplosionFX` 新建 — 像素爆炸消散** | 复制 `shaders/sources/pixel_explosion.gdshader` → `shaders/effects/pixel_explosion.gdshader`。新建 `scripts/shader/explosion_fx.gd`(class_name ExplosionFX)。用于忍者"遁"术/卡牌销毁 | **P3** | ⬜ |
+| K2c | **环境氛围 shader 引入** | 按需从 `shaders/sources/` 复制 `liquid_distortion.gdshader`(水遁 Boss)/`wave.gdshader`(风遁)/`rainy_surface.gdshader`(雨战)。不走子系统，通过 `GlobalShaders.create_material_from_path()` 直接加载 | **P3** | ⬜ |
+| K2d | **风格化/限定 shader（需漫画风确认）** | `rainbow`(限定卡牌)/`halo_01`(选中光环)/`jelly_wobble`(果冻反馈)。需先确认不与漫画风方向冲突 | **P3** | ⬜ |
+
+---
 
 ## 🔒 Phase D-E — 远期（暂缓）
 
@@ -430,7 +470,31 @@ Phase F1 ──→ Phase F2 ──→ Phase F3 ──→ Phase H ──→ Phase
  I1 = 运行时类 + 5 阶段 Pipeline
  J1-J2 = 箔片闪光加强 + 溶解动态
  J4 = 色差 VFX 工具集
+ K0 = 复用扩展: fake3d_flash 增强 + GlowFX 闪烁模式
+ K1 = RippleFX 波纹反馈 + FilterFX 统一滤镜 + Sprite 色差
+ K2 = GlitchFX 故障 / ExplosionFX 消散 / 场景氛围 shader
 ```
+
+---
+
+## 📝 Phase L — 游戏回放日志系统 (Game Replay Logger)
+
+> **Grill 9 轮设计决策, 2026-06-18**
+> **核心：** 记录每次 run 的操作序列到 `user://logs/` 供 Bug 复现。HTML 可视化回放。
+>
+> **文件：** `scripts/ninking/logging/game_logger.gd`（静态类，无 autoload/class_name，通过 preload 引用）
+> **查看器：** `docs/ninking/ninja-game-replay.html`（拖拽 JSON 日志 → 可视化回放）
+> **接入面：** `game_state.gd` / `seal_controller.gd` / `shop_manager.gd` — 13 种事件全覆盖
+
+| # | 任务 | 说明 | 优先级 | 状态 |
+|---|------|------|--------|------|
+| L1 | **GameRunLogger 核心类** — 13 种事件记录 + JSON 序列化 + 全量/增量快照 + 文件管理 | `scripts/ninking/logging/game_logger.gd` | **P2** | ✅ |
+| L2 | **game_state.gd 插桩** — run_started/seal_started/cards_dealt/auto_arranged/game_over/victory | 6 处调用 | **P2** | ✅ |
+| L3 | **seal_controller.gd 插桩** — play_prepared/play_executed/card_swapped/seal_completed/shop_entered | 5 处调用 | **P2** | ✅ |
+| L4 | **shop_manager.gd 插桩** — ninja_acquired/item_purchased | 2 处调用 | **P2** | ✅ |
+| L5 | **HTML 回放查看器** — 拖拽加载/时间线/卡牌渲染/计分展示/键盘导航 | `docs/ninking/ninja-game-replay.html` | **P2** | ✅ |
+| L6 | **Debug 场景接入** — 7 处插桩（发牌/随机/AI排列/討伐/拖拽交换），与主场景共用日志格式 | `debug_controller.gd` | **P2** | ✅ |
+| L7 | **手动运行验证** — 主场景 + Debug 场景各记录一局并回放确认 | 由用户操作确认 | **P2** | ⬜ |
 
 ---
 
@@ -538,4 +602,9 @@ Phase F1 ──→ Phase F2 ──→ Phase F3 ──→ Phase H ──→ Phase
 | 2026-06-16 | ✨ **忍者牌稀有度闪光材质效果调优**: 边框纹理 resize fix(_resize_to_card() 500x700 to 125x175); Uncommon 静态转缓慢银光(speed=0.5/int=0.35); Rare 降速降强度(speed=1.0/int=0.3); Legendary 多次降强度(1.0 to 0.6 to 0.45)+呼吸范围同步调低; 所有参数三文件同步(.tres+RARITY_FLASH_PARAMS+脉冲范围)。附: 恢复缺失 card_preview.gd。|
 | 2026-06-15 | 📐 **全部 6 项代码质量任务实施完成** 🎉: C30 创建 `score_helpers.gd`(含 `include_seal` 参数) + 两处调用替换; C31 `ScoreResult`→`score_result.gd`(更新 5 引用文件); C32 `Arrangement`→`arrangement.gd`(更新 4 引用文件); C33 `CardVisualComposer.create_tooltip_stylebox()`+ 替换两处; C34 `ContinuePanel`→`continue_panel.tscn`(新建脚本 `continue_panel.gd`); C35 `CardDetailPopup`→`card_detail_popup.tscn`(节点预置于场景)。净消除 ~100 行重复代码, 新增 3 文件 + 2 场景。|
 | 2026-06-17 | 📋 **Kenney UI 素材包双方向评估 + 执行计划**: 创建 `20-kenney-ui-pack-evaluation.md`（少年漫画/治愈漫画完整匹配度矩阵）。创建执行计划，含方向决策框架、方案 A（光标+维持少年漫画）、方案 B（治愈系 5 阶段过渡）。V52 + K1-K7 加入 TODO。详见 `.claude/plans/delightful-forging-cocke.md`。 |
+| 2026-06-18 | 🐛 **Debug 场景日志落盘修复**: debug_controller.gd `_on_back_pressed()` 退出前未调用 `on_game_over()` → `_finalize_run()` 从未触发 → events 累积内存不写盘。修复: 退出前调 `GameRunLogger.on_game_over(...)` 触发 JSON 写入。同时修 `game_logger.gd` UNUSED_PARAMETER 警告。|
+| 2026-06-18 | 📢 **start_run() 输出窗口提醒**: 启动时打印日志 ID/牌组名/保存目录(真实路径)/HTML 回放查看器路径，方便快速跳转和打开回放 |
+| 2026-06-18 | 📝 **Phase L 游戏回放日志系统完成**: Grill 9 轮设计决策。`game_logger.gd` 核心类(13 种事件 + JSON 序列化 + 全量/增量快照) + `game_state.gd`/`seal_controller.gd`/`shop_manager.gd` 插桩 + `ninja-game-replay.html` HTML 可视化回放查看器(拖拽加载/时间线/卡牌渲染/键盘导航)。详见 TODO Phase L。 |
+| 2026-06-18 | 🐛 **save_manager 只读字典崩溃**: `load_progress()` 对 `DEFAULT_PROGRESS` 使用浅拷贝 `.duplicate()`，内层嵌套空字典保持只读 → `record_run_result()` 写入时崩溃。修复: `.duplicate(true)` 深拷贝。同步更新 `06-ui-layout-reference.md`/`10-main-ui-design.md`/`11-main-overlay-design.md` 的 GameOver 节点描述（ScoreSummary 28px 居中 + BackToMenuButton 20px flat）|
 | 2026-06-17 | 📋 **方案审阅+Grill: 外部 Shader 资源集成**: 审阅 3 外部库（ShaderLib/ShaderV/gdquest）→ 选定箔片闪光增强(flash_type=3) + 溶解 UV 滚动 + 色差工具集 3 方向。跳过全息卡(vertex冲突)/悬停(已覆盖)/阴影(过度工程)。J1-J5 共 5 项加入 TODO Phase J。Spec: `specs/shader-external-integration.md` |
+| 2026-06-18 | 🎬 **方案审阅: 外部 Shader 整合引入 → Phase K**: 归档 11 枚源 .gdshader → `shaders/sources/`。review-plan 发现: ① fake3d_flash 已覆盖 robust_shine 不重复引入 ② GlowFX 扩展 emissive_add 覆盖 blink ③ 纯参数效果合并为 FilterFX 统一管线 ④ 全屏色差暂缓。K0-K2 共 11 项加入 TODO Phase K。K0 子项可 F1 同期做 |

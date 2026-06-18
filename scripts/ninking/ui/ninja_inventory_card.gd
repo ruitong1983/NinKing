@@ -42,24 +42,12 @@ var _fake3d_mat: ShaderMaterial = null
 var _dissolve_mat: ShaderMaterial = null
 # Flash material for rarity-based card surface effects (shared instance, front+frame)
 var _flash_mat: ShaderMaterial = null
-# Legendary flag for breathing pulse control
+# Legendary / Rare flags for animation pulse control
 var _is_legendary: bool = false
+var _is_rare: bool = false
 
 const NAME_FONT_SIZE: int = 12
 
-# Flash material resource paths per rarity (fake3d_flash.gdshader parametrization)
-const FLASH_MATERIAL_PATHS: Dictionary = {
-	"uncommon": "res://resources/materials/fake3d_uncommon.tres",
-	"rare": "res://resources/materials/fake3d_rare.tres",
-	"legendary": "res://resources/materials/fake3d_legendary.tres",
-}
-
-# Base flash shader parameters per rarity (for hover accelerate / restore)
-const RARITY_FLASH_PARAMS: Dictionary = {
-	"uncommon": {"intensity": 0.6, "move_speed": 0.3},
-	"rare": {"intensity": 0.3, "move_speed": 0.6},
-	"legendary": {"intensity": 0.45, "move_speed": 0.8},
-}
 
 
 func _init() -> void:
@@ -281,6 +269,7 @@ func _resize_to_card(texture: Texture2D) -> Texture2D:
 	img.resize(int(card_size.x), int(card_size.y), Image.INTERPOLATE_LANCZOS)
 	return ImageTexture.create_from_image(img)
 
+
 func _apply_rarity_frame(rarity: String) -> void:
 	## Load and display a rarity frame texture overlay via CardVisualComposer.
 	## Falls back to StyleBoxFlat border if frame texture unavailable.
@@ -295,7 +284,7 @@ func _apply_rarity_frame(rarity: String) -> void:
 		# Fallback: rarity-colored border via StyleBoxFlat
 		add_theme_stylebox_override("panel", CardVisualComposer.create_rarity_stylebox(rarity, "full"))
 
-	# Apply flash material for non-common rarity
+	# Apply flash material (all rarities now have distinct flash effects)
 	_apply_flash_material(rarity)
 
 
@@ -303,30 +292,48 @@ func _apply_rarity_frame(rarity: String) -> void:
 # Flash material (Foil / Holo / Polychrome)
 # ============================================================
 
+## Restore the appropriate idle looping animation based on rarity.
+func _restore_idle_animation() -> void:
+	if not _flash_mat:
+		return
+	var r: String = ninja_data.get("rarity", "common")
+	match r:
+		"legendary":
+			GlobalTweens.shader_pulse(self, _flash_mat, "intensity", 0.1, 0.38, 0.8)
+		"rare":
+			GlobalTweens.shader_pulse(self, _flash_mat, "intensity", 0.2, 0.55, 0.6)
+		"uncommon":
+			GlobalTweens.shader_pulse(self, _flash_mat, "intensity", 0.18, 0.42, 1.2)
+
+
 ## Load and apply rarity-based flash shader to both front_face and frame_overlay.
-## Common -> keep existing fake3d (no flash).
+## All four rarities have flash materials with distinct dynamic modes:
+##   Common   -> type2 silver gradient scan (silk, static intensity 0.3)
+##   Uncommon -> type2 ocean wave gradient flow + breath (0.18~0.42)
+##   Rare     -> type2 fire gradient flicker + pulse (0.20~0.55)
+##   Legendary-> type1 rainbow shimmer + breath (0.10~0.38)
 ## Uses a single ShaderMaterial instance shared by front and frame layers,
 ## so shader param tweens affect both simultaneously.
 func _apply_flash_material(rarity: String) -> void:
-	if rarity == "common":
+	var path: String = AssetRegistry.FLASH_MATERIAL_PATHS.get(rarity, "")
+	if path.is_empty():
+		# No flash material -> revert to basic fake3d (shouldn't happen now)
 		_flash_mat = null
 		_is_legendary = false
-		# Revert front_face to basic fake3d
+		_is_rare = false
 		if front_face_texture:
 			front_face_texture.material = _fake3d_mat.duplicate() if _fake3d_mat else null
 		if frame_overlay:
 			frame_overlay.material = null
 		return
 
-	var path: String = FLASH_MATERIAL_PATHS.get(rarity, "")
-	if path.is_empty():
-		return
 	var loaded := load(path) as ShaderMaterial
 	if loaded == null:
 		return
 
 	_flash_mat = loaded.duplicate()
 	_is_legendary = rarity == "legendary"
+	_is_rare = rarity == "rare"
 
 	# Apply to front face (replaces fake3d)
 	if front_face_texture:
@@ -336,18 +343,33 @@ func _apply_flash_material(rarity: String) -> void:
 	if frame_overlay:
 		frame_overlay.material = _flash_mat
 
-	# Start legendary breathing pulse
-	if _is_legendary:
-		_start_legendary_breath()
+	# Apply rarity-specific flash params (one_way_loop, softness) from AssetRegistry.RARITY_FLASH_PARAMS
+	if _flash_mat:
+		var par: Dictionary = AssetRegistry.RARITY_FLASH_PARAMS.get(rarity, {})
+		if par.has("one_way_loop"):
+			_flash_mat.set_shader_parameter("one_way_loop", par["one_way_loop"])
+		if par.has("softness"):
+			_flash_mat.set_shader_parameter("softness", par["softness"])
+
+	# Start rarity-specific looping animations
+	if _flash_mat:
+		match rarity:
+			"legendary":
+				GlobalTweens.shader_pulse(self, _flash_mat, "intensity", 0.1, 0.38, 0.8)
+			"rare":
+				GlobalTweens.shader_pulse(self, _flash_mat, "intensity", 0.2, 0.55, 0.6)
+			"uncommon":
+				GlobalTweens.shader_pulse(self, _flash_mat, "intensity", 0.18, 0.42, 1.2)
+			# common: no looping animation (subtle scan only)
 
 
 ## Speed up flash material params on hover (intensity x1.5, move_speed x2).
-## For legendary: also accelerate the breathing cycle.
+## For legendary/rare: also accelerate the looping pulse cycle.
 func _on_hover_start() -> void:
 	if not _flash_mat:
 		return
 	var r: String = ninja_data.get("rarity", "common")
-	var base: Dictionary = RARITY_FLASH_PARAMS.get(r, {})
+	var base: Dictionary = AssetRegistry.RARITY_FLASH_PARAMS.get(r, {})
 	var target_intensity: float = base.get("intensity", 0.0) * 1.5
 	var target_speed: float = maxf(base.get("move_speed", 0.0) * 2.0, 1.0)
 
@@ -355,28 +377,22 @@ func _on_hover_start() -> void:
 	GlobalTweens.tween_shader_param(self, _flash_mat, "move_speed", target_speed, 0.15)
 
 	if _is_legendary:
-		GlobalTweens.shader_pulse(self, _flash_mat, "intensity", 0.3, 0.65, 0.3)
+		GlobalTweens.shader_pulse(self, _flash_mat, "intensity", 0.2, 0.55, 0.3)
+	elif _is_rare:
+		GlobalTweens.shader_pulse(self, _flash_mat, "intensity", 0.35, 0.75, 0.4)
 
 
-## Restore flash material params on unhover.
+## Restore flash material params on unhover and resume idle animation.
 func _on_hover_end() -> void:
 	if not _flash_mat:
 		return
 	var r: String = ninja_data.get("rarity", "common")
-	var base: Dictionary = RARITY_FLASH_PARAMS.get(r, {})
+	var base: Dictionary = AssetRegistry.RARITY_FLASH_PARAMS.get(r, {})
 
 	GlobalTweens.tween_shader_param(self, _flash_mat, "intensity", base.get("intensity", 0.0), 0.2)
 	GlobalTweens.tween_shader_param(self, _flash_mat, "move_speed", base.get("move_speed", 0.0), 0.2)
 
-	if _is_legendary:
-		_start_legendary_breath()
-
-
-## Start infinite breathing pulse on intensity (0.25 <-> 0.55, 0.8s cycle).
-## Auto-killed by shader_pulse domain when hover starts or rarity changes.
-func _start_legendary_breath() -> void:
-	if _flash_mat:
-		GlobalTweens.shader_pulse(self, _flash_mat, "intensity", 0.2, 0.4, 0.8)
+	_restore_idle_animation()
 
 
 # ============================================================

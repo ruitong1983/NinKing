@@ -1,6 +1,10 @@
-# 识图：遇图片用 `node vision.js "<路径>" "用中文描述"`，勿用 Read
+# ⚠️ 工作流
 
-# ⚠️ Spec-First — 先出方案，再写代码
+## 识图
+
+> 遇图片用 `node vision.js "<路径>" "用中文描述"`，勿用 Read
+
+## ⚠️ Spec-First — 先出方案，再写代码
 
 > **非纯代码的修改请求 → 先输出方案 → 用户确认 → 再动手。优先级最高。**
 >
@@ -8,25 +12,25 @@
 > **例外：** 单行修复、精确到行的指令、纯查询。
 > **方案：** 列出涉及文件 + 改动概要 + 理由 + 影响面 + 风险（可以只有两行，但必须有）。
 >
-> Skill（ui-modify-plan / review-plan / update-docs）在方案确认后执行。
+> 匹配的 Skill 在方案确认后执行。
 
-# 📋 工作清单 → `docs/ninking/09-mgmt/TODO.md`
+## 📋 工作清单 → `docs/ninking/09-mgmt/TODO.md`
 
 > 每次会话开始先读取。完成任务后更新状态。
 
-# 🔧 疑难问题 → `docs/ninking/09-mgmt/90-troubleshooting.md`
+## 🔧 疑难问题 → `docs/ninking/09-mgmt/90-troubleshooting.md`
 
 > 遇到非显而易见的报错/异常行为/Godot 编辑器问题，先查此手册是否已有记录。
 
-# 🧪 Godot MCP Pro 测试 → 先读 `docs/ninking/08-testing/testing-guide.md`
+## 🧪 Godot MCP Pro 测试 → 先读 `docs/ninking/08-testing/testing-guide.md`
 
 > **注意：运行时测试不自动执行。需要测试时，在回复中写出测试目标与预期结果，提醒用户手动操作并反馈结果，再根据反馈调整代码。**
 >
 > **触发：** 任何需要运行时验证（`play_scene` / `find_ui_elements` / `simulate_mouse_click` / `get_game_screenshot`）的场景。
-> **为什么：** 用户希望亲手验证效果，自动测试常因场景状态/按钮文本对不上卡住，浪费回合；用户自己操作更灵活，也能发现预期外的问题。
+>
 > **参考记忆：** [[manual-test-invocation]]
 
-# ⚠️ 任务分派 — 动手前先查 Skill
+## ⚠️ 任务分派 — 动手前先查 Skill
 
 > 非纯代码任务必须先检查 `.claude/skills/`。Skill 匹配后走完其完整流程。
 
@@ -38,9 +42,12 @@
 | 更新HTML / update-html | `update-html` | 更新 HTML 可视化文件 |
 | 消除告警 / fix warnings / UNUSED_VARIABLE | `fix-gdscript-warnings` | 消除 GDScript 未使用变量/参数告警 |
 | 忍者测试 / ninja-test | `ninja-test` | 构建 → 计分模拟 → Delta验证 → Review报告 |
+| **模拟玩家性格测试 / MBTI模拟 / 性格测试** | **`ninja-mbti-test`** | **清理 → 模拟35型 → HTML报告(结论+平衡性+建议)** |
 | 上传代码 / push / 提交推送 / sync | `upload-code` | git add . → commit → push |
 
 > **Skill 文件跟踪：** `.claude/skills/` 目录下的 skill 文件随项目代码一起纳入 git 版本管理，新增或修改 skill 时一并提交推送。
+
+# 🏗️ 编码规范 · Godot 4.6.2 纯2D
 
 ## 素材替换
 
@@ -48,20 +55,42 @@
 >
 > 疑难问题 → `docs/ninking/09-mgmt/90-troubleshooting.md`
 
-# Claude Code 开发规范 · Godot 4.6.2 纯2D
-
 ## 环境与编码
+
 - Godot 4.6.2 / GDScript 2.0 / 纯2D（禁止任何 `3D` 后缀的类/节点/API/资源）
 - 纯原生，不依赖第三方插件/SDK/扩展库，路径统一 `res://`
 - 命名：文件/目录/函数/变量 `snake_case`，类/节点 `PascalCase`，常量 `CONSTANT_CASE`，私有 `_` 前缀。所有变量加类型注解。
-- 节点引用 `@onready`，信号用 `signal` / `emit_signal` / callable 绑定
-- 禁用 Godot 3.x 旧语法：yield、字符串 connect、`get_node()`、`set_process()`、`export()` 变体（`:=` 类型推断允许使用）
+- 节点引用 `@onready`，信号用 `signal` 定义 + `signal_name.emit()` 发射 + callable 绑定
+- 禁用 Godot 3.x 旧语法：yield、字符串 connect、`emit_signal()`、`get_node()`、`set_process()`、`export()` 变体（`:=` 类型推断允许使用）
 - 物理/碰撞/AI → `_physics_process`，动画/UI/渲染 → `_process`
-- ⚠️ Godot 资源文件 (.tscn/.tres/.gd/.godot/.cfg) 必须 UTF-8 无 BOM, LF 换行
+- ⚠️ Godot 资源文件 (.tscn/.tres/.gd/.cfg) 及 project.godot 必须 UTF-8 无 BOM, LF 换行
 - ⚠️ 文件操作必须用 Read/Write/Edit 工具，禁止 PowerShell/Bash 做文件内容读写
 - ⚠️ Edit 失败一次 → 立刻改用 Write 重写整个文件。禁止 shell 脚本做字符串替换（会引入 BOM/UTF-16 LE/中文乱码）
 - ⚠️ PowerShell: `Set-Content -Encoding UTF8` 会加 BOM; `>` / `Out-File` 默认 UTF-16 LE
 - ⚠️ **TextureRect 必须显式设 `expand_mode`**：禁止依赖默认值 `EXPAND_KEEP_SIZE`（会让 `minimum_size` 锁定为纹理原生尺寸，溢出布局）。程序化创建的 TextureRect 必须紧跟 `.expand_mode = TextureRect.EXPAND_IGNORE_SIZE`。已在 `card_detail_popup.gd` / `ninja_inventory_card.gd` 踩坑两次。→ `docs/ninking/09-mgmt/90-troubleshooting.md §4`
+
+## 项目约定（基于代码库实际模式归纳）
+
+### AutoLoad
+- 注册名 = 脚本文件名 `snake_case` 转 `PascalCase`（如 `game_state.gd` → `NinKingGameState`）
+- 全部 `extends Node`，不声明 `class_name`，通过注册名直接访问
+
+### `class_name`
+- 被其他脚本引用的类**必须**声明 `class_name`
+- 禁止使用 `extends "res://..."` 字符串路径继承
+- 仅因编辑器缓存冲突可不声明（须注释原因，如 `game_logger.gd`）
+
+### `@export`
+- 项目代码中禁止使用 `@export`（含 `@export_group` / `@export_category` / `@export_subgroup`）
+- 所有配置数据用文件级 `const` 定义（`const Dictionary` / `const Array`）
+
+### `@tool`
+- 仅用于 CardContainer 子类（编辑时布局预览）和 CardFactory（满足 CardManager 依赖）
+- 其他场景禁止使用
+
+### 常量定义位置
+- 就近定义在语义最相关的脚本中，不设全局 `constants.gd`
+- 枚举用 `enum` + `@tag` 注释，数据表用 `const Dictionary` / `const Array`
 
 ## Card-Framework 卡牌框架
 
@@ -114,3 +143,5 @@ API 速查 → `docs/shader-library-reference.md`。
 5. **变量命名：** 实例/局部/`@export`/`@onready` 必须 `snake_case`，常量 `CONSTANT_CASE`
 6. **Card-Framework 复用：** 所有卡牌拖拽/悬停/排列/堆叠必须基于 Card-Framework
 7. **文档同步：** 对照 `DOCUMENT_MAP.md` 确认受影响文档已同步，未同步的提交视为不完整
+8. **`class_name` / `@export` / `@tool`：** 必须符合项目约定——禁止 `extends "res://..."` 字符串路径；禁止在项目代码中使用 `@export`；`@tool` 仅限 CardContainer 子类和 CardFactory
+9. **常量定义：** 就近定义在语义最相关的脚本中，禁止新增全局 `constants.gd`

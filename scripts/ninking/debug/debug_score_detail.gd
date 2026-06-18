@@ -104,17 +104,21 @@ func _build_card_grid() -> void:
 
 	var title := Label.new()
 	title.text = "🃏 牌组 3×3 — 行(组) / 列(牌型)"
-	title.add_theme_font_size_override("font_size", 16)
+	title.add_theme_font_size_override("font_size", 20)
 	title.add_theme_color_override("font_color", Color(0.831, 0.659, 0.263))
 	wrapper.add_child(title)
 
 	var grid := GridContainer.new()
 	grid.columns = 4
-	grid.add_theme_constant_override("h_separation", 4)
-	grid.add_theme_constant_override("v_separation", 2)
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 4)
+
+	# Center the grid horizontally
+	var grid_center := CenterContainer.new()
+	grid_center.add_child(grid)
 
 	# Header row
-	grid.add_child(_cell_label("", CLR_GRAY, 13))
+	grid.add_child(_cell_label("", CLR_GRAY, 18))
 	var col_dir: Array[String] = ["左", "中", "右"]
 	for ci: int in range(3):
 		var col_type: int = _col_evals[ci].hand_type if _col_evals.size() > ci else CardData.HandType3.HIGH_CARD_3
@@ -122,7 +126,7 @@ func _build_card_grid() -> void:
 		var hdr: String = "%s\n%s" % [col_dir[ci], CardData.get_hand_type3_name(col_type)]
 		if cm > 1:
 			hdr += "(×%d)" % cm
-		grid.add_child(_cell_label(hdr, CLR_COL, 13))
+		grid.add_child(_cell_label(hdr, CLR_COL, 18))
 
 	# Row data
 	for gi: int in range(3):
@@ -139,7 +143,7 @@ func _build_card_grid() -> void:
 			ht_name = CardData.get_hand_type3_name(eval_result.hand_type)
 		var label_text: String = "%s\n%s" % [gname, ht_name]
 		var label_color: String = CLR_NORMAL
-		grid.add_child(_cell_label(label_text, label_color, 13))
+		grid.add_child(_cell_label(label_text, label_color, 18))
 
 		for ci: int in range(3):
 			if ci < cards.size():
@@ -148,7 +152,7 @@ func _build_card_grid() -> void:
 			else:
 				grid.add_child(_cell_label("-", CLR_GRAY, 13))
 
-	wrapper.add_child(grid)
+	wrapper.add_child(grid_center)
 	_detail_vbox.add_child(wrapper)
 
 
@@ -185,10 +189,10 @@ func _card_cell(cd: CardData.PlayingCard) -> Label:
 
 	var lbl := Label.new()
 	lbl.text = text
-	lbl.add_theme_font_size_override("font_size", 14)
+	lbl.add_theme_font_size_override("font_size", 36)
 	lbl.add_theme_color_override("font_color", Color(color))
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lbl.custom_minimum_size = Vector2(64, 32)
+	lbl.custom_minimum_size = Vector2(120, 60)
 	return lbl
 
 
@@ -277,10 +281,14 @@ func _build_all_groups_bbcode(result: ScoreResult, is_ninja: bool) -> String:
 
 	# Row groups
 	var group_keys: Array[String] = ["head", "mid", "tail"]
-	var group_labels: Array[String] = ["影 (头组)", "瞬 (中组)", "滅 (尾组)"]
+	var group_eval_labels: Array[String] = [
+			"影 (%s)" % CardData.get_hand_type3_name(_get_head_eval().hand_type),
+			"瞬 (%s)" % CardData.get_hand_type3_name(_get_mid_eval().hand_type),
+			"滅 (%s)" % CardData.get_hand_type3_name(_get_tail_eval().hand_type),
+		]
 	for gi: int in range(3):
 		parts.append(_build_group_bbcode(
-			group_labels[gi],
+			group_eval_labels[gi],
 			_get_group_card_chips(result, group_keys[gi]),
 			_get_group_hand_chips(result, group_keys[gi]),
 			_get_group_ench_chips(result, group_keys[gi]),
@@ -366,7 +374,8 @@ func _build_group_bbcode(
 func _build_column_bbcode(
 	col_idx: int, col_cards: Array, col_type: int, result: ScoreResult, is_ninja: bool
 ) -> String:
-	var label: String = "列%d — %s" % [col_idx + 1, CardData.get_hand_type3_name(col_type)]
+	var col_names: Array[String] = ["左列", "中列", "右列"]
+	var label: String = "%s — %s" % [col_names[col_idx], CardData.get_hand_type3_name(col_type)]
 	var cm: int = COL_MULT_MAP.get(col_type, 1)
 	if cm > 1:
 		label += " ×%d" % cm
@@ -462,30 +471,41 @@ func _build_final_score_bbcode(result: ScoreResult) -> String:
 	var lines: Array[String] = []
 	lines.append("[color=%s]━━ 最终分 ━━[/color]" % CLR_GRAY)
 
-	var total_raw: int = _compute_total_raw(result)
-	lines.append("[color=%s]④ 三组原始分 Σ =[/color] [color=%s][b]%d[/b][/color]" % [CLR_GRAY, CLR_GOLD, total_raw])
+	# ④ Row breakdown: N + N + N = total
+	var row_scores: Array[int] = [result.head_score, result.mid_score, result.tail_score]
+	var row_parts: Array[String] = []
+	var rows_raw: int = 0
+	for ri: int in range(3):
+		rows_raw += row_scores[ri]
+		row_parts.append("[color=%s]%d[/color]" % [CLR_GOLD, row_scores[ri]])
+	lines.append("[color=%s]④ 三行分 =[/color] %s [color=%s]= [b]%d[/b][/color]" % [CLR_GRAY, " + ".join(row_parts), CLR_GOLD, rows_raw])
 
-	# Column breakdown
-	if _col_evals.size() == 3:
+	# ⑤ Column breakdown (additive): N + N + N = total
+	if result.col_scores.size() == 3:
 		var col_parts: Array[String] = []
-		var col_prod: int = 1
+		var col_total: int = 0
 		for ci: int in range(3):
-			var ct: int = _col_evals[ci].hand_type
-			var cm: int = COL_MULT_MAP.get(ct, 1)
-			col_prod *= cm
-			col_parts.append("[color=%s]%d[/color]" % ([CLR_COL, cm]))
-		var col_joined: String = "×".join(col_parts)
-		lines.append("[color=%s]× 列乘 =[/color] %s [color=%s]= ×%d[/color]" % [CLR_GRAY, col_joined, CLR_COL, col_prod])
+			var cs: int = result.col_scores[ci]
+			if cs > 0:
+				col_total += cs
+				col_parts.append("[color=%s]%d[/color]" % [CLR_GOLD, cs])
+		if not col_parts.is_empty():
+			lines.append("[color=%s]⑤ 列分 =[/color] %s [color=%s]= [b]%d[/b][/color]" % [CLR_GRAY, " + ".join(col_parts), CLR_GOLD, col_total])
 
-	# Xi breakdown
+	# ⑥ Raw total
+	var total_raw: int = _compute_total_raw(result)
+	lines.append("[color=%s]⑥ 原始总分 = ④ + ⑤[/color] [color=%s]= [b]%d[/b][/color]" % [CLR_GRAY, CLR_GOLD, total_raw])
+
+	# × 喜乘 with xi type names
 	if not result.global_xi_x_stack.is_empty():
-		var xi_parts: Array[String] = []
-		var xi_prod: int = 1
-		for xv: int in result.global_xi_x_stack:
-			xi_prod *= xv
-			xi_parts.append("[color=%s]%d[/color]" % [CLR_XI, xv])
-		var xi_joined: String = "×".join(xi_parts)
-		lines.append("[color=%s]× 喜乘 =[/color] %s [color=%s]= ×%d[/color]" % [CLR_GRAY, xi_joined, CLR_XI, xi_prod])
+		var xi_details: Array[Dictionary] = _get_xi_details()
+		if not xi_details.is_empty():
+			var xi_parts: Array[String] = []
+			var xi_prod: int = 1
+			for xi: Dictionary in xi_details:
+				xi_prod *= xi["x_mult"]
+				xi_parts.append("[color=%s]%s(×%d)[/color]" % [CLR_XI, xi["name"], xi["x_mult"]])
+			lines.append("[color=%s]× 喜乘 =[/color] %s [color=%s]= ×%d[/color]" % [CLR_GRAY, " × ".join(xi_parts), CLR_XI, xi_prod])
 
 	lines.append("[color=%s]=[/color] [color=%s][b]%d[/b][/color]" % [CLR_GRAY, CLR_GOLD, result.total_score])
 
@@ -514,21 +534,27 @@ func _build_delta_section() -> void:
 	var delta: int = ns - bs
 	var pct: float = (float(delta) / float(max(bs, 1))) * 100.0
 
-	var raw_b: int = _compute_total_raw(_baseline)
-	var raw_n: int = _compute_total_raw(_ninja_result)
-	var raw_delta: int = raw_n - raw_b
+	var rows_b: int = _compute_rows_raw(_baseline)
+	var rows_n: int = _compute_rows_raw(_ninja_result)
+	var rows_delta: int = rows_n - rows_b
 
-	# Column prod
-	var col_b: int = _compute_col_prod()
-	var col_n: int = _compute_col_prod()
+	var cols_b_raw: int = 0
+	var cols_n_raw: int = 0
+	if _baseline.col_scores.size() == 3:
+		for cs: int in _baseline.col_scores:
+			cols_b_raw += cs
+	if _ninja_result.col_scores.size() == 3:
+		for cs: int in _ninja_result.col_scores:
+			cols_n_raw += cs
+	var cols_delta: int = cols_n_raw - cols_b_raw
 
 	# Xi prod
 	var xi_b: int = _xi_prod(_baseline)
 	var xi_n: int = _xi_prod(_ninja_result)
 
 	var lines: Array[String] = [
-		"原始分: [b]%d[/b] → [b]%d[/b]  %s" % [raw_b, raw_n, _delta_str(raw_delta)],
-		"列乘: ×%d → ×%d  %s" % [col_b, col_n, _delta_xi_str(col_n - col_b)],
+		"三行: [b]%d[/b] → [b]%d[/b]  %s" % [rows_b, rows_n, _delta_str(rows_delta)],
+		"列分: [b]%d[/b] → [b]%d[/b]  %s" % [cols_b_raw, cols_n_raw, _delta_str(cols_delta)],
 		"喜乘: ×%d → ×%d  %s" % [xi_b, xi_n, _delta_xi_str(xi_n - xi_b)],
 		"最终: [b]%d[/b] → [b]%d[/b]  %s (%+.1f%%)" % [bs, ns, _delta_str(delta), pct],
 	]
@@ -585,6 +611,26 @@ func _compute_total_raw(result: ScoreResult) -> int:
 		for cs: int in result.col_scores:
 			raw += cs
 	return raw
+
+
+func _compute_rows_raw(result: ScoreResult) -> int:
+	return result.head_score + result.mid_score + result.tail_score
+
+
+## Build named xi detail list by matching triggered names against XI_DEFINITIONS.
+## Only includes xi with x_mult > 1 (those that actually contribute to the stack).
+func _get_xi_details() -> Array[Dictionary]:
+	if _xi_result == null or _xi_result.triggered.is_empty():
+		return []
+	var details: Array[Dictionary] = []
+	for name: String in _xi_result.triggered:
+		for def: Dictionary in XiDetector.XI_DEFINITIONS:
+			if def["name"] == name:
+				var xv: int = def.get("x_mult", 1)
+				if xv > 1:
+					details.append({"name": name, "x_mult": xv})
+				break
+	return details
 
 
 # ══════════════════════════════════════════

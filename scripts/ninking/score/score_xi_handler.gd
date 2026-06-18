@@ -56,7 +56,7 @@ static func apply_group_xi(
 	xi_bonus: int,
 	score_head: bool, score_mid: bool, score_tail: bool,
 	head_eval, mid_eval, tail_eval,
-	col_scores: Array
+	_col_scores: Array
 ) -> void:
 	for xi_name: String in xi_result.triggered:
 		var x_val: int = xi_override.get(xi_name, 0)

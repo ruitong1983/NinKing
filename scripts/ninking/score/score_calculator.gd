@@ -250,6 +250,9 @@ static func calculate(
 	# Breakdown for debugging
 	result.col_scores = col_scores
 	result.col_total = col_total
+	result.chips_sum = result.head_chips + result.mid_chips + result.tail_chips
+	result.mult_sum = result.head_mult + result.mid_mult + result.tail_mult
+
 	result.breakdown = {
 		"head_score": result.head_score,
 		"mid_score": result.mid_score,
@@ -608,6 +611,9 @@ static func calculate_with_summary(
 
 	result.col_scores = col_scores
 	result.col_total = col_total
+	result.chips_sum = result.head_chips + result.mid_chips + result.tail_chips
+	result.mult_sum = result.head_mult + result.mid_mult + result.tail_mult
+
 	result.breakdown = {
 		"head_score": result.head_score,
 		"mid_score": result.mid_score,

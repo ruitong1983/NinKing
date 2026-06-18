@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NinKing MBTI 32型 · 模拟测试报告 2026-06-18 15:23:53</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,"Microsoft YaHei","PingFang SC",sans-serif; background:#0f0f23; color:#e0e0e0; }
+.container { max-width:1100px; margin:0 auto; padding:24px 20px; }
+
+h1 { font-size:26px; color:#ffd700; }
+h2 { font-size:18px; color:#ffd700; margin:28px 0 12px; border-bottom:1px solid #2a2a5a; padding-bottom:6px; }
+h3 { font-size:15px; color:#ddd; margin:16px 0 8px; }
+
+.report-meta { font-size:13px; color:#888; margin:6px 0 20px; display:flex; gap:20px; flex-wrap:wrap; }
+.meta-tag { background:#1e1e3a; padding:2px 10px; border-radius:4px; }
+
+/* 发现卡片 */
+.findings { display:flex; flex-direction:column; gap:8px; margin:12px 0; }
+.finding { padding:12px 16px; border-radius:8px; border:1px solid #2a2a5a; display:flex; align-items:center; gap:10px; font-size:14px; line-height:1.5; }
+.finding .rating { font-size:20px; }
+.finding.normal { background:#0f2a0f; border-color:#1b5e20; }
+.finding.warning { background:#2a1f0f; border-color:#795548; }
+.finding.weak { background:#2a0f0f; border-color:#5e1b1b; }
+.finding.critical { background:#3a0f0f; border-color:#8b1a1a; }
+.finding.op { background:#1f0f2a; border-color:#6a1b8b; }
+
+/* KPI */
+.kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin:16px 0; }
+.kpi-card { background:#16163a; border-radius:10px; padding:16px; border:1px solid #2a2a5a; }
+.kpi-card .kpi-label { font-size:11px; color:#888; text-transform:uppercase; }
+.kpi-card .kpi-value { font-size:28px; font-weight:700; margin:4px 0; }
+.kpi-card .kpi-sub { font-size:12px; color:#888; }
+
+/* 表格 */
+table { width:100%; border-collapse:collapse; margin:12px 0 20px; font-size:13px; }
+th { background:#0f0f23; color:#ffd700; padding:8px 12px; text-align:center; border-bottom:2px solid #2a2a5a; }
+td { padding:8px 12px; text-align:center; border-bottom:1px solid #1e1e3a; }
+tr:hover td { background:#1a1a3a; }
+
+.bar-bg { height:6px; background:#2a2a5a; border-radius:3px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:3px; }
+
+/* 调整建议 — 新样式 */
+.suggestions { display:flex; flex-direction:column; gap:10px; margin:12px 0; }
+.suggestion { padding:14px 16px; border-radius:8px; border-left:4px solid; position:relative; }
+.suggestion.high { background:#2a0f0f; border-color:#f44336; }
+.suggestion.medium { background:#1a1a3a; border-color:#ff9800; }
+.suggestion.low { background:#0f0f23; border-color:#555; }
+.suggestion .sug-category { display:inline-block; font-size:11px; padding:1px 8px; border-radius:3px; margin-bottom:6px; }
+.suggestion .sug-target { font-weight:600; font-size:14px; }
+.suggestion .sug-text { font-size:13px; color:#ccc; margin-top:6px; line-height:1.6; }
+.suggestion .sug-evidence { font-size:11px; color:#666; margin-top:6px; border-top:1px solid #2a2a5a; padding-top:6px; }
+.suggestion .sug-source { font-size:10px; color:#444; float:right; }
+
+/* 建议分类徽章颜色 */
+.cat-机制 { background:#4a148c; color:#ce93d8; }
+.cat-数值 { background:#1a237e; color:#90caf9; }
+.cat-价格 { background:#e65100; color:#ffcc80; }
+.cat-奖励 { background:#004d40; color:#80cbc4; }
+.cat-阈值 { background:#3e2723; color:#a1887f; }
+
+/* 折叠面板 */
+.detail-group { margin:8px 0; background:#16163a; border-radius:10px; border:1px solid #2a2a5a; overflow:hidden; }
+.detail-header { padding:12px 16px; cursor:pointer; display:flex; align-items:center; gap:10px; font-size:14px; font-weight:600; user-select:none; }
+.detail-header:hover { background:#1e1e4a; }
+.detail-header .arrow { transition:transform 0.2s; }
+.detail-header.open .arrow { transform:rotate(90deg); }
+.detail-body { padding:0 16px 16px; display:none; }
+.detail-body.open { display:block; }
+
+.type-row { display:flex; align-items:center; gap:10px; padding:6px 0; font-size:13px; border-bottom:1px solid #1e1e3a; }
+.type-row:last-child { border-bottom:none; }
+.type-row .name { width:140px; }
+.type-row .stat { width:70px; text-align:center; }
+.type-row .bar { flex:1; max-width:200px; }
+
+/* A/T 对比 */
+.at-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:10px; margin:12px 0; }
+.at-card { background:#16163a; border-radius:8px; padding:12px; border:1px solid #2a2a5a; }
+.at-card .at-name { font-size:14px; font-weight:600; }
+.at-card .at-row { display:flex; justify-content:space-between; font-size:12px; margin:4px 0; color:#aaa; }
+.at-diff-pos { color:#4caf50; }
+.at-diff-neg { color:#f44336; }
+
+/* 膨胀详情 */
+.inflate-card { background:#16163a; border-radius:8px; padding:10px 14px; border:1px solid #2a2a5a; font-size:13px; }
+
+.footer { text-align:center; font-size:12px; color:#555; margin:40px 0 20px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>🧠 NinKing MBTI 32型 · 模拟测试报告</h1>
+<div class="report-meta">
+  <span class="meta-tag">📅 2026-06-18 15:23:53</span>
+  <span class="meta-tag">🎯 35 型</span>
+  <span class="meta-tag">🔄 3 次/型</span>
+  <span class="meta-tag">📂 data_personality/</span>
+</div>
+
+<!-- KPI 总览 -->
+<h2>📊 总览</h2>
+<div class="kpi-grid" id="kpiGrid"></div>
+
+<!-- 关键发现 -->
+<h2>⚠️ 关键发现</h2>
+<div class="findings" id="findingsContainer"></div>
+
+<!-- 数值膨胀分析 -->
+<h2>📈 数值膨胀 / 超模分析</h2>
+<div id="inflationContainer"></div>
+
+<!-- 调整建议 -->
+<h2>🔧 游戏机制调整建议</h2>
+<p style="font-size:12px;color:#888;margin-bottom:8px;">
+  建议基于多维数据分析自动生成，聚焦具体游戏机制调整方向。
+  每条建议标注分类（🔧机制 / ⚖️数值 / 💰价格 / 🎁奖励 / 🎯阈值）和数据来源。
+</p>
+<div class="suggestions" id="suggestionsContainer"></div>
+
+<!-- A/T 对比 -->
+<h2>⚖️ A/T 自信 vs 动荡 对比</h2>
+<div id="atContainer"></div>
+
+<!-- 各组详情 -->
+<h2>📋 各组明细</h2>
+<div id="detailContainer"></div>
+
+<div class="footer">
+  NinKing MBTI 模拟测试 · 由 generate_mbti_report.py 自动生成 · 2026-06-18 15:23:53
+</div>
+
+</div>
+
+<script>
+const RESULTS = [{"group": "感性型", "name": "创作家·纠结", "icon": "🎭", "runs": 3, "b8_pass_rate": 33.3, "b8_p50": 9922752, "b8_min": 9922752, "b8_max": 9922752, "max_barrier": 8, "avg_trigger": 89.6, "avg_active": 9.8, "seal_count": 24, "barrier_pass": {"1": 66.7, "2": 33.3, "3": 33.3, "4": 33.3, "5": 33.3, "6": 33.3, "7": 33.3, "8": 33.3}, "description": "有趣的组合太多，选择困难"}, {"group": "感性型", "name": "创作家·自在", "icon": "🎭", "runs": 3, "b8_pass_rate": 33.3, "b8_p50": 12050016, "b8_min": 12050016, "b8_max": 12050016, "max_barrier": 8, "avg_trigger": 87.2, "avg_active": 9.9, "seal_count": 24, "barrier_pass": {"1": 100.0, "2": 33.3, "3": 33.3, "4": 33.3, "5": 33.3, "6": 33.3, "7": 33.3, "8": 33.3}, "description": "玩自己的组合，不为结果焦虑"}, {"group": "感性型", "name": "愿景师·坚定", "icon": "🎭", "runs": 3, "b8_pass_rate": 33.3, "b8_p50": 32144384, "b8_min": 32144384, "b8_max": 32144384, "max_barrier": 8, "avg_trigger": 79.0, "avg_active": 8.4, "seal_count": 24, "barrier_pass": {"1": 100.0, "2": 33.3, "3": 33.3, "4": 33.3, "5": 33.3, "6": 33.3, "7": 33.3, "8": 33.3}, "description": "信念坚定，忍耐力极强"}, {"group": "感性型", "name": "愿景师·焦虑", "icon": "🎭", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 1, "avg_trigger": 55.6, "avg_active": 0.9, "seal_count": 3, "barrier_pass": {"1": 100.0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "愿景宏大却害怕撑不到那一天"}, {"group": "感性型", "name": "探险家·乐天", "icon": "🎭", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 1, "avg_trigger": 38.9, "avg_active": 0.5, "seal_count": 4, "barrier_pass": {"1": 100.0, "2": 0.0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "好奇但理性，享受探索不过度冒险"}, {"group": "感性型", "name": "探险家·狂热", "icon": "🎭", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 3, "avg_trigger": 85.4, "avg_active": 3.6, "seal_count": 9, "barrier_pass": {"1": 100.0, "2": 33.3, "3": 33.3, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "每个方向都诱人，每个都想试试"}, {"group": "感性型", "name": "鼓舞者·从容", "icon": "🎭", "runs": 3, "b8_pass_rate": 33.3, "b8_p50": 70192000, "b8_min": 70192000, "b8_max": 70192000, "max_barrier": 8, "avg_trigger": 84.8, "avg_active": 10.3, "seal_count": 24, "barrier_pass": {"1": 100.0, "2": 33.3, "3": 33.3, "4": 33.3, "5": 33.3, "6": 33.3, "7": 33.3, "8": 33.3}, "description": "阵容合理就足够，信任团队"}, {"group": "感性型", "name": "鼓舞者·操心", "icon": "🎭", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 1, "avg_trigger": 72.2, "avg_active": 1.4, "seal_count": 4, "barrier_pass": {"1": 66.7, "2": 0.0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "总怕某个位置拖后腿，不断修补"}, {"group": "收集型", "name": "均衡流·操心", "icon": "📋", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 2, "avg_trigger": 52.8, "avg_active": 1.3, "seal_count": 5, "barrier_pass": {"1": 66.7, "2": 33.3, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "总怕某个位置掉链子，不断调整"}, {"group": "收集型", "name": "均衡流·稳健", "icon": "📋", "runs": 3, "b8_pass_rate": 33.3, "b8_p50": 49533952, "b8_min": 49533952, "b8_max": 49533952, "max_barrier": 8, "avg_trigger": 88.6, "avg_active": 9.8, "seal_count": 24, "barrier_pass": {"1": 66.7, "2": 33.3, "3": 33.3, "4": 33.3, "5": 33.3, "6": 33.3, "7": 33.3, "8": 33.3}, "description": "团队已经够好了，不需要过度干预"}, {"group": "混沌型", "name": "反人性", "icon": "🧪", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 2, "avg_trigger": 48.9, "avg_active": 0.7, "seal_count": 5, "barrier_pass": {"1": 100.0, "2": 33.3, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "故意做反最优选择——下限基线"}, {"group": "混沌型", "name": "少商店", "icon": "🧪", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 1, "avg_trigger": 0.0, "avg_active": 0.0, "seal_count": 3, "barrier_pass": {"1": 100.0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "从不进商店——纯基础牌面基线"}, {"group": "混沌型", "name": "真随机", "icon": "🧪", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 1, "avg_trigger": 75.0, "avg_active": 0.8, "seal_count": 4, "barrier_pass": {"1": 33.3, "2": 0.0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "完全零智力——纯随机决策基线"}, {"group": "灵活型", "name": "机会主义者·敏捷", "icon": "🦎", "runs": 3, "b8_pass_rate": 33.3, "b8_p50": 52281488, "b8_min": 52281488, "b8_max": 52281488, "max_barrier": 8, "avg_trigger": 66.9, "avg_active": 7.7, "seal_count": 24, "barrier_pass": {"1": 66.7, "2": 33.3, "3": 33.3, "4": 33.3, "5": 33.3, "6": 33.3, "7": 33.3, "8": 33.3}, "description": "眼光精准，出手果断"}, {"group": "灵活型", "name": "机会主义者·贪婪", "icon": "🦎", "runs": 3, "b8_pass_rate": 33.3, "b8_p50": 5275824, "b8_min": 5275824, "b8_max": 5275824, "max_barrier": 8, "avg_trigger": 72.8, "avg_active": 8.4, "seal_count": 24, "barrier_pass": {"1": 66.7, "2": 33.3, "3": 33.3, "4": 33.3, "5": 33.3, "6": 33.3, "7": 33.3, "8": 33.3}, "description": "每个机会都想要，反而难以抉择"}, {"group": "灵活型", "name": "直觉流·游移", "icon": "🦎", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 1, "avg_trigger": 16.7, "avg_active": 0.2, "seal_count": 3, "barrier_pass": {"1": 66.7, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "直觉选完又怀疑，总想看看别的"}, {"group": "灵活型", "name": "直觉流·笃行", "icon": "🦎", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 1, "avg_trigger": 50.0, "avg_active": 0.8, "seal_count": 3, "barrier_pass": {"1": 66.7, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "直觉定了就信到底，不内耗"}, {"group": "理财型", "name": "守财奴·心慌", "icon": "💰", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 1, "avg_trigger": 33.3, "avg_active": 0.3, "seal_count": 3, "barrier_pass": {"1": 66.7, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "存了很多但怕守不住，偶尔会花"}, {"group": "理财型", "name": "守财奴·铁律", "icon": "💰", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 1, "avg_trigger": 0.0, "avg_active": 0.0, "seal_count": 3, "barrier_pass": {"1": 100.0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "存钱意志坚如铁，绝不动摇"}, {"group": "理财型", "name": "精算师·疑虑", "icon": "💰", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 1, "avg_trigger": 66.7, "avg_active": 1.0, "seal_count": 3, "barrier_pass": {"1": 33.3, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "计划完美但执行时总想微调"}, {"group": "理财型", "name": "精算师·远见", "icon": "💰", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 1, "avg_trigger": 25.0, "avg_active": 0.2, "seal_count": 4, "barrier_pass": {"1": 66.7, "2": 0.0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "计划周密，坚信远期布局终会回报"}, {"group": "稳妥型", "name": "对顺双修·笃定", "icon": "🛡️", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 2, "avg_trigger": 63.0, "avg_active": 1.9, "seal_count": 6, "barrier_pass": {"1": 100.0, "2": 33.3, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "相信自己能驾驭两条路线，从容切换"}, {"group": "稳妥型", "name": "对顺双修·谨慎", "icon": "🛡️", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 1, "avg_trigger": 66.7, "avg_active": 1.0, "seal_count": 3, "barrier_pass": {"1": 66.7, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "总是想多留一条后路，犹豫不决"}, {"group": "稳妥型", "name": "稳健杂食·从容", "icon": "🛡️", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 2, "avg_trigger": 70.0, "avg_active": 1.7, "seal_count": 5, "barrier_pass": {"1": 100.0, "2": 33.3, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "有什么打什么，不焦虑不冒进"}, {"group": "稳妥型", "name": "稳健杂食·急切", "icon": "🛡️", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 2, "avg_trigger": 70.0, "avg_active": 1.6, "seal_count": 5, "barrier_pass": {"1": 100.0, "2": 33.3, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "总怕错过好的，见了就买"}, {"group": "稳妥型", "name": "精打细算·焦虑", "icon": "🛡️", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 1, "avg_trigger": 46.3, "avg_active": 0.7, "seal_count": 3, "barrier_pass": {"1": 100.0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "算来算去总怕算漏，偶尔会多花"}, {"group": "稳妥型", "name": "精打细算·高效", "icon": "🛡️", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 2, "avg_trigger": 50.0, "avg_active": 0.9, "seal_count": 5, "barrier_pass": {"1": 66.7, "2": 33.3, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "精确知道需要什么，不多花一金"}, {"group": "稳妥型", "name": "纯对子·务实", "icon": "🛡️", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 2, "avg_trigger": 50.0, "avg_active": 1.1, "seal_count": 5, "barrier_pass": {"1": 66.7, "2": 33.3, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "对选择充满信心，不需要额外的安全垫"}, {"group": "稳妥型", "name": "纯对子·求稳", "icon": "🛡️", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 2, "avg_trigger": 61.1, "avg_active": 1.4, "seal_count": 5, "barrier_pass": {"1": 66.7, "2": 33.3, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "总担心不够强，会多买一张备用"}, {"group": "赌狗型", "name": "混合赌徒·焦躁", "icon": "🎲", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 2, "avg_trigger": 83.3, "avg_active": 2.2, "seal_count": 6, "barrier_pass": {"1": 100.0, "2": 33.3, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "哪个都不够好，再刷一把"}, {"group": "赌狗型", "name": "混合赌徒·自信", "icon": "🎲", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 1, "avg_trigger": 55.6, "avg_active": 0.7, "seal_count": 3, "barrier_pass": {"1": 100.0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "玩得转多线操作，冷静控盘"}, {"group": "赌狗型", "name": "狂战士·专注", "icon": "🎲", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 6, "avg_trigger": 80.9, "avg_active": 6.0, "seal_count": 17, "barrier_pass": {"1": 100.0, "2": 66.7, "3": 33.3, "4": 33.3, "5": 33.3, "6": 33.3, "7": 0, "8": 0}, "description": "目标明确，不动摇不怀疑"}, {"group": "赌狗型", "name": "狂战士·燃烧", "icon": "🎲", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 3, "avg_trigger": 80.8, "avg_active": 2.7, "seal_count": 8, "barrier_pass": {"1": 100.0, "2": 33.3, "3": 33.3, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "不成功便成仁，越输越上头"}, {"group": "赌狗型", "name": "绝命赌徒·洒脱", "icon": "🎲", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 3, "avg_trigger": 82.6, "avg_active": 3.3, "seal_count": 8, "barrier_pass": {"1": 100.0, "2": 33.3, "3": 33.3, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "输赢看淡，享受过程相信运气"}, {"group": "赌狗型", "name": "绝命赌徒·疯狂", "icon": "🎲", "runs": 3, "b8_pass_rate": 0, "b8_p50": 0, "b8_min": 0, "b8_max": 0, "max_barrier": 3, "avg_trigger": 79.7, "avg_active": 2.9, "seal_count": 9, "barrier_pass": {"1": 100.0, "2": 33.3, "3": 33.3, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "description": "已经输了这么多，再搏一把翻盘"}];
+const FINDINGS = [{"group": "感性型", "icon": "🎭", "avg_b8": 16.6, "b8_wins": 4, "total": 8, "max_barrier": 8, "best_name": "创作家·纠结", "best_rate": 33.3, "worst_name": "愿景师·焦虑", "worst_rate": 0, "rating": "🟡", "severity": "warning"}, {"group": "收集型", "icon": "📋", "avg_b8": 16.6, "b8_wins": 1, "total": 2, "max_barrier": 8, "best_name": "均衡流·稳健", "best_rate": 33.3, "worst_name": "均衡流·操心", "worst_rate": 0, "rating": "🟡", "severity": "warning"}, {"group": "混沌型", "icon": "🧪", "avg_b8": 0.0, "b8_wins": 0, "total": 3, "max_barrier": 2, "best_name": "反人性", "best_rate": 0, "worst_name": "反人性", "worst_rate": 0, "rating": "🔴", "severity": "critical"}, {"group": "灵活型", "icon": "🦎", "avg_b8": 16.6, "b8_wins": 2, "total": 4, "max_barrier": 8, "best_name": "机会主义者·敏捷", "best_rate": 33.3, "worst_name": "直觉流·游移", "worst_rate": 0, "rating": "🟡", "severity": "warning"}, {"group": "理财型", "icon": "💰", "avg_b8": 0.0, "b8_wins": 0, "total": 4, "max_barrier": 1, "best_name": "守财奴·心慌", "best_rate": 0, "worst_name": "守财奴·心慌", "worst_rate": 0, "rating": "🔴", "severity": "critical"}, {"group": "稳妥型", "icon": "🛡️", "avg_b8": 0.0, "b8_wins": 0, "total": 8, "max_barrier": 2, "best_name": "对顺双修·笃定", "best_rate": 0, "worst_name": "对顺双修·笃定", "worst_rate": 0, "rating": "🔴", "severity": "critical"}, {"group": "赌狗型", "icon": "🎲", "avg_b8": 0.0, "b8_wins": 0, "total": 6, "max_barrier": 6, "best_name": "混合赌徒·焦躁", "best_rate": 0, "worst_name": "混合赌徒·焦躁", "worst_rate": 0, "rating": "🔴", "severity": "critical"}, {"type": "individual", "rating": "🔴", "severity": "critical", "msg": "🎭 愿景师·焦虑 从未突破B2 — 严重过弱"}, {"type": "individual", "rating": "🔴", "severity": "critical", "msg": "🎭 探险家·乐天 从未突破B2 — 严重过弱"}, {"type": "individual", "rating": "🔴", "severity": "critical", "msg": "🎭 鼓舞者·操心 从未突破B2 — 严重过弱"}, {"type": "individual", "rating": "🔴", "severity": "critical", "msg": "📋 均衡流·操心 从未突破B2 — 严重过弱"}, {"type": "individual", "rating": "🔴", "severity": "critical", "msg": "🧪 反人性 从未突破B2 — 严重过弱"}, {"type": "individual", "rating": "🔴", "severity": "critical", "msg": "🧪 少商店 从未突破B2 — 严重过弱"}, {"type": "individual", "rating": "🔴", "severity": "critical", "msg": "🧪 真随机 从未突破B2 — 严重过弱"}, {"type": "individual", "rating": "🔴", "severity": "critical", "msg": "🦎 直觉流·游移 从未突破B2 — 严重过弱"}, {"type": "individual", "rating": "🔴", "severity": "critical", "msg": "🦎 直觉流·笃行 从未突破B2 — 严重过弱"}, {"type": "individual", "rating": "🔴", "severity": "critical", "msg": "💰 守财奴·心慌 从未突破B2 — 严重过弱"}, {"type": "individual", "rating": "🔴", "severity": "critical", "msg": "💰 守财奴·铁律 从未突破B2 — 严重过弱"}, {"type": "individual", "rating": "🔴", "severity": "critical", "msg": "💰 精算师·疑虑 从未突破B2 — 严重过弱"}, {"type": "individual", "rating": "🔴", "severity": "critical", "msg": "💰 精算师·远见 从未突破B2 — 严重过弱"}, {"type": "individual", "rating": "🔴", "severity": "critical", "msg": "🛡️ 对顺双修·笃定 从未突破B2 — 严重过弱"}, {"type": "individual", "rating": "🔴", "severity": "critical", "msg": "🛡️ 对顺双修·谨慎 从未突破B2 — 严重过弱"}, {"type": "individual", "rating": "🔴", "severity": "critical", "msg": "🛡️ 稳健杂食·从容 从未突破B2 — 严重过弱"}, {"type": "individual", "rating": "🔴", "severity": "critical", "msg": "🛡️ 稳健杂食·急切 从未突破B2 — 严重过弱"}, {"type": "individual", "rating": "🔴", "severity": "critical", "msg": "🛡️ 精打细算·焦虑 从未突破B2 — 严重过弱"}, {"type": "individual", "rating": "🔴", "severity": "critical", "msg": "🛡️ 精打细算·高效 从未突破B2 — 严重过弱"}, {"type": "individual", "rating": "🔴", "severity": "critical", "msg": "🛡️ 纯对子·务实 从未突破B2 — 严重过弱"}, {"type": "individual", "rating": "🔴", "severity": "critical", "msg": "🛡️ 纯对子·求稳 从未突破B2 — 严重过弱"}, {"type": "individual", "rating": "🔴", "severity": "critical", "msg": "🎲 混合赌徒·焦躁 从未突破B2 — 严重过弱"}, {"type": "individual", "rating": "🔴", "severity": "critical", "msg": "🎲 混合赌徒·自信 从未突破B2 — 严重过弱"}];
+const INFLATION = {"target": 210000, "min_score": 5275824, "max_score": 70192000, "avg_score": 33057202, "gap_ratio": 13.3, "count": 7, "details": [{"group": "感性型", "name": "鼓舞者·从容", "icon": "🎭", "runs": 3, "b8_pass_rate": 33.3, "b8_p50": 70192000, "b8_min": 70192000, "b8_max": 70192000, "max_barrier": 8, "avg_trigger": 84.8, "avg_active": 10.3, "seal_count": 24, "barrier_pass": {"1": 100.0, "2": 33.3, "3": 33.3, "4": 33.3, "5": 33.3, "6": 33.3, "7": 33.3, "8": 33.3}, "description": "阵容合理就足够，信任团队", "ratio": 334.2, "level": "明显膨胀"}, {"group": "灵活型", "name": "机会主义者·敏捷", "icon": "🦎", "runs": 3, "b8_pass_rate": 33.3, "b8_p50": 52281488, "b8_min": 52281488, "b8_max": 52281488, "max_barrier": 8, "avg_trigger": 66.9, "avg_active": 7.7, "seal_count": 24, "barrier_pass": {"1": 66.7, "2": 33.3, "3": 33.3, "4": 33.3, "5": 33.3, "6": 33.3, "7": 33.3, "8": 33.3}, "description": "眼光精准，出手果断", "ratio": 249.0, "level": "明显膨胀"}, {"group": "收集型", "name": "均衡流·稳健", "icon": "📋", "runs": 3, "b8_pass_rate": 33.3, "b8_p50": 49533952, "b8_min": 49533952, "b8_max": 49533952, "max_barrier": 8, "avg_trigger": 88.6, "avg_active": 9.8, "seal_count": 24, "barrier_pass": {"1": 66.7, "2": 33.3, "3": 33.3, "4": 33.3, "5": 33.3, "6": 33.3, "7": 33.3, "8": 33.3}, "description": "团队已经够好了，不需要过度干预", "ratio": 235.9, "level": "明显膨胀"}, {"group": "感性型", "name": "愿景师·坚定", "icon": "🎭", "runs": 3, "b8_pass_rate": 33.3, "b8_p50": 32144384, "b8_min": 32144384, "b8_max": 32144384, "max_barrier": 8, "avg_trigger": 79.0, "avg_active": 8.4, "seal_count": 24, "barrier_pass": {"1": 100.0, "2": 33.3, "3": 33.3, "4": 33.3, "5": 33.3, "6": 33.3, "7": 33.3, "8": 33.3}, "description": "信念坚定，忍耐力极强", "ratio": 153.1, "level": "明显膨胀"}, {"group": "感性型", "name": "创作家·自在", "icon": "🎭", "runs": 3, "b8_pass_rate": 33.3, "b8_p50": 12050016, "b8_min": 12050016, "b8_max": 12050016, "max_barrier": 8, "avg_trigger": 87.2, "avg_active": 9.9, "seal_count": 24, "barrier_pass": {"1": 100.0, "2": 33.3, "3": 33.3, "4": 33.3, "5": 33.3, "6": 33.3, "7": 33.3, "8": 33.3}, "description": "玩自己的组合，不为结果焦虑", "ratio": 57.4, "level": "关注"}, {"group": "感性型", "name": "创作家·纠结", "icon": "🎭", "runs": 3, "b8_pass_rate": 33.3, "b8_p50": 9922752, "b8_min": 9922752, "b8_max": 9922752, "max_barrier": 8, "avg_trigger": 89.6, "avg_active": 9.8, "seal_count": 24, "barrier_pass": {"1": 66.7, "2": 33.3, "3": 33.3, "4": 33.3, "5": 33.3, "6": 33.3, "7": 33.3, "8": 33.3}, "description": "有趣的组合太多，选择困难", "ratio": 47.3, "level": "关注"}, {"group": "灵活型", "name": "机会主义者·贪婪", "icon": "🦎", "runs": 3, "b8_pass_rate": 33.3, "b8_p50": 5275824, "b8_min": 5275824, "b8_max": 5275824, "max_barrier": 8, "avg_trigger": 72.8, "avg_active": 8.4, "seal_count": 24, "barrier_pass": {"1": 66.7, "2": 33.3, "3": 33.3, "4": 33.3, "5": 33.3, "6": 33.3, "7": 33.3, "8": 33.3}, "description": "每个机会都想要，反而难以抉择", "ratio": 25.1, "level": "关注"}]};
+const SUGGESTIONS = [{"target": "赌狗型整体过弱", "suggestion": "赌狗型 6 个亚型平均 B8 率仅 0.0%，对应高牌型构筑（同花顺/豹子）路线成本过高。建议降低高牌型忍者费用，或增强「倍率X·组定向」类忍者的适用性（如开局/中盘/收官可从纯组定向改为任意组可用或条件放宽）", "priority": "high", "category": "机制", "evidence": "赌狗型 6 亚型，仅 0 型有 B8 记录，最高 B6", "source": "analyze_strategy_meta"}, {"target": "高稀有度构筑路线总成本过高", "suggestion": "当前核心卡最高费用：「火遁」(14g)、「雷遁」(16g)、「极光」(16g)、「黄金律」(14g)。而初始金币仅 8g，利息上限 5g/轮，结界奖励固定 3/5/8g。玩家在 B6 之前几乎不可能累积足够金币购买 14g+ 的忍者。建议降低豹子/同花顺路线的关键卡费用 2~4g，或 B5+ 结界奖励递增", "priority": "high", "category": "价格", "evidence": "当前最贵卡牌：雷遁 16g、龙之眼 18g、极光 16g、鼎立 13g、收官 14g、火遁 14g、黄金律 14g。初始金币 8g，利息上限 5g/轮", "source": "analyze_strategy_meta"}, {"target": "结界奖励不随关数递增", "suggestion": "B1 到 B8 的奖励完全相同：修罗 3g / 明王 5g / 夜叉 8g。这导致后期缺乏经济追赶机制——前期落后=永久落后。建议 B5+ 奖励递增：B5-B6 修罗 5g/明王 8g/夜叉 12g，B7-B8 修罗 8g/明王 12g/夜叉 18g", "priority": "high", "category": "奖励", "evidence": "当前所有结界奖励恒定为 3/5/8g（修罗/明王/夜叉），利息上限 5g/轮", "source": "analyze_economy_balance"}, {"target": "理财型纯经济路线收益不足", "suggestion": "理财型 4 个亚型平均 B8 率 0.0%，纯经济策略（如守财奴/囤货党）缺乏将经济转化为战斗力的有效渠道。建议增加经济→战力转化类忍者（类似黄金律但费用更低过渡更平滑），或提高利息上限让经济型玩家在 B4+ 有更多购买力", "priority": "medium", "category": "机制", "evidence": "理财型最高 B1，当前利息上限 5g/轮", "source": "analyze_strategy_meta"}, {"target": "金刚力 vs 黄金律 性价比失衡", "suggestion": "金刚力(8g)需要 50 金币才能触发满 10 mult（花费 vs 收益比为 50金:10mult ≈ 20%), 而黄金律(14g)在 45 金币时已达 x8（比 290%）。建议金刚力 cap 从 10 降到 5（每 3 金+1 mult），或改为无上限线性增长", "priority": "medium", "category": "数值", "evidence": "金刚力(cost=8, 每5金+1全行列mult上限10), 黄金律(cost=14, 每15金乘x2上限x8=3层)", "source": "analyze_economy_balance"}, {"target": "喜鹊(4g)性价比过高", "suggestion": "喜鹊仅需 4g 就能让全局喜倍率 +1，配合三清(x2+1=x3)或全同花(x3+1=x4)效果显著。建议喜鹊费用从 4→6，或改为每触发 2 个喜才 +1", "priority": "medium", "category": "数值", "evidence": "喜鹊是第 2 便宜的忍者(4g)，无任何触发条件，效果为全局性", "source": "sim_config"}, {"target": "Phase E 喜倍率偏高", "suggestion": "三等(x5)、满堂(x5)、背水(x4)、贫打(x4) 等高倍率喜配合全同花(x3)和喜鹊(+1)可能产生 x4~x6 叠加，是分数膨胀的主要来源。建议将三等从 x5 降为 x4，满堂从 x5 降为 x4", "priority": "medium", "category": "数值", "evidence": "三等条件(三行筹码相等)在特定构筑下可稳定达成，配合全同花×3+喜鹊+1=×4，叠加后可达 ×20", "source": "analyze_inflation"}, {"target": "利息上限限制经济型玩法", "suggestion": "利息上限 5g/轮意味着持有 25g 以上不再增加利息收入。利息之印（7g）虽然将上限提到 10g，但购买本身消耗 7g 且回收周期长。建议利息上限从 5→8（默认），持有 40g 饱和，给经济型玩家合理回报", "priority": "medium", "category": "奖励", "evidence": "INTEREST_CAP=5, INTEREST_PER_5=1。持有 25g 可获得满利息 5g。利息之印提升至 10g", "source": "sim_config"}, {"target": "愿景师·焦虑 严重过弱", "suggestion": "检查该人格的 strategy_lock 是否锁定了过弱的牌型路线，或者 budget_ratio 是否过低导致买不到关键忍者", "priority": "medium", "category": "机制", "evidence": "🎭 愿景师·焦虑 从未突破B2 — 严重过弱", "source": "analyze_balance"}, {"target": "探险家·乐天 严重过弱", "suggestion": "检查该人格的 strategy_lock 是否锁定了过弱的牌型路线，或者 budget_ratio 是否过低导致买不到关键忍者", "priority": "medium", "category": "机制", "evidence": "🎭 探险家·乐天 从未突破B2 — 严重过弱", "source": "analyze_balance"}, {"target": "鼓舞者·操心 严重过弱", "suggestion": "检查该人格的 strategy_lock 是否锁定了过弱的牌型路线，或者 budget_ratio 是否过低导致买不到关键忍者", "priority": "medium", "category": "机制", "evidence": "🎭 鼓舞者·操心 从未突破B2 — 严重过弱", "source": "analyze_balance"}, {"target": "均衡流·操心 严重过弱", "suggestion": "检查该人格的 strategy_lock 是否锁定了过弱的牌型路线，或者 budget_ratio 是否过低导致买不到关键忍者", "priority": "medium", "category": "机制", "evidence": "📋 均衡流·操心 从未突破B2 — 严重过弱", "source": "analyze_balance"}, {"target": "反人性 严重过弱", "suggestion": "检查该人格的 strategy_lock 是否锁定了过弱的牌型路线，或者 budget_ratio 是否过低导致买不到关键忍者", "priority": "medium", "category": "机制", "evidence": "🧪 反人性 从未突破B2 — 严重过弱", "source": "analyze_balance"}, {"target": "少商店 严重过弱", "suggestion": "检查该人格的 strategy_lock 是否锁定了过弱的牌型路线，或者 budget_ratio 是否过低导致买不到关键忍者", "priority": "medium", "category": "机制", "evidence": "🧪 少商店 从未突破B2 — 严重过弱", "source": "analyze_balance"}, {"target": "真随机 严重过弱", "suggestion": "检查该人格的 strategy_lock 是否锁定了过弱的牌型路线，或者 budget_ratio 是否过低导致买不到关键忍者", "priority": "medium", "category": "机制", "evidence": "🧪 真随机 从未突破B2 — 严重过弱", "source": "analyze_balance"}, {"target": "直觉流·游移 严重过弱", "suggestion": "检查该人格的 strategy_lock 是否锁定了过弱的牌型路线，或者 budget_ratio 是否过低导致买不到关键忍者", "priority": "medium", "category": "机制", "evidence": "🦎 直觉流·游移 从未突破B2 — 严重过弱", "source": "analyze_balance"}, {"target": "直觉流·笃行 严重过弱", "suggestion": "检查该人格的 strategy_lock 是否锁定了过弱的牌型路线，或者 budget_ratio 是否过低导致买不到关键忍者", "priority": "medium", "category": "机制", "evidence": "🦎 直觉流·笃行 从未突破B2 — 严重过弱", "source": "analyze_balance"}, {"target": "守财奴·心慌 严重过弱", "suggestion": "检查该人格的 strategy_lock 是否锁定了过弱的牌型路线，或者 budget_ratio 是否过低导致买不到关键忍者", "priority": "medium", "category": "机制", "evidence": "💰 守财奴·心慌 从未突破B2 — 严重过弱", "source": "analyze_balance"}, {"target": "守财奴·铁律 严重过弱", "suggestion": "检查该人格的 strategy_lock 是否锁定了过弱的牌型路线，或者 budget_ratio 是否过低导致买不到关键忍者", "priority": "medium", "category": "机制", "evidence": "💰 守财奴·铁律 从未突破B2 — 严重过弱", "source": "analyze_balance"}, {"target": "精算师·疑虑 严重过弱", "suggestion": "检查该人格的 strategy_lock 是否锁定了过弱的牌型路线，或者 budget_ratio 是否过低导致买不到关键忍者", "priority": "medium", "category": "机制", "evidence": "💰 精算师·疑虑 从未突破B2 — 严重过弱", "source": "analyze_balance"}, {"target": "精算师·远见 严重过弱", "suggestion": "检查该人格的 strategy_lock 是否锁定了过弱的牌型路线，或者 budget_ratio 是否过低导致买不到关键忍者", "priority": "medium", "category": "机制", "evidence": "💰 精算师·远见 从未突破B2 — 严重过弱", "source": "analyze_balance"}, {"target": "对顺双修·笃定 严重过弱", "suggestion": "检查该人格的 strategy_lock 是否锁定了过弱的牌型路线，或者 budget_ratio 是否过低导致买不到关键忍者", "priority": "medium", "category": "机制", "evidence": "🛡️ 对顺双修·笃定 从未突破B2 — 严重过弱", "source": "analyze_balance"}, {"target": "对顺双修·谨慎 严重过弱", "suggestion": "检查该人格的 strategy_lock 是否锁定了过弱的牌型路线，或者 budget_ratio 是否过低导致买不到关键忍者", "priority": "medium", "category": "机制", "evidence": "🛡️ 对顺双修·谨慎 从未突破B2 — 严重过弱", "source": "analyze_balance"}, {"target": "稳健杂食·从容 严重过弱", "suggestion": "检查该人格的 strategy_lock 是否锁定了过弱的牌型路线，或者 budget_ratio 是否过低导致买不到关键忍者", "priority": "medium", "category": "机制", "evidence": "🛡️ 稳健杂食·从容 从未突破B2 — 严重过弱", "source": "analyze_balance"}, {"target": "稳健杂食·急切 严重过弱", "suggestion": "检查该人格的 strategy_lock 是否锁定了过弱的牌型路线，或者 budget_ratio 是否过低导致买不到关键忍者", "priority": "medium", "category": "机制", "evidence": "🛡️ 稳健杂食·急切 从未突破B2 — 严重过弱", "source": "analyze_balance"}, {"target": "精打细算·焦虑 严重过弱", "suggestion": "检查该人格的 strategy_lock 是否锁定了过弱的牌型路线，或者 budget_ratio 是否过低导致买不到关键忍者", "priority": "medium", "category": "机制", "evidence": "🛡️ 精打细算·焦虑 从未突破B2 — 严重过弱", "source": "analyze_balance"}, {"target": "精打细算·高效 严重过弱", "suggestion": "检查该人格的 strategy_lock 是否锁定了过弱的牌型路线，或者 budget_ratio 是否过低导致买不到关键忍者", "priority": "medium", "category": "机制", "evidence": "🛡️ 精打细算·高效 从未突破B2 — 严重过弱", "source": "analyze_balance"}, {"target": "纯对子·务实 严重过弱", "suggestion": "检查该人格的 strategy_lock 是否锁定了过弱的牌型路线，或者 budget_ratio 是否过低导致买不到关键忍者", "priority": "medium", "category": "机制", "evidence": "🛡️ 纯对子·务实 从未突破B2 — 严重过弱", "source": "analyze_balance"}, {"target": "纯对子·求稳 严重过弱", "suggestion": "检查该人格的 strategy_lock 是否锁定了过弱的牌型路线，或者 budget_ratio 是否过低导致买不到关键忍者", "priority": "medium", "category": "机制", "evidence": "🛡️ 纯对子·求稳 从未突破B2 — 严重过弱", "source": "analyze_balance"}, {"target": "混合赌徒·焦躁 严重过弱", "suggestion": "检查该人格的 strategy_lock 是否锁定了过弱的牌型路线，或者 budget_ratio 是否过低导致买不到关键忍者", "priority": "medium", "category": "机制", "evidence": "🎲 混合赌徒·焦躁 从未突破B2 — 严重过弱", "source": "analyze_balance"}, {"target": "混合赌徒·自信 严重过弱", "suggestion": "检查该人格的 strategy_lock 是否锁定了过弱的牌型路线，或者 budget_ratio 是否过低导致买不到关键忍者", "priority": "medium", "category": "机制", "evidence": "🎲 混合赌徒·自信 从未突破B2 — 严重过弱", "source": "analyze_balance"}, {"target": "结界过渡过陡：B1→B2", "suggestion": "B1→B2 通过率滑坡 57.9%，建议 B2-修罗目标从 40K→35K，或 B1 夜叉→B2 修罗过渡提高金币奖励", "priority": "low", "category": "阈值", "evidence": "通过率从 82.9% 降至 34.9%，滑坡 57.9%", "source": "analyze_barrier_dropoff"}, {"target": "B1-B3 前期体验保障", "suggestion": "确保 B1 通过率 ≥ 80%、B2 ≥ 50%、B3 ≥ 30%，避免多数玩家在前三结界就体验到负反馈。当前数据显示混沌型(全随机基线)三型均 0% 通过 B2，说明基础牌面分数不足以支撑前期阈值", "priority": "low", "category": "阈值", "evidence": "混沌型三型全部在 B2 之前失败，基础散牌(5 chips x1 mult)分数太低", "source": "generate_suggestions"}];
+const AT_PAIRS = [{"name": "创作家", "icon": "🎭", "a_b8": 33.3, "t_b8": 33.3, "diff": 0.0, "a_trig": 87.2, "t_trig": 89.6}, {"name": "均衡流", "icon": "📋", "a_b8": 33.3, "t_b8": 0, "diff": -33.3, "a_trig": 88.6, "t_trig": 52.8}, {"name": "守财奴", "icon": "💰", "a_b8": 0, "t_b8": 0, "diff": 0, "a_trig": 0.0, "t_trig": 33.3}, {"name": "对顺双修", "icon": "🛡️", "a_b8": 0, "t_b8": 0, "diff": 0, "a_trig": 63.0, "t_trig": 66.7}, {"name": "愿景师", "icon": "🎭", "a_b8": 33.3, "t_b8": 0, "diff": -33.3, "a_trig": 79.0, "t_trig": 55.6}, {"name": "探险家", "icon": "🎭", "a_b8": 0, "t_b8": 0, "diff": 0, "a_trig": 38.9, "t_trig": 85.4}, {"name": "机会主义者", "icon": "🦎", "a_b8": 33.3, "t_b8": 33.3, "diff": 0.0, "a_trig": 66.9, "t_trig": 72.8}, {"name": "混合赌徒", "icon": "🎲", "a_b8": 0, "t_b8": 0, "diff": 0, "a_trig": 55.6, "t_trig": 83.3}, {"name": "狂战士", "icon": "🎲", "a_b8": 0, "t_b8": 0, "diff": 0, "a_trig": 80.9, "t_trig": 80.8}, {"name": "直觉流", "icon": "🦎", "a_b8": 0, "t_b8": 0, "diff": 0, "a_trig": 50.0, "t_trig": 16.7}, {"name": "稳健杂食", "icon": "🛡️", "a_b8": 0, "t_b8": 0, "diff": 0, "a_trig": 70.0, "t_trig": 70.0}, {"name": "精打细算", "icon": "🛡️", "a_b8": 0, "t_b8": 0, "diff": 0, "a_trig": 50.0, "t_trig": 46.3}, {"name": "精算师", "icon": "💰", "a_b8": 0, "t_b8": 0, "diff": 0, "a_trig": 25.0, "t_trig": 66.7}, {"name": "纯对子", "icon": "🛡️", "a_b8": 0, "t_b8": 0, "diff": 0, "a_trig": 50.0, "t_trig": 61.1}, {"name": "绝命赌徒", "icon": "🎲", "a_b8": 0, "t_b8": 0, "diff": 0, "a_trig": 82.6, "t_trig": 79.7}, {"name": "鼓舞者", "icon": "🎭", "a_b8": 33.3, "t_b8": 0, "diff": -33.3, "a_trig": 84.8, "t_trig": 72.2}];
+
+// KPI 总览
+(function() {
+  const grid = document.getElementById('kpiGrid');
+  const b8Rates = RESULTS.map(r => r.b8_pass_rate);
+  const avgB8 = (b8Rates.reduce((s,v) => s+v, 0) / b8Rates.length).toFixed(1);
+  const b8Any = b8Rates.filter(v => v > 0).length;
+  const b8Zero = b8Rates.filter(v => v === 0).length;
+  const avgTrig = (RESULTS.reduce((s,r) => s + r.avg_trigger, 0) / RESULTS.length).toFixed(1);
+  const b8Best = Math.max(...b8Rates);
+  const b8Worst = Math.min(...b8Rates);
+  grid.innerHTML = `
+    <div class="kpi-card"><div class="kpi-label">平均 B8 通关率</div><div class="kpi-value" style="color:#ffd700;">${avgB8}%</div><div class="kpi-sub">${b8Any}型通关 / ${b8Zero}型未通</div></div>
+    <div class="kpi-card"><div class="kpi-label">最佳 / 最差</div><div class="kpi-value" style="font-size:22px;"><span style="color:#4caf50;">${b8Best}%</span> / <span style="color:#f44336;">${b8Worst}%</span></div><div class="kpi-sub">跨度 ${(b8Best - b8Worst).toFixed(1)}%</div></div>
+    <div class="kpi-card"><div class="kpi-label">平均触发率</div><div class="kpi-value" style="color:#42a5f5;">${avgTrig}%</div><div class="kpi-sub">忍者激活水平</div></div>
+    <div class="kpi-card"><div class="kpi-label">测试规模</div><div class="kpi-value" style="color:#ab47bc;">${RESULTS.length}型</div><div class="kpi-sub">× ${RESULTS[0]?.runs || 0} 次运行</div></div>
+  `;
+})();
+
+// 关键发现
+(function() {
+  const container = document.getElementById('findingsContainer');
+  let html = '';
+  for (const f of FINDINGS) {
+    const cls = f.severity === 'critical' ? 'critical' : f.severity === 'weak' ? 'weak' : f.severity === 'op' ? 'op' : f.severity === 'warning' ? 'warning' : 'normal';
+    if (f.type === 'individual') {
+      html += `<div class="finding ${cls}"><span class="rating">${f.rating}</span><span>${f.msg}</span></div>`;
+    } else {
+      html += `<div class="finding ${cls}"><span class="rating">${f.rating}</span><span><b>${f.icon} ${f.group}</b> B8均 <b>${f.avg_b8}%</b> (${f.b8_wins}/${f.total}型通关) · 最佳 ${f.best_name} ${f.best_rate}% · 最弱 ${f.worst_name} ${f.worst_rate}%</span></div>`;
+    }
+  }
+  container.innerHTML = html;
+})();
+
+// 膨胀分析
+(function() {
+  const container = document.getElementById('inflationContainer');
+  if (!INFLATION) { container.innerHTML = '<p style="color:#888;">无B8通关数据，无法分析膨胀</p>'; return; }
+  const fmt = n => {
+    if (n >= 1e9) return (n/1e9).toFixed(2) + 'B';
+    if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
+    if (n >= 1e3) return (n/1e3).toFixed(0) + 'K';
+    return n.toString();
+  };
+  let html = '<div class="inflate-card" style="margin-bottom:12px;">';
+  html += `<div>目标分数: <b>${fmt(INFLATION.target)}</b></div>`;
+  html += `<div>B8_P50范围: <b>${fmt(INFLATION.min_score)}</b> ~ <b>${fmt(INFLATION.max_score)}</b> (差距 <b style="color:${INFLATION.gap_ratio > 100 ? '#f44336' : '#ff9800'};">${INFLATION.gap_ratio}x</b>)</div>`;
+  html += `<div>平均得分: <b>${fmt(INFLATION.avg_score)}</b> = 目标的 <b>${(INFLATION.avg_score / INFLATION.target).toFixed(1)}x</b></div>`;
+  html += `</div>`;
+  html += '<table><tr><th>类型</th><th>P50得分</th><th>膨胀系数</th><th>等级</th></tr>';
+  for (const d of INFLATION.details.slice(0, 10)) {
+    const color = d.level === '严重膨胀' ? '#f44336' : d.level === '明显膨胀' ? '#ff9800' : d.level === '关注' ? '#ffd700' : '#4caf50';
+    html += `<tr><td>${d.icon} ${d.name}</td><td>${fmt(d.b8_p50)}</td><td>${d.ratio}x</td><td style="color:${color};">${d.level}</td></tr>`;
+  }
+  if (INFLATION.details.length > 10) {
+    html += `<tr><td colspan="4" style="color:#666;">... 共 ${INFLATION.details.length} 型有B8记录</td></tr>`;
+  }
+  html += '</table>';
+  container.innerHTML = html;
+})();
+
+// 调整建议 — 带分类徽章和证据行
+(function() {
+  const container = document.getElementById('suggestionsContainer');
+  let html = '';
+  for (const s of SUGGESTIONS) {
+    const cat = s.category || '机制';
+    const catClass = 'cat-' + cat;
+    const emoji = cat === '机制' ? '🔧' : cat === '数值' ? '⚖️' : cat === '价格' ? '💰' : cat === '奖励' ? '🎁' : '🎯';
+    html += `<div class="suggestion ${s.priority}">`;
+    html += `<div class="sug-category ${catClass}">${emoji} ${cat}</div>`;
+    html += `<div class="sug-target">${s.target}</div>`;
+    html += `<div class="sug-text">💡 ${s.suggestion}</div>`;
+    if (s.evidence) {
+      html += `<div class="sug-evidence">📊 ${s.evidence}</div>`;
+    }
+    html += `<div class="sug-source">来源: ${s.source || 'auto'}</div>`;
+    html += `</div>`;
+  }
+  container.innerHTML = html;
+})();
+
+// A/T 对比
+(function() {
+  const container = document.getElementById('atContainer');
+  if (!AT_PAIRS || !AT_PAIRS.length) { container.innerHTML = '<p style="color:#888;">无A/T配对数据</p>'; return; }
+  let html = '<div class="at-grid">';
+  for (const p of AT_PAIRS) {
+    const diffClass = p.diff > 0 ? 'at-diff-pos' : p.diff < 0 ? 'at-diff-neg' : '';
+    html += `<div class="at-card">`;
+    html += `<div class="at-name">${p.icon} ${p.name}</div>`;
+    html += `<div class="at-row"><span>-A 自信: ${p.a_b8}% (触发 ${p.a_trig}%)</span><span>-T 动荡: ${p.t_b8}% (触发 ${p.t_trig}%)</span></div>`;
+    html += `<div class="at-row"><span>B8差距: <span class="${diffClass}">${p.diff > 0 ? '+' : ''}${p.diff}%</span></span><span style="color:#888;">T相对于A的表现</span></div>`;
+    html += `</div>`;
+  }
+  html += '</div>';
+  container.innerHTML = html;
+})();
+
+// 各组详情（折叠）
+(function() {
+  const GROUP_ORDER = ['稳妥型','理财型','赌狗型','灵活型','收集型','感性型','混沌型'];
+  const GROUP_ICONS = {'稳妥型':'🛡️','理财型':'💰','赌狗型':'🎲','灵活型':'🦎','收集型':'📋','感性型':'🎭','混沌型':'🧪'};
+  const container = document.getElementById('detailContainer');
+  let html = '';
+  for (const g of GROUP_ORDER) {
+    const members = RESULTS.filter(r => r.group === g);
+    if (!members.length) continue;
+    const icon = GROUP_ICONS[g] || '❓';
+    const avgB8 = (members.reduce((s,r) => s+r.b8_pass_rate, 0) / members.length).toFixed(1);
+    html += `<div class="detail-group">`;
+    html += `<div class="detail-header" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">`;
+    html += `<span class="arrow">▶</span> ${icon} ${g} <span style="color:#888;font-weight:400;font-size:12px;">(${members.length}型 · B8均 ${avgB8}%)</span>`;
+    html += `</div><div class="detail-body">`;
+    for (const r of members) {
+      const b8c = r.b8_pass_rate >= 30 ? '#4caf50' : r.b8_pass_rate >= 10 ? '#ff9800' : '#f44336';
+      const barPct = Math.min(r.b8_pass_rate, 100);
+      html += `<div class="type-row"><span class="name">${r.icon} ${r.name}</span>`;
+      html += `<span class="stat" style="color:${b8c};">${r.b8_pass_rate}%</span>`;
+      html += `<span class="stat">B${r.max_barrier}</span>`;
+      html += `<span class="stat">${r.avg_trigger}%</span>`;
+      html += `<span class="stat">${r.avg_active}</span>`;
+      html += `<span class="bar"><div class="bar-bg"><div class="bar-fill" style="width:${barPct}%;background:${b8c}"></div></div></span>`;
+      html += `</div>`;
+    }
+    html += `</div></div>`;
+  }
+  container.innerHTML = html;
+})();
+</script>
+</body>
+</html>

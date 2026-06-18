@@ -24,9 +24,9 @@ static func compute_group_score(
 	hand_type: CardData.HandType3,
 	star_chart_levels: Dictionary,
 	ninja_effects: Dictionary,
-	hungry_ghost: bool
+	_hungry_ghost: bool
 ) -> int:
-	var card_chips: int = _group_card_chips(cards, hungry_ghost)
+	var card_chips: int = _group_card_chips(cards, _hungry_ghost)
 	var hand_chips: int = CardData.get_hand_type3_leveled_chips(hand_type, star_chart_levels)
 	var ench_chips: int = _group_ench_chips(cards)
 
@@ -65,9 +65,9 @@ static func row_score(
 	hand_type: int,
 	star_chart_levels: Dictionary,
 	ninja_eff: Dictionary,
-	hungry_ghost: bool
+	_hungry_ghost: bool
 ) -> void:
-	var card_chips: int = _group_card_chips(cards, hungry_ghost)
+	var card_chips: int = _group_card_chips(cards, _hungry_ghost)
 	var hand_chips: int = CardData.get_hand_type3_leveled_chips(hand_type, star_chart_levels)
 	var ench_chips: int = _group_ench_chips(cards)
 	var total_chips: int = card_chips + hand_chips + ench_chips + ninja_eff.chips
@@ -132,7 +132,7 @@ static func row_score(
 # NOTE: These match original score_calculator behavior (no edition chips/mult,
 # no seal ×2). ScoreHelpers has alternative versions with edition+seal support.
 
-static func _group_card_chips(cards: Array, hungry_ghost: bool) -> int:
+static func _group_card_chips(cards: Array, _hungry_ghost: bool) -> int:
 	var total: int = 0
 	for card: CardData.PlayingCard in cards:
 		total += card.get_chip_value()

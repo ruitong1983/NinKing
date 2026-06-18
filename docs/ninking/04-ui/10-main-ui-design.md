@@ -1,6 +1,6 @@
 # NinKing Main Game UI 设计方案
 
-> **建立日期:** 2026-06-10 | **最后同步:** 2026-06-11 | **关联场景:** `ninking_main.tscn` + `ui_manager.gd`
+> **建立日期:** 2026-06-10 | **最后同步:** 2026-06-18 | **关联场景:** `ninking_main.tscn` + `ui_manager.gd`
 > **风格权威:** [`../05-art/16-art-direction-principles.md`](../05-art/16-art-direction-principles.md) · 少年漫画风
 ## §1 概述
 
@@ -56,7 +56,7 @@ NinKingMain (Control) [game_manager.gd]
     │   │   │
     │   │   ├── ScoreCard (Panel)       ← 得分卡, anchor_top=0, anchor_bottom=0.5 (上半 1/2)
     │   │   │   └── ScoreCardVBox       ← anchors full rect (layout_mode=1)
-    │   │   │       ├── ColXiLabel (32px 列金/喜accent)
+    │   │   │       ├── ColXiLabel (32px 喜accent, autowrap, 自然高度)
     │   │   │       ├── HandTypeRow (VBoxContainer)    ← 合入 ScoreCardVBox
     │   │   │       │   ├── Row影 → ShadowDun/ShadowType/ShadowScore/%ShadowLv
     │   │   │       │   ├── Row瞬 → FlashDun/FlashType/FlashScore/%FlashLv
@@ -110,10 +110,10 @@ NinKingMain (Control) [game_manager.gd]
     ├── LevelComplete (Control)         ← 过关覆盖层
     ├── GameOver (Control) [%GameOver]       ← 失败覆盖层
     │   ├── OverlayBg (ColorRect)           ← #000 80%
-    │   ├── GameOverLabel [%GameOverLabel]  ← "失败" 48px 红
-    │   ├── RetryButton [%RetryButton]      ← "重新开始" (flat)
-    │   ├── BackToMenuButton [%BackToMenuButton] ← "返回主菜单"
-    │   └── ScoreSummary [%ScoreSummary]    ← 战绩摘要 Label
+    │   ├── GameOverLabel [%GameOverLabel]  ← "失败" 48px 红 居中
+    │   ├── ScoreSummary [%ScoreSummary]    ← "战绩: 结界 X · 忍気 Y" 28px 居中
+    │   ├── RetryButton [%RetryButton]      ← "重新开始" 24px flat
+    │   └── BackToMenuButton [%BackToMenuButton] ← "返回主菜单" 20px flat
     ├── VictoryOverlay (Control)        ← 通关覆盖层
     └── DeckViewer (Control)            ← 牌库查看器
 ```
@@ -138,7 +138,7 @@ NinKingMain (Control) [game_manager.gd]
 
 | 元素 | 字号 | 颜色 | 用途 |
 |------|------|------|------|
-| ColXiLabel | 32px | 列#C4A843金 / 喜accent | 列×累乘 + 喜预览 |
+| ColXiLabel | 32px | 喜accent `#D93333` | 喜名称列表，autowrap 自动换行，自然高度不撑开 |
 | ScoreLabel | 48px | `(0.941, 0.929, 0.894)` 白 | "気 N" |
 | ProgressBar | 28px | 灰底+金 fill, 圆角 6px | 进度条 |
 | TargetScoreLabel | **28px** | `(0.478, 0.478, 0.416)` 灰 | "封印 N" |

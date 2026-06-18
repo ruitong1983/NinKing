@@ -1,6 +1,6 @@
 # 疑难问题解决手册
 
-> **建立日期:** 2026-06-14 | **最后更新:** 2026-06-17 (§9)
+> **建立日期:** 2026-06-14 | **最后更新:** 2026-06-18 (§9, §13, §14)
 > **用途:** 记录开发中遇到的非显而易见的坑及其解决方案，避免重复踩坑。
 
 ## §1 素材替换后"缺少依赖项"
@@ -320,3 +320,129 @@ rtl.size = Vector2(300, 32)
 **受影响的文件：** `hand_card_container.gd`、`debug_controller.gd`
 
 **实例：** 2026-06-17 Debug 场景交换卡牌后行列/喜标签不刷新。
+
+---
+
+## §10 Button disabled 样式不生效
+
+**现象：** 按钮设置了 `theme_override_styles/disabled = SubResource("StyleBoxFlat_xxx")`，bg_color 设了半透明灰度色，但按钮禁用后仍然显示正常（红色/明亮），灰色样式未出现。
+
+**根因（两坑）：**
+
+### 坑 A：按钮 `disabled` 属性从未被设为 `true`
+
+`theme_override_styles/disabled` 只控制**禁用时的外观**，但按钮本身必须 `button.disabled = true` 才会切换到这个样式。如果代码中没有把按钮设为禁用（只做了功能性 return），灰色样式永远不会显示。
+
+```
+# ❌ 只阻止行为，不改按钮状态
+func _on_play_pressed() -> void:
+    if not _is_legal():
+        _set_status("约束不满足")
+        return   # 按钮仍是 enabled 状态，显示 normal 样式
+
+# ✅ 同时更新按钮状态
+func _update_button_states() -> void:
+    var can_play: bool = _check_legal()
+    _play_btn.disabled = not can_play   # 触发 disabled 样式切换
+```
+
+**排查：** 在 `_update_button_states()`（或等效更新按钮状态的位置）检查 `disabled` 属性是否根据条件正确设置。
+
+### 坑 B：`disabled` 样式被其他 theme_override 覆盖
+
+如果同时设置了 `theme_override_styles/normal` 和 `theme_override_styles/disabled`，但 normal 样式中 bg_color 的 alpha = 1.0，而 disabled 样式中 bg_color 的 alpha = 0.5，但仍显示 full color——先检查坑 A。
+
+**修复：** `_update_button_states()` 或等效函数中，确保约束/条件不满足时显式设 `btn.disabled = true`。
+
+**实例：** 2026-06-18 Debug 场景 `debug_controller.gd` `_update_button_states()` 只检查牌数(≠9)，不检查约束(ascending head≤mid≤tail)，导致非法排列时按钮状态正确(禁用)但 visual 始终显示 normal 样式。修复：加入约束检查后 `disabled = true` 正确触发，灰色样式生效。
+
+---
+
+## §11 ScoreResult.chips_sum / mult_sum 未赋值导致 debug 场景显示 "0 × 1 = 总分"
+
+**现象：** Debug 场景打完一轮后，左边栏总分标签显示 `"0 × 1 = 120"`（或类似格式），第一个数始终为 0，中间始终为 1，只有等号后的总分正确。主场景不受影响。
+
+**根因：** `ScoreResult` 声明了 `chips_sum: int = 0` 和 `mult_sum: int = 0` 两个字段，但全项目**没有任何代码给它们赋值** — 永远是默认值 0。
+
+Debug 场景的 `_update_score_display()`（`debug_controller.gd:490`）直接用这两个字段格式化：
+
+```gdscript
+_score_label.text = "%d ×%d = %d" % [
+    result.chips_sum,               # 始终 0
+    max(result.mult_sum, 1),        # max(0, 1) → 始终 1
+    result.total_score              # 正确
+]
+```
+
+主场景不受影响是因为它使用 `UIManager._score_subtotal`（动画流程中累计的行+列总分）和 `_score_xi`（全局喜×倍率），不涉及 `chips_sum`/`mult_sum`。
+
+**修复：** 在 `ScoreCalculator.calculate()` 和 `calculate_with_summary()` 的 `result.breakdown` 之前各加两行：
+
+```gdscript
+result.chips_sum = result.head_chips + result.mid_chips + result.tail_chips
+result.mult_sum = result.head_mult + result.mid_mult + result.tail_mult
+```
+
+**受影响的文件：** `scripts/ninking/score/score_calculator.gd`（+4 行）、`scripts/ninking/debug/debug_controller.gd:490`（消费端）。
+
+**实例：** 2026-06-18 用户报告 debug 场景左边栏总分显示 `"0 × 1 = 总分"`。
+
+---
+
+## §12 外部编辑 .gd 文件后 Godot 报 "hides a global script class"
+
+**现象：** 用外部工具（Node.js / VS Code 等）修改 GDScript 文件后，Godot 编辑器的 `validate_script` 报 `Parse Error: Class "XXX" hides a global script class`，但实际只有一处 `class_name` 定义。
+
+**根因：** 外部编辑保存后，Godot 的脚本缓存未及时刷新。编辑器创建一个临时副本（PID 号如 `-9223367996364212366.gd`）来解析新内容，旧缓存仍保留 → 解析器认为存在两个同名的全局脚本类。
+
+**修复：** 在 Godot 编辑器中执行一次 **Project → Reload Current Project**（或通过 MCP 调用 `reload_project`），即可刷新缓存消除误报。若 persist，在 Godot 中 **关闭并重新打开** 受影响的脚本文件再 Reload。
+
+**注意：** `read_script` MCP 命令返回 LF 行尾（不管磁盘是 CRLF），`validate_script` 在该文件上可能持续报错，但不影响实际加载 —— `load()` 和 `execute_editor_script` 都能正常使用。
+
+**实例：** 2026-06-18 `score_calculator.gd` 经 Node.js 外部编辑后持续报 Class "ScoreCalculator" hides a global script class，Reload Project 后消除。
+
+## §13 JSON.parse 返回的 Dictionary 是只读的
+
+**现象：** 运行时报 `Dictionary is in read-only state`，栈追踪指向 `_read_json()` 或 `load_progress()` 中尝试写入字典的行。
+
+**根因：** Godot 4 的 `JSON.parse()` 返回的 `json.data` 是只读 Dictionary。调用方直接修改它（如 `data["total_runs"] += 1`）会触发 `Dictionary is in read-only state` 错误。嵌套字典也是只读的。
+
+**修复：** `_read_json()` 返回前做深拷贝：
+```gdscript
+return (json.data as Dictionary).duplicate(true)
+```
+
+**影响范围：** 所有基于 `_read_json()` 的函数：`load_run()`、`load_progress()`。如果调用方需要修改返回的数据，必须使用可写副本。
+
+**实例：** 2026-06-18 `save_manager.gd:99` — `record_run_result()` 试图写入 `load_progress()` 返回的只读字典。修复见 `save_manager.gd:131`。
+
+---
+
+## §14 scale≠1 时设置 global_position 导致动画后位置偏移
+
+**现象：** 卡片在 scale=0.1（待 pop-in 状态）时设置 `card.global_position = target_pos`，pop_in 动画将 scale 变为 1.0 后，卡片实际渲染位置与 target_pos 不符（偏高/头部被截断）。
+
+**根因：** Godot 的 `global_position` setter 在反向计算 `local_position` 时会将当前 scale 和 pivot_offset 纳入变换矩阵。在 scale=0.1 + pivot_offset=(62.5, 87.5) 时算出的 `local_position` **只在 scale=0.1 下正确**。动画将 scale 变为 1.0 后，`local_position` 不再对应期望的全局位置，卡片发生视觉跳跃。
+
+实测数据（6 张忍者牌）：
+```
+scale=0.1 时设 global_position.y=20
+  → Godot 反算出 local_position.y=-68.75（parent_gp.y=10）
+scale→1.0 后实际渲染位置 = 10 + (-68.75) = -58.75
+  → 比目标位置高了 78.75px
+```
+
+**修复：** 设置 `global_position` 前临时将 scale 置为 1.0，算完再恢复：
+```gdscript
+var saved_scale := card.scale
+card.scale = Vector2.ONE
+card.global_position = target_pos
+card.scale = saved_scale
+```
+
+**涉及文件：** `scripts/ninking/ui/ninja_bar_container.gd:_update_target_positions()`
+
+**影响范围：** 所有在非 1.0 scale 下设置 `global_position` 后通过 Tween 恢复 scale 的场景。应遵循"设 global_position 前先归一化 scale"的原则。
+
+**实例：** 2026-06-18 `ninja_bar_container.gd:108-119` — NinjaBar 忍者牌初始定位。此修复对 NinjaBarContainer 全局生效（主场景 + Debug 场景）。
+

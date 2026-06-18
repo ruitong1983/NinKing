@@ -214,14 +214,23 @@ NinKingDebug (Control) [debug_controller.gd]
 ### 5.3 计分触发
 
 ```
+手牌变动（交换/发牌/重排/清空）
+    → _update_button_states()
+        → 牌数 ≠ 9 → 讨伐按钮禁用（灰色 disabled 样式）
+        → 牌数 = 9 且约束(head ≤ mid ≤ tail)不满足 → 讨伐按钮禁用（灰色 disabled 样式）
+        → 牌数 = 9 且约束满足 → 讨伐按钮可用
+
 点击 [討伐] 按钮
     → 从 3 个 Hand 提取 card_data（9 张）
     → HandEvaluator3.evaluate() × 3（三墩评估）
+    → 约束检查（head ≤ mid ≤ tail）→ 不满足则提示并返回
     → HandEvaluator3.evaluate() × 3（三列评估）
     → XiDetector.detect()（喜检测）
     → ScoreCalculator.calculate(...)（完整计分）
     → 计分动画 → 更新 LeftPanel：ScoreLabel / ProgressBar / ColXiLabel（最终结果）
 ```
+
+> **约束视觉反馈：** 约束不满足时，PlayBtn 的 `theme_override_styles/disabled` 样式生效（`bg_color = Color(0.4, 0.18, 0.13, 0.5)` 半透明暗红 + 灰色字体 `Color(0.8, 0.8, 0.8, 0.5)`），玩家可以明确看到按钮不可用。主场景与 Debug 场景均同步了此样式。
 
 ### 5.4 忍者选择
 

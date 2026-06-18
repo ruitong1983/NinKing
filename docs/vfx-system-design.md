@@ -4,7 +4,7 @@
 > 引擎：Godot 4.6.2 / 纯 2D
 > 设计日期：2026-06-06
 > 实现日期：2026-06-06
-> 最后更新：2026-06-16 (稀有度材质 Foil/Holo/Polychrome 接入)
+> 最后更新：2026-06-18 (CardDetailPopup 入场动效 + Flash 材质)
 > 状态：✅ 框架已实现 + 上层对接完成
 
 ---
@@ -376,6 +376,7 @@ GlobalTweens ──┬── TweenFX         (Autoload, 纯静态) — 含 move_
 | ✅ 溶解消散 dissolve_out | `tween_fx.gd` | 噪声溶解+燃烧边缘 |
 | ✅ CRT 移除 (V24) | 全项目 | 扫描线/色差/暗角已删除 |
 | ✅ 稀有度材质 Foil/Holo/Polychrome | `ninja_inventory_card.gd` + `.tres` ×3 | 3 档 flash 材质 + 传奇呼吸脉冲 + 悬停加速，全走 GlobalTweens API |
+| ✅ **CardDetailPopup 入场动效 + Flash 材质** | `card_detail_popup.gd`, `card_visual_composer.gd`, `asset_registry.gd` | 右键详情弹窗 rarity 分阶入场(pop_in/punch_in + stagger 文字) + 退场缩退 + 卡面 flash 材质(银光/波浪/火焰/彩虹) |
 
 ### 🔲 低优先级
 

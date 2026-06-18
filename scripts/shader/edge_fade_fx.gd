@@ -30,15 +30,15 @@ func apply(node: CanvasItem, fade_start: float = DEFAULT_FADE_START) -> void:
 
 	# 如果已有边缘淡出材质，只更新参数
 	if _active.has(node) and is_instance_valid(_active[node]):
-		var mat: ShaderMaterial = _active[node]
-		mat.set_shader_parameter("fade_start", fade_start)
+		var existing_mat: ShaderMaterial = _active[node]
+		existing_mat.set_shader_parameter("fade_start", fade_start)
 		return
 
-	var mat := ShaderMaterial.new()
-	mat.shader = _shader
-	mat.set_shader_parameter("fade_start", fade_start)
-	node.material = mat
-	_active[node] = mat
+	var new_mat := ShaderMaterial.new()
+	new_mat.shader = _shader
+	new_mat.set_shader_parameter("fade_start", fade_start)
+	node.material = new_mat
+	_active[node] = new_mat
 
 
 ## 移除节点的边缘淡出材质。

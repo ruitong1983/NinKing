@@ -79,17 +79,17 @@ static func get_material(node: CanvasItem) -> ShaderMaterial:
 # ══════════════════════════════════════════
 
 ## 设置 Shader 参数（安全版，检查 material 是否为 ShaderMaterial）。
-static func set_param(mat: ShaderMaterial, name: String, value: Variant) -> void:
+static func set_param(mat: ShaderMaterial, param_name: String, value: Variant) -> void:
 	if not is_instance_valid(mat):
 		return
-	mat.set_shader_parameter(name, value)
+	mat.set_shader_parameter(param_name, value)
 
 
 ## 获取 Shader 参数值。
-static func get_param(mat: ShaderMaterial, name: String) -> Variant:
+static func get_param(mat: ShaderMaterial, param_name: String) -> Variant:
 	if not is_instance_valid(mat):
 		return null
-	return mat.get_shader_parameter(name)
+	return mat.get_shader_parameter(param_name)
 
 
 # ══════════════════════════════════════════

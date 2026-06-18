@@ -68,8 +68,10 @@ theme_override_constants/separation = 8
 [node name="ColXiLabel" type="Label" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox" unique_id=1205393969]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_vertical = 0
 theme_override_colors/font_color = Color(0.769, 0.659, 0.263, 1)
 theme_override_font_sizes/font_size = 32
+autowrap_mode = 3
 
 [node name="HandTypeRow" type="VBoxContainer" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox" unique_id=1493402944]
 layout_mode = 2

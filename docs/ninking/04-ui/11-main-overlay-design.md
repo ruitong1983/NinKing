@@ -182,13 +182,14 @@ LevelComplete (Control 1920×1080)
 
 ```
 ┌──────────────────────────────────────────┐
-│                  全屏黑底 (70% opacity)    │
+│                  全屏黑底 (80% opacity)    │
 │                                          │
-│                忍気不足                   │  ← GameOverLabel
+│                忍気不足                   │  ← GameOverLabel 48px 红 居中
 │                                          │
-│          战绩: 结界 3 · 忍気 380          │  ← ScoreSummary
+│          战绩: 结界 3 · 忍気 380          │  ← ScoreSummary 28px 居中
 │                                          │
-│          [重试]      [返回主菜单]          │
+│              [重新开始]                    │  ← RetryButton 24px flat
+│              [返回主菜单]                  │  ← BackToMenuButton 20px flat
 │                                          │
 └──────────────────────────────────────────┘
 ```
@@ -198,10 +199,10 @@ LevelComplete (Control 1920×1080)
 ```
 GameOver (Control 1920×1080)
 ├── OverlayBg (ColorRect)
-├── GameOverLabel (Label)              ← "忍気不足" / "封印失败"
-├── ScoreSummary (Label)               ← 战绩摘要
-├── RetryButton (Button)              ← "重试"
-└── BackToMenuButton (Button)         ← "返回主菜单"
+├── GameOverLabel (Label)              ← "失败" 48px 红 居中 / 代码覆盖
+├── ScoreSummary (Label)               ← "战绩: 结界 X · 忍気 Y" 28px 居中
+├── RetryButton (Button)              ← "重新开始" 24px flat
+└── BackToMenuButton (Button)         ← "返回主菜单" 20px flat
 ```
 
 ### 6.3 永久死亡 (A8)

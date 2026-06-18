@@ -1,6 +1,6 @@
 # NinKing 设计文档索引
 
-> **最后更新:** 2026-06-17 (同步忍者牌标签分类 + Shader 库文档索引) | **关联:** [`09-mgmt/TODO.md`](09-mgmt/TODO.md)
+> **最后更新:** 2026-06-18 (新增人格模型引用, 10-ops/ 运维分类，移动日志指南) | **关联:** [`09-mgmt/TODO.md`](09-mgmt/TODO.md)
 > **目录结构:** 文档按以下 9 分类存放。每个文档只能归到一个分类，README 提供跨分类索引。
 
 ---
@@ -69,6 +69,8 @@
 | 文档 | 内容 |
 |------|------|
 | [`20-debug-scene-design.md`](08-testing/20-debug-scene-design.md) | **Debug 计分测试场景:** 独立于主场景，52牌选择+忍者/星图测试 |
+| [`21-simulation-methodology.md`](08-testing/21-simulation-methodology.md) | **模拟方法论:** 难度模拟、人格驱动测试、MBTI集成、游戏机制调整建议框架 |
+| [`21-simulation-methodology.md#7-玩家人格驱动模拟`](08-testing/21-simulation-methodology.md#7-玩家人格驱动模拟) | **玩家人格模型:** 6 人格 × 25 亚型，8 维度决策参数，模拟结果 |
 | [`testing-guide.md`](08-testing/testing-guide.md) | **测试指南:** Godot MCP Pro 测试流程/常见陷阱/命令速查 |
 
 ## 📐 项目管理 (09-mgmt/)
@@ -78,6 +80,12 @@
 | [`90-troubleshooting.md`](09-mgmt/90-troubleshooting.md) | **疑难问题解决手册:** 非显而易见的坑及解决方案 |
 | [`TODO.md`](09-mgmt/TODO.md) | **工作清单:** Bug / 待实现 / 优化 / 素材缺口 |
 | [`specs/`](09-mgmt/specs/) | **方案文档:** 已归档的实施方案与规格书 |
+
+## 🔧 运维与日志 (10-ops/)
+
+| 文档 | 内容 |
+|------|------|
+| [`logs-operations-guide.md`](10-ops/logs-operations-guide.md) | **日志系统运维指南:** 文件管理/回放查看器/事件参考/JSON Schema/排查 |
 
 ## 参考资料 (references/)
 

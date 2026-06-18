@@ -68,7 +68,7 @@ const DEFAULT_PROGRESS: Dictionary = {
 static func load_progress() -> Dictionary:
 	var data: Dictionary = _read_json(PROGRESS_SAVE_PATH)
 	if data.is_empty():
-		data = DEFAULT_PROGRESS.duplicate()
+		data = DEFAULT_PROGRESS.duplicate(true)
 	# Backward compat: migrate old key names
 	if not data.has("deck_best_barriers") and data.has("deck_best_antes"):
 		data["deck_best_barriers"] = data["deck_best_antes"]
@@ -128,7 +128,8 @@ static func _read_json(path: String) -> Dictionary:
 	if error != OK:
 		push_error("SaveManager: Failed to parse: %s" % path)
 		return {}
-	return json.data
+	# JSON.parse 返回的 Dictionary 是只读的，深拷贝确保调用方可修改
+	return (json.data as Dictionary).duplicate(true)
 
 
 static func _delete_file(path: String) -> void:

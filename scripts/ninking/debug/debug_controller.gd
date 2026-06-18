@@ -404,6 +404,14 @@ func _on_play_pressed() -> void:
 	_last_col_evals = col_evals.duplicate()
 	_last_xi_result = xi_result
 
+	# ── Build summary for ninja trigger animations ──
+	var summary: Dictionary = ScoreCalculator.analyze_effects(
+		head_cards, mid_cards, tail_cards,
+		head_eval, mid_eval, tail_eval,
+		col_evals,
+		_selected_ninjas, 0, xi_result
+	)
+
 	# ── Build play_data and trigger scoring animation ──
 	var play_data: Dictionary = {
 		"score_result": result,
@@ -412,6 +420,7 @@ func _on_play_pressed() -> void:
 		"head_eval": head_eval,
 		"mid_eval": mid_eval,
 		"tail_eval": tail_eval,
+		"summary": summary,
 		"current_score": 0,
 		"target_score": 99999,
 		"plays_remaining": 3,
@@ -434,6 +443,7 @@ func _on_play_pressed() -> void:
 	NinKingGameState.owned_ninjas = _selected_ninjas.duplicate()
 	_anim_handler.current_play_data = play_data
 	await _anim_handler.run_scoring()
+	NinKingGameState.current_score += result.total_score
 	_update_score_display(result, head_eval, mid_eval, tail_eval, col_evals, xi_result)
 	_detail_btn.visible = true
 	_set_status("动画完成 — 总分: %d" % result.total_score)
@@ -485,15 +495,16 @@ func _update_score_display(
 		%Col1Label.text = CardData.get_hand_type3_name(col_evals[1].hand_type)
 		%Col2Label.text = CardData.get_hand_type3_name(col_evals[2].hand_type)
 
+	if col_evals.size() == 3:
+		# Restore left-panel column type labels (scoring animation mutates them)
+		%LeftColType.text = CardData.get_hand_type3_name(col_evals[0].hand_type)
+		%MidColType.text = CardData.get_hand_type3_name(col_evals[1].hand_type)
+		%RightColType.text = CardData.get_hand_type3_name(col_evals[2].hand_type)
+
 	if xi_result and xi_result.has_any():
 		var xi_parts: Array[String] = []
 		for xi_name: String in xi_result.triggered:
-			var x_val: int = 1
-			for defn: Dictionary in XiDetector.XI_DEFINITIONS:
-				if defn["name"] == xi_name:
-					x_val = defn["x_mult"]
-					break
-			xi_parts.append("%s×%d" % [xi_name, x_val])
+			xi_parts.append(xi_name)
 		_col_xi_label.text = "喜: " + "  ".join(xi_parts)
 	else:
 		_col_xi_label.text = "喜: -"
@@ -596,12 +607,7 @@ func _update_xi_preview(
 	if xi_result and xi_result.has_any():
 		var xi_parts: Array[String] = []
 		for xi_name: String in xi_result.triggered:
-			var x_val: int = 1
-			for defn: Dictionary in XiDetector.XI_DEFINITIONS:
-				if defn["name"] == xi_name:
-					x_val = defn["x_mult"]
-					break
-			xi_parts.append("%s×%d" % [xi_name, x_val])
+			xi_parts.append(xi_name)
 		_col_xi_label.text = "喜: " + "  ".join(xi_parts)
 	else:
 		_col_xi_label.text = "喜: -"

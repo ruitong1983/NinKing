@@ -1,0 +1,685 @@
+{
+  "meta": {
+    "version": "2.0",
+    "framework": "MBTI-32-A/T",
+    "description": "MBTI 16型 × Assertive/Turbulent (-A/-T) 维度 = 32型人格决策策略 · 策略外置化，代码只读此文件执行",
+    "created": "2026-06-18",
+    "note": "所有决策参数在此定义。修改此文件即可调整任何人格的策略行为，无需改动 Python 代码。"
+  },
+
+  "mbti_types": [
+    {
+      "mbti": "ISTJ",
+      "name": "纯对子",
+      "group": "稳妥型",
+      "icon": "🛡️",
+      "description": "结构化、守规则，相信稳定路线带来可预测结果",
+      "variants": {
+        "A": {
+          "name": "纯对子·务实",
+          "description": "对选择充满信心，不需要额外的安全垫",
+          "params": {
+            "strategy_lock": ["对子流"],
+            "strategy_purity": 1.0,
+            "budget_ratio": 0.65,
+            "refresh_behavior": "never",
+            "economy_preference": "normal",
+            "fill_slots": "opportunistic",
+            "replace_when_full": true,
+            "desperate_behavior": null
+          }
+        },
+        "T": {
+          "name": "纯对子·求稳",
+          "description": "总担心不够强，会多买一张备用",
+          "params": {
+            "strategy_lock": ["对子流"],
+            "strategy_purity": 0.9,
+            "budget_ratio": 0.75,
+            "refresh_behavior": "occasional",
+            "economy_preference": "normal",
+            "fill_slots": "opportunistic",
+            "replace_when_full": true,
+            "desperate_behavior": null
+          }
+        }
+      }
+    },
+    {
+      "mbti": "ISFJ",
+      "name": "对顺双修",
+      "group": "稳妥型",
+      "icon": "🛡️",
+      "description": "谨慎护全、渐进扩展，先巩固已知再试探新方向",
+      "variants": {
+        "A": {
+          "name": "对顺双修·笃定",
+          "description": "相信自己能驾驭两条路线，从容切换",
+          "params": {
+            "strategy_lock": ["对子流", "顺子流"],
+            "strategy_purity": 0.85,
+            "budget_ratio": 0.55,
+            "refresh_behavior": "occasional",
+            "economy_preference": "normal",
+            "fill_slots": "opportunistic",
+            "replace_when_full": false,
+            "desperate_behavior": null
+          }
+        },
+        "T": {
+          "name": "对顺双修·谨慎",
+          "description": "总是想多留一条后路，犹豫不决",
+          "params": {
+            "strategy_lock": ["对子流", "顺子流"],
+            "strategy_purity": 0.75,
+            "budget_ratio": 0.65,
+            "refresh_behavior": "core_missing",
+            "economy_preference": "normal",
+            "fill_slots": "opportunistic",
+            "replace_when_full": false,
+            "desperate_behavior": null
+          }
+        }
+      }
+    },
+    {
+      "mbti": "ESTJ",
+      "name": "精打细算",
+      "group": "稳妥型",
+      "icon": "🛡️",
+      "description": "务实高效，每一分资源追求最大回报",
+      "variants": {
+        "A": {
+          "name": "精打细算·高效",
+          "description": "精确知道需要什么，不多花一金",
+          "params": {
+            "strategy_lock": ["对子流", "顺子流", "同花流"],
+            "strategy_purity": 0.6,
+            "budget_ratio": 0.30,
+            "refresh_behavior": "never",
+            "economy_preference": "prefer",
+            "fill_slots": "picky",
+            "replace_when_full": false,
+            "desperate_behavior": null
+          }
+        },
+        "T": {
+          "name": "精打细算·焦虑",
+          "description": "算来算去总怕算漏，偶尔会多花",
+          "params": {
+            "strategy_lock": ["对子流", "顺子流", "同花流"],
+            "strategy_purity": 0.4,
+            "budget_ratio": 0.40,
+            "refresh_behavior": "occasional",
+            "economy_preference": "prefer",
+            "fill_slots": "picky",
+            "replace_when_full": false,
+            "desperate_behavior": null
+          }
+        }
+      }
+    },
+    {
+      "mbti": "ESFJ",
+      "name": "均衡流",
+      "group": "收集型",
+      "icon": "📋",
+      "description": "追求平衡覆盖，不愿任何位置被冷落",
+      "variants": {
+        "A": {
+          "name": "均衡流·稳健",
+          "description": "团队已经够好了，不需要过度干预",
+          "params": {
+            "strategy_lock": null,
+            "strategy_purity": 0.0,
+            "budget_ratio": 0.65,
+            "refresh_behavior": "core_missing",
+            "economy_preference": "normal",
+            "fill_slots": "opportunistic",
+            "replace_when_full": true,
+            "desperate_behavior": null,
+            "_prefer_group_coverage": true
+          }
+        },
+        "T": {
+          "name": "均衡流·操心",
+          "description": "总怕某个位置掉链子，不断调整",
+          "params": {
+            "strategy_lock": null,
+            "strategy_purity": 0.0,
+            "budget_ratio": 0.75,
+            "refresh_behavior": "aggressive",
+            "economy_preference": "normal",
+            "fill_slots": "immediate",
+            "replace_when_full": true,
+            "desperate_behavior": null,
+            "_prefer_group_coverage": true
+          }
+        }
+      }
+    },
+    {
+      "mbti": "INTJ",
+      "name": "精算师",
+      "group": "理财型",
+      "icon": "💰",
+      "description": "战略级计算，每一步都有远期规划",
+      "variants": {
+        "A": {
+          "name": "精算师·远见",
+          "description": "计划周密，坚信远期布局终会回报",
+          "params": {
+            "strategy_lock": ["对子流", "顺子流"],
+            "strategy_purity": 0.6,
+            "budget_ratio": 0.45,
+            "refresh_behavior": "never",
+            "economy_preference": "prefer",
+            "fill_slots": "opportunistic",
+            "replace_when_full": false,
+            "desperate_behavior": null
+          }
+        },
+        "T": {
+          "name": "精算师·疑虑",
+          "description": "计划完美但执行时总想微调",
+          "params": {
+            "strategy_lock": ["对子流", "顺子流"],
+            "strategy_purity": 0.4,
+            "budget_ratio": 0.55,
+            "refresh_behavior": "occasional",
+            "economy_preference": "prefer",
+            "fill_slots": "opportunistic",
+            "replace_when_full": false,
+            "desperate_behavior": null
+          }
+        }
+      }
+    },
+    {
+      "mbti": "INTP",
+      "name": "直觉流",
+      "group": "灵活型",
+      "icon": "🦎",
+      "description": "凭第一感觉选方向，深入探索其可能性",
+      "variants": {
+        "A": {
+          "name": "直觉流·笃行",
+          "description": "直觉定了就信到底，不内耗",
+          "params": {
+            "strategy_lock": null,
+            "strategy_purity": 0.0,
+            "budget_ratio": 0.55,
+            "refresh_behavior": "occasional",
+            "economy_preference": "normal",
+            "fill_slots": "opportunistic",
+            "replace_when_full": false,
+            "desperate_behavior": null,
+            "_pick_strategy": "random_start"
+          }
+        },
+        "T": {
+          "name": "直觉流·游移",
+          "description": "直觉选完又怀疑，总想看看别的",
+          "params": {
+            "strategy_lock": null,
+            "strategy_purity": 0.0,
+            "budget_ratio": 0.65,
+            "refresh_behavior": "aggressive",
+            "economy_preference": "normal",
+            "fill_slots": "opportunistic",
+            "replace_when_full": false,
+            "desperate_behavior": null,
+            "_pick_strategy": "random_start"
+          }
+        }
+      }
+    },
+    {
+      "mbti": "ENTJ",
+      "name": "守财奴",
+      "group": "理财型",
+      "icon": "💰",
+      "description": "纪律严明，坚信资源积累是决胜关键",
+      "variants": {
+        "A": {
+          "name": "守财奴·铁律",
+          "description": "存钱意志坚如铁，绝不动摇",
+          "params": {
+            "strategy_lock": null,
+            "strategy_purity": 0.0,
+            "budget_ratio": 0.25,
+            "refresh_behavior": "never",
+            "economy_preference": "only_economy",
+            "fill_slots": "picky",
+            "replace_when_full": false,
+            "desperate_behavior": null
+          }
+        },
+        "T": {
+          "name": "守财奴·心慌",
+          "description": "存了很多但怕守不住，偶尔会花",
+          "params": {
+            "strategy_lock": null,
+            "strategy_purity": 0.0,
+            "budget_ratio": 0.35,
+            "refresh_behavior": "occasional",
+            "economy_preference": "only_economy",
+            "fill_slots": "picky",
+            "replace_when_full": false,
+            "desperate_behavior": null
+          }
+        }
+      }
+    },
+    {
+      "mbti": "ENTP",
+      "name": "混合赌徒",
+      "group": "赌狗型",
+      "icon": "🎲",
+      "description": "多线并进，总在寻找更优的解",
+      "variants": {
+        "A": {
+          "name": "混合赌徒·自信",
+          "description": "玩得转多线操作，冷静控盘",
+          "params": {
+            "strategy_lock": ["同花顺流", "豹子流"],
+            "strategy_purity": 0.8,
+            "budget_ratio": 0.80,
+            "refresh_behavior": "aggressive",
+            "economy_preference": "ignore",
+            "fill_slots": "opportunistic",
+            "replace_when_full": true,
+            "desperate_behavior": null
+          }
+        },
+        "T": {
+          "name": "混合赌徒·焦躁",
+          "description": "哪个都不够好，再刷一把",
+          "params": {
+            "strategy_lock": ["同花顺流", "豹子流"],
+            "strategy_purity": 0.6,
+            "budget_ratio": 0.90,
+            "refresh_behavior": "all_in",
+            "economy_preference": "ignore",
+            "fill_slots": "opportunistic",
+            "replace_when_full": true,
+            "desperate_behavior": "sell_refresh"
+          }
+        }
+      }
+    },
+    {
+      "mbti": "ISTP",
+      "name": "狂战士",
+      "group": "赌狗型",
+      "icon": "🎲",
+      "description": "冷静下注，一旦认定全力执行",
+      "variants": {
+        "A": {
+          "name": "狂战士·专注",
+          "description": "目标明确，不动摇不怀疑",
+          "params": {
+            "strategy_lock": ["同花顺流", "豹子流"],
+            "strategy_purity": 0.9,
+            "budget_ratio": 0.90,
+            "refresh_behavior": "all_in",
+            "economy_preference": "ignore",
+            "fill_slots": "opportunistic",
+            "replace_when_full": true,
+            "desperate_behavior": null
+          }
+        },
+        "T": {
+          "name": "狂战士·燃烧",
+          "description": "不成功便成仁，越输越上头",
+          "params": {
+            "strategy_lock": ["同花顺流", "豹子流"],
+            "strategy_purity": 0.7,
+            "budget_ratio": 0.95,
+            "refresh_behavior": "all_in",
+            "economy_preference": "ignore",
+            "fill_slots": "opportunistic",
+            "replace_when_full": true,
+            "desperate_behavior": "sell_refresh"
+          }
+        }
+      }
+    },
+    {
+      "mbti": "ISFP",
+      "name": "绝命赌徒",
+      "group": "赌狗型",
+      "icon": "🎲",
+      "description": "享受拼尽全力的过程本身",
+      "variants": {
+        "A": {
+          "name": "绝命赌徒·洒脱",
+          "description": "输赢看淡，享受过程相信运气",
+          "params": {
+            "strategy_lock": ["同花顺流", "豹子流", "顺子流"],
+            "strategy_purity": 0.7,
+            "budget_ratio": 0.75,
+            "refresh_behavior": "aggressive",
+            "economy_preference": "ignore",
+            "fill_slots": "opportunistic",
+            "replace_when_full": true,
+            "desperate_behavior": null
+          }
+        },
+        "T": {
+          "name": "绝命赌徒·疯狂",
+          "description": "已经输了这么多，再搏一把翻盘",
+          "params": {
+            "strategy_lock": ["同花顺流", "豹子流", "顺子流"],
+            "strategy_purity": 0.5,
+            "budget_ratio": 0.85,
+            "refresh_behavior": "aggressive",
+            "economy_preference": "ignore",
+            "fill_slots": "opportunistic",
+            "replace_when_full": true,
+            "desperate_behavior": "sell_refresh"
+          }
+        }
+      }
+    },
+    {
+      "mbti": "ESTP",
+      "name": "稳健杂食",
+      "group": "稳妥型",
+      "icon": "🛡️",
+      "description": "灵活性高，充分利用眼前资源最大化产出",
+      "variants": {
+        "A": {
+          "name": "稳健杂食·从容",
+          "description": "有什么打什么，不焦虑不冒进",
+          "params": {
+            "strategy_lock": null,
+            "strategy_purity": 0.0,
+            "budget_ratio": 0.60,
+            "refresh_behavior": "occasional",
+            "economy_preference": "normal",
+            "fill_slots": "opportunistic",
+            "replace_when_full": true,
+            "desperate_behavior": null
+          }
+        },
+        "T": {
+          "name": "稳健杂食·急切",
+          "description": "总怕错过好的，见了就买",
+          "params": {
+            "strategy_lock": null,
+            "strategy_purity": 0.0,
+            "budget_ratio": 0.70,
+            "refresh_behavior": "aggressive",
+            "economy_preference": "normal",
+            "fill_slots": "opportunistic",
+            "replace_when_full": true,
+            "desperate_behavior": null
+          }
+        }
+      }
+    },
+    {
+      "mbti": "ESFP",
+      "name": "机会主义者",
+      "group": "灵活型",
+      "icon": "🦎",
+      "description": "善于捕捉眼前机会，灵活转换方向",
+      "variants": {
+        "A": {
+          "name": "机会主义者·敏捷",
+          "description": "眼光精准，出手果断",
+          "params": {
+            "strategy_lock": null,
+            "strategy_purity": 0.0,
+            "budget_ratio": 0.60,
+            "refresh_behavior": "occasional",
+            "economy_preference": "normal",
+            "fill_slots": "opportunistic",
+            "replace_when_full": true,
+            "desperate_behavior": null,
+            "_pick_strategy": "shop_first_two"
+          }
+        },
+        "T": {
+          "name": "机会主义者·贪婪",
+          "description": "每个机会都想要，反而难以抉择",
+          "params": {
+            "strategy_lock": null,
+            "strategy_purity": 0.0,
+            "budget_ratio": 0.70,
+            "refresh_behavior": "aggressive",
+            "economy_preference": "normal",
+            "fill_slots": "opportunistic",
+            "replace_when_full": true,
+            "desperate_behavior": null,
+            "_pick_strategy": "shop_first_two"
+          }
+        }
+      }
+    },
+    {
+      "mbti": "INFJ",
+      "name": "愿景师",
+      "group": "感性型",
+      "icon": "🎭",
+      "description": "有长远格局，愿为远期目标承受短期阵痛",
+      "variants": {
+        "A": {
+          "name": "愿景师·坚定",
+          "description": "信念坚定，忍耐力极强",
+          "params": {
+            "strategy_lock": null,
+            "strategy_purity": 0.95,
+            "budget_ratio": 0.40,
+            "refresh_behavior": "core_missing",
+            "economy_preference": "normal",
+            "fill_slots": "opportunistic",
+            "replace_when_full": true,
+            "desperate_behavior": null,
+            "_pick_strategy": "random_start"
+          }
+        },
+        "T": {
+          "name": "愿景师·焦虑",
+          "description": "愿景宏大却害怕撑不到那一天",
+          "params": {
+            "strategy_lock": null,
+            "strategy_purity": 0.90,
+            "budget_ratio": 0.50,
+            "refresh_behavior": "aggressive",
+            "economy_preference": "normal",
+            "fill_slots": "opportunistic",
+            "replace_when_full": true,
+            "desperate_behavior": null,
+            "_pick_strategy": "random_start"
+          }
+        }
+      }
+    },
+    {
+      "mbti": "ENFJ",
+      "name": "鼓舞者",
+      "group": "感性型",
+      "icon": "🎭",
+      "description": "注重团队全面性，追求整体大于部分之和",
+      "variants": {
+        "A": {
+          "name": "鼓舞者·从容",
+          "description": "阵容合理就足够，信任团队",
+          "params": {
+            "strategy_lock": ["对子流", "顺子流", "同花流"],
+            "strategy_purity": 0.5,
+            "budget_ratio": 0.60,
+            "refresh_behavior": "core_missing",
+            "economy_preference": "normal",
+            "fill_slots": "opportunistic",
+            "replace_when_full": true,
+            "desperate_behavior": null,
+            "_prefer_group_coverage": true
+          }
+        },
+        "T": {
+          "name": "鼓舞者·操心",
+          "description": "总怕某个位置拖后腿，不断修补",
+          "params": {
+            "strategy_lock": ["对子流", "顺子流", "同花流"],
+            "strategy_purity": 0.3,
+            "budget_ratio": 0.70,
+            "refresh_behavior": "aggressive",
+            "economy_preference": "normal",
+            "fill_slots": "immediate",
+            "replace_when_full": true,
+            "desperate_behavior": null,
+            "_prefer_group_coverage": true
+          }
+        }
+      }
+    },
+    {
+      "mbti": "INFP",
+      "name": "创作家",
+      "group": "感性型",
+      "icon": "🎭",
+      "description": "追求自我表达，宁愿输得有风格也不愿赢得无聊",
+      "variants": {
+        "A": {
+          "name": "创作家·自在",
+          "description": "玩自己的组合，不为结果焦虑",
+          "params": {
+            "strategy_lock": null,
+            "strategy_purity": 0.4,
+            "budget_ratio": 0.55,
+            "refresh_behavior": "occasional",
+            "economy_preference": "ignore",
+            "fill_slots": "opportunistic",
+            "replace_when_full": true,
+            "desperate_behavior": null,
+            "_pick_strategy": "random_start"
+          }
+        },
+        "T": {
+          "name": "创作家·纠结",
+          "description": "有趣的组合太多，选择困难",
+          "params": {
+            "strategy_lock": null,
+            "strategy_purity": 0.2,
+            "budget_ratio": 0.65,
+            "refresh_behavior": "aggressive",
+            "economy_preference": "ignore",
+            "fill_slots": "opportunistic",
+            "replace_when_full": true,
+            "desperate_behavior": null,
+            "_pick_strategy": "random_start"
+          }
+        }
+      }
+    },
+    {
+      "mbti": "ENFP",
+      "name": "探险家",
+      "group": "感性型",
+      "icon": "🎭",
+      "description": "充满好奇心，每局都是一次全新冒险",
+      "variants": {
+        "A": {
+          "name": "探险家·乐天",
+          "description": "好奇但理性，享受探索不过度冒险",
+          "params": {
+            "strategy_lock": null,
+            "strategy_purity": 0.0,
+            "budget_ratio": 0.70,
+            "refresh_behavior": "core_missing",
+            "economy_preference": "normal",
+            "fill_slots": "opportunistic",
+            "replace_when_full": true,
+            "desperate_behavior": null,
+            "_pick_strategy": "random_start"
+          }
+        },
+        "T": {
+          "name": "探险家·狂热",
+          "description": "每个方向都诱人，每个都想试试",
+          "params": {
+            "strategy_lock": null,
+            "strategy_purity": 0.0,
+            "budget_ratio": 0.80,
+            "refresh_behavior": "all_in",
+            "economy_preference": "normal",
+            "fill_slots": "opportunistic",
+            "replace_when_full": true,
+            "desperate_behavior": "sell_refresh",
+            "_pick_strategy": "random_start"
+          }
+        }
+      }
+    }
+  ],
+
+  "test_baselines": [
+    {
+      "id": "chaos_random",
+      "name": "真随机",
+      "group": "混沌型",
+      "icon": "🧪",
+      "description": "完全零智力——纯随机决策基线",
+      "params": {
+        "strategy_lock": null,
+        "strategy_purity": 0.0,
+        "budget_ratio": -1,
+        "refresh_behavior": "random",
+        "economy_preference": "random",
+        "fill_slots": "random",
+        "replace_when_full": false,
+        "desperate_behavior": null,
+        "_random_decisions": true
+      }
+    },
+    {
+      "id": "chaos_anti",
+      "name": "反人性",
+      "group": "混沌型",
+      "icon": "🧪",
+      "description": "故意做反最优选择——下限基线",
+      "params": {
+        "strategy_lock": null,
+        "strategy_purity": 0.0,
+        "budget_ratio": -1,
+        "refresh_behavior": "never",
+        "economy_preference": "ignore",
+        "fill_slots": "picky",
+        "replace_when_full": false,
+        "desperate_behavior": null,
+        "_reverse_decisions": true
+      }
+    },
+    {
+      "id": "chaos_noshop",
+      "name": "少商店",
+      "group": "混沌型",
+      "icon": "🧪",
+      "description": "从不进商店——纯基础牌面基线",
+      "params": {
+        "strategy_lock": null,
+        "strategy_purity": 0.0,
+        "budget_ratio": 0.0,
+        "refresh_behavior": "never",
+        "economy_preference": "ignore",
+        "fill_slots": "picky",
+        "replace_when_full": false,
+        "desperate_behavior": null,
+        "_skip_shop": true
+      }
+    }
+  ],
+
+  "group_index": {
+    "稳妥型": { "icon": "🛡️", "description": "稳扎稳打，依赖特定牌型建build" },
+    "理财型": { "icon": "💰", "description": "经济至上，利息和免费资源最大化" },
+    "赌狗型": { "icon": "🎲", "description": "高风险高收益，追求极限牌型" },
+    "灵活型": { "icon": "🦎", "description": "随机应变，看商店出什么决定方向" },
+    "收集型": { "icon": "📋", "description": "先填满5张忍者再谈品质" },
+    "感性型": { "icon": "🎭", "description": "凭直觉/价值观/乐趣做决策" },
+    "混沌型": { "icon": "🧪", "description": "纯测试基线" }
+  }
+}

@@ -40,7 +40,7 @@
 
 ## 2. 场景树全图
 
-> **校验依据：** `scenes/ninking/ninking_main.tscn` 实际节点结构（2026-06-16 同步）。
+> **校验依据：** `scenes/ninking/ninking_main.tscn` 实际节点结构（2026-06-18 同步）。
 > `[game_manager.gd]` = 脚本绑定 ｜ `[%Name]` = unique_name_in_owner ｜ `（运行时动态加载）` = 代码创建
 
 ```
@@ -78,7 +78,7 @@ NinKingMain (Control) 1920×1080                      [game_manager.gd]
     │   │   │       │   ├── DestroyLv (Label) [%DestroyLv]
     │   │   │       │   └── DestroyScore (RichTextLabel) [%DestroyScore]
     │   │   │       ├── ColDivider (ColorRect)          — 列分割线
-    │   │   │       └── ColumnBar (Control)             — 三列牌型/分数/等级
+    │   │   │       └── ColumnBar (Control)             — 三列牌型（v7: 分数内联于牌型标签，ColScore等子节点保留但不参与动画）
     │   │   │           ├── LeftColType (Label) [%LeftColType]
     │   │   │           ├── MidColType (Label) [%MidColType]
     │   │   │           ├── RightColType (Label) [%RightColType]
@@ -94,7 +94,7 @@ NinKingMain (Control) 1920×1080                      [game_manager.gd]
     │   │   │
     │   │   ├── ScorePanel (Panel) [%ScorePanel]       — anchor_top=0.5 anchor_bottom=0.75
     │   │   │   └── ScoreVBox (VBoxContainer)
-    │   │   │       ├── ColXiLabel (Label) [%ColXiLabel] "列: x16  喜: x2" 32px
+    │   │   │       ├── ColXiLabel (Label) [%ColXiLabel] "喜: 昇龍 背水" 32px autowrap
     │   │   │       ├── ScoreLabel (Label) [%ScoreLabel] "忍気 0" 48px
     │   │   │       ├── ProgressBar (ProgressBar) [%ProgressBar] 28px
     │   │   │       └── TargetScoreLabel (Label) [%TargetScoreLabel] "封印 0" 28px
@@ -144,10 +144,10 @@ NinKingMain (Control) 1920×1080                      [game_manager.gd]
     │
     ├── GameOver (Control) [%GameOver]                  — 失败弹窗 (view: "gameover")
     │   ├── OverlayBg (ColorRect)                      #000 80%
-    │   ├── GameOverLabel (Label) [%GameOverLabel]     "失败" 48px 红
-    │   ├── RetryButton (Button) [%RetryButton]         "重新开始"
-    │   ├── BackToMenuButton (Button) [%BackToMenuButton] "返回主菜单"
-    │   └── ScoreSummary (Label) [%ScoreSummary]
+    │   ├── GameOverLabel (Label) [%GameOverLabel]     "失败" 48px 红, 居中
+    │   ├── ScoreSummary (Label) [%ScoreSummary]        "战绩: 结界 X · 忍気 Y" 28px 居中
+    │   ├── RetryButton (Button) [%RetryButton]         "重新开始" 24px flat
+    │   └── BackToMenuButton (Button) [%BackToMenuButton] "返回主菜单" 20px flat
     │
     ├── VictoryOverlay (Control)                        — 通关弹窗 (view: "victory")
     │   ├── OverlayBg (ColorRect)                      #000 70%
@@ -257,7 +257,7 @@ Lv badge 色阶：Lv.1-2 `#7A7A7A` 灰 | Lv.3-4 `#588CF2` 蓝 | Lv.5-6 `#C4A843`
 
 | 元素 | 字号 | 颜色 | 用途 |
 |------|------|------|------|
-| ColXiLabel [%ColXiLabel] | 32px | 列 `#C4A843` 金 / 喜 accent | 列×累乘 + 喜预览 |
+| ColXiLabel [%ColXiLabel] | 32px | 喜 accent `#D93333` | 喜名称列表，autowrap 自动换行，自然高度不撑开 |
 | ScoreLabel [%ScoreLabel] | 48px | `(0.941, 0.929, 0.894)` 白 | "気 N" |
 | ProgressBar [%ProgressBar] | 28px | 灰底 + 金 fill | 进度条 |
 | TargetScoreLabel [%TargetScoreLabel] | 28px | 灰 `#7A7A6A` | "封印 N" |

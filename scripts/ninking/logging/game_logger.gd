@@ -37,7 +37,7 @@ const LOG_DIR: String = "user://logs/"
 # Run 生命周期
 # ════════════════════════════════════════════════════════════
 
-static func start_run(deck_name: String) -> void:
+static func start_run(p_deck_name: String) -> void:
 	if not enabled:
 		return
 	_entries.clear()
@@ -52,6 +52,24 @@ static func start_run(deck_name: String) -> void:
 		dir.make_dir("logs")
 
 	_file_path = ""
+
+	# ── 输出窗口提醒 ──
+	var logs_dir: String = OS.get_user_data_dir().path_join("logs")
+	var viewer_path: String = "docs/ninking/ninja-game-replay.html"
+	print("")
+	print("╔══════════════════════════════════════════════════════╗")
+	print("║          📝 GameLogger 日志已启动                   ║")
+	print("╠══════════════════════════════════════════════════════╣")
+	print("║  日志 ID:   %s" % _run_id)
+	print("║  牌组:      %s" % p_deck_name)
+	print("║  保存目录:  %s" % logs_dir)
+	print("║  文件名:    {时间}_{结果}_{ID}.json")
+	print("╠══════════════════════════════════════════════════════╣")
+	print("║  ▶ 回放查看: 用浏览器打开项目目录下的               ║")
+	print("║    %s" % viewer_path)
+	print("║    拖入日志 JSON 文件即可回放                       ║")
+	print("╚══════════════════════════════════════════════════════╝")
+	print("")
 
 
 static func _generate_run_id() -> String:
@@ -123,6 +141,23 @@ static func on_play_prepared(play_data: Dictionary) -> void:
 	var score_result = play_data.get("score_result")
 	var xi_result = play_data.get("xi_result")
 	var arr = play_data.get("current_arrangement", {})
+
+	# ── 触发的忍者牌 ──
+	var summary: Dictionary = play_data.get("summary", {})
+	var triggered_ids: Array = summary.get("triggered_ids", [])
+	var owned_ninjas: Array = play_data.get("owned_ninjas", [])
+	var ninja_triggers: Array[Dictionary] = []
+	for tid: String in triggered_ids:
+		var nname: String = ""
+		for n: Dictionary in owned_ninjas:
+			if n.get("id", "") == tid:
+				nname = n.get("name", "?")
+				break
+		ninja_triggers.append({
+			"id": tid,
+			"name": nname,
+		})
+
 	_add_entry("play_prepared", {
 		"score_detail": {
 			"total_score": score_result.total_score if score_result else 0,
@@ -139,6 +174,7 @@ static func on_play_prepared(play_data: Dictionary) -> void:
 			"mid": _serialize_group(arr.get("mid", [])),
 			"tail": _serialize_group(arr.get("tail", [])),
 		},
+		"ninja_triggers": ninja_triggers,
 	})
 
 
@@ -223,7 +259,7 @@ static func on_victory(barrier_num: int, total_score: int) -> void:
 static func on_custom_event(event_name: String, detail: Dictionary = {}, snapshot: Dictionary = {}) -> void:
 	if not enabled or not _run_started:
 		return
-	_add_entry(event_name, detail, snapshot if not snapshot.is_empty() else null)
+	_add_entry(event_name, detail, snapshot)
 
 
 # ════════════════════════════════════════════════════════════

@@ -9,9 +9,10 @@
 #
 # 流程:
 #   1. 运行 4 个提取脚本注入数据到 ninja_card_viewer.html
-#   2. 基本校验（文件大小、卡牌数量）
-#   3. git commit（如有变更）
-#   4. 如果传了 --pr: git push + gh pr create
+#   2. 复制忍者卡图片到 docs/assets/
+#   3. 基本校验（文件大小、卡牌数量）
+#   4. git commit（如有变更）
+#   5. 如果传了 --pr: git push + gh pr create
 # ═══════════════════════════════════════════════════════
 set -e
 
@@ -28,6 +29,10 @@ EXTRACTORS=(
   "tools/tscn_parser.py"
 )
 INJECTOR="tools/inject_recent_updates.py"
+
+# ── Asset paths (copy card images for GitHub Pages) ──
+NINJA_CARD_SRC="assets/images/cards/ninjas"
+NINJA_CARD_DST="docs/assets/images/cards/ninjas"
 
 # ── Help ──────────────────────────────────────────────
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
@@ -54,24 +59,31 @@ warn() { echo -e "  ${YELLOW}⚠${NC} $1"; }
 fail() { echo -e "  ${RED}✗${NC} $1"; }
 
 # ── 1. Run extraction scripts ────────────────────────
-echo "━━━ 1/5 提取忍者牌数据 ━━━"
+echo "━━━ 1/6 提取忍者牌数据 ━━━"
 "$PYTHON" "${EXTRACTORS[0]}" "$HTML"
 ok "ninja_data 注入完成"
 
-echo "━━━ 2/5 提取喜系统数据 ━━━"
+echo "━━━ 2/6 提取喜系统数据 ━━━"
 "$PYTHON" "${EXTRACTORS[1]}" "$HTML"
 ok "xi_data 注入完成"
 
-echo "━━━ 3/5 提取场景树数据 ━━━"
+echo "━━━ 3/6 提取场景树数据 ━━━"
 "$PYTHON" "${EXTRACTORS[2]}" "$HTML"
 ok "场景树注入完成"
 
-echo "━━━ 4/5 注入最近提交 ━━━"
+echo "━━━ 4/6 注入最近提交 ━━━"
 "$PYTHON" "$INJECTOR" "$HTML"
 ok "最近提交注入完成"
 
-# ── 5. Validate ──────────────────────────────────────
-echo "━━━ 校验 HTML ━━━"
+# ── 5. Copy card images for GitHub Pages ─────────────
+echo "━━━ 5/6 复制忍者卡图片 ━━━"
+mkdir -p "$NINJA_CARD_DST"
+cp "$NINJA_CARD_SRC/"*.png "$NINJA_CARD_DST/"
+COUNT=$(ls "$NINJA_CARD_DST/"*.png 2>/dev/null | wc -l)
+ok "已复制 $COUNT 张忍者卡图片"
+
+# ── 6. Validate ──────────────────────────────────────
+echo "━━━ 6/6 校验 HTML ━━━"
 if [ ! -f "$HTML" ]; then
   fail "$HTML 不存在"
   exit 1
@@ -103,7 +115,7 @@ ok "HTML 校验通过"
 
 # ── 6. Commit ────────────────────────────────────────
 echo "━━━ 提交 ━━━"
-git add "$HTML"
+git add "$HTML" "$NINJA_CARD_DST"
 
 if git diff --cached --quiet; then
   ok "HTML 无变更，跳过提交"

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NinKing MBTI 32型人格策略浏览器</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, "Microsoft YaHei", "PingFang SC", sans-serif; background: #0f0f23; color: #e0e0e0; height: 100vh; display: flex; overflow: hidden; }
+
+  /* ── 左侧栏 ── */
+  .sidebar { width: 300px; min-width: 300px; background: #16163a; border-right: 1px solid #2a2a5a; display: flex; flex-direction: column; overflow: hidden; }
+  .sidebar-header { padding: 16px 18px; border-bottom: 1px solid #2a2a5a; }
+  .sidebar-header h1 { font-size: 16px; color: #ffd700; }
+  .sidebar-header .sub { font-size: 11px; color: #888; margin-top: 2px; }
+  .sidebar-header .count { font-size: 11px; color: #666; margin-top: 1px; }
+  .sidebar-search { padding: 10px 14px; border-bottom: 1px solid #2a2a5a; }
+  .sidebar-search input { width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #333; background: #0f0f23; color: #ddd; font-size: 12px; outline: none; }
+  .sidebar-search input:focus { border-color: #ffd70055; }
+  .sidebar-list { flex: 1; overflow-y: auto; padding: 6px 0; }
+  .sidebar-list::-webkit-scrollbar { width: 4px; }
+  .sidebar-list::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+  .group-label { padding: 8px 18px 4px; font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+  .group-label .badge { float: right; font-size: 10px; color: #666; letter-spacing: 0; }
+
+  .type-item { padding: 7px 18px 7px 24px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; border-left: 3px solid transparent; transition: all 0.15s; }
+  .type-item:hover { background: #1e1e4a; }
+  .type-item.active { background: #1a2a5a; border-left-color: #ffd700; }
+  .type-item .icon-symbol { font-size: 14px; width: 20px; text-align: center; }
+  .type-item .name { flex: 1; }
+  .type-item .mbti-tag { font-size: 10px; color: #888; background: #222; padding: 1px 6px; border-radius: 4px; font-family: monospace; }
+  .type-item .variant-tag { font-size: 10px; padding: 1px 5px; border-radius: 3px; font-weight: 600; }
+  .variant-tag.a { background: #1a4a2a; color: #4caf50; }
+  .variant-tag.t { background: #4a1a1a; color: #f44336; }
+
+  /* ── 右侧 ── */
+  .main { flex: 1; overflow-y: auto; }
+  .main::-webkit-scrollbar { width: 6px; }
+  .main::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+  .welcome { height: 100%; display: flex; align-items: center; justify-content: center; color: #555; font-size: 18px; flex-direction: column; gap: 12px; }
+  .welcome .big-icon { font-size: 64px; opacity: 0.3; }
+
+  .detail-header { padding: 24px 32px 16px; border-bottom: 1px solid #2a2a5a; }
+  .detail-header .breadcrumb { font-size: 12px; color: #888; margin-bottom: 6px; }
+  .detail-header .title-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .detail-header .title-row .icon-symbol { font-size: 28px; }
+  .detail-header .title-row h2 { font-size: 24px; color: #fff; }
+  .detail-header .title-row .mbti-badge { font-size: 13px; background: #2a2a5a; padding: 2px 10px; border-radius: 6px; color: #a0d2ff; font-family: monospace; font-weight: 600; }
+  .detail-header .title-row .variant-badge { font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+  .detail-header .desc { font-size: 14px; color: #aaa; margin-top: 8px; }
+
+  .detail-body { padding: 24px 32px 40px; }
+
+  .section-title { font-size: 13px; color: #ffd700; font-weight: 600; margin: 20px 0 12px; letter-spacing: 0.5px; }
+  .section-title:first-child { margin-top: 0; }
+
+  .param-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .param-card { background: #16163a; border-radius: 10px; padding: 14px 16px; border: 1px solid #2a2a5a; }
+  .param-card .label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .param-card .value { font-size: 14px; color: #fff; font-family: 'Consolas', monospace; margin-bottom: 6px; }
+  .param-card .bar-bg { height: 4px; background: #2a2a5a; border-radius: 2px; overflow: hidden; }
+  .param-card .bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+
+  .compare-table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 13px; }
+  .compare-table th { background: #0f0f23; color: #ffd700; padding: 8px 12px; text-align: center; font-size: 11px; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 2px solid #2a2a5a; }
+  .compare-table td { padding: 8px 12px; text-align: center; border-bottom: 1px solid #1e1e3a; }
+  .compare-table tr:hover td { background: #1a1a3a; }
+  .compare-table .param-name { text-align: left; color: #aaa; font-size: 11px; }
+  .compare-table .diff-pos { color: #4caf50; }
+  .compare-table .diff-neg { color: #f44336; }
+
+  .specials-wrap { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .specials-tag { background: #1e1e3a; padding: 4px 10px; border-radius: 6px; font-size: 12px; color: #aaa; border: 1px solid #2a2a5a; }
+
+  .insight-box { background: #16163a; border-radius: 10px; padding: 16px; margin-bottom: 24px; border: 1px solid #2a2a5a; font-size: 14px; line-height: 1.8; color: #ccc; }
+
+  @media (max-width: 768px) { .sidebar { width: 200px; min-width: 200px; } .param-grid { grid-template-columns: 1fr; } }
+
+  .no-match { padding: 20px; text-align: center; color: #666; font-size: 13px; }
+
+  /* ── 模拟结果 ── */
+  .sim-card { background: #16163a; border-radius: 10px; padding: 14px 16px; border: 1px solid #2a2a5a; display: flex; flex-direction: column; gap: 4px; }
+  .sim-card .sim-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.3px; }
+  .sim-card .sim-value { font-size: 18px; font-weight: 700; }
+  .sim-card .sim-sub { font-size: 11px; color: #888; }
+  .sim-pass { color: #4caf50; }
+  .sim-fail { color: #f44336; }
+  .sim-warn { color: #ff9800; }
+  .sim-barrier-bar { display: flex; gap: 3px; margin: 6px 0; }
+  .sim-barrier-cell { flex: 1; height: 18px; border-radius: 3px; font-size: 9px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; }
+  .sim-barrier-cell.pass { background: #1b5e20; }
+  .sim-barrier-cell.fail { background: #4a1a1a; color: #888; }
+  .sim-barrier-cell.partial { background: #795548; }
+
+  .sim-check-list { list-style: none; padding: 0; margin: 8px 0; }
+  .sim-check-list li { padding: 5px 0; border-bottom: 1px solid #1e1e3a; font-size: 13px; line-height: 1.6; }
+  .sim-check-list li:last-child { border-bottom: none; }
+  .sim-conc { background: #0f0f23; border-radius: 8px; padding: 14px 18px; margin: 8px 0; font-size: 13px; line-height: 1.7; color: #ccc; }
+  .sim-conc .conc-group { color: #ffd700; font-weight: 600; }
+  .sim-score-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin: 10px 0; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-header">
+    <h1>🧠 MBTI 32型策略</h1>
+    <div class="sub">16型 × -A/-T 自信/动荡 · 含模拟结果</div>
+    <div class="count" id="typeCount"></div>
+  </div>
+  <div class="sidebar-search">
+    <input type="text" id="searchInput" placeholder="搜索名称或MBTI码..." oninput="filterList()">
+  </div>
+  <div class="sidebar-list" id="sidebarList"></div>
+</div>
+
+<div class="main" id="mainArea">
+  <div class="welcome" id="welcomeScreen">
+    <div class="big-icon">🧠</div>
+    <div>从左侧选择一个性格类型</div>
+    <div style="font-size:13px;color:#444;">MBTI 32型 · 8维度决策参数可视化</div>
+  </div>
+  <div id="detailArea" style="display:none;"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// 数据 — 从 mbti_strategies.json 生成（内嵌）
+// ═══════════════════════════════════════════════════════════════
+const STRATEGY_DATA = {"meta":{"version":"2.0","framework":"MBTI-32-A/T","description":"MBTI 16型 × Assertive/Turbulent (-A/-T) 维度 = 32型人格决策策略 · 策略外置化，代码只读此文件执行","created":"2026-06-18","note":"所有决策参数在此定义。修改此文件即可调整任何人格的策略行为，无需改动 Python 代码。"},"mbti_types":[{"mbti":"ISTJ","name":"纯对子","group":"稳妥型","icon":"🛡️","description":"结构化、守规则，相信稳定路线带来可预测结果","variants":{"A":{"name":"纯对子·务实","description":"对选择充满信心，不需要额外的安全垫","params":{"strategy_lock":["对子流"],"strategy_purity":1.0,"budget_ratio":0.65,"refresh_behavior":"never","economy_preference":"normal","fill_slots":"opportunistic","replace_when_full":true,"desperate_behavior":null}},"T":{"name":"纯对子·求稳","description":"总担心不够强，会多买一张备用","params":{"strategy_lock":["对子流"],"strategy_purity":0.9,"budget_ratio":0.75,"refresh_behavior":"occasional","economy_preference":"normal","fill_slots":"opportunistic","replace_when_full":true,"desperate_behavior":null}}}},{"mbti":"ISFJ","name":"对顺双修","group":"稳妥型","icon":"🛡️","description":"谨慎护全、渐进扩展，先巩固已知再试探新方向","variants":{"A":{"name":"对顺双修·笃定","description":"相信自己能驾驭两条路线，从容切换","params":{"strategy_lock":["对子流","顺子流"],"strategy_purity":0.85,"budget_ratio":0.55,"refresh_behavior":"occasional","economy_preference":"normal","fill_slots":"opportunistic","replace_when_full":false,"desperate_behavior":null}},"T":{"name":"对顺双修·谨慎","description":"总是想多留一条后路，犹豫不决","params":{"strategy_lock":["对子流","顺子流"],"strategy_purity":0.75,"budget_ratio":0.65,"refresh_behavior":"core_missing","economy_preference":"normal","fill_slots":"opportunistic","replace_when_full":false,"desperate_behavior":null}}}},{"mbti":"ESTJ","name":"精打细算","group":"稳妥型","icon":"🛡️","description":"务实高效，每一分资源追求最大回报","variants":{"A":{"name":"精打细算·高效","description":"精确知道需要什么，不多花一金","params":{"strategy_lock":["对子流","顺子流","同花流"],"strategy_purity":0.6,"budget_ratio":0.3,"refresh_behavior":"never","economy_preference":"prefer","fill_slots":"picky","replace_when_full":false,"desperate_behavior":null}},"T":{"name":"精打细算·焦虑","description":"算来算去总怕算漏，偶尔会多花","params":{"strategy_lock":["对子流","顺子流","同花流"],"strategy_purity":0.4,"budget_ratio":0.4,"refresh_behavior":"occasional","economy_preference":"prefer","fill_slots":"picky","replace_when_full":false,"desperate_behavior":null}}}},{"mbti":"ESFJ","name":"均衡流","group":"收集型","icon":"📋","description":"追求平衡覆盖，不愿任何位置被冷落","variants":{"A":{"name":"均衡流·稳健","description":"团队已经够好了，不需要过度干预","params":{"strategy_lock":null,"strategy_purity":0.0,"budget_ratio":0.65,"refresh_behavior":"core_missing","economy_preference":"normal","fill_slots":"opportunistic","replace_when_full":true,"desperate_behavior":null,"_prefer_group_coverage":true}},"T":{"name":"均衡流·操心","description":"总怕某个位置掉链子，不断调整","params":{"strategy_lock":null,"strategy_purity":0.0,"budget_ratio":0.75,"refresh_behavior":"aggressive","economy_preference":"normal","fill_slots":"immediate","replace_when_full":true,"desperate_behavior":null,"_prefer_group_coverage":true}}}},{"mbti":"INTJ","name":"精算师","group":"理财型","icon":"💰","description":"战略级计算，每一步都有远期规划","variants":{"A":{"name":"精算师·远见","description":"计划周密，坚信远期布局终会回报","params":{"strategy_lock":["对子流","顺子流"],"strategy_purity":0.6,"budget_ratio":0.45,"refresh_behavior":"never","economy_preference":"prefer","fill_slots":"opportunistic","replace_when_full":false,"desperate_behavior":null}},"T":{"name":"精算师·疑虑","description":"计划完美但执行时总想微调","params":{"strategy_lock":["对子流","顺子流"],"strategy_purity":0.4,"budget_ratio":0.55,"refresh_behavior":"occasional","economy_preference":"prefer","fill_slots":"opportunistic","replace_when_full":false,"desperate_behavior":null}}}},{"mbti":"INTP","name":"直觉流","group":"灵活型","icon":"🦎","description":"凭第一感觉选方向，深入探索其可能性","variants":{"A":{"name":"直觉流·笃行","description":"直觉定了就信到底，不内耗","params":{"strategy_lock":null,"strategy_purity":0.0,"budget_ratio":0.55,"refresh_behavior":"occasional","economy_preference":"normal","fill_slots":"opportunistic","replace_when_full":false,"desperate_behavior":null,"_pick_strategy":"random_start"}},"T":{"name":"直觉流·游移","description":"直觉选完又怀疑，总想看看别的","params":{"strategy_lock":null,"strategy_purity":0.0,"budget_ratio":0.65,"refresh_behavior":"aggressive","economy_preference":"normal","fill_slots":"opportunistic","replace_when_full":false,"desperate_behavior":null,"_pick_strategy":"random_start"}}}},{"mbti":"ENTJ","name":"守财奴","group":"理财型","icon":"💰","description":"纪律严明，坚信资源积累是决胜关键","variants":{"A":{"name":"守财奴·铁律","description":"存钱意志坚如铁，绝不动摇","params":{"strategy_lock":null,"strategy_purity":0.0,"budget_ratio":0.25,"refresh_behavior":"never","economy_preference":"only_economy","fill_slots":"picky","replace_when_full":false,"desperate_behavior":null}},"T":{"name":"守财奴·心慌","description":"存了很多但怕守不住，偶尔会花","params":{"strategy_lock":null,"strategy_purity":0.0,"budget_ratio":0.35,"refresh_behavior":"occasional","economy_preference":"only_economy","fill_slots":"picky","replace_when_full":false,"desperate_behavior":null}}}},{"mbti":"ENTP","name":"混合赌徒","group":"赌狗型","icon":"🎲","description":"多线并进，总在寻找更优的解","variants":{"A":{"name":"混合赌徒·自信","description":"玩得转多线操作，冷静控盘","params":{"strategy_lock":["同花顺流","豹子流"],"strategy_purity":0.8,"budget_ratio":0.8,"refresh_behavior":"aggressive","economy_preference":"ignore","fill_slots":"opportunistic","replace_when_full":true,"desperate_behavior":null}},"T":{"name":"混合赌徒·焦躁","description":"哪个都不够好，再刷一把","params":{"strategy_lock":["同花顺流","豹子流"],"strategy_purity":0.6,"budget_ratio":0.9,"refresh_behavior":"all_in","economy_preference":"ignore","fill_slots":"opportunistic","replace_when_full":true,"desperate_behavior":"sell_refresh"}}}},{"mbti":"ISTP","name":"狂战士","group":"赌狗型","icon":"🎲","description":"冷静下注，一旦认定全力执行","variants":{"A":{"name":"狂战士·专注","description":"目标明确，不动摇不怀疑","params":{"strategy_lock":["同花顺流","豹子流"],"strategy_purity":0.9,"budget_ratio":0.9,"refresh_behavior":"all_in","economy_preference":"ignore","fill_slots":"opportunistic","replace_when_full":true,"desperate_behavior":null}},"T":{"name":"狂战士·燃烧","description":"不成功便成仁，越输越上头","params":{"strategy_lock":["同花顺流","豹子流"],"strategy_purity":0.7,"budget_ratio":0.95,"refresh_behavior":"all_in","economy_preference":"ignore","fill_slots":"opportunistic","replace_when_full":true,"desperate_behavior":"sell_refresh"}}}},{"mbti":"ISFP","name":"绝命赌徒","group":"赌狗型","icon":"🎲","description":"享受拼尽全力的过程本身","variants":{"A":{"name":"绝命赌徒·洒脱","description":"输赢看淡，享受过程相信运气","params":{"strategy_lock":["同花顺流","豹子流","顺子流"],"strategy_purity":0.7,"budget_ratio":0.75,"refresh_behavior":"aggressive","economy_preference":"ignore","fill_slots":"opportunistic","replace_when_full":true,"desperate_behavior":null}},"T":{"name":"绝命赌徒·疯狂","description":"已经输了这么多，再搏一把翻盘","params":{"strategy_lock":["同花顺流","豹子流","顺子流"],"strategy_purity":0.5,"budget_ratio":0.85,"refresh_behavior":"aggressive","economy_preference":"ignore","fill_slots":"opportunistic","replace_when_full":true,"desperate_behavior":"sell_refresh"}}}},{"mbti":"ESTP","name":"稳健杂食","group":"稳妥型","icon":"🛡️","description":"灵活性高，充分利用眼前资源最大化产出","variants":{"A":{"name":"稳健杂食·从容","description":"有什么打什么，不焦虑不冒进","params":{"strategy_lock":null,"strategy_purity":0.0,"budget_ratio":0.6,"refresh_behavior":"occasional","economy_preference":"normal","fill_slots":"opportunistic","replace_when_full":true,"desperate_behavior":null}},"T":{"name":"稳健杂食·急切","description":"总怕错过好的，见了就买","params":{"strategy_lock":null,"strategy_purity":0.0,"budget_ratio":0.7,"refresh_behavior":"aggressive","economy_preference":"normal","fill_slots":"opportunistic","replace_when_full":true,"desperate_behavior":null}}}},{"mbti":"ESFP","name":"机会主义者","group":"灵活型","icon":"🦎","description":"善于捕捉眼前机会，灵活转换方向","variants":{"A":{"name":"机会主义者·敏捷","description":"眼光精准，出手果断","params":{"strategy_lock":null,"strategy_purity":0.0,"budget_ratio":0.6,"refresh_behavior":"occasional","economy_preference":"normal","fill_slots":"opportunistic","replace_when_full":true,"desperate_behavior":null,"_pick_strategy":"shop_first_two"}},"T":{"name":"机会主义者·贪婪","description":"每个机会都想要，反而难以抉择","params":{"strategy_lock":null,"strategy_purity":0.0,"budget_ratio":0.7,"refresh_behavior":"aggressive","economy_preference":"normal","fill_slots":"opportunistic","replace_when_full":true,"desperate_behavior":null,"_pick_strategy":"shop_first_two"}}}},{"mbti":"INFJ","name":"愿景师","group":"感性型","icon":"🎭","description":"有长远格局，愿为远期目标承受短期阵痛","variants":{"A":{"name":"愿景师·坚定","description":"信念坚定，忍耐力极强","params":{"strategy_lock":null,"strategy_purity":0.95,"budget_ratio":0.4,"refresh_behavior":"core_missing","economy_preference":"normal","fill_slots":"opportunistic","replace_when_full":true,"desperate_behavior":null,"_pick_strategy":"random_start"}},"T":{"name":"愿景师·焦虑","description":"愿景宏大却害怕撑不到那一天","params":{"strategy_lock":null,"strategy_purity":0.9,"budget_ratio":0.5,"refresh_behavior":"aggressive","economy_preference":"normal","fill_slots":"opportunistic","replace_when_full":true,"desperate_behavior":null,"_pick_strategy":"random_start"}}}},{"mbti":"ENFJ","name":"鼓舞者","group":"感性型","icon":"🎭","description":"注重团队全面性，追求整体大于部分之和","variants":{"A":{"name":"鼓舞者·从容","description":"阵容合理就足够，信任团队","params":{"strategy_lock":["对子流","顺子流","同花流"],"strategy_purity":0.5,"budget_ratio":0.6,"refresh_behavior":"core_missing","economy_preference":"normal","fill_slots":"opportunistic","replace_when_full":true,"desperate_behavior":null,"_prefer_group_coverage":true}},"T":{"name":"鼓舞者·操心","description":"总怕某个位置拖后腿，不断修补","params":{"strategy_lock":["对子流","顺子流","同花流"],"strategy_purity":0.3,"budget_ratio":0.7,"refresh_behavior":"aggressive","economy_preference":"normal","fill_slots":"immediate","replace_when_full":true,"desperate_behavior":null,"_prefer_group_coverage":true}}}},{"mbti":"INFP","name":"创作家","group":"感性型","icon":"🎭","description":"追求自我表达，宁愿输得有风格也不愿赢得无聊","variants":{"A":{"name":"创作家·自在","description":"玩自己的组合，不为结果焦虑","params":{"strategy_lock":null,"strategy_purity":0.4,"budget_ratio":0.55,"refresh_behavior":"occasional","economy_preference":"ignore","fill_slots":"opportunistic","replace_when_full":true,"desperate_behavior":null,"_pick_strategy":"random_start"}},"T":{"name":"创作家·纠结","description":"有趣的组合太多，选择困难","params":{"strategy_lock":null,"strategy_purity":0.2,"budget_ratio":0.65,"refresh_behavior":"aggressive","economy_preference":"ignore","fill_slots":"opportunistic","replace_when_full":true,"desperate_behavior":null,"_pick_strategy":"random_start"}}}},{"mbti":"ENFP","name":"探险家","group":"感性型","icon":"🎭","description":"充满好奇心，每局都是一次全新冒险","variants":{"A":{"name":"探险家·乐天","description":"好奇但理性，享受探索不过度冒险","params":{"strategy_lock":null,"strategy_purity":0.0,"budget_ratio":0.7,"refresh_behavior":"core_missing","economy_preference":"normal","fill_slots":"opportunistic","replace_when_full":true,"desperate_behavior":null,"_pick_strategy":"random_start"}},"T":{"name":"探险家·狂热","description":"每个方向都诱人，每个都想试试","params":{"strategy_lock":null,"strategy_purity":0.0,"budget_ratio":0.8,"refresh_behavior":"all_in","economy_preference":"normal","fill_slots":"opportunistic","replace_when_full":true,"desperate_behavior":"sell_refresh","_pick_strategy":"random_start"}}}}],"test_baselines":[{"id":"chaos_random","name":"真随机","group":"混沌型","icon":"🧪","description":"完全零智力——纯随机决策基线","params":{"strategy_lock":null,"strategy_purity":0.0,"budget_ratio":-1,"refresh_behavior":"random","economy_preference":"random","fill_slots":"random","replace_when_full":false,"desperate_behavior":null,"_random_decisions":true}},{"id":"chaos_anti","name":"反人性","group":"混沌型","icon":"🧪","description":"故意做反最优选择——下限基线","params":{"strategy_lock":null,"strategy_purity":0.0,"budget_ratio":-1,"refresh_behavior":"never","economy_preference":"ignore","fill_slots":"picky","replace_when_full":false,"desperate_behavior":null,"_reverse_decisions":true}},{"id":"chaos_noshop","name":"少商店","group":"混沌型","icon":"🧪","description":"从不进商店——纯基础牌面基线","params":{"strategy_lock":null,"strategy_purity":0.0,"budget_ratio":0.0,"refresh_behavior":"never","economy_preference":"ignore","fill_slots":"picky","replace_when_full":false,"desperate_behavior":null,"_skip_shop":true}}],"group_index":{"稳妥型":{"icon":"🛡️","description":"稳扎稳打，依赖特定牌型建build"},"理财型":{"icon":"💰","description":"经济至上，利息和免费资源最大化"},"赌狗型":{"icon":"🎲","description":"高风险高收益，追求极限牌型"},"灵活型":{"icon":"🦎","description":"随机应变，看商店出什么决定方向"},"收集型":{"icon":"📋","description":"先填满5张忍者再谈品质"},"感性型":{"icon":"🎭","description":"凭直觉/价值观/乐趣做决策"},"混沌型":{"icon":"🧪","description":"纯测试基线"}}};
+
+// ═══════════════════════════════════════════════════════════════
+// 模拟结果数据 — 从 data_personality/*.json 汇总（2026-06-18）
+// ═══════════════════════════════════════════════════════════════
+const SIM_RESULTS = {"创作家·纠结":{"b8r":20.0,"mb":8,"at":89.0,"aa":10.5,"bp":{"1":100.0,"2":40.0,"3":20.0,"4":20.0,"5":20.0,"6":20.0,"7":20.0,"8":20.0},"b8p50":72124352.0,"b8min":60123392,"b8max":84125312},"创作家·自在":{"b8r":10.0,"mb":8,"at":84.0,"aa":9.7,"bp":{"1":90.0,"2":40.0,"3":20.0,"4":10.0,"5":10.0,"6":10.0,"7":10.0,"8":10.0},"b8p50":13670320,"b8min":13670320,"b8max":13670320},"愿景师·坚定":{"b8r":20.0,"mb":8,"at":80.7,"aa":8.3,"bp":{"1":90.0,"2":20.0,"3":20.0,"4":20.0,"5":20.0,"6":20.0,"7":20.0,"8":20.0},"b8p50":23550944.0,"b8min":22645312,"b8max":24456576},"愿景师·焦虑":{"b8r":30.0,"mb":8,"at":83.5,"aa":9.4,"bp":{"1":90.0,"2":50.0,"3":30.0,"4":30.0,"5":30.0,"6":30.0,"7":30.0,"8":30.0},"b8p50":45630656.0,"b8min":35468544,"b8max":115442112},"探险家·乐天":{"b8r":0,"mb":3,"at":71.1,"aa":2.4,"bp":{"1":90.0,"2":30.0,"3":10.0,"4":0,"5":0,"6":0,"7":0,"8":0},"b8p50":0,"b8min":0,"b8max":0},"探险家·狂热":{"b8r":0,"mb":3,"at":79.7,"aa":3.3,"bp":{"1":100.0,"2":60.0,"3":30.0,"4":0,"5":0,"6":0,"7":0,"8":0},"b8p50":0,"b8min":0,"b8max":0},"鼓舞者·从容":{"b8r":20.0,"mb":8,"at":80.3,"aa":9.2,"bp":{"1":80.0,"2":30.0,"3":30.0,"4":20.0,"5":20.0,"6":20.0,"7":20.0,"8":20.0},"b8p50":1765881096.0,"b8min":143116352,"b8max":3388645840},"鼓舞者·操心":{"b8r":0,"mb":2,"at":58.8,"aa":1.4,"bp":{"1":100.0,"2":10.0,"3":0,"4":0,"5":0,"6":0,"7":0,"8":0},"b8p50":0,"b8min":0,"b8max":0},"升级狂":{"b8r":20.0,"mb":8,"at":83.1,"aa":10.0,"bp":{"1":100.0,"2":20.0,"3":20.0,"4":20.0,"5":20.0,"6":20.0,"7":20.0,"8":20.0},"b8p50":77844480,"b8min":77844480,"b8max":77844480},"图鉴党":{"b8r":40.0,"mb":8,"at":83.8,"aa":10.1,"bp":{"1":100.0,"2":80.0,"3":40.0,"4":40.0,"5":40.0,"6":40.0,"7":40.0,"8":40.0},"b8p50":120245888.0,"b8min":62098464,"b8max":178393312},"均衡流":{"b8r":0,"mb":1,"at":27.8,"aa":0.4,"bp":{"1":80.0,"2":0,"3":0,"4":0,"5":0,"6":0,"7":0,"8":0},"b8p50":0,"b8min":0,"b8max":0},"均衡流·操心":{"b8r":10.0,"mb":8,"at":84.6,"aa":10.4,"bp":{"1":90.0,"2":30.0,"3":10.0,"4":10.0,"5":10.0,"6":10.0,"7":10.0,"8":10.0},"b8p50":67225088,"b8min":67225088,"b8max":67225088},"均衡流·稳健":{"b8r":0,"mb":2,"at":72.6,"aa":1.7,"bp":{"1":100.0,"2":10.0,"3":0,"4":0,"5":0,"6":0,"7":0,"8":0},"b8p50":0,"b8min":0,"b8max":0},"批发商":{"b8r":20.0,"mb":8,"at":81.1,"aa":9.5,"bp":{"1":100.0,"2":20.0,"3":20.0,"4":20.0,"5":20.0,"6":20.0,"7":20.0,"8":20.0},"b8p50":41134848,"b8min":41134848,"b8max":41134848},"反人性":{"b8r":0,"mb":2,"at":51.9,"aa":1.4,"bp":{"1":90.0,"2":10.0,"3":0,"4":0,"5":0,"6":0,"7":0,"8":0},"b8p50":0,"b8min":0,"b8max":0},"少商店":{"b8r":0,"mb":1,"at":0.0,"aa":0.0,"bp":{"1":90.0,"2":0,"3":0,"4":0,"5":0,"6":0,"7":0,"8":0},"b8p50":0,"b8min":0,"b8max":0},"真随机":{"b8r":10.0,"mb":8,"at":69.6,"aa":6.9,"bp":{"1":90.0,"2":30.0,"3":10.0,"4":10.0,"5":10.0,"6":10.0,"7":10.0,"8":10.0},"b8p50":188552704,"b8min":188552704,"b8max":188552704},"实用主义者":{"b8r":20.0,"mb":8,"at":89.8,"aa":10.1,"bp":{"1":100.0,"2":20.0,"3":20.0,"4":20.0,"5":20.0,"6":20.0,"7":20.0,"8":20.0},"b8p50":43346688,"b8min":43346688,"b8max":43346688},"机会主义者":{"b8r":20.0,"mb":8,"at":70.4,"aa":8.3,"bp":{"1":100.0,"2":60.0,"3":40.0,"4":20.0,"5":20.0,"6":20.0,"7":20.0,"8":20.0},"b8p50":31893904,"b8min":31893904,"b8max":31893904},"机会主义者·敏捷":{"b8r":10.0,"mb":8,"at":75.8,"aa":8.5,"bp":{"1":70.0,"2":20.0,"3":10.0,"4":10.0,"5":10.0,"6":10.0,"7":10.0,"8":10.0},"b8p50":111620480,"b8min":111620480,"b8max":111620480},"机会主义者·贪婪":{"b8r":10.0,"mb":8,"at":70.7,"aa":8.0,"bp":{"1":100.0,"2":30.0,"3":20.0,"4":10.0,"5":10.0,"6":10.0,"7":10.0,"8":10.0},"b8p50":36217632,"b8min":36217632,"b8max":36217632},"直觉流":{"b8r":0,"mb":1,"at":71.5,"aa":1.5,"bp":{"1":80.0,"2":0.0,"3":0,"4":0,"5":0,"6":0,"7":0,"8":0},"b8p50":0,"b8min":0,"b8max":0},"直觉流·游移":{"b8r":20.0,"mb":8,"at":88.2,"aa":9.6,"bp":{"1":100.0,"2":60.0,"3":30.0,"4":20.0,"5":20.0,"6":20.0,"7":20.0,"8":20.0},"b8p50":33006880.0,"b8min":23196992,"b8max":42816768},"直觉流·笃行":{"b8r":10.0,"mb":8,"at":90.5,"aa":10.7,"bp":{"1":90.0,"2":30.0,"3":20.0,"4":20.0,"5":20.0,"6":20.0,"7":10.0,"8":10.0},"b8p50":60190592,"b8min":60190592,"b8max":60190592},"骑墙派":{"b8r":20.0,"mb":8,"at":77.5,"aa":8.9,"bp":{"1":100.0,"2":20.0,"3":20.0,"4":20.0,"5":20.0,"6":20.0,"7":20.0,"8":20.0},"b8p50":34690368,"b8min":34690368,"b8max":34690368},"佛系理财":{"b8r":40.0,"mb":8,"at":76.4,"aa":8.4,"bp":{"1":100.0,"2":60.0,"3":60.0,"4":40.0,"5":40.0,"6":40.0,"7":40.0,"8":40.0},"b8p50":45492608.0,"b8min":24328192,"b8max":66657024},"囤货党":{"b8r":0,"mb":1,"at":67.7,"aa":1.3,"bp":{"1":100.0,"2":0.0,"3":0,"4":0,"5":0,"6":0,"7":0,"8":0},"b8p50":0,"b8min":0,"b8max":0},"守财奴":{"b8r":20.0,"mb":8,"at":89.6,"aa":4.4,"bp":{"1":100.0,"2":20.0,"3":20.0,"4":20.0,"5":20.0,"6":20.0,"7":20.0,"8":20.0},"b8p50":2270464,"b8min":2270464,"b8max":2270464},"守财奴·心慌":{"b8r":20.0,"mb":8,"at":90.1,"aa":3.9,"bp":{"1":80.0,"2":40.0,"3":30.0,"4":20.0,"5":20.0,"6":20.0,"7":20.0,"8":20.0},"b8p50":3176064.0,"b8min":1635456,"b8max":4716672},"守财奴·铁律":{"b8r":0,"mb":2,"at":45.0,"aa":0.7,"bp":{"1":90.0,"2":10.0,"3":0,"4":0,"5":0,"6":0,"7":0,"8":0},"b8p50":0,"b8min":0,"b8max":0},"精算师":{"b8r":0,"mb":3,"at":54.5,"aa":2.5,"bp":{"1":100.0,"2":60.0,"3":20.0,"4":0,"5":0,"6":0,"7":0,"8":0},"b8p50":0,"b8min":0,"b8max":0},"精算师·疑虑":{"b8r":30.0,"mb":8,"at":79.7,"aa":9.6,"bp":{"1":100.0,"2":30.0,"3":30.0,"4":30.0,"5":30.0,"6":30.0,"7":30.0,"8":30.0},"b8p50":35956736.0,"b8min":26543584,"b8max":84731552},"精算师·远见":{"b8r":10.0,"mb":8,"at":75.3,"aa":8.2,"bp":{"1":90.0,"2":30.0,"3":20.0,"4":10.0,"5":10.0,"6":10.0,"7":10.0,"8":10.0},"b8p50":4850016,"b8min":4850016,"b8max":4850016},"保守积累":{"b8r":60.0,"mb":8,"at":83.3,"aa":8.8,"bp":{"1":100.0,"2":60.0,"3":60.0,"4":60.0,"5":60.0,"6":60.0,"7":60.0,"8":60.0},"b8p50":22109760.0,"b8min":14381248,"b8max":36391680},"对顺双修":{"b8r":20.0,"mb":8,"at":82.1,"aa":9.8,"bp":{"1":80.0,"2":20.0,"3":20.0,"4":20.0,"5":20.0,"6":20.0,"7":20.0,"8":20.0},"b8p50":39928960,"b8min":39928960,"b8max":39928960},"对顺双修·笃定":{"b8r":20.0,"mb":8,"at":83.4,"aa":9.9,"bp":{"1":100.0,"2":30.0,"3":30.0,"4":20.0,"5":20.0,"6":20.0,"7":20.0,"8":20.0},"b8p50":60964768.0,"b8min":36251392,"b8max":85678144},"对顺双修·谨慎":{"b8r":0,"mb":2,"at":70.4,"aa":2.2,"bp":{"1":90.0,"2":40.0,"3":0.0,"4":0,"5":0,"6":0,"7":0,"8":0},"b8p50":0,"b8min":0,"b8max":0},"稳健杂食":{"b8r":60.0,"mb":8,"at":89.5,"aa":10.4,"bp":{"1":100.0,"2":60.0,"3":60.0,"4":60.0,"5":60.0,"6":60.0,"7":60.0,"8":60.0},"b8p50":27470848.0,"b8min":26628096,"b8max":52719840},"稳健杂食·从容":{"b8r":20.0,"mb":8,"at":87.5,"aa":10.2,"bp":{"1":80.0,"2":30.0,"3":20.0,"4":20.0,"5":20.0,"6":20.0,"7":20.0,"8":20.0},"b8p50":117854848.0,"b8min":72331264,"b8max":163378432},"稳健杂食·急切":{"b8r":20.0,"mb":8,"at":88.3,"aa":10.4,"bp":{"1":100.0,"2":30.0,"3":20.0,"4":20.0,"5":20.0,"6":20.0,"7":20.0,"8":20.0},"b8p50":68262368.0,"b8min":58689216,"b8max":77835520},"精打细算":{"b8r":40.0,"mb":8,"at":75.3,"aa":8.4,"bp":{"1":100.0,"2":40.0,"3":40.0,"4":40.0,"5":40.0,"6":40.0,"7":40.0,"8":40.0},"b8p50":130271296.0,"b8min":60872192,"b8max":199670400},"精打细算·焦虑":{"b8r":20.0,"mb":8,"at":87.1,"aa":10.5,"bp":{"1":100.0,"2":20.0,"3":20.0,"4":20.0,"5":20.0,"6":20.0,"7":20.0,"8":20.0},"b8p50":88858016.0,"b8min":50749120,"b8max":126966912},"精打细算·高效":{"b8r":0,"mb":2,"at":24.4,"aa":0.5,"bp":{"1":90.0,"2":10.0,"3":0,"4":0,"5":0,"6":0,"7":0,"8":0},"b8p50":0,"b8min":0,"b8max":0},"纯对子":{"b8r":60.0,"mb":8,"at":88.7,"aa":10.6,"bp":{"1":80.0,"2":60.0,"3":60.0,"4":60.0,"5":60.0,"6":60.0,"7":60.0,"8":60.0},"b8p50":81072640.0,"b8min":52103920,"b8max":86284992},"纯对子·务实":{"b8r":30.0,"mb":8,"at":88.9,"aa":9.7,"bp":{"1":90.0,"2":60.0,"3":30.0,"4":30.0,"5":30.0,"6":30.0,"7":30.0,"8":30.0},"b8p50":18531088.0,"b8min":2914880,"b8max":34348672},"纯对子·求稳":{"b8r":40.0,"mb":8,"at":88.1,"aa":10.4,"bp":{"1":100.0,"2":40.0,"3":40.0,"4":40.0,"5":40.0,"6":40.0,"7":40.0,"8":40.0},"b8p50":47846208.0,"b8min":8894640,"b8max":53792576},"同花顺赌徒":{"b8r":0,"mb":1,"at":60.0,"aa":0.9,"bp":{"1":100.0,"2":0,"3":0,"4":0,"5":0,"6":0,"7":0,"8":0},"b8p50":0,"b8min":0,"b8max":0},"混合赌徒":{"b8r":0,"mb":3,"at":79.5,"aa":3.4,"bp":{"1":80.0,"2":20.0,"3":20.0,"4":0,"5":0,"6":0,"7":0,"8":0},"b8p50":0,"b8min":0,"b8max":0},"混合赌徒·焦躁":{"b8r":10.0,"mb":8,"at":80.3,"aa":8.1,"bp":{"1":90.0,"2":40.0,"3":20.0,"4":20.0,"5":20.0,"6":10.0,"7":10.0,"8":10.0},"b8p50":32405312,"b8min":32405312,"b8max":32405312},"混合赌徒·自信":{"b8r":0,"mb":4,"at":87.3,"aa":5.2,"bp":{"1":90.0,"2":30.0,"3":20.0,"4":10.0,"5":0,"6":0,"7":0,"8":0},"b8p50":0,"b8min":0,"b8max":0},"狂战士":{"b8r":20.0,"mb":8,"at":84.5,"aa":8.4,"bp":{"1":80.0,"2":20.0,"3":20.0,"4":20.0,"5":20.0,"6":20.0,"7":20.0,"8":20.0},"b8p50":40365312,"b8min":40365312,"b8max":40365312},"狂战士·专注":{"b8r":0,"mb":2,"at":57.8,"aa":1.2,"bp":{"1":100.0,"2":10.0,"3":0,"4":0,"5":0,"6":0,"7":0,"8":0},"b8p50":0,"b8min":0,"b8max":0},"狂战士·燃烧":{"b8r":0,"mb":2,"at":70.8,"aa":1.3,"bp":{"1":80.0,"2":10.0,"3":0,"4":0,"5":0,"6":0,"7":0,"8":0},"b8p50":0,"b8min":0,"b8max":0},"绝命赌徒":{"b8r":0,"mb":2,"at":63.3,"aa":1.4,"bp":{"1":80.0,"2":20.0,"3":0,"4":0,"5":0,"6":0,"7":0,"8":0},"b8p50":0,"b8min":0,"b8max":0},"绝命赌徒·洒脱":{"b8r":0,"mb":2,"at":72.6,"aa":2.3,"bp":{"1":70.0,"2":20.0,"3":0,"4":0,"5":0,"6":0,"7":0,"8":0},"b8p50":0,"b8min":0,"b8max":0},"绝命赌徒·疯狂":{"b8r":0,"mb":3,"at":81.7,"aa":3.5,"bp":{"1":100.0,"2":50.0,"3":40.0,"4":0,"5":0,"6":0,"7":0,"8":0},"b8p50":0,"b8min":0,"b8max":0},"豹子赌徒":{"b8r":0,"mb":2,"at":62.7,"aa":1.4,"bp":{"1":100.0,"2":20.0,"3":0,"4":0,"5":0,"6":0,"7":0,"8":0},"b8p50":0,"b8min":0,"b8max":0}};
+
+const SIM_CONCLUSIONS = ["全部 57 型模拟完成（含35型MBTI-A/T + 基线 + 旧版数据）。","总B8通关率均值 14.9%。","仅 35 型至少1次抵达B8。","","最佳：🛡️ 稳妥型·保守积累 (60.0%)","","Top 5 通关型（MBTI）：","  1. 🛡️ 稳健杂食 B8=60.0% 触发率=89.5%","  2. 🛡️ 纯对子 B8=60.0% 触发率=88.7%","  3. 🛡️ 保守积累 B8=60.0% 触发率=83.3%","  4. 🛡️ 纯对子·求稳 B8=40.0% 触发率=88.1%","  5. 📋 图鉴党 B8=40.0% 触发率=83.8%","","A/T 对比发现：","  -A（自信型）整体budget_ratio更低，但B8率无明显优势","  -T（动荡型）refresh更积极，部分焦虑型反而B8率更高","  -T触发率普遍略高于-A（投入更多资源买忍者）","","组排名：","  🛡️ 稳妥型: B8均30.0% 最佳=保守积累 60.0%","  📋 收集型: B8均15.0% 最佳=图鉴党 40.0%","  💰 理财型: B8均15.0% 最佳=佛系理财 40.0%","  🦎 灵活型: B8均13.8% 最佳=实用主义者 20.0%","  🎭 感性型: B8均12.5% 最佳=愿景师·焦虑 30.0%","  🧪 混沌型: B8均3.3% 最佳=真随机 10.0%","  🎲 赌狗型: B8均2.7% 最佳=狂战士 20.0%","","核心发现：","  1. 赌狗型整体最弱（B8均2.7%），高波动但不稳定","  2. 稳妥型最强（B8均30%），保守积累和纯对子表现突出","  3. 守财奴·铁律(ENTJ-A) B8=0% — 过于保守错过成长期","  4. 守财奴·心慌(ENTJ-T) 反而 B8=20% — 适当松动有利于生存","  5. 灵感型中的愿景师·焦虑(INFJ-T) B8=30% 为感性型最高","  6. 混沌基线中真随机反而有10%通关率，说明运气也是实力"];
+
+// ══════════════════════════════════════════
+// 工具
+// ══════════════════════════════════════════
+const REFRESH_LABELS = { 'never':'从不刷新','occasional':'偶尔刷新','core_missing':'缺核刷新','aggressive':'积极刷新','all_in':'ALL-IN刷新','random':'随机' };
+const REFRESH_ORDER = ['never','occasional','core_missing','aggressive','all_in'];
+const ECON_LABELS = { 'ignore':'无视经济','random':'随机','normal':'正常','prefer':'偏好经济','only_economy':'只买经济' };
+const ECON_ORDER = ['ignore','random','normal','prefer','only_economy'];
+const FILL_LABELS = { 'opportunistic':'随缘','immediate':'立即填满','picky':'精挑细选','random':'随机' };
+const FILL_ORDER = ['opportunistic','immediate','picky'];
+const DESPERATE_LABELS = { 'null':'无','all_in_refresh':'ALL-IN刷新','sell_refresh':'卖牌刷新' };
+const GROUP_ICONS = { '稳妥型':'🛡️','理财型':'💰','赌狗型':'🎲','灵活型':'🦎','收集型':'📋','感性型':'🎭','混沌型':'🧪' };
+const TEMPERAMENTS = { SJ:['ISTJ','ISFJ','ESTJ','ESFJ'], NT:['INTJ','INTP','ENTJ','ENTP'], SP:['ISTP','ISFP','ESTP','ESFP'], NF:['INFJ','ENFJ','INFP','ENFP'] };
+const GROUP_ORDER = ['稳妥型','理财型','赌狗型','灵活型','收集型','感性型','混沌型'];
+
+function flatten() {
+  const r = [];
+  for (const e of STRATEGY_DATA.mbti_types) {
+    for (const [vk, v] of Object.entries(e.variants))
+      r.push({ id:e.mbti+'-'+vk, name:v.name, mbti:e.mbti, variant:vk, group:e.group, icon:e.icon, description:v.description, params:v.params, baseName:e.name });
+  }
+  for (const b of STRATEGY_DATA.test_baselines||[])
+    r.push({ id:b.id, name:b.name, mbti:null, variant:null, group:b.group, icon:b.icon, description:b.description, params:b.params, baseName:b.name });
+  return r;
+}
+let ALL = flatten();
+
+document.getElementById('typeCount').textContent = `共 ${ALL.length} 型 (32 MBTI-A/T + 3 基线)`;
+
+let selectedId = null;
+
+// ══════════════════════════════════════════
+// 左侧栏
+// ══════════════════════════════════════════
+function renderSidebar(filter) {
+  const list = document.getElementById('sidebarList');
+  let html = '', totalShown = 0;
+
+  for (const g of GROUP_ORDER) {
+    const members = ALL.filter(p => p.group === g);
+    const f = filter ? members.filter(p => p.name.includes(filter) || (p.mbti && p.mbti.includes(filter.toUpperCase()))) : members;
+    if (!f.length) continue;
+    const gi = STRATEGY_DATA.group_index[g]||{};
+    html += `<div class="group-label">${gi.icon||GROUP_ICONS[g]||''} ${g} <span class="badge">${f.length}/${members.length}</span></div>`;
+    for (const p of f) {
+      totalShown++;
+      const ac = selectedId===p.id ? 'active' : '';
+      html += `<div class="type-item ${ac}" onclick="select('${p.id}')">`;
+      html += `<span class="icon-symbol">${p.icon}</span>`;
+      html += `<span class="name">${p.name}</span>`;
+      if (p.mbti) { html += `<span class="mbti-tag">${p.mbti}</span><span class="variant-tag ${p.variant==='A'?'a':'t'}">${p.variant}</span>`; }
+      else { html += `<span class="mbti-tag" style="color:#666;">基线</span>`; }
+      html += `</div>`;
+    }
+  }
+  list.innerHTML = totalShown ? html : `<div class="no-match">没有匹配 "${filter}"</div>`;
+}
+
+function filterList() { renderSidebar(document.getElementById('searchInput').value); }
+
+// ══════════════════════════════════════════
+// 选择
+// ══════════════════════════════════════════
+function select(id) {
+  selectedId = id;
+  renderSidebar(document.getElementById('searchInput').value);
+  const p = ALL.find(x => x.id === id);
+  if (p) renderDetail(p);
+}
+
+// ══════════════════════════════════════════
+// 右侧详情
+// ══════════════════════════════════════════
+function renderDetail(p) {
+  document.getElementById('welcomeScreen').style.display = 'none';
+  document.getElementById('detailArea').style.display = 'block';
+
+  const isChaos = p.mbti===null;
+  const vc = p.variant==='A'?'a':'t';
+  const sibling = !isChaos ? ALL.find(x => x.mbti===p.mbti && x.variant!==p.variant) : null;
+
+  let h = '';
+
+  // Header
+  h += `<div class="detail-header">`;
+  h += `<div class="breadcrumb">${p.icon} ${p.group} / ${p.baseName||p.name}</div>`;
+  h += `<div class="title-row">`;
+  h += `<span class="icon-symbol">${p.icon}</span><h2>${p.name}</h2>`;
+  if (p.mbti) {
+    h += `<span class="mbti-badge">${p.mbti}</span>`;
+    h += `<span class="variant-badge variant-tag ${vc}">${p.variant==='A'?'Assertive 自信':'Turbulent 动荡'}</span>`;
+  }
+  h += `</div><div class="desc">${p.description}</div></div>`;
+
+  h += `<div class="detail-body">`;
+
+  // Param cards
+  h += `<div class="section-title">📊 8维决策参数</div>`;
+  h += `<div class="param-grid">`;
+  h += card('策略锁定', lockStr(p.params.strategy_lock), lockPct(p.params.strategy_lock), 0x42a5f5);
+  h += card('策略纯度', (p.params.strategy_purity*100).toFixed(0)+'%', p.params.strategy_purity*100, 0x4caf50);
+  h += card('预算比例', (p.params.budget_ratio*100).toFixed(0)+'%', Math.min(p.params.budget_ratio*100,100), 0xff9800);
+  h += card('刷新倾向', REFRESH_LABELS[p.params.refresh_behavior]||p.params.refresh_behavior, REFRESH_ORDER.indexOf(p.params.refresh_behavior)/(REFRESH_ORDER.length-1)*100, 0xab47bc);
+  h += card('经济偏好', ECON_LABELS[p.params.economy_preference]||p.params.economy_preference, ECON_ORDER.indexOf(p.params.economy_preference)/(ECON_ORDER.length-1)*100, 0x42a5f5);
+  h += card('填坑策略', FILL_LABELS[p.params.fill_slots]||p.params.fill_slots, FILL_ORDER.indexOf(p.params.fill_slots)/(FILL_ORDER.length-1)*100, 0x4caf50);
+  h += card('满5替换', p.params.replace_when_full?'✅ 会替换':'❌ 不替换', p.params.replace_when_full?100:0, 0xff9800);
+  h += card('逆境搏命', desLabel(p.params.desperate_behavior), p.params.desperate_behavior?100:0, 0xf44336);
+  h += `</div>`;
+
+  // Specials
+  const specs = [];
+  if (p.params._pick_strategy) specs.push(`策略选取: ${p.params._pick_strategy}`);
+  if (p.params._prefer_group_coverage) specs.push(`偏好阵容覆盖`);
+  if (p.params._batch_replace_threshold) specs.push(`批量替换阈值: ${p.params._batch_replace_threshold}`);
+  if (p.params._random_decisions) specs.push(`随机决策`);
+  if (p.params._reverse_decisions) specs.push(`反向决策`);
+  if (p.params._skip_shop) specs.push(`跳过商店`);
+  if (specs.length) {
+    h += `<div class="section-title">⚙️ 特殊参数</div>`;
+    h += `<div class="specials-wrap">`;
+    for (const s of specs) h += `<span class="specials-tag">${s}</span>`;
+    h += `</div>`;
+  }
+
+  // Insight
+  if (p.mbti) {
+    const gm = ALL.filter(x => x.group===p.group && x.mbti!==null);
+    const aB = avg(gm,'budget_ratio'), aP = avg(gm,'strategy_purity');
+    let tempName='?';
+    for (const [t,m] of Object.entries(TEMPERAMENTS)) { if (m.includes(p.mbti)) { tempName=t; break; } }
+
+    h += `<div class="section-title">📋 类型解读</div>`;
+    h += `<div class="insight-box">`;
+    h += `<div><b>MBTI 气质：</b>${tempName}</div>`;
+    h += `<div style="margin-top:6px;"><b>A/T 差异：</b>${p.variant==='A'?'自信型(Assertive) — 抗压性强，逆境不轻易改变策略，预算控制更紧':'动荡型(Turbulent) — 完美主义倾向，逆境易焦虑，会花更多钱买安全感'}</div>`;
+    h += `<div style="margin-top:6px;"><b>与同组对比：</b></div>`;
+    h += `<div style="display:flex;gap:20px;margin-top:4px;font-size:12px;color:#aaa;">`;
+    h += `<span>纯度 ${p.variant==='A'?'📈':'📊'} ${(p.params.strategy_purity*100).toFixed(0)}% (组均 ${(aP*100).toFixed(0)}%)</span>`;
+    h += `<span>预算 ${p.variant==='A'?'📉':'📈'} ${(p.params.budget_ratio*100).toFixed(0)}% (组均 ${(aB*100).toFixed(0)}%)</span>`;
+    h += `</div></div>`;
+  }
+
+  // A/T对比
+  if (sibling) {
+    h += `<div class="section-title">⚖️ ${p.mbti} ${p.variant} vs ${sibling.variant}</div>`;
+    h += `<table class="compare-table"><tr><th>参数</th><th>${p.name}</th><th>${sibling.name}</th><th>差异</th></tr>`;
+    const cp = [
+      {k:'strategy_purity',l:'纯度',f:v=>(v*100).toFixed(0)+'%'},
+      {k:'budget_ratio',l:'预算',f:v=>(v*100).toFixed(0)+'%'},
+      {k:'refresh_behavior',l:'刷新',f:v=>REFRESH_LABELS[v]||v},
+      {k:'economy_preference',l:'经济',f:v=>ECON_LABELS[v]||v},
+      {k:'fill_slots',l:'填坑',f:v=>FILL_LABELS[v]||v},
+    ];
+    for (const c of cp) {
+      const cv=p.params[c.k], sv=sibling.params[c.k];
+      let diff='';
+      if (typeof cv==='number'&&typeof sv==='number') {
+        const d=sv!==0?((cv-sv)/sv*100).toFixed(0):'∞';
+        if (d>0) diff=`<span class="diff-pos">+${d}%</span>`;
+        else if (d<0) diff=`<span class="diff-neg">${d}%</span>`;
+        else diff=`<span style="color:#888;">—</span>`;
+      } else diff=cv!==sv?'<span style="color:#ff9800;">⇄</span>':'<span style="color:#888;">=</span>';
+      h+=`<tr><td class="param-name">${c.l}</td><td>${c.f(cv)}</td><td>${c.f(sv)}</td><td>${diff}</td></tr>`;
+    }
+    h+=`</table>`;
+  }
+
+  h+=`</div>`;
+
+  // ◀ 模拟结果插入
+  const sim = SIM_RESULTS?.[p.name];
+  if (sim) {
+    h += renderSimulation(p, sim);
+  }
+
+  // ◀ 结论文本（每个类型都可见）
+  h += renderConclusions();
+
+  document.getElementById('detailArea').innerHTML = h;
+}
+
+// ══════════════════════════════════════════
+// 模拟结果渲染
+// ══════════════════════════════════════════
+function renderSimulation(p, sim) {
+  if (!sim) return '';
+  let h = '';
+
+  h += `<div class="section-title">🎮 模拟结果</div>`;
+
+  // 4 个核心指标
+  const b8color = sim.b8r >= 30 ? 'sim-pass' : sim.b8r >= 10 ? 'sim-warn' : 'sim-fail';
+  const trColor = sim.at >= 80 ? 'sim-pass' : sim.at >= 60 ? 'sim-warn' : 'sim-fail';
+  h += `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">`;
+  h += `<div class="sim-card"><div class="sim-label">B8通关率</div><div class="sim-value ${b8color}">${sim.b8r}%</div></div>`;
+  h += `<div class="sim-card"><div class="sim-label">最高结界</div><div class="sim-value" style="color:${sim.mb>=8?'#4caf50':'#ff9800'}">B${sim.mb}</div></div>`;
+  h += `<div class="sim-card"><div class="sim-label">忍者触发率</div><div class="sim-value ${trColor}">${sim.at}%</div></div>`;
+  h += `<div class="sim-card"><div class="sim-label">平均活跃忍者</div><div class="sim-value" style="color:#42a5f5">${sim.aa.toFixed(1)}</div></div>`;
+  h += `</div>`;
+
+  // 结界通过率条
+  h += `<div style="margin-bottom:16px;">`;
+  h += `<div style="font-size:11px;color:#888;margin-bottom:4px;">每个结界通过率（B1→B8）</div>`;
+  h += `<div class="sim-barrier-bar">`;
+  for (let b = 1; b <= 8; b++) {
+    const rate = sim.bp?.[String(b)] ?? 0;
+    const cls = rate >= 60 ? 'pass' : rate >= 20 ? 'partial' : 'fail';
+    h += `<div class="sim-barrier-cell ${cls}" title="B${b}: ${rate}%">${rate>0?rate+'%':'✗'}</div>`;
+  }
+  h += `</div></div>`;
+
+  // B8得分
+  if (sim.b8r > 0 && sim.b8p50 > 0) {
+    h += `<div class="section-title" style="margin-top:0;">🏆 B8通关得分</div>`;
+    h += `<div class="sim-score-grid">`;
+    h += `<div class="sim-card"><div class="sim-label">P50中位数</div><div class="sim-value" style="color:#ffd700;font-size:16px;">${(sim.b8p50/1e6).toFixed(1)}M</div></div>`;
+    h += `<div class="sim-card"><div class="sim-label">最低</div><div class="sim-value" style="color:#888;font-size:16px;">${(sim.b8min/1e6).toFixed(1)}M</div></div>`;
+    h += `<div class="sim-card"><div class="sim-label">最高</div><div class="sim-value" style="color:#4caf50;font-size:16px;">${(sim.b8max/1e6).toFixed(1)}M</div></div>`;
+    h += `</div>`;
+  }
+
+  return h;
+}
+
+function renderConclusions() {
+  if (!SIM_CONCLUSIONS) return '';
+  let h = `<div class="section-title">📈 模拟结论（全57型汇总）</div>`;
+  h += `<div class="sim-conc">`;
+  for (const line of SIM_CONCLUSIONS) {
+    if (line === '') { h += `<br>`; continue; }
+    if (line.startsWith('Top') || line.startsWith('A/T') || line.startsWith('组排名') || line.startsWith('核心发现')) {
+      h += `<div class="conc-group">${line}</div>`;
+    } else { h += `<div>${line}</div>`; }
+  }
+  h += `</div>`;
+  return h;
+}
+
+// ── helpers ──
+function card(label, val, pct, color) {
+  const c = '#'+color.toString(16).padStart(6,'0');
+  return `<div class="param-card"><div class="label">${label}</div><div class="value">${val}</div><div class="bar-bg"><div class="bar-fill" style="width:${Math.max(0,Math.min(100,pct))}%;background:${c}"></div></div></div>`;
+}
+function lockStr(l) { return l===null?'无锁定':Array.isArray(l)?l.join('、')||'无锁定':String(l); }
+function lockPct(l) { return l===null?0:Array.isArray(l)?Math.min(l.length/5*100,100):50; }
+function desLabel(d) { return d?DESPERATE_LABELS[d]||d:'无'; }
+function avg(arr,key) { return arr.length?arr.reduce((s,x)=>s+(x.params[key]||0),0)/arr.length:0; }
+
+// ══════════════════════════════════════════
+// 启动：渲染左侧栏
+// ══════════════════════════════════════════
+renderSidebar();
+</script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+{
+  "personality_group": "赌狗型",
+  "personality_name": "混合赌徒·自信",
+  "personality_icon": "🎲",
+  "personality_description": "玩得转多线操作，冷静控盘",
+  "runs": 10,
+  "seal_stats": [
+    {
+      "barrier": 1,
+      "seal": 0,
+      "seal_type": "修羅",
+      "target": 15000,
+      "pass_count": 7,
+      "pass_rate": 0.7,
+      "scores": [
+        10307,
+        12669,
+        12888,
+        24156,
+        45180,
+        48324,
+        53568,
+        61200,
+        62406,
+        62856
+      ],
+      "min": 10307,
+      "max": 62856,
+      "p10": 12432.8,
+      "p25": 15705.0,
+      "p50": 46752.0,
+      "p75": 59292.0,
+      "p90": 62451.0,
+      "avg_trigger_rate": 0.0,
+      "avg_active_ninjas": 0.0
+    },
+    {
+      "barrier": 1,
+      "seal": 1,
+      "seal_type": "明王",
+      "target": 25000,
+      "pass_count": 7,
+      "pass_rate": 0.7,
+      "scores": [
+        26236,
+        33735,
+        35028,
+        35901,
+        37620,
+        39324,
+        101619
+      ],
+      "min": 26236,
+      "max": 101619,
+      "p10": 30735.4,
+      "p25": 34381.5,
+      "p50": 35901.0,
+      "p75": 38472.0,
+      "p90": 64242.00000000002,
+      "avg_trigger_rate": 1.0,
+      "avg_active_ninjas": 1.0
+    },
+    {
+      "barrier": 1,
+      "seal": 2,
+      "seal_type": "夜叉",
+      "target": 40000,
+      "pass_count": 1,
+      "pass_rate": 0.1,
+      "scores": [
+        22822,
+        31602,
+        34212,
+        34935,
+        38283,
+        38304,
+        1101074
+      ],
+      "min": 22822,
+      "max": 1101074,
+      "p10": 28090.0,
+      "p25": 32907.0,
+      "p50": 34935.0,
+      "p75": 38293.5,
+      "p90": 463412.00000000035,
+      "avg_trigger_rate": 1.0,
+      "avg_active_ninjas": 2.0
+    },
+    {
+      "barrier": 2,
+      "seal": 0,
+      "seal_type": "修羅",
+      "target": 40000,
+      "pass_count": 1,
+      "pass_rate": 0.1,
+      "scores": [
+        75668
+      ],
+      "min": 75668,
+      "max": 75668,
+      "p10": 75668,
+      "p25": 75668,
+      "p50": 75668,
+      "p75": 75668,
+      "p90": 75668,
+      "avg_trigger_rate": 0.6666666666666666,
+      "avg_active_ninjas": 2.0
+    },
+    {
+      "barrier": 2,
+      "seal": 1,
+      "seal_type": "明王",
+      "target": 60000,
+      "pass_count": 1,
+      "pass_rate": 0.1,
+      "scores": [
+        80508
+      ],
+      "min": 80508,
+      "max": 80508,
+      "p10": 80508,
+      "p25": 80508,
+      "p50": 80508,
+      "p75": 80508,
+      "p90": 80508,
+      "avg_trigger_rate": 0.75,
+      "avg_active_ninjas": 3.0
+    },
+    {
+      "barrier": 2,
+      "seal": 2,
+      "seal_type": "夜叉",
+      "target": 80000,
+      "pass_count": 1,
+      "pass_rate": 0.1,
+      "scores": [
+        145960
+      ],
+      "min": 145960,
+      "max": 145960,
+      "p10": 145960,
+      "p25": 145960,
+      "p50": 145960,
+      "p75": 145960,
+      "p90": 145960,
+      "avg_trigger_rate": 0.8,
+      "avg_active_ninjas": 4.0
+    },
+    {
+      "barrier": 3,
+      "seal": 0,
+      "seal_type": "修羅",
+      "target": 60000,
+      "pass_count": 1,
+      "pass_rate": 0.1,
+      "scores": [
+        294000
+      ],
+      "min": 294000,
+      "max": 294000,
+      "p10": 294000,
+      "p25": 294000,
+      "p50": 294000,
+      "p75": 294000,
+      "p90": 294000,
+      "avg_trigger_rate": 0.8888888888888888,
+      "avg_active_ninjas": 5.333333333333333
+    },
+    {
+      "barrier": 3,
+      "seal": 1,
+      "seal_type": "明王",
+      "target": 100000,
+      "pass_count": 1,
+      "pass_rate": 0.1,
+      "scores": [
+        265008
+      ],
+      "min": 265008,
+      "max": 265008,
+      "p10": 265008,
+      "p25": 265008,
+      "p50": 265008,
+      "p75": 265008,
+      "p90": 265008,
+      "avg_trigger_rate": 0.7142857142857143,
+      "avg_active_ninjas": 5.0
+    },
+    {
+      "barrier": 3,
+      "seal": 2,
+      "seal_type": "夜叉",
+      "target": 150000,
+      "pass_count": 0,
+      "pass_rate": 0.0,
+      "scores": [
+        127660
+      ],
+      "min": 127660,
+      "max": 127660,
+      "p10": 127660,
+      "p25": 127660,
+      "p50": 127660,
+      "p75": 127660,
+      "p90": 127660,
+      "avg_trigger_rate": 0.75,
+      "avg_active_ninjas": 6.0
+    }
+  ]
+}

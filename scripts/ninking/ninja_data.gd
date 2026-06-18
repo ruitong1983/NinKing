@@ -254,13 +254,13 @@ const ALL_NINJAS: Array[Dictionary] = [
 	{
 		"id": "n_113", "tags": ["倍率X"], "name": "喜鹊",
 		"effect": {"xi_x_bonus": 1},
-		"cost": 4, "rarity": "uncommon",
+		"cost": 20, "rarity": "legendary",
 		"desc": "每个喜的×倍率效果 +1"
 	},
 	{
 		"id": "n_114", "tags": ["倍率X"], "name": "龙之眼",
 		"effect": {"xi_max_mult_stack": true},
-		"cost": 18, "rarity": "rare",
+		"cost": 22, "rarity": "legendary",
 		"desc": "多个喜触发时全部按最高喜倍率结算"
 	},
 

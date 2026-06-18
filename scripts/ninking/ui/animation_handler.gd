@@ -8,6 +8,8 @@ extends RefCounted
 ##     All score labels count from 0 to final values with eased animation.
 ## v6: Enhanced VFX — pop_in on score labels, punch_in for product reveal,
 ##     panel_bg glow pulse on cumulative updates (2026-06-15).
+## v7: Column score inline count-up on type labels (removed hidden col_score_labels).
+## v8: Removed _compute_ninja_contributions fallback (H3 — use summary.anim_contribs only).
 
 const FX = preload("res://scripts/tween/tween_fx.gd")
 const SB = preload("res://scripts/config/sound_bank.gd")
@@ -56,15 +58,13 @@ func _run_scoring_animation() -> void:
 	_ui.progress_bar.modulate = Color.WHITE
 	await tree.create_timer(1.2).timeout
 
-	# Phase H: use pre-computed ninja contribs from summary; fallback to legacy computation
-	var ninja_contribs: Array[Dictionary] = []
+	# Phase H: consume pre-computed ninja contribs from summary (single pass in ScoreCalculator)
 	var _raw_summary: Dictionary = play_data.get("summary", {})
 	var _raw_contribs: Array = _raw_summary.get("anim_contribs", [])
+	var ninja_contribs: Array[Dictionary] = []
 	for _c in _raw_contribs:
 		if _c is Dictionary:
 			ninja_contribs.append(_c)
-	if ninja_contribs.is_empty():
-		ninja_contribs = _compute_ninja_contributions(play_data)
 
 	# ── Round-robin pool for cat meow SFX (彩蛋) ──
 	var _unplayed_cats: Array[AudioStream] = SB.CAT_MEOWS.duplicate()
@@ -85,7 +85,6 @@ func _run_scoring_animation() -> void:
 	var dun_chips_vals: Array[int] = [score_result.head_chips, score_result.mid_chips, score_result.tail_chips]
 	var dun_mult_vals: Array[int] = [score_result.head_mult, score_result.mid_mult, score_result.tail_mult]
 	var dun_score_labels: Array[RichTextLabel] = [_ui.shadow_score_label, _ui.flash_score_label, _ui.destroy_score_label]
-	var col_score_labels: Array[RichTextLabel] = [_ui.left_col_score, _ui.mid_col_score, _ui.right_col_score]
 
 	var _original_texts: Array[String] = []
 	for lbl: Label in dun_type_labels:
@@ -101,8 +100,8 @@ func _run_scoring_animation() -> void:
 			var dm: int = dun_mult_vals[i]
 			var dr: int = dc * dm
 
-			# -- Score fade-in: show "0 × 0 = 0" at low alpha --
-			sl.text = "0 × 0 = 0"
+			# -- Score fade-in: show "0 x 0 = 0" at low alpha --
+			sl.text = "0 x 0 = 0"
 			sl.modulate.a = 0.0
 			sl.scale = Vector2(0.1, 0.1)
 			GlobalTweens.fade_in(sl, 0.15)
@@ -121,7 +120,7 @@ func _run_scoring_animation() -> void:
 			for nc: Dictionary in row_ninjas:
 				var ninja_card: NinjaInventoryCard = _find_ninja_card(nc.id)
 				if ninja_card != null:
-					# Bright white flash → gold flash (hit impact)
+					# Bright white flash -> gold flash (hit impact)
 					GlobalTweens.color_flash(ninja_card, Color.WHITE, 0.06)
 					await tree.create_timer(0.04).timeout
 					GlobalTweens.color_flash(ninja_card, Color.GOLD, 0.35)
@@ -201,27 +200,12 @@ func _run_scoring_animation() -> void:
 	var col_type_labels: Array[Label] = [_ui.left_col_type, _ui.mid_col_type, _ui.right_col_type]
 	var col_lv_labels: Array[Label] = [_ui.left_col_lv, _ui.mid_col_lv, _ui.right_col_lv]
 
-	# Compute column display values
-	var col_display_chips: Array[int] = []
-	var col_display_mult: Array[int] = []
+	# Compute column hand names (used as prefix for inline count-up)
 	var col_hand_names: Array[String] = []
 	if col_evals.size() == 3 and gs.current_arrangement != null:
-		var arr = gs.current_arrangement
-		var levels: Dictionary = gs.star_chart_levels
 		for i: int in range(3):
 			var ct: CardData.HandType3 = col_evals[i].hand_type
 			col_hand_names.append(CardData.get_hand_type3_name(ct))
-			if ct == CardData.HandType3.HIGH_CARD_3:
-				col_display_chips.append(0)
-				col_display_mult.append(0)
-			else:
-				var card_chips := 0
-				match i:
-					0: card_chips = arr.head[0].get_chip_value() + arr.mid[0].get_chip_value() + arr.tail[0].get_chip_value()
-					1: card_chips = arr.head[1].get_chip_value() + arr.mid[1].get_chip_value() + arr.tail[1].get_chip_value()
-					2: card_chips = arr.head[2].get_chip_value() + arr.mid[2].get_chip_value() + arr.tail[2].get_chip_value()
-				col_display_chips.append(card_chips + CardData.get_hand_type3_leveled_chips(ct, levels))
-				col_display_mult.append(CardData.get_hand_type3_leveled_mult(ct, levels))
 
 	var col_cumulative: int = row_total
 	var col_scores: Array = score_result.col_scores
@@ -235,10 +219,11 @@ func _run_scoring_animation() -> void:
 			if cs > 0:
 				col_cumulative += cs
 
-				# Flash column type label
+				# Flash column type label + start score count-up inline
 				var ctl: Label = col_type_labels[i]
-				ctl.text = col_hand_names[i]
+				ctl.text = col_hand_names[i] + "+0"
 				GlobalTweens.color_flash(ctl, Color(0.627, 0.627, 0.627, 1.0), 0.35)
+				var col_tw: Tween = GlobalTweens.count_up(ctl, cs, 0.75, col_hand_names[i] + "+", "", _sfx_tick)
 				await tree.create_timer(0.05).timeout
 
 				# -- Column ninja replay (global/economy ninjas only, Balatro-style) --
@@ -254,27 +239,14 @@ func _run_scoring_animation() -> void:
 						GlobalTweens.burst_particles(ninja_card.global_position + ninja_card.size * 0.5, "sparkle")
 					await tree.create_timer(0.12).timeout
 
-				# -- play_score: 3-segment column count-up (faster than rows) --
-				var csl: RichTextLabel = col_score_labels[i]
-				var cc: int = col_display_chips[i]
-				var cm: int = col_display_mult[i]
-				var cr: int = cs
-				var col_tw: Tween = GlobalTweens.play_score(
-					csl, cc, cm, cr, 0.75, _sfx_tick
-				)
-
 				# Lv badge flash
 				var cll: Label = col_lv_labels[i]
 				if is_instance_valid(cll) and cll.visible:
 					GlobalTweens.color_flash(cll, Color.GOLD, 0.4)
 
-				# Wait for column score tween to finish FIRST
+				# Wait for column score count-up to finish FIRST
 				if col_tw != null:
 					await col_tw.finished
-
-				# -- punch_in AFTER score completes (emphasis) --
-				if is_instance_valid(csl):
-					GlobalTweens.punch_in(csl, 0.25, 1.4)
 
 				# -- Cumulative total update after this column --
 				await tree.create_timer(0.1).timeout
@@ -381,11 +353,11 @@ func _apply_progress_color(current_value: float) -> void:
 	var max_val: float = bar.max_value
 	var pct: float = current_value / max_val if max_val > 0 else 0.0
 	if pct >= 1.0:
-		bar.modulate = Color(1.0, 0.15, 0.05, 0.85)   # 红色
+		bar.modulate = Color(1.0, 0.15, 0.05, 0.85)   # red
 	elif pct >= 0.8:
-		bar.modulate = Color(1.0, 0.65, 0.1, 0.75)    # 橙黄色
+		bar.modulate = Color(1.0, 0.65, 0.1, 0.75)    # orange
 	elif pct >= 0.5:
-		bar.modulate = Color(1.0, 0.9, 0.4, 0.65)     # 淡黄色
+		bar.modulate = Color(1.0, 0.9, 0.4, 0.65)     # light yellow
 	else:
 		bar.modulate = Color.WHITE
 
@@ -423,12 +395,7 @@ func _build_xi_summary(xi_result: XiDetector.XiResult) -> String:
 		return "喜: -"
 	var parts: Array[String] = []
 	for xi_name: String in xi_result.triggered:
-		var x_val: int = 1
-		for defn: Dictionary in XiDetector.XI_DEFINITIONS:
-			if defn["name"] == xi_name:
-				x_val = defn["x_mult"]
-				break
-		parts.append("%s×%d" % [xi_name, x_val])
+		parts.append(xi_name)
 	if parts.size() > 0:
 		return "喜: " + "  ".join(parts)
 	return "喜: -"
@@ -456,78 +423,6 @@ func _show_breakdown_toast(text: String, _color: Color) -> void:
 	tw.tween_callback(toast.queue_free)
 
 	_active_toast = toast
-
-
-# ════════════════════════════════════════════════════════════════
-#  Ninja contribution helpers (Stage 2 injection)
-# ════════════════════════════════════════════════════════════════
-
-func _compute_ninja_contributions(play_data: Dictionary) -> Array[Dictionary]:
-	## Compute which ninjas affect which rows, and their chips/mult values.
-	## Returns Array of {id, chips, mult, groups: Array[int], is_economy}.
-	var gs: NinKingGameState = NinKingGameState
-	var arr: Arrangement = gs.current_arrangement
-	if arr == null:
-		return []
-
-	var dun_evals: Array = [
-		play_data.get("head_eval"),
-		play_data.get("mid_eval"),
-		play_data.get("tail_eval"),
-	]
-	var xi_result: XiDetector.XiResult = play_data.get("xi_result")
-
-	var head_type: int = dun_evals[0].hand_type if dun_evals[0] != null else CardData.HandType3.HIGH_CARD_3
-	var mid_type: int = dun_evals[1].hand_type if dun_evals[1] != null else CardData.HandType3.HIGH_CARD_3
-	var tail_type: int = dun_evals[2].hand_type if dun_evals[2] != null else CardData.HandType3.HIGH_CARD_3
-
-	var head_cards: Array = arr.head
-	var mid_cards: Array = arr.mid
-	var tail_cards: Array = arr.tail
-
-	var result: Array[Dictionary] = []
-	for ninja: Dictionary in gs.owned_ninjas:
-		var effect: Dictionary = ninja.get("effect", {})
-		var chips: int = effect.get("add_chips", 0)
-		var mult: int = effect.get("add_mult", 0)
-		var has_raw: bool = chips > 0 or mult > 0
-		var has_economy: bool = effect.get("mult_per_gold", 0) > 0 or effect.get("x_per_gold", 1) > 1
-
-		if not has_raw and not has_economy:
-			continue
-
-		# Skip xi-conditional ninjas whose xi isn't triggered
-		var xi_cond: String = effect.get("condition", {}).get("xi", "")
-		if xi_cond != "":
-			if xi_result == null or not xi_result.has_any() or xi_cond not in xi_result.triggered:
-				continue
-
-		var groups: Array[String] = ScoreEffectCollector.ninja_affected_groups(
-			effect, head_type, mid_type, tail_type,
-			head_cards, mid_cards, tail_cards,
-			dun_evals[0], dun_evals[1], dun_evals[2]
-		)
-
-		var row_indices: Array[int] = []
-		for g: String in groups:
-			match g:
-				"head": row_indices.append(0)
-				"mid": row_indices.append(1)
-				"tail": row_indices.append(2)
-
-		# Empty groups means no specific condition → affects all rows
-		if groups.is_empty():
-			row_indices = [0, 1, 2]
-
-		result.append({
-			"id": ninja.get("id", ""),
-			"chips": chips,
-			"mult": mult,
-			"groups": row_indices,
-			"is_economy": not has_raw and has_economy,
-		})
-
-	return result
 
 
 func _contribs_for_row(contribs: Array, row_idx: int) -> Array:
@@ -560,7 +455,7 @@ func _find_ninja_card(ninja_id: String) -> NinjaInventoryCard:
 
 
 func _float_ninja_text(ninja_card: NinjaInventoryCard, chips: int, mult: int) -> void:
-	## Create floating "+N筹码  +M倍率" text above a triggered ninja card.
+	## Create floating "+N chips  +M mult" text above a triggered ninja card.
 	var text: String = ""
 	if chips > 0 and mult > 0:
 		text = "+%d筹码  +%d倍率" % [chips, mult]

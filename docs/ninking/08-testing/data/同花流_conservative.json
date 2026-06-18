@@ -1,0 +1,190 @@
+{
+  "strategy": "同花流",
+  "budget": "conservative",
+  "budget_ratio": 0.4,
+  "runs": 10,
+  "total_seals": 24,
+  "seal_stats": [
+    {
+      "barrier": 1,
+      "seal": 0,
+      "seal_type": "修羅",
+      "target": 15000,
+      "pass_count": 10,
+      "pass_rate": 1.0,
+      "scores": [
+        29272,
+        140052,
+        18612,
+        29864,
+        30570,
+        21231,
+        39816,
+        54582,
+        29583,
+        23922
+      ],
+      "min": 18612,
+      "max": 140052,
+      "p10": 20969.100000000002,
+      "p25": 25259.5,
+      "p50": 29723.5,
+      "p75": 37504.5,
+      "p90": 63128.99999999997,
+      "avg_trigger_rate": 0.0,
+      "avg_active_ninjas": 0.0
+    },
+    {
+      "barrier": 1,
+      "seal": 1,
+      "seal_type": "明王",
+      "target": 25000,
+      "pass_count": 4,
+      "pass_rate": 0.4,
+      "scores": [
+        15852,
+        37688,
+        67284,
+        22012,
+        24804,
+        37530,
+        24180,
+        21783,
+        14580,
+        33660
+      ],
+      "min": 14580,
+      "max": 67284,
+      "p10": 15724.800000000001,
+      "p25": 21840.25,
+      "p50": 24492.0,
+      "p75": 36562.5,
+      "p90": 40647.59999999999,
+      "avg_trigger_rate": 0.5,
+      "avg_active_ninjas": 0.5
+    },
+    {
+      "barrier": 1,
+      "seal": 2,
+      "seal_type": "夜叉",
+      "target": 40000,
+      "pass_count": 1,
+      "pass_rate": 0.1,
+      "scores": [
+        34140,
+        33360,
+        98676,
+        39336
+      ],
+      "min": 33360,
+      "max": 98676,
+      "p10": 33594.0,
+      "p25": 33945.0,
+      "p50": 36738.0,
+      "p75": 54171.0,
+      "p90": 80874.0,
+      "avg_trigger_rate": 0.75,
+      "avg_active_ninjas": 1.25
+    },
+    {
+      "barrier": 2,
+      "seal": 0,
+      "seal_type": "修羅",
+      "target": 40000,
+      "pass_count": 1,
+      "pass_rate": 0.1,
+      "scores": [
+        57084
+      ],
+      "min": 57084,
+      "max": 57084,
+      "p10": 57084,
+      "p25": 57084,
+      "p50": 57084,
+      "p75": 57084,
+      "p90": 57084,
+      "avg_trigger_rate": 1.0,
+      "avg_active_ninjas": 2.0
+    },
+    {
+      "barrier": 2,
+      "seal": 1,
+      "seal_type": "明王",
+      "target": 60000,
+      "pass_count": 1,
+      "pass_rate": 0.1,
+      "scores": [
+        185588
+      ],
+      "min": 185588,
+      "max": 185588,
+      "p10": 185588,
+      "p25": 185588,
+      "p50": 185588,
+      "p75": 185588,
+      "p90": 185588,
+      "avg_trigger_rate": 1.0,
+      "avg_active_ninjas": 3.0
+    },
+    {
+      "barrier": 2,
+      "seal": 2,
+      "seal_type": "夜叉",
+      "target": 80000,
+      "pass_count": 1,
+      "pass_rate": 0.1,
+      "scores": [
+        132572
+      ],
+      "min": 132572,
+      "max": 132572,
+      "p10": 132572,
+      "p25": 132572,
+      "p50": 132572,
+      "p75": 132572,
+      "p90": 132572,
+      "avg_trigger_rate": 1.0,
+      "avg_active_ninjas": 4.0
+    },
+    {
+      "barrier": 3,
+      "seal": 0,
+      "seal_type": "修羅",
+      "target": 60000,
+      "pass_count": 1,
+      "pass_rate": 0.1,
+      "scores": [
+        78660
+      ],
+      "min": 78660,
+      "max": 78660,
+      "p10": 78660,
+      "p25": 78660,
+      "p50": 78660,
+      "p75": 78660,
+      "p90": 78660,
+      "avg_trigger_rate": 1.0,
+      "avg_active_ninjas": 5.0
+    },
+    {
+      "barrier": 3,
+      "seal": 1,
+      "seal_type": "明王",
+      "target": 100000,
+      "pass_count": 0,
+      "pass_rate": 0.0,
+      "scores": [
+        93923
+      ],
+      "min": 93923,
+      "max": 93923,
+      "p10": 93923,
+      "p25": 93923,
+      "p50": 93923,
+      "p75": 93923,
+      "p90": 93923,
+      "avg_trigger_rate": 1.0,
+      "avg_active_ninjas": 5.0
+    }
+  ]
+}

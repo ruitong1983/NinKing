@@ -19,9 +19,24 @@ const SPACING_MAX: int = 24
 
 func _ready() -> void:
 	super._ready()
+	# layout_mode = 1 (LAYOUT_MODE_ANCHORS) needed: .new() defaults to
+	# LAYOUT_MODE_FREE (0), which ignores anchor sizing in non-Container parents.
+	# NOTE: Control.LayoutMode enum has no ANCHORS member exposed in Godot 4.6.2,
+	# so we use set() to bypass the enum type-check warning.
+	set("layout_mode", 1)
 	anchor_right = 1.0
 	anchor_bottom = 1.0
+	# Minimum size ensures container tall enough to vertically center
+	# the 175px-tall NinjaInventoryCard with equal top/bottom padding.
 	custom_minimum_size = Vector2(0, 195)
+	# Explicit minimum height as runtime fallback — if anchor-based sizing
+	# hasn't been processed yet, size.y stays at 0 and the Y-offset formula
+	# (size.y - card.card_size.y) / 2.0 produces a hugely negative value,
+	# placing cards far above the container.
+	# NOTE: Non-equal opposite anchors override direct size.y in _ready(),
+	# so set_deferred is used to apply after anchor sizing settles.
+	if size.y < 195.0:
+		set_deferred("size", Vector2(size.x, 195.0))
 
 
 func _notification(what: int) -> void:
@@ -88,13 +103,21 @@ func _update_target_positions() -> void:
 		partitions.append(global_x)
 
 		# Skip cards being actively dragged — their position is managed by the
-		# drag system. Calling move() would force HOLDING → MOVING state change
+		# drag system. Calling move() would force HOLDING -> MOVING state change
 		# and break the drag interaction, causing visual overlap.
 		if card.current_state == DraggableObject.DraggableState.HOLDING:
 			continue
 
 		var target_pos := Vector2(global_position.x + card_origin_x, global_position.y + (size.y - card.card_size.y) / 2.0)
-		card.move(target_pos, 0)
+		# Temp scale=1 so global_position computes a local_pos correct for
+		# scale=1. At scale=0.1 + pivot_offset the inverse transform only
+		# works at scale=0.1; after pop_in→scale=1 the card jumps upward.
+		var saved_scale := card.scale
+		card.scale = Vector2.ONE
+		card.global_position = target_pos
+		card.scale = saved_scale
+		if card.current_state == DraggableObject.DraggableState.MOVING:
+			card.change_state(DraggableObject.DraggableState.IDLE)
 
 	if drop_zone:
 		drop_zone.set_vertical_partitions(partitions)

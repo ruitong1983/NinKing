@@ -1,0 +1,129 @@
+{
+  "personality_group": "稳妥型",
+  "personality_name": "精打细算·高效",
+  "personality_icon": "🛡️",
+  "personality_description": "精确知道需要什么，不多花一金",
+  "runs": 10,
+  "seal_stats": [
+    {
+      "barrier": 1,
+      "seal": 0,
+      "seal_type": "修羅",
+      "target": 15000,
+      "pass_count": 7,
+      "pass_rate": 0.7,
+      "scores": [
+        9684,
+        11344,
+        12578,
+        16170,
+        22380,
+        29364,
+        48384,
+        58902,
+        65178,
+        72444
+      ],
+      "min": 9684,
+      "max": 72444,
+      "p10": 11178.0,
+      "p25": 13476.0,
+      "p50": 25872.0,
+      "p75": 56272.5,
+      "p90": 65904.6,
+      "avg_trigger_rate": 0.0,
+      "avg_active_ninjas": 0.0
+    },
+    {
+      "barrier": 1,
+      "seal": 1,
+      "seal_type": "明王",
+      "target": 25000,
+      "pass_count": 5,
+      "pass_rate": 0.5,
+      "scores": [
+        15968,
+        20604,
+        30420,
+        30588,
+        38136,
+        48222,
+        62370
+      ],
+      "min": 15968,
+      "max": 62370,
+      "p10": 18749.6,
+      "p25": 25512.0,
+      "p50": 30588.0,
+      "p75": 43179.0,
+      "p90": 53881.200000000004,
+      "avg_trigger_rate": 0.0,
+      "avg_active_ninjas": 0.0
+    },
+    {
+      "barrier": 1,
+      "seal": 2,
+      "seal_type": "夜叉",
+      "target": 40000,
+      "pass_count": 2,
+      "pass_rate": 0.2,
+      "scores": [
+        28278,
+        31647,
+        38628,
+        45914,
+        48105
+      ],
+      "min": 28278,
+      "max": 48105,
+      "p10": 29625.6,
+      "p25": 31647.0,
+      "p50": 38628.0,
+      "p75": 45914.0,
+      "p90": 47228.6,
+      "avg_trigger_rate": 0.7333333333333333,
+      "avg_active_ninjas": 0.7333333333333333
+    },
+    {
+      "barrier": 2,
+      "seal": 0,
+      "seal_type": "修羅",
+      "target": 40000,
+      "pass_count": 1,
+      "pass_rate": 0.1,
+      "scores": [
+        30159,
+        66372
+      ],
+      "min": 30159,
+      "max": 66372,
+      "p10": 33780.3,
+      "p25": 39212.25,
+      "p50": 48265.5,
+      "p75": 57318.75,
+      "p90": 62750.700000000004,
+      "avg_trigger_rate": 0.6666666666666666,
+      "avg_active_ninjas": 0.8333333333333333
+    },
+    {
+      "barrier": 2,
+      "seal": 1,
+      "seal_type": "明王",
+      "target": 60000,
+      "pass_count": 0,
+      "pass_rate": 0.0,
+      "scores": [
+        35382
+      ],
+      "min": 35382,
+      "max": 35382,
+      "p10": 35382,
+      "p25": 35382,
+      "p50": 35382,
+      "p75": 35382,
+      "p90": 35382,
+      "avg_trigger_rate": 0.8333333333333334,
+      "avg_active_ninjas": 1.6666666666666667
+    }
+  ]
+}

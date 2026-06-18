@@ -303,7 +303,10 @@ static func _check_full_house(
 		return false
 	# Check columns
 	for i: int in range(3):
-		var col_cards: Array = [head_cards[i], mid_cards[i], tail_cards[i]]
+		var col_cards: Array[CardData.PlayingCard] = [
+				head_cards[i] as CardData.PlayingCard,
+				mid_cards[i] as CardData.PlayingCard,
+				tail_cards[i] as CardData.PlayingCard]
 		var col_eval = HandEvaluator3.evaluate(col_cards)
 		if col_eval.hand_type == CardData.HandType3.HIGH_CARD_3:
 			return false
@@ -321,7 +324,11 @@ static func _count_diag_matches(
 	var count: int = 0
 	var col_evals: Array = []
 	for i: int in range(3):
-		col_evals.append(HandEvaluator3.evaluate([head_cards[i], mid_cards[i], tail_cards[i]]))
+		var col_cards: Array[CardData.PlayingCard] = [
+				head_cards[i] as CardData.PlayingCard,
+				mid_cards[i] as CardData.PlayingCard,
+				tail_cards[i] as CardData.PlayingCard]
+		col_evals.append(HandEvaluator3.evaluate(col_cards))
 	var row_types: Array[int] = [int(head_eval.hand_type), int(mid_eval.hand_type), int(tail_eval.hand_type)]
 	for row_type: int in row_types:
 		# 散牌不计入"合"——散牌配散牌不算巧妙匹配

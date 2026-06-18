@@ -17,9 +17,30 @@ const RARITY_BORDER_COLORS: Dictionary = {
 ## Name/title colors for rarity text labels.
 const RARITY_NAME_COLORS: Dictionary = {
 	"common": Color("#888888"),
-	"uncommon": Color("#4CAF50"),
+	"uncommon": Color("#6A8CFF"),  # blue-purple
 	"rare": Color("#F44336"),
 	"legendary": Color("#FFD700"),
+}
+
+## Flash material resource paths for all four rarity tiers (fake3d_flash.gdshader).
+## Shared by NinjaInventoryCard and CardDetailPopup.
+const FLASH_MATERIAL_PATHS: Dictionary = {
+	"common": "res://resources/materials/fake3d_common.tres",
+	"uncommon": "res://resources/materials/fake3d_uncommon.tres",
+	"rare": "res://resources/materials/fake3d_rare.tres",
+	"legendary": "res://resources/materials/fake3d_legendary.tres",
+}
+## Base flash shader parameters per rarity (for hover accelerate / restore).
+## Design intent:
+##   Common   -> type2 silver gradient scan,   intensity 0.3 (no breathing)
+##   Uncommon -> type2 ocean wave gradient,     breath 0.18~0.42
+##   Rare     -> type2 fire gradient flicker,   pulse 0.20~0.55
+##   Legendary-> type1 rainbow shimmer,         breath 0.10~0.38
+const RARITY_FLASH_PARAMS: Dictionary = {
+	"common": {"intensity": 0.3, "move_speed": 0.4, "one_way_loop": true, "softness": 0.25},
+	"uncommon": {"intensity": 0.35, "move_speed": 0.2, "one_way_loop": true, "softness": 0.4},
+	"rare": {"intensity": 0.55, "move_speed": 0.35, "one_way_loop": true, "softness": 0.35},
+	"legendary": {"intensity": 0.35, "move_speed": 0.8, "one_way_loop": false, "softness": 0.2},
 }
 
 
