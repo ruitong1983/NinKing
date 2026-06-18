@@ -15,7 +15,7 @@ var _current_hand: Array[CardData.PlayingCard] = []
 func setup(
 	card_grid: HandCardContainer,
 	head_type: Label, mid_type: Label, tail_type: Label,
-	col0: Label, col1: Label, col2: Label, col_xi: Label,
+	col0: Label, col1: Label, col2: Label, col_xi: RichTextLabel,
 	shadow_type: Label, flash_type: Label, destroy_type: Label,
 	shadow_score: RichTextLabel, flash_score: RichTextLabel, destroy_score: RichTextLabel,
 	shadow_lv: Label, flash_lv: Label, destroy_lv: Label,
@@ -52,34 +52,28 @@ func _clear_all() -> void:
 		_card_grid.clear_cards()
 
 
-func _add_card(card_data: CardData.PlayingCard, idx: int,
-		swap_idx: int,
-		on_card_clicked: Callable = Callable()) -> void:
+func _add_card(card_data: CardData.PlayingCard, idx: int) -> void:
 	var pc: NinKingCard = NinKingCard.new()
 	pc.card_size = Vector2(125, 175)
 	pc.name = "CardBtn_%d" % idx
 	pc.playing_card_data = card_data
 	pc.card_index = idx
-	if on_card_clicked.is_valid() and not pc.ninking_card_clicked.is_connected(on_card_clicked):
-		pc.ninking_card_clicked.connect(on_card_clicked)
-	if idx == swap_idx:
-		pc.set_visual_state(NinKingCard.VisualState.SWAP_SOURCE)
 	_card_grid.add_card(pc)
 	pc.update_display()
 	GlobalTweens.pop_in(pc, 0.25)
 
 
-func refresh(hand: Array[CardData.PlayingCard], swap_idx: int, on_card_clicked: Callable = Callable()) -> void:
+func refresh(hand: Array[CardData.PlayingCard]) -> void:
 	_current_hand = hand
 	_clear_all()
 	if hand.size() < 9:
 		_labeler.reset_labels()
 		return
 	for i: int in range(9):
-		_add_card(hand[i], i, swap_idx, on_card_clicked)
+		_add_card(hand[i], i)
 	if _card_grid and _card_grid.is_inside_tree():
 		var timer := _card_grid.get_tree().create_timer(0.3)
-		timer.timeout.connect(_fixup_layout, CONNECT_ONE_SHOT)
+		timer.timeout.connect(_try_fixup_layout, CONNECT_ONE_SHOT)
 
 
 func update_labels(hand: Array[CardData.PlayingCard]) -> void:
@@ -92,7 +86,7 @@ func clear() -> void:
 	_current_hand.clear()
 
 
-func _fixup_layout() -> void:
-	if not is_instance_valid(_card_grid):
+func _try_fixup_layout() -> void:
+	if not is_instance_valid(_card_grid) or not _card_grid.is_inside_tree():
 		return
 	_card_grid.update_card_ui()

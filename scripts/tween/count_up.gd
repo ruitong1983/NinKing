@@ -34,13 +34,22 @@ static func play(label: Label, from_value: int, to_value: int, duration: float =
 		return null
 
 	_kill_label_tween(label)
+
+	var value_range: int = maxi(to_value - from_value, 1)
+	var total_ticks: int = clampi(ceili(duration * 14.0), 4, mini(value_range, 24))
+	var tracker: Dictionary = {"last_ms": -1, "pitch": 0.88}
+
 	var tw := label.create_tween()
 	tw.set_ignore_time_scale(true)
 	tw.tween_method(
 		func(v: int):
 			var new_text := prefix + str(v) + suffix
-			if label.text != new_text and per_tick.is_valid():
-				per_tick.call()
+			var progress: float = float(v - from_value) / float(value_range)
+			var milestone: int = int(floor(progress * total_ticks))
+			if milestone > tracker["last_ms"] and milestone < total_ticks and per_tick.is_valid():
+				tracker["last_ms"] = milestone
+				per_tick.call(tracker["pitch"])
+				tracker["pitch"] = minf(tracker["pitch"] + 0.05, 1.22)
 			label.text = new_text,
 		from_value, to_value, duration
 	)
@@ -56,14 +65,23 @@ static func play_eased(label: Label, from_value: int, to_value: int, duration: f
 		return null
 
 	_kill_label_tween(label)
+
+	var value_range: int = maxi(to_value - from_value, 1)
+	var total_ticks: int = clampi(ceili(duration * 14.0), 4, mini(value_range, 24))
+	var tracker: Dictionary = {"last_ms": -1, "pitch": 0.88}
+
 	var tw := label.create_tween()
 	tw.set_ignore_time_scale(true)
 	tw.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
 	tw.tween_method(
 		func(v: int):
 			var new_text := prefix + str(v) + suffix
-			if label.text != new_text and per_tick.is_valid():
-				per_tick.call()
+			var progress: float = float(v - from_value) / float(value_range)
+			var milestone: int = int(floor(progress * total_ticks))
+			if milestone > tracker["last_ms"] and milestone < total_ticks and per_tick.is_valid():
+				tracker["last_ms"] = milestone
+				per_tick.call(tracker["pitch"])
+				tracker["pitch"] = minf(tracker["pitch"] + 0.05, 1.22)
 			label.text = new_text,
 		from_value, to_value, duration
 	)
@@ -79,14 +97,22 @@ static func play_gold(label: Label, amount: int, duration: float = 0.6,
 		return null
 
 	_kill_label_tween(label)
+
+	var total_ticks: int = clampi(ceili(duration * 14.0), 4, mini(amount, 24))
+	var tracker: Dictionary = {"last_ms": -1, "pitch": 0.88}
+
 	var tw := label.create_tween()
 	tw.set_ignore_time_scale(true)
 	tw.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
 	tw.tween_method(
 		func(v: int):
 			var new_text := prefix + str(v) + suffix
-			if label.text != new_text and per_tick.is_valid():
-				per_tick.call()
+			var progress: float = float(v) / float(maxi(amount, 1))
+			var milestone: int = int(floor(progress * total_ticks))
+			if milestone > tracker["last_ms"] and milestone < total_ticks and per_tick.is_valid():
+				tracker["last_ms"] = milestone
+				per_tick.call(tracker["pitch"])
+				tracker["pitch"] = minf(tracker["pitch"] + 0.05, 1.22)
 			label.text = new_text,
 		0, amount, duration
 	)

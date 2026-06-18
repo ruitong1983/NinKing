@@ -93,7 +93,7 @@ func _on_state_changed(new_state: NinKingGameState.State) -> void:
 			if ui.game_layout.has_node("CenterColumn/HandArea"):
 				ui.game_layout.get_node("CenterColumn/HandArea").modulate = Color.WHITE
 			GlobalTweens.play_sfx(SB.DEAL)  # C17: deal SFX
-			ui.refresh_hand(NinKingGameState.hand)
+			# hand refresh is already triggered by auto_arrange() → hand_updated signal
 			ui.refresh_ninjas(NinKingGameState.owned_ninjas, NinKingGameState.max_ninja_slots)
 			ui.ai_rearrange_btn.disabled = false
 			_update_deck_display()

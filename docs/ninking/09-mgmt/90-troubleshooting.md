@@ -1,6 +1,6 @@
 # 疑难问题解决手册
 
-> **建立日期:** 2026-06-14 | **最后更新:** 2026-06-18 (§9, §13, §14)
+> **建立日期:** 2026-06-14 | **最后更新:** 2026-06-18 (§15)
 > **用途:** 记录开发中遇到的非显而易见的坑及其解决方案，避免重复踩坑。
 
 ## §1 素材替换后"缺少依赖项"
@@ -445,4 +445,40 @@ card.scale = saved_scale
 **影响范围：** 所有在非 1.0 scale 下设置 `global_position` 后通过 Tween 恢复 scale 的场景。应遵循"设 global_position 前先归一化 scale"的原则。
 
 **实例：** 2026-06-18 `ninja_bar_container.gd:108-119` — NinjaBar 忍者牌初始定位。此修复对 NinjaBarContainer 全局生效（主场景 + Debug 场景）。
+
+---
+
+## §15 点击卡牌后位置微小偏移
+
+**现象：** 鼠标左键点击手牌区卡牌（不拖拽，仅单击），卡牌释放后位置与点击前不符，偏移若干像素（~6-9px）。
+
+**根因：** Card Framework 的 `DraggableObject` 状态机在 `HOLDING → IDLE` 转换时故意不重置 position（`_exit_state(HOLDING)` 注释: "Reset visual effects but preserve position for return_card() animation"）。position 预期由拖放流程的 `return_card()` 恢复。
+
+但在同容器同 index 的释放场景（点击不放拖），`CardManager._on_drag_dropped()` 检测到卡牌落在同一容器的同一位置后调用 `HandCardContainer.move_cards()` → `src_idx == index` → 直接 `return true`（no-op），卡牌的 position 从未被恢复到正确的网格坐标。
+
+完整链路：
+```
+HOVERING → (click) → HOLDING (position 跟随鼠标)
+  → (release) → IDLE (position 不重置)
+    → release_holding_cards() → _on_drag_dropped()
+      → HandCardContainer.move_cards() → same-index no-op
+        → position 停留在 HOLDING 期间的鼠标位置 ✗
+```
+
+**修复：** `hand_card_container.gd:135-140` — 同 index 释放时，调用 `cards[0].move()` 将卡牌 tween 动画移回正确的网格坐标，而不是直接返回：
+
+```gdscript
+if src_idx == index:
+    # Same slot — restore card to correct grid position
+    # (click without drag leaves card at HOLDING position)
+    var target := global_position + _card_local_pos(index)
+    cards[0].move(target, 0.0)
+    return true
+```
+
+**调试方法：** 在 `DraggableObject._handle_mouse_pressed()`、`_handle_mouse_released()`、`Card._handle_mouse_released()`、`CardContainer.release_holding_cards()`、`CardManager._on_drag_dropped()`、`HandCardContainer.move_cards()` 沿链路加 `print()` 追踪 position 变化即可定位。
+
+**受影响的文件：** `scripts/ninking/ui/hand_card_container.gd`
+
+**实例：** 2026-06-18 用户报告左键点击卡牌后卡牌有少许偏移。日志确认 position 从 (322, 24) 变到 (328.39, 32.89)，偏移 +6.4×+8.9 像素。
 

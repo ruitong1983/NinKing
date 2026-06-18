@@ -2,12 +2,12 @@
 
 [ext_resource type="Theme" uid="uid://bqb2i07k0v8jt" path="res://assets/themes/manga_theme.tres" id="1_pgq0x"]
 [ext_resource type="PackedScene" uid="uid://c7u8hryloq7hy" path="res://addons/card-framework/card_manager.tscn" id="2_ff38i"]
-[ext_resource type="Script" uid="uid://ba3r5kv3bxlmg" path="res://scripts/ninking/ui/game_manager.gd" id="2_pgq0x"]
-[ext_resource type="Script" uid="uid://dgk1vdi44nj6m" path="res://scripts/ninking/ui/ui_manager.gd" id="2_ui_mgr"]
-[ext_resource type="Texture2D" uid="uid://cmh6fgxip28j3" path="res://assets/images/background/table_bg.png" id="3_tblbg"]
+[ext_resource type="Script" uid="uid://bs0iqxh63utdk" path="res://scripts/ninking/ui/game_manager.gd" id="2_pgq0x"]
+[ext_resource type="Script" uid="uid://csla30fhhqlyj" path="res://scripts/ninking/ui/ui_manager.gd" id="2_ui_mgr"]
+[ext_resource type="Texture2D" uid="uid://deelue8r4tqif" path="res://assets/images/background/table_bg.png" id="3_tblbg"]
 [ext_resource type="PackedScene" uid="uid://4jkp5mgq3d6t" path="res://scenes/ninking/ninking_card_factory.tscn" id="4_ensa0"]
-[ext_resource type="Shader" uid="uid://v8sl5wp6qlqi" path="res://shaders/panel_edge_fade.gdshader" id="5_shader_fade"]
-[ext_resource type="Script" uid="uid://dkduntlls22m2" path="res://scripts/ninking/ui/hand_card_container.gd" id="8_pgq0x"]
+[ext_resource type="Shader" uid="uid://demp43un45wvo" path="res://shaders/panel_edge_fade.gdshader" id="5_shader_fade"]
+[ext_resource type="Script" uid="uid://btor5q756bk78" path="res://scripts/ninking/ui/hand_card_container.gd" id="8_pgq0x"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_match_fade"]
 shader = ExtResource("5_shader_fade")
@@ -461,7 +461,7 @@ layout_mode = 0
 offset_top = 2.0
 offset_right = 46.0
 offset_bottom = 42.0
-theme_override_colors/font_color = Color(0.899, 0.549, 0.611, 1)
+theme_override_colors/font_color = Color(0.9195475, 0.6182181, 0.6686688, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.6)
 theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 38
@@ -512,7 +512,7 @@ layout_mode = 0
 offset_top = 2.0
 offset_right = 46.0
 offset_bottom = 42.0
-theme_override_colors/font_color = Color(0.888, 0.241, 0.161, 1)
+theme_override_colors/font_color = Color(0.964521, 0.52849525, 0.43090877, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.6)
 theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 38
@@ -720,20 +720,24 @@ offset_right = -200.0
 grow_vertical = 2
 theme_override_constants/separation = 8
 
-[node name="ColXiLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/ScorePanel/ScoreVBox" unique_id=763201303]
+[node name="ColXiLabel" type="RichTextLabel" parent="UIManager/GameLayout/LeftPanel/ScorePanel/ScoreVBox" unique_id=763201303]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 0
-theme_override_colors/font_color = Color(0.85, 0.2, 0.2, 1)
-theme_override_font_sizes/font_size = 32
-autowrap_mode = 3
+theme_override_colors/default_color = Color(0.85, 0.2, 0.2, 1)
+theme_override_font_sizes/normal_font_size = 40
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
 
 [node name="ScoreLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/ScorePanel/ScoreVBox" unique_id=523126247]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
 theme_override_font_sizes/font_size = 48
 text = "0 ×0 = 0"
+horizontal_alignment = 1
 
 [node name="ProgressBar" type="ProgressBar" parent="UIManager/GameLayout/LeftPanel/ScorePanel/ScoreVBox" unique_id=2091025954]
 unique_name_in_owner = true
@@ -750,7 +754,6 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.478, 0.478, 0.416, 1)
 theme_override_font_sizes/font_size = 28
-text = "封印 300"
 
 [node name="CenterColumn" type="Control" parent="UIManager/GameLayout" unique_id=1744613414]
 custom_minimum_size = Vector2(1000, 0)
@@ -817,6 +820,7 @@ offset_left = 270.0
 offset_top = 298.0
 offset_right = 970.0
 offset_bottom = 969.0
+mouse_filter = 1
 theme_override_styles/panel = SubResource("StyleBoxFlat_dun_area")
 
 [node name="ColumnLabelRow" type="HBoxContainer" parent="UIManager/GameLayout/CenterColumn/DunArea" unique_id=1076051941]
@@ -952,23 +956,6 @@ theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 28
 text = "同花"
 horizontal_alignment = 1
-
-[node name="CardGrid" type="Control" parent="UIManager/GameLayout/CenterColumn/DunArea" unique_id=1184411948]
-unique_name_in_owner = true
-z_index = 10
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 100.0
-offset_top = 70.0
-offset_right = -200.0
-offset_bottom = -51.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 1
-script = ExtResource("8_pgq0x")
-metadata/_script_path = "res://scripts/ninking/ui/hand_card_container.gd"
 
 [node name="AiRearrangeBtn" type="Button" parent="UIManager/GameLayout/CenterColumn" unique_id=472924208]
 unique_name_in_owner = true
@@ -1214,10 +1201,10 @@ grow_vertical = 2
 [node name="StatusLabel" type="Label" parent="UIManager" unique_id=357275323]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 400.0
-offset_top = 600.0
-offset_right = 797.0
-offset_bottom = 634.0
+offset_left = 424.0
+offset_top = 702.0
+offset_right = 821.0
+offset_bottom = 736.0
 theme_override_colors/font_color = Color(0.251, 0.753, 0.251, 1)
 theme_override_font_sizes/font_size = 24
 text = "影 <= 瞬 <= 滅 -- 可以出牌"
@@ -1245,3 +1232,20 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_v5l2m")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_b00f3")
 theme_override_styles/hover = SubResource("StyleBoxFlat_pqepw")
 text = "牌库: 52"
+
+[node name="CardGrid" type="Control" parent="." unique_id=1184411948]
+unique_name_in_owner = true
+z_index = 10
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 842.0
+offset_top = 356.0
+offset_right = -698.0
+offset_bottom = -194.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("8_pgq0x")
+metadata/_script_path = "res://scripts/ninking/ui/hand_card_container.gd"

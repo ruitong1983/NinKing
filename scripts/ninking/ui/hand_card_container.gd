@@ -133,7 +133,11 @@ func move_cards(cards: Array, index: int = -1, with_history: bool = true) -> boo
 		var src_idx: int = _held_cards.find(cards[0])
 		index = clampi(index, 0, _held_cards.size() - 1)
 		if src_idx == index:
-			return true  # Same slot — no-op
+			# Same slot — restore card to correct grid position
+			# (click without drag leaves card at HOLDING position)
+			var target := global_position + _card_local_pos(index)
+			cards[0].move(target, 0.0)
+			return true
 		SealController.swap_cards(NinKingGameState, src_idx, index)
 		# If not in PLAYING state (e.g. debug menu), swap_cards won't
 		# emit hand_swapped → swap_two_cards won't fire via signal.

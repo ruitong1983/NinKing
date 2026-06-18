@@ -14,7 +14,7 @@ extends RefCounted
 var _head_type_label: Label
 var _mid_type_label: Label
 var _tail_type_label: Label
-var _col_xi_label: Label
+var _col_xi_label: RichTextLabel
 var _shadow_type_label: Label
 var _flash_type_label: Label
 var _destroy_type_label: Label
@@ -75,7 +75,7 @@ func setup(
 	col0: Label,
 	col1: Label,
 	col2: Label,
-	col_xi: Label,
+	col_xi: RichTextLabel,
 	shadow_type: Label,
 	flash_type: Label,
 	destroy_type: Label,
@@ -429,7 +429,7 @@ func _update_column_types(hand: Array[CardData.PlayingCard]) -> void:
 # ColXiLabel — xi preview only (v2: column info moved to rows)
 # ══════════════════════════════════════════
 
-## Update top preview: 喜: 名 (or empty).
+## Update top preview: 喜: 名 ×N (BBcode, multiplier in small font).
 func _update_col_xi_preview(hand: Array[CardData.PlayingCard]) -> void:
 	if hand.size() < 9:
 		if _col_xi_label and is_instance_valid(_col_xi_label):
@@ -453,8 +453,10 @@ func _update_col_xi_preview(hand: Array[CardData.PlayingCard]) -> void:
 
 	var xi_parts: Array[String] = []
 	if xi_result != null and xi_result.has_any():
-		for xi_name: String in xi_result.triggered:
-			xi_parts.append(xi_name)
+		for i: int in range(xi_result.triggered.size()):
+			var xi_name: String = xi_result.triggered[i]
+			var x_mult: int = xi_result.mult_x_stack[i]
+			xi_parts.append("%s [font_size=22]×%d[/font_size]" % [xi_name, x_mult])
 
 	if xi_parts.size() > 0:
 		_col_xi_label.text = "喜: " + "  ".join(xi_parts)

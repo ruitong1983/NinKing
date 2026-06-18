@@ -10,13 +10,9 @@ extends Card
 ## nodes are created programmatically in _ensure_face_nodes() as a fallback.
 ##
 ## Fake3D: Applies fake3d perspective shader to TextureRects for 3D tilt effect.
-## Visual states (SWAP_SOURCE / REDRAW_TARGET) switch to fake3d_flash + modulate.
+## REDRAW_TARGET switches to fake3d_flash + modulate.
 
-signal ninking_card_clicked(index: int)
-
-enum VisualState { NORMAL, SWAP_SOURCE, REDRAW_TARGET }
-
-const CLICK_THRESHOLD: float = 10.0
+enum VisualState { NORMAL, REDRAW_TARGET }
 
 # Fake3D materials (loaded at runtime to avoid compile-time .tres dependency)
 var _fake3d_mat: ShaderMaterial = null
@@ -24,6 +20,9 @@ var _flash_mat: ShaderMaterial = null
 
 # Card back texture (shared across all cards, loaded once at init)
 static var _card_back_tex: Texture2D
+
+# SVG texture cache — avoid re-processing the same face repeatedly
+static var _face_cache: Dictionary = {}
 
 func _get_card_back_tex() -> Texture2D:
 	if _card_back_tex == null:
@@ -36,14 +35,14 @@ const SVG_BASE_PATH: String = "res://assets/images/cards/4color_deck_by_heratexx
 # ── Instance vars ──
 var playing_card_data: CardData.PlayingCard
 var card_index: int = -1
-var _press_global_position: Vector2 = Vector2.ZERO
+
 var _visual_state: int = VisualState.NORMAL
+var _texture_loaded: bool = false
 
 
 func _ready() -> void:
 	_ensure_face_nodes()
 	super._ready()
-	_load_card_texture()
 	_load_fake3d_materials()
 	_apply_fake3d_material()
 
@@ -106,18 +105,25 @@ func _get_card_svg_path() -> String:
 
 
 func _load_card_texture() -> void:
+	if _texture_loaded:
+		return
 	var path: String = _get_card_svg_path()
 	if path.is_empty():
 		return
-	var svg_tex: Texture2D = load(path)
-	if svg_tex == null:
-		return
 
-	var front_tex: Texture2D = svg_tex
-	var img: Image = svg_tex.get_image()
-	if img and (img.get_width() != int(card_size.x) or img.get_height() != int(card_size.y)):
-		img.resize(int(card_size.x), int(card_size.y), Image.INTERPOLATE_LANCZOS)
-		front_tex = ImageTexture.create_from_image(img)
+	var front_tex: Texture2D
+	if _face_cache.has(path):
+		front_tex = _face_cache[path]
+	else:
+		var svg_tex: Texture2D = load(path)
+		if svg_tex == null:
+			return
+		front_tex = svg_tex
+		var img: Image = svg_tex.get_image()
+		if img and (img.get_width() != int(card_size.x) or img.get_height() != int(card_size.y)):
+			img.resize(int(card_size.x), int(card_size.y), Image.INTERPOLATE_LANCZOS)
+			front_tex = ImageTexture.create_from_image(img)
+		_face_cache[path] = front_tex
 
 	var back_tex: Texture2D = _get_card_back_tex()
 	var back_img: Image = back_tex.get_image()
@@ -126,6 +132,7 @@ func _load_card_texture() -> void:
 		back_tex = ImageTexture.create_from_image(back_img)
 
 	set_faces(front_tex, back_tex)
+	_texture_loaded = true
 
 	if front_face_texture:
 		front_face_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -157,10 +164,6 @@ func set_visual_state(state: int) -> void:
 				back_mat.set_shader_parameter("y_rot", 0.0)
 				back_face_texture.material = back_mat
 
-		VisualState.SWAP_SOURCE:
-			modulate = Color(0.6, 0.8, 1.0, 1.0)
-			_apply_flash_material(Color(0.2, 0.5, 1.0, 1.0))
-
 		VisualState.REDRAW_TARGET:
 			modulate = Color(1.0, 0.6, 0.6, 1.0)
 			_apply_flash_material(Color(1.0, 0.2, 0.2, 1.0))
@@ -188,27 +191,13 @@ func _apply_flash_material(flash_color: Color) -> void:
 		back_face_texture.material = back_mat
 
 
-# ═══ Click/drag detection ═══
+# ═══ Drag detection ═══
 
-## Override: detect click vs drag on mouse release.
-## Click: emit ninking_card_clicked for swap/redraw interaction.
-## Drag: let Card Framework process drop positioning via
-## super._handle_mouse_released(), then our HandCardContainer.move_cards()
-## override intercepts the same-container drop to perform a swap + game state
-## sync via SealController.swap_cards().
+## Override: Card Framework handles drop positioning;
+## HandCardContainer.move_cards() override intercepts same-container drops
+## to perform swap + game state sync via SealController.swap_cards().
+
+
+
 func _handle_mouse_released() -> void:
-	var drag_distance: float = global_position.distance_to(_press_global_position)
-	var was_click: bool = drag_distance < CLICK_THRESHOLD
-
-	# Always call super — Card Framework handles drop detection + positioning;
-	# HandCardContainer.move_cards() override handles swap + game state sync.
 	super._handle_mouse_released()
-
-	if was_click:
-		ninking_card_clicked.emit(card_index)
-
-
-## Override: track press position for click detection.
-func _handle_mouse_pressed() -> void:
-	_press_global_position = global_position
-	super._handle_mouse_pressed()

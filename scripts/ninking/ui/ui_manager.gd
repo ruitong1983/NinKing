@@ -2,7 +2,7 @@ class_name UIManager
 extends Control
 
 ## Centralized UI management for NinKing (忍者牌 × 比鸡).
-## Delegates to HandDisplay, HandInteraction, DeckViewerController,
+## Delegates to HandDisplay, DeckViewerController,
 ## DunHighlighter, ResultScreenDisplay, NinjaBarNode (preloaded).
 ## All display updates go through this class — game_manager.gd only handles flow.
 ## NinjaBarNode loaded dynamically (avoids editor cache conflicts).
@@ -37,7 +37,7 @@ const BOSS_PORTRAITS: Dictionary = {
 # ═══ Left panel ═══
 @onready var left_panel: Control = %LeftPanel
 @onready var panel_bg: ColorRect = %PanelBg
-@onready var col_xi_label: Label = %ColXiLabel
+@onready var col_xi_label: RichTextLabel = %ColXiLabel
 
 func update_xi_display(text: String) -> void:
 	col_xi_label.text = text
@@ -118,7 +118,7 @@ func update_xi_display(text: String) -> void:
 
 # ═══ Delegates ═══
 var hand_display: RefCounted  # HandDisplay
-var hand_interaction: RefCounted  # HandInteraction
+
 var deck_viewer_ctrl: DeckViewerController
 var dun_highlighter: DunHighlighter
 var result_screen: ResultScreenDisplay
@@ -141,10 +141,6 @@ func _ready() -> void:
 		left_col_lv, mid_col_lv, right_col_lv,
 		play_btn, status_label
 	)
-
-	# Hand interaction (swap state machine)
-	hand_interaction = HandInteraction.new()
-	hand_interaction.setup(hand_display, _on_ninking_card_clicked)
 
 	# Deck viewer
 	deck_viewer_ctrl = DeckViewerController.new()
@@ -411,12 +407,11 @@ func update_target(target: int) -> void:
 
 
 # ══════════════════════════════════════════
-# Hand display — thin wrappers to HandDisplay + HandInteraction
+# Hand display — thin wrappers to HandDisplay
 # ══════════════════════════════════════════
 
 func _refresh_internal(hand: Array[CardData.PlayingCard]) -> void:
-	hand_interaction.set_hand(hand)
-	hand_display.refresh(hand, hand_interaction.swap_source_idx, _on_ninking_card_clicked)
+	hand_display.refresh(hand)
 	hand_display.update_labels(hand)
 	dun_highlighter.update(NinKingGameState.current_arrangement, NinKingGameState.current_seal_lord_effects.get("constraint", "ascending"))
 	play_btn.disabled = not NinKingGameState.is_constraint_satisfied()
@@ -428,20 +423,10 @@ func refresh_hand(hand: Array[CardData.PlayingCard]) -> void:
 
 ## Called after two cards swap — animate in-place, no full rebuild.
 func on_cards_swapped(src: int, tgt: int) -> void:
-	hand_interaction.set_hand(NinKingGameState.hand)
-	hand_interaction.swap_source_idx = -1
 	card_grid.swap_two_cards(src, tgt)
 	hand_display.update_labels(NinKingGameState.hand)
 	dun_highlighter.update(NinKingGameState.current_arrangement, NinKingGameState.current_seal_lord_effects.get("constraint", "ascending"))
 	play_btn.disabled = not NinKingGameState.is_constraint_satisfied()
-
-
-# ══════════════════════════════════════════
-# Card interaction — delegated to HandInteraction
-# ══════════════════════════════════════════
-
-func _on_ninking_card_clicked(idx: int) -> void:
-	hand_interaction.handle_card_clicked(idx)
 
 
 # ══════════════════════════════════════════
