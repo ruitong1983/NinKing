@@ -6,9 +6,9 @@ extends RefCounted
 ## v2: Single HandCardContainer replaces 3 Hand nodes.
 
 # ── Highlight colors ──
-const HIGHLIGHT_FONT_COLOR := Color(1.0, 0.9, 0.5, 1.0)
-const HIGHLIGHT_OUTLINE_COLOR := Color(1.0, 0.85, 0.3, 0.8)
-const DEFAULT_FONT_COLOR := Color(0.831, 0.659, 0.263, 1.0)
+const HIGHLIGHT_FONT_COLOR := Color(0.7, 0.55, 0.22, 1.0)
+const HIGHLIGHT_OUTLINE_COLOR := Color(0.0, 0.0, 0.0, 0.8)
+const DEFAULT_FONT_COLOR := Color(0.55, 0.4, 0.12, 1.0)
 const DEFAULT_HEAD_OUTLINE := Color(0.0, 0.0, 0.0, 0.3)
 const DEFAULT_MID_OUTLINE := Color(0.0, 0.0, 0.0, 0.6)
 const DEFAULT_TAIL_OUTLINE := Color(0.0, 0.0, 0.0, 1.0)
@@ -45,14 +45,27 @@ func setup(
 # Constraint highlight (V21)
 # ══════════════════════════════════════════
 
-func update(arrangement: Arrangement) -> void:
+func update(arrangement: Arrangement, constraint: String = "ascending") -> void:
 
 	if arrangement == null:
 		reset()
 		return
 
-	var pair1_ok: bool = arrangement.head_eval.strength <= arrangement.mid_eval.strength
-	var pair2_ok: bool = arrangement.mid_eval.strength <= arrangement.tail_eval.strength
+	var pair1_ok: bool
+	var pair2_ok: bool
+	match constraint:
+		"descending":
+			pair1_ok = arrangement.head_eval.strength >= arrangement.mid_eval.strength
+			pair2_ok = arrangement.mid_eval.strength >= arrangement.tail_eval.strength
+		"equal":
+			pair1_ok = arrangement.head_eval.hand_type == arrangement.mid_eval.hand_type
+			pair2_ok = arrangement.mid_eval.hand_type == arrangement.tail_eval.hand_type
+		"none":
+			pair1_ok = true
+			pair2_ok = true
+		_:  # "ascending" and unknown values default to ascending
+			pair1_ok = arrangement.head_eval.strength <= arrangement.mid_eval.strength
+			pair2_ok = arrangement.mid_eval.strength <= arrangement.tail_eval.strength
 
 	_apply_label_highlight(_head_label, pair1_ok, DEFAULT_HEAD_OUTLINE)
 	_apply_label_highlight(_middle_label, pair1_ok or pair2_ok, DEFAULT_MID_OUTLINE)
@@ -76,9 +89,15 @@ func update(arrangement: Arrangement) -> void:
 		const ERROR_FONT_COLOR := Color(0.95, 0.3, 0.3, 1.0)
 		_status_label.add_theme_color_override("font_color", ERROR_FONT_COLOR)
 		if not pair1_ok and pair2_ok:
-			_status_label.text = "影勢過強 — 影 > 瞬！调整手牌顺序"
+			if constraint == "descending":
+				_status_label.text = "影勢過弱 — 影 < 瞬！调整手牌顺序"
+			else:
+				_status_label.text = "影勢過強 — 影 > 瞬！调整手牌顺序"
 		elif pair1_ok and not pair2_ok:
-			_status_label.text = "滅力不足 — 瞬 > 滅！调整手牌顺序"
+			if constraint == "descending":
+				_status_label.text = "滅力過強 — 瞬 < 滅！调整手牌顺序"
+			else:
+				_status_label.text = "滅力不足 — 瞬 > 滅！调整手牌顺序"
 		else:
 			_status_label.text = "重排三道 — 调整手牌顺序"
 

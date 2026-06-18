@@ -112,7 +112,7 @@ const HAND_TYPE3_NAMES: Dictionary = {
 
 ## 3-card hand type base values (chips + mult)
 const HAND_TYPE3_BASE_VALUES: Dictionary = {
-	HandType3.HIGH_CARD_3: {"chips": 5, "mult": 1},
+	HandType3.HIGH_CARD_3: {"chips": 0, "mult": 1},
 	HandType3.ONE_PAIR_3: {"chips": 10, "mult": 2},
 	HandType3.STRAIGHT_3: {"chips": 20, "mult": 3},
 	HandType3.FLUSH_3: {"chips": 30, "mult": 4},
@@ -286,7 +286,8 @@ static func get_hand_type3_leveled_mult(ht: HandType3, levels: Dictionary) -> in
 
 
 ## Calculate hand strength for 3-card group (used for constraint: 头 ≤ 中 ≤ 尾)
-## Formula: hand_type × 100 + high_rank × 10 + mid_rank + suit_tiebreak (int)
+## Formula: hand_type × 1000 + high_rank × 10 + mid_rank + suit_tiebreak (int)
+## type_val × 1000 ensures type dominates rank (max rank contribution = 154).
 static func calc_hand_strength(ht: HandType3, cards: Array[PlayingCard]) -> int:
 	var type_val: int = int(ht)
 	var ranks: Array[int] = []
@@ -306,7 +307,7 @@ static func calc_hand_strength(ht: HandType3, cards: Array[PlayingCard]) -> int:
 			high_suit = c.suit
 			break
 
-	var strength: int = type_val * 100 + high * 10 + mid + SUIT_TIEBREAK[high_suit]
+	var strength: int = type_val * 1000 + high * 10 + mid + SUIT_TIEBREAK[high_suit]
 	return strength
 
 

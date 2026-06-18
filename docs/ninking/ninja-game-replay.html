@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NinKing 回放查看器 · Game Replay Viewer</title>
+<style>
+/* ══════════════════════════════════════════
+   NinKing 回放查看器
+   ══════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg-main: #1a1a2e;
+  --bg-card: #16213e;
+  --bg-panel: #0f1a30;
+  --bg-control: #1e2a4a;
+  --bg-hover: #2a3a5a;
+  --text: #e0e0e0;
+  --text-muted: #888;
+  --text-dim: #666;
+  --gold: #c4a843;
+  --gold-dim: #c4a84333;
+  --green: #4caf50;
+  --red: #ef5350;
+  --blue: #4fc3f7;
+  --purple: #ab47bc;
+  --orange: #ff9800;
+  --border: #2a2a4a;
+  --border-light: #3a3a5a;
+  --card-radius: 6px;
+  --panel-radius: 8px;
+}
+
+body {
+  font-family: -apple-system, 'Segoe UI', 'Noto Sans SC', 'Microsoft YaHei', monospace, sans-serif;
+  background: var(--bg-main);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Header ─── */
+header {
+  padding: 16px 24px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+header h1 { font-size: 20px; color: var(--gold); }
+header h1 small { font-size: 13px; color: var(--text-muted); font-weight: 400; margin-left: 8px; }
+.header-info { font-size: 13px; color: var(--text-muted); }
+.header-info .label { color: var(--text-dim); }
+.header-info .val  { color: var(--text); }
+
+/* ─── Drop zone / Load ─── */
+.drop-zone {
+  margin: 20px auto;
+  padding: 48px 32px;
+  max-width: 480px;
+  text-align: center;
+  border: 2px dashed var(--border-light);
+  border-radius: var(--panel-radius);
+  cursor: pointer;
+  transition: all .2s;
+}
+.drop-zone:hover { border-color: var(--gold); background: var(--gold-dim); }
+.drop-zone.dragover { border-color: var(--gold); background: var(--gold-dim); }
+.drop-zone .icon { font-size: 40px; margin-bottom: 8px; }
+.drop-zone p { color: var(--text-muted); font-size: 14px; }
+.drop-zone .sub { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+
+/* ─── Main layout ─── */
+.main-layout { display: none; flex: 1; }
+.main-layout.active { display: flex; }
+
+/* ─── Left: Board ─── */
+.board-section {
+  flex: 1;
+  padding: 16px 20px;
+  overflow-y: auto;
+}
+
+/* State bar */
+.state-bar {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--panel-radius);
+  font-size: 13px;
+}
+.state-bar .stat { display: flex; gap: 4px; align-items: center; }
+.state-bar .stat .lbl { color: var(--text-dim); }
+.state-bar .stat .vl { color: var(--text); font-weight: 600; }
+.state-bar .stat .vl.score { color: var(--gold); }
+.state-bar .stat .vl.gold { color: var(--gold); }
+.state-bar .stat .vl.plays { color: var(--blue); }
+.state-bar .stat .vl.danger { color: var(--red); }
+
+/* Event title */
+.event-title {
+  font-size: 15px;
+  color: var(--gold);
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.event-title .seq { color: var(--text-muted); font-weight: 400; }
+.event-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+/* Card grid: 3 rows × 3 cols */
+.card-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.card-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+.card-row .group-label {
+  width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg-panel);
+  border-radius: var(--card-radius);
+}
+.card-row .group-label.head { color: var(--blue); }
+.card-row .group-label.mid  { color: var(--purple); }
+.card-row .group-label.tail { color: var(--orange); }
+
+/* Single card */
+.rcard {
+  width: 88px;
+  height: 124px;
+  border-radius: var(--card-radius);
+  border: 1px solid var(--border-light);
+  background: #f5f0e8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Segoe UI', sans-serif;
+  position: relative;
+  transition: transform .15s;
+  cursor: default;
+  color: #222;
+}
+.rcard:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,.3); }
+.rcard .suit { font-size: 22px; line-height: 1; }
+.rcard .rank { font-size: 18px; font-weight: 700; line-height: 1; margin-top: 2px; }
+.rcard .enh-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 10px;
+  padding: 1px 3px;
+  border-radius: 2px;
+  background: rgba(0,0,0,.6);
+  color: #fff;
+  line-height: 1.2;
+}
+.rcard .seal-dot {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.rcard .seal-dot.red { background: var(--red); }
+.rcard .seal-dot.gold { background: var(--gold); }
+.rcard .seal-dot.blue { background: var(--blue); }
+.rcard .seal-dot.purple { background: var(--purple); }
+.rcard.suit-red .suit, .rcard.suit-red .rank { color: #c0392b; }
+.rcard.suit-black .suit, .rcard.suit-black .rank { color: #222; }
+
+/* Score display */
+.score-block {
+  padding: 12px 16px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--panel-radius);
+  margin-bottom: 16px;
+}
+.score-block h3 { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+.score-row {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+.score-row .item { display: flex; gap: 4px; }
+.score-row .item .lbl { color: var(--text-dim); }
+.score-row .item .v { font-weight: 600; }
+.score-row .total { font-size: 18px; font-weight: 700; color: var(--gold); }
+
+/* Xi display */
+.xi-block {
+  padding: 8px 12px;
+  background: #c4a84322;
+  border: 1px solid var(--gold);
+  border-radius: var(--card-radius);
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--gold);
+}
+
+/* Details table */
+.detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 8px;
+}
+.detail-table td {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+}
+.detail-table td:last-child { color: var(--text); text-align: right; }
+
+/* ─── Right: Timeline ─── */
+.timeline-section {
+  width: 320px;
+  min-width: 320px;
+  border-left: 1px solid var(--border);
+  background: var(--bg-panel);
+  display: flex;
+  flex-direction: column;
+}
+.timeline-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.timeline-header span { color: var(--text-muted); font-weight: 400; font-size: 12px; }
+
+.timeline-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+.timeline-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  font-size: 12px;
+  transition: all .1s;
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+.timeline-item:hover { background: var(--bg-hover); }
+.timeline-item.active {
+  background: var(--bg-control);
+  border-left-color: var(--gold);
+}
+.timeline-item .tseq {
+  color: var(--text-dim);
+  font-size: 11px;
+  min-width: 24px;
+  font-family: monospace;
+}
+.timeline-item .tevent {
+  color: var(--text-muted);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.timeline-item .tarrow { display: none; }
+.timeline-item.active .tarrow {
+  display: inline;
+  color: var(--gold);
+  font-size: 10px;
+}
+.timeline-item .tscore {
+  font-family: monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.timeline-item.seal_started .tevent { color: var(--blue); }
+.timeline-item.play_executed .tevent { color: var(--green); }
+.timeline-item.play_prepared .tevent { color: var(--orange); }
+.timeline-item.game_over .tevent { color: var(--red); font-weight: 600; }
+.timeline-item.victory .tevent { color: var(--gold); font-weight: 600; }
+.timeline-item.shop_entered .tevent { color: var(--purple); }
+.timeline-item.seal_completed .tevent { color: var(--orange); }
+.timeline-item.card_swapped .tevent { color: var(--text-muted); }
+.timeline-item.auto_arranged .tevent { color: var(--text-muted); }
+.timeline-item.cards_dealt .tevent { color: var(--text-muted); }
+
+/* ─── Controls ─── */
+.controls {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.controls button {
+  padding: 6px 14px;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  background: var(--bg-control);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 13px;
+  transition: all .15s;
+}
+.controls button:hover { background: var(--bg-hover); border-color: var(--gold); }
+.controls button:disabled { opacity: .35; cursor: default; }
+.controls button:disabled:hover { background: var(--bg-control); border-color: var(--border-light); }
+.controls .step-info {
+  font-size: 12px;
+  color: var(--text-muted);
+  flex: 1;
+  text-align: center;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 800px) {
+  .main-layout.active { flex-direction: column; }
+  .timeline-section { width: 100%; min-width: auto; border-left: none; border-top: 1px solid var(--border); max-height: 300px; }
+}
+
+/* ─── File picker ─── */
+.file-picker { display: none; }
+</style>
+</head>
+<body>
+
+<!-- ═══ Header ═══ -->
+<header>
+  <h1>🎲 NinKing 回放查看器 <small>Game Replay Viewer</small></h1>
+  <div class="header-info">
+    <span class="label">日志版本 </span><span class="val" id="logVersion">—</span>
+    &nbsp;·&nbsp;
+    <span class="label">牌组 </span><span class="val" id="logDeck">—</span>
+    &nbsp;·&nbsp;
+    <span class="label">结果 </span><span class="val" id="logOutcome">—</span>
+  </div>
+</header>
+
+<!-- ═══ Drop zone ═══ -->
+<div class="drop-zone" id="dropZone">
+  <div class="icon">📂</div>
+  <p>拖拽 .json 日志文件到此处，或点击选择文件</p>
+  <div class="sub">日志文件位于 user://logs/ 目录</div>
+  <input type="file" class="file-picker" id="filePicker" accept=".json">
+</div>
+
+<!-- ═══ Main Layout ═══ -->
+<div class="main-layout" id="mainLayout">
+  <!-- Left: Board -->
+  <div class="board-section" id="boardSection">
+    <!-- State bar -->
+    <div class="state-bar" id="stateBar">
+      <div class="stat"><span class="lbl">关</span><span class="vl" id="stBarrier">—</span></div>
+      <div class="stat"><span class="lbl">印</span><span class="vl" id="stSeal">—</span></div>
+      <div class="stat"><span class="lbl">得分</span><span class="vl score" id="stScore">—</span></div>
+      <div class="stat"><span class="lbl">目标</span><span class="vl" id="stTarget">—</span></div>
+      <div class="stat"><span class="lbl">剩余出牌</span><span class="vl plays" id="stPlays">—</span></div>
+      <div class="stat"><span class="lbl">金币</span><span class="vl gold" id="stGold">—</span></div>
+      <div class="stat"><span class="lbl">封印主</span><span class="vl" id="stLord">—</span></div>
+    </div>
+
+    <!-- Event display -->
+    <div id="eventDisplay">
+      <div class="drop-zone" style="padding:24px;border-style:solid;margin:0;cursor:default;">
+        <p>选择一个日志事件开始回放</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Timeline -->
+  <div class="timeline-section">
+    <div class="timeline-header">
+      <span>📋 事件时间线</span>
+      <span id="eventCount">0 条</span>
+    </div>
+    <div class="timeline-list" id="timelineList"></div>
+    <div class="controls">
+      <button id="btnFirst" title="第一条">⏮</button>
+      <button id="btnPrev" title="上一步">◀</button>
+      <span class="step-info" id="stepInfo">0 / 0</span>
+      <button id="btnNext" title="下一步">▶</button>
+      <button id="btnLast" title="最后一条">⏭</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   NinKing 回放引擎
+   ══════════════════════════════════════════ */
+
+// ─── State ───
+let runData = null;
+let entries = [];
+let currentIndex = -1;
+
+// ─── DOM refs ───
+const dropZone = document.getElementById('dropZone');
+const filePicker = document.getElementById('filePicker');
+const mainLayout = document.getElementById('mainLayout');
+const timelineList = document.getElementById('timelineList');
+const eventDisplay = document.getElementById('eventDisplay');
+const stepInfo = document.getElementById('stepInfo');
+const eventCount = document.getElementById('eventCount');
+
+const stBarrier = document.getElementById('stBarrier');
+const stSeal = document.getElementById('stSeal');
+const stScore = document.getElementById('stScore');
+const stTarget = document.getElementById('stTarget');
+const stPlays = document.getElementById('stPlays');
+const stGold = document.getElementById('stGold');
+const stLord = document.getElementById('stLord');
+const logVersion = document.getElementById('logVersion');
+const logDeck = document.getElementById('logDeck');
+const logOutcome = document.getElementById('logOutcome');
+
+const btnFirst = document.getElementById('btnFirst');
+const btnPrev = document.getElementById('btnPrev');
+const btnNext = document.getElementById('btnNext');
+const btnLast = document.getElementById('btnLast');
+
+// ─── Helpers ───
+
+/** Suit display chars */
+const SUIT = { '♣':'♣', '♦':'♦', '♥':'♥', '♠':'♠' };
+const SUIT_COLOR = { '♣': 'black', '♦': 'red', '♥': 'red', '♠': 'black' };
+
+/** Render a single card from log data */
+function renderCard(cd, opts = {}) {
+  if (!cd || !cd.suit) return '<div class="rcard" style="opacity:.2">?</div>';
+  const suit = cd.suit;
+  const rank = cd.rank;
+  const isRed = (suit === '♥' || suit === '♦');
+  const enh = cd.enhancement || '';
+  const seal = cd.seal || 0;
+  const sealClass = {1:'red',2:'gold',3:'blue',4:'purple'}[seal] || '';
+  return `<div class="rcard suit-${isRed?'red':'black'}">
+    <div class="suit">${suit}</div>
+    <div class="rank">${rank}</div>
+    ${enh ? `<div class="enh-badge">${enh}</div>` : ''}
+    ${sealClass ? `<div class="seal-dot ${sealClass}"></div>` : ''}
+  </div>`;
+}
+
+/** Render a 3×3 card grid from hand data {head,mid,tail} */
+function renderHand(hand, opts = {}) {
+  if (!hand) return '<div class="card-grid"><p style="color:var(--text-dim);text-align:center;">无手牌数据</p></div>';
+  const groups = ['head','mid','tail'];
+  const labels = { head:'头', mid:'中', tail:'尾' };
+  const colors = { head:'head', mid:'mid', tail:'tail' };
+  let html = '<div class="card-grid">';
+  for (const g of groups) {
+    const cards = hand[g] || [];
+    html += `<div class="card-row">
+      <div class="group-label ${colors[g]}">${labels[g]}</div>`;
+    for (const c of cards) html += renderCard(c);
+    html += '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+/** Format elapsed ms */
+function fmtElapsed(ms) {
+  if (!ms && ms !== 0) return '';
+  const s = Math.floor(ms / 1000);
+  const m = Math.floor(s / 60);
+  return m > 0 ? `${m}m${s%60}s` : `${s}s`;
+}
+
+/** Event display name */
+const EVENT_NAMES = {
+  run_started: '🏁 游戏开始',
+  seal_started: '🔰 封印开始',
+  cards_dealt: '🃏 发牌',
+  auto_arranged: '🤖 AI 重排',
+  card_swapped: '🔄 交换手牌',
+  play_prepared: '🧮 出牌计分（动画前）',
+  play_executed: '✅ 出牌完成',
+  seal_completed: '🏆 封印通关',
+  shop_entered: '🛒 进入商店',
+  ninja_acquired: '👤 获得忍者',
+  item_purchased: '🎯 购买道具',
+  game_over: '💀 游戏结束',
+  victory: '👑 通关胜利',
+};
+
+// ─── Event rendering ───
+
+function renderEvent(index) {
+  const entry = entries[index];
+  if (!entry) return;
+  currentIndex = index;
+
+  // Update state bar from entry's gs snapshot if present
+  const gs = entry.gs || {};
+  stBarrier.textContent = gs.barrier_num ?? '—';
+  stSeal.textContent = gs.seal_idx ?? '—';
+  stScore.textContent = gs.current_score ?? '—';
+  stTarget.textContent = gs.target_score ?? '—';
+  stPlays.textContent = gs.plays_remaining ?? '—';
+  stGold.textContent = gs.gold ?? '—';
+  stLord.textContent = gs.current_seal_lord_name || '—';
+
+  // Fallback for play_executed delta snapshots
+  const det = entry.detail || {};
+  if (det.score_gained !== undefined && gs.current_score === undefined) {
+    // Try to show something useful
+  }
+
+  // Build event display
+  const ename = EVENT_NAMES[entry.event] || entry.event;
+  let html = `<div class="event-title">📌 <span class="seq">#${entry.seq}</span> ${ename} <span style="font-size:12px;color:var(--text-dim);font-weight:400;">+${fmtElapsed(entry.elapsed_ms)}</span></div>`;
+
+  // ── Hand display ──
+  const hand = gs.hand || det.hand || det.new_hand || det.old_hand || det.hand_after || null;
+  const arr = det.arrangement || null;
+  if (arr && arr.head) {
+    html += renderHand(arr);
+  } else if (hand && hand.head) {
+    html += renderHand(hand);
+  }
+
+  // ── Score detail ──
+  const sd = det.score_detail;
+  if (sd) {
+    html += `<div class="score-block"><h3>📊 计分明细</h3><div class="score-row">
+      <div class="item"><span class="lbl">头:</span><span class="v">${sd.head_type||'?'} ${sd.head_score||0}</span></div>
+      <div class="item"><span class="lbl">中:</span><span class="v">${sd.mid_type||'?'} ${sd.mid_score||0}</span></div>
+      <div class="item"><span class="lbl">尾:</span><span class="v">${sd.tail_type||'?'} ${sd.tail_score||0}</span></div>
+      <div class="total">= ${sd.total_score||0}</div>
+    </div></div>`;
+  }
+
+  // ── Xi display ──
+  const xi = det.xi_triggered;
+  if (xi && xi.length > 0) {
+    html += `<div class="xi-block">✨ 喜触发: ${xi.join(' · ')}</div>`;
+  }
+
+  // ── Event-specific details ──
+  let rows = [];
+
+  if (entry.event === 'run_started' && det.deck_name) {
+    rows.push(['牌组', det.deck_name], ['初始金币', det.starting_gold]);
+  }
+  if (entry.event === 'seal_started') {
+    rows.push(['封印', `#${det.barrier_num}-${det.seal_idx} 目标 ${det.target_score}`]);
+    if (det.seal_lord_name) rows.push(['封印主', det.seal_lord_name]);
+  }
+  if (entry.event === 'play_executed') {
+    if (det.score_gained !== undefined) rows.push(['本局得分', `+${det.score_gained}`]);
+    if (det.plays_left !== undefined) rows.push(['剩余出牌', det.plays_left]);
+  }
+  if (entry.event === 'card_swapped') {
+    rows.push(['交换', `位置 ${det.idx1} ↔ ${det.idx2}`]);
+  }
+  if (entry.event === 'seal_completed') {
+    if (det.final_score !== undefined) rows.push(['最终得分', det.final_score]);
+    if (det.gold_earned !== undefined) rows.push(['金币奖励', `+${det.gold_earned}`]);
+    if (det.interest !== undefined) rows.push(['利息', `+${det.interest}`]);
+  }
+  if (entry.event === 'shop_entered') {
+    rows.push(['金币', det.gold], ['进度', `#${det.barrier_num}-${det.seal_idx}`]);
+  }
+  if (entry.event === 'ninja_acquired') {
+    rows.push(['忍者', (det.ninja||{}).name || '?', '来源', det.source]);
+  }
+  if (entry.event === 'item_purchased') {
+    rows.push(['道具', JSON.stringify(det.item)], ['花费', det.cost]);
+  }
+  if (entry.event === 'game_over') {
+    rows.push(['到达', `#${det.barrier_num}-${det.seal_idx}`], ['最终得分', det.final_score]);
+    if (det.reason) rows.push(['原因', det.reason]);
+  }
+  if (entry.event === 'victory') {
+    rows.push(['最终得分', det.total_score]);
+  }
+
+  if (rows.length > 0) {
+    html += '<table class="detail-table">';
+    for (const r of rows) {
+      html += `<tr><td>${r[0]}</td><td>${r[1]}</td>`;
+      if (r[2]) html += `<td>${r[2]}</td><td>${r[3]}</td>`;
+      html += '</tr>';
+    }
+    html += '</table>';
+  }
+
+  // ── Raw detail dump (for unhandled events) ──
+  if (rows.length === 0 && !sd && !xi) {
+    html += '<pre style="font-size:11px;color:var(--text-dim);margin-top:8px;white-space:pre-wrap;">' +
+      JSON.stringify(det, null, 2).slice(0, 1000) + '</pre>';
+  }
+
+  eventDisplay.innerHTML = html;
+
+  // Update timeline highlight
+  document.querySelectorAll('.timeline-item').forEach((el, i) => {
+    el.classList.toggle('active', i === index);
+    if (i === index) el.scrollIntoView({ block: 'nearest' });
+  });
+
+  // Update controls
+  updateControls();
+}
+
+function updateControls() {
+  const total = entries.length;
+  const idx = currentIndex;
+  stepInfo.textContent = `${idx + 1} / ${total}`;
+  btnFirst.disabled = idx <= 0;
+  btnPrev.disabled = idx <= 0;
+  btnNext.disabled = idx >= total - 1;
+  btnLast.disabled = idx >= total - 1;
+}
+
+// ─── Timeline ───
+
+function buildTimeline() {
+  timelineList.innerHTML = '';
+  for (let i = 0; i < entries.length; i++) {
+    const e = entries[i];
+    const ename = EVENT_NAMES[e.event] || e.event;
+    const score = e.detail?.score_detail?.total_score || e.detail?.score_gained || '';
+    const scoreStr = score ? ` <span style="color:var(--gold)">+${score}</span>` : '';
+    const item = document.createElement('div');
+    item.className = `timeline-item ${e.event}`;
+    item.innerHTML = `<span class="tseq">#${e.seq}</span>
+      <span class="tevent">${ename}</span>
+      <span class="tscore">${score ? '+'+score : ''}</span>`;
+    item.dataset.index = i;
+    item.addEventListener('click', () => renderEvent(i));
+    timelineList.appendChild(item);
+  }
+  eventCount.textContent = entries.length + ' 条';
+}
+
+// ─── Load data ───
+
+function loadJSON(text) {
+  try {
+    runData = JSON.parse(text);
+  } catch(e) {
+    alert('JSON 解析失败: ' + e.message);
+    return;
+  }
+
+  if (!runData.entries || !Array.isArray(runData.entries)) {
+    alert('无效的日志文件：缺少 entries 数组');
+    return;
+  }
+
+  entries = runData.entries;
+  entries.sort((a, b) => a.seq - b.seq);
+
+  // Header info
+  logVersion.textContent = runData.version || '1.0';
+  logDeck.textContent = runData.deck_name || '—';
+  const outcomeNames = { game_over: '💀 败北', victory: '👑 通关' };
+  logOutcome.textContent = outcomeNames[runData.outcome] || runData.outcome || '—';
+
+  // Show main layout
+  dropZone.style.display = 'none';
+  mainLayout.classList.add('active');
+
+  buildTimeline();
+  if (entries.length > 0) renderEvent(0);
+}
+
+// ─── File loading ───
+
+dropZone.addEventListener('click', () => filePicker.click());
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) readFile(file);
+});
+filePicker.addEventListener('change', () => {
+  if (filePicker.files[0]) readFile(filePicker.files[0]);
+});
+
+function readFile(file) {
+  if (!file.name.endsWith('.json')) {
+    alert('请选择 .json 文件');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => loadJSON(e.target.result);
+  reader.readAsText(file);
+}
+
+// ─── Controls ───
+
+btnFirst.addEventListener('click', () => { if (entries.length) renderEvent(0); });
+btnPrev.addEventListener('click', () => { if (currentIndex > 0) renderEvent(currentIndex - 1); });
+btnNext.addEventListener('click', () => { if (currentIndex < entries.length - 1) renderEvent(currentIndex + 1); });
+btnLast.addEventListener('click', () => { if (entries.length) renderEvent(entries.length - 1); });
+
+// Keyboard
+document.addEventListener('keydown', (e) => {
+  if (!mainLayout.classList.contains('active')) return;
+  if (e.key === 'ArrowLeft' || e.key === 'a') btnPrev.click();
+  if (e.key === 'ArrowRight' || e.key === 'd') btnNext.click();
+  if (e.key === 'Home') btnFirst.click();
+  if (e.key === 'End') btnLast.click();
+});
+
+// ─── URL param auto-load ───
+const params = new URLSearchParams(window.location.search);
+const urlLog = params.get('log');
+if (urlLog) {
+  fetch(urlLog)
+    .then(r => r.text())
+    .then(loadJSON)
+    .catch(() => { /* user will drag-drop */ });
+}
+
+console.log('🎲 NinKing 回放查看器已加载');
+console.log('📖 拖拽 .json 日志文件到页面中开始回放');
+console.log('⌨️  方向键 ← → 上一步/下一步，Home/End 首尾');
+</script>
+</body>
+</html>

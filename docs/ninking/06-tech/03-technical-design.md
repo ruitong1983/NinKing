@@ -508,7 +508,7 @@ HandEvaluator3 (RefCounted)
 Arrangement (RefCounted, arrangement.gd)
 ├── head, mid, tail: Array[PlayingCard]
 ├── head_eval, mid_eval, tail_eval: EvalResult
-└── is_legal() — checks head ≤ mid ≤ tail constraint
+└── is_legal(constraint: String = "ascending") — checks constraint (ascending: head≤mid≤tail, descending: head≥mid≥tail)
 
 ScoreHelpers (RefCounted, score_helpers.gd)
 ├── group_card_chips(cards, hungry_ghost, include_seal) — 含封印×2参数

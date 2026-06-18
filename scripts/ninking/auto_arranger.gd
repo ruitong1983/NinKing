@@ -4,7 +4,7 @@ extends RefCounted
 ## Brute-force optimal arrangement of 9 cards into 3 groups × 3 cards.
 ## Enumerates C(9,3) × C(6,3) = 1680 arrangements, filters by constraint,
 ## scores each, returns the best.
-## v4.0 — per-group scoring model (跟组走).
+## v5.0 — per-group scoring model (跟组走), rows-only (列不计入AI评分).
 ##
 ## Arrangement class is defined in arrangement.gd (class_name Arrangement).
 ## Shared helpers in score_helpers.gd (class_name ScoreHelpers).
@@ -55,7 +55,10 @@ static func find_best(cards: Array[CardData.PlayingCard],
 					"equal":
 						if head_eval.hand_type != mid_eval.hand_type or mid_eval.hand_type != tail_eval.hand_type:
 							continue
-					_:
+					"descending":
+						if not (head_eval.strength >= mid_eval.strength and mid_eval.strength >= tail_eval.strength):
+							continue
+					_:  # "ascending" and unknown values default to ascending
 						if not (head_eval.strength <= mid_eval.strength and mid_eval.strength <= tail_eval.strength):
 							continue
 
@@ -72,11 +75,13 @@ static func find_best(cards: Array[CardData.PlayingCard],
 		return best_arrangement
 
 
-## Fast score estimation (v4.0 per-group model).
+## Fast score estimation (v5.0 — rows only, no columns).
 ## Uses the independent-group scoring formula:
-##   group_score = (card_chips + hand_chips) × hand_mult × ninja_x_mult × card_x_mult
-## Then applies column detection as a bonus for ranking.
-##
+##   group_score = (card_chips + hand_chips + ench_chips + ninja_chips)
+##               × (hand_mult + ench_mult + ninja_mult)
+##               × ∏(ninja_x_mult) × ∏(card_x_mult)
+## Score = head_score + mid_score + tail_score (columns are NOT considered
+## in AI ranking — they are scored post-hoc by ScoreCalculator).
 ## No xi detection here — that's done separately after arrangement.
 ## Returns float for AI-internal comparison precision.
 static func _fast_score(head_eval: HandEvaluator3.EvalResult,
@@ -121,17 +126,11 @@ static func _fast_score(head_eval: HandEvaluator3.EvalResult,
 		tail_card, tail_hand_chips, tail_hand_mult,
 		tail_ninja, tail_cards, tail_ht)
 
-	# ── Column bonus (approximate — only check if any column has ≥对子) ──
-	var col_bonus: float = _estimate_column_bonus(head_cards, mid_cards, tail_cards)
-	var col_penalty: float = _estimate_column_waste_penalty(head_cards, mid_cards, tail_cards)
-
-	# ── Score aggregation ──
+	# ── Score aggregation (rows only, no columns) ──
 	var base_score: float = head_score + mid_score + tail_score
-	base_score *= col_bonus
-	base_score -= col_penalty
 
 	if scoring == "tail_only":
-		base_score = tail_score * col_bonus - col_penalty
+		base_score = tail_score
 
 	# ── Balance penalty (封印师: penalize uneven groups) ──
 	if balance_groups:
@@ -171,58 +170,6 @@ static func _per_group_score(
 			x_product *= x_ench
 
 	return float(max(chips, 1) * max(mult, 1) * x_product)
-
-
-## Estimate column bonus: check how many columns form a pair or better.
-## Returns a multiplier factor for ranking.
-static func _estimate_column_bonus(
-	head_cards: Array, mid_cards: Array, tail_cards: Array) -> float:
-	var bonus: float = 1.0
-	for i: int in range(3):
-		var col: Array[CardData.PlayingCard] = [head_cards[i], mid_cards[i], tail_cards[i]]
-		var col_eval: HandEvaluator3.EvalResult = HandEvaluator3.evaluate(col)
-		if int(col_eval.hand_type) >= int(CardData.HandType3.ONE_PAIR_3):
-			# Rough bonus: better hand type = higher multiplier
-			match col_eval.hand_type:
-				CardData.HandType3.THREE_OF_KIND_3:
-					bonus *= 1.3
-				CardData.HandType3.STRAIGHT_FLUSH_3:
-					bonus *= 1.25
-				CardData.HandType3.FLUSH_3:
-					bonus *= 1.2
-				CardData.HandType3.STRAIGHT_3:
-					bonus *= 1.15
-				CardData.HandType3.ONE_PAIR_3:
-					bonus *= 1.1
-	return bonus
-
-
-## Penalty for spreading cards across groups (waste).
-## This helps the AI prefer concentrated hand types.
-static func _estimate_column_waste_penalty(
-	head_cards: Array, mid_cards: Array, tail_cards: Array) -> float:
-	var penalty: float = 0.0
-	# If three-of-a-kind cards are split across groups, add penalty
-	var rank_counts: Dictionary = {}
-	for c: CardData.PlayingCard in head_cards + mid_cards + tail_cards:
-		rank_counts[c.rank] = rank_counts.get(c.rank, 0) + 1
-	for r: int in rank_counts:
-		var cnt: int = rank_counts[r]
-		if cnt >= 3:
-			# Three same rank — count how many groups they span
-			var groups: Array[int] = [0, 0, 0]
-			for c: CardData.PlayingCard in head_cards:
-				if c.rank == r: groups[0] += 1
-			for c: CardData.PlayingCard in mid_cards:
-				if c.rank == r: groups[1] += 1
-			for c: CardData.PlayingCard in tail_cards:
-				if c.rank == r: groups[2] += 1
-			var spanned: int = 0
-			for g: int in groups:
-				if g > 0: spanned += 1
-			if spanned > 1:
-				penalty += float(cnt * 3)  # Encourage grouping same ranks
-	return penalty
 
 
 ## Delegated to ScoreHelpers (kept as private wrapper for backward compat).

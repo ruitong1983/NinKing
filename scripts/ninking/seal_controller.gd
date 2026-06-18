@@ -2,6 +2,8 @@
 class_name SealController
 extends RefCounted
 
+const GameRunLogger = preload("res://scripts/ninking/logging/game_logger.gd")
+
 ## Play execution & seal completion logic extracted from NinKingGameState.
 ## All methods are static and take the game state autoload as first parameter.
 
@@ -14,6 +16,7 @@ static func execute_play(gs) -> void:
 	var play_data: Dictionary = prepare_play(gs)
 	if play_data.is_empty():
 		return
+	GameRunLogger.on_play_prepared(play_data)
 	finalize_play(gs, play_data)
 
 
@@ -29,7 +32,8 @@ static func prepare_play(gs) -> Dictionary:
 		return {}
 	if gs.plays_remaining <= 0:
 		return {}
-	if not gs.current_arrangement or not gs.current_arrangement.is_legal():
+	var constraint: String = gs.current_seal_lord_effects.get("constraint", "ascending")
+	if not gs.current_arrangement or not gs.current_arrangement.is_legal(constraint):
 		return {}
 
 	var head_cards: Array[CardData.PlayingCard] = gs.current_arrangement.head
@@ -155,6 +159,9 @@ static func finalize_play(gs, play_data: Dictionary) -> void:
 		"triggered_xis": xi_result.triggered if xi_result and xi_result.has_any() else [],
 	})
 
+	# Log play result before branching (win/lose/continue)
+	GameRunLogger.on_play_executed(score_result.total_score, gs.plays_remaining, gs.hand)
+
 	# Check win/lose
 	if gs.current_score >= gs.target_score:
 		_complete_seal(gs)
@@ -212,6 +219,7 @@ static func swap_cards(gs: NinKingGameState, idx1: int, idx2: int) -> void:
 	gs.hand[idx1] = gs.hand[idx2]
 	gs.hand[idx2] = temp
 	gs.re_evaluate_arrangement()
+	GameRunLogger.on_card_swapped(idx1, idx2, gs.hand)
 	gs.hand_swapped.emit(idx1, idx2)
 
 
@@ -239,6 +247,8 @@ static func _complete_seal(gs, summary: Dictionary = {}) -> void:
 	gs.gold += interest
 	gs.gold_changed.emit(gs.gold)
 
+	GameRunLogger.on_seal_completed(gs.current_score, seal_cfg.get("gold", 0), interest)
+
 	if not _advance_seal(gs):
 		return
 
@@ -246,6 +256,7 @@ static func _complete_seal(gs, summary: Dictionary = {}) -> void:
 
 
 static func go_to_shop(gs) -> void:
+	GameRunLogger.on_shop_entered(gs.gold, gs.barrier_num, gs.seal_idx)
 	gs._transition_to(NinKingGameState.State.SHOP)
 
 
