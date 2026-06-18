@@ -1,5 +1,7 @@
 extends Node
 
+const GameRunLogger = preload("res://scripts/ninking/logging/game_logger.gd")
+
 ## Core game state autoload — NinKing (忍者牌 × 比鸡).
 ## Barrier/Seal progression, 9-card hand → 3-group arrangement, scoring pipeline.
 
@@ -87,6 +89,8 @@ func start_new_run(deck_name: String = "standard") -> void:
 	owned_items.clear()
 	_reset_star_chart_levels()
 	deck_manager = DeckManager.new()
+	GameRunLogger.start_run(deck_name)
+	GameRunLogger.on_run_started(deck_name, gold)
 	_start_seal()
 
 
@@ -122,9 +126,9 @@ func _start_seal() -> void:
 		current_seal_lord_name = lord["name"]
 		current_seal_lord_effects = lord.get("effect", {}).duplicate()
 
-	# Check if Seal Lord changes constraint
+	# Check if Seal Lord changes constraint — used by is_constraint_satisfied()
 	if current_seal_lord_effects.has("constraint"):
-		pass  # handled by auto_arranger via scoring_rules
+		pass  # stored in current_seal_lord_effects, read by is_constraint_satisfied()
 
 	# Apply Seal Lord ninja slot reduction
 	if current_seal_lord_effects.has("ninja_slots_minus"):
@@ -140,8 +144,10 @@ func _start_seal() -> void:
 ## Compute the best arrangement and emit signals.
 ## Called externally by SealController and ShopManager.
 func auto_arrange() -> void:
+	var old_hand: Array = hand.duplicate()
 	ArrangeController.auto_arrange(self)
 	_recompute_col_evals()
+	GameRunLogger.on_auto_arranged(old_hand, hand)
 	hand_updated.emit(hand)
 
 
@@ -248,7 +254,8 @@ func get_tail_cards() -> Array[CardData.PlayingCard]:
 func is_constraint_satisfied() -> bool:
 	if not current_arrangement:
 		return false
-	return current_arrangement.is_legal()
+	var c: String = current_seal_lord_effects.get("constraint", "ascending")
+	return current_arrangement.is_legal(c)
 
 
 # ══════════════════════════════════════════
@@ -295,9 +302,13 @@ func continue_run() -> void:
 ## Shared seal startup: reset deck → deal 9 → auto-arrange → checkpoint → emit signals → await intro.
 ## Called by _start_seal (fresh seal) and continue_run (resumed seal).
 func _begin_seal_phase() -> void:
+	GameRunLogger.on_seal_started(barrier_num, seal_idx, target_score, current_seal_lord_name)
+
 	deck_manager = DeckManager.new()
 	deck_manager.reset()
 	hand = deck_manager.draw(9)
+	GameRunLogger.on_cards_dealt(hand)
+
 	auto_arrange()
 
 	# Checkpoint save after seal is fully set up
@@ -316,8 +327,10 @@ func _transition_to(new_state: State) -> void:
 
 	# Permanent death: record run result and delete checkpoint on terminal states
 	if new_state == State.GAME_OVER:
+		GameRunLogger.on_game_over(barrier_num, seal_idx, current_score, "plays_depleted")
 		SaveManager.record_run_result(current_deck_name, barrier_num, false)
 		SaveManager.delete_run()
 	elif new_state == State.VICTORY:
+		GameRunLogger.on_victory(barrier_num, current_score)
 		SaveManager.record_run_result(current_deck_name, barrier_num, true)
 		SaveManager.delete_run()

@@ -132,6 +132,10 @@ func _ready() -> void:
 	_detail_btn.pressed.connect(_on_detail_open)
 	_score_detail_panel.close_requested.connect(_on_detail_close)
 
+	# State signals (mirror main scene's game_manager)
+	NinKingGameState.hand_swapped.connect(_on_hand_swapped)
+	_card_grid.layout_changed.connect(_on_grid_layout_changed)
+
 	_reset_ui()
 	_update_button_states()
 
@@ -763,6 +767,31 @@ func _reset_ui() -> void:
 	_barrier_label.text = "結界 DEBUG"
 	_hands_label.text = "討伐 0"
 	_clear_all_type_labels()
+	_update_button_states()
+
+
+func _on_hand_swapped(src: int, tgt: int) -> void:
+	## Mirror main scene's game_manager._on_hand_swapped — update labels after swap.
+	if src >= 0 and src < _slot_data.size() and tgt >= 0 and tgt < _slot_data.size():
+		var tmp = _slot_data[src]
+		_slot_data[src] = _slot_data[tgt]
+		_slot_data[tgt] = tmp
+	if _cards_on_table() == 9:
+		_preview_dun_labels()
+	_update_button_states()
+
+
+func _on_grid_layout_changed() -> void:
+	## Sync _slot_data from actual card grid state, then refresh labels.
+	## Covers all layout changes including swap_two_cards (now emits layout_changed).
+	var cards: Array = _card_grid._held_cards
+	if cards.size() != 9:
+		return
+	for i: int in range(9):
+		var c = cards[i]
+		if c is NinKingCard and c.playing_card_data != null:
+			_slot_data[i] = c.playing_card_data
+	_preview_dun_labels()
 	_update_button_states()
 
 

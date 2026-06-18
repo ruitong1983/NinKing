@@ -418,7 +418,7 @@ func _refresh_internal(hand: Array[CardData.PlayingCard]) -> void:
 	hand_interaction.set_hand(hand)
 	hand_display.refresh(hand, hand_interaction.swap_source_idx, _on_ninking_card_clicked)
 	hand_display.update_labels(hand)
-	dun_highlighter.update(NinKingGameState.current_arrangement)
+	dun_highlighter.update(NinKingGameState.current_arrangement, NinKingGameState.current_seal_lord_effects.get("constraint", "ascending"))
 	play_btn.disabled = not NinKingGameState.is_constraint_satisfied()
 
 
@@ -432,7 +432,7 @@ func on_cards_swapped(src: int, tgt: int) -> void:
 	hand_interaction.swap_source_idx = -1
 	card_grid.swap_two_cards(src, tgt)
 	hand_display.update_labels(NinKingGameState.hand)
-	dun_highlighter.update(NinKingGameState.current_arrangement)
+	dun_highlighter.update(NinKingGameState.current_arrangement, NinKingGameState.current_seal_lord_effects.get("constraint", "ascending"))
 	play_btn.disabled = not NinKingGameState.is_constraint_satisfied()
 
 

@@ -38,7 +38,7 @@ window/size/viewport_height=1080
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/QuickAudioPreview/plugin.cfg", "res://addons/godot_mcp/plugin.cfg", "res://addons/shader_library/plugin.cfg")
+enabled=PackedStringArray("res://addons/QuickAudioPreview/plugin.cfg", "res://addons/godot_mcp/plugin.cfg")
 
 [godot_mcp]
 

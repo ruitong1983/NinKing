@@ -1,6 +1,6 @@
 # 疑难问题解决手册
 
-> **建立日期:** 2026-06-14 | **最后更新:** 2026-06-16 (§8)
+> **建立日期:** 2026-06-14 | **最后更新:** 2026-06-17 (§9)
 > **用途:** 记录开发中遇到的非显而易见的坑及其解决方案，避免重复踩坑。
 
 ## §1 素材替换后"缺少依赖项"
@@ -277,3 +277,46 @@ rtl.size = Vector2(300, 32)
 **预防：** 添加 Card Framework drop 支持的自定义容器时，按以上 6 步逐一验收。第一次集成时在 `check_card_can_be_dropped` 加 `print()` 定位最快。
 
 **实例：** 2026-06-16 B17 手牌拖拽交换修复，上述第 4、5、6 项全部踩坑。
+
+---
+
+## §9 卡牌交换后行列/喜标签不刷新
+
+**现象：** 在手牌区交换两张牌后（点击交换或拖拽交换），行标签（影/瞬/滅）、列标签（Col0-2）、喜检测标签均不更新，仍显示交换前的牌型。
+
+**根因：** `HandCardContainer.swap_two_cards()` 只做视觉层面的卡牌交换（移动节点、更新 `_held_cards`），但**没有发出任何信号通知 UI 层刷新标签**。在 Debug 场景下问题更严重——`SealController.swap_cards()` 内部有状态守卫 `if gs.current_state != PLAYING: return`，Debug 场景的状态是 `MAIN_MENU`，`hand_swapped` 信号永远不会发出，标签刷新链路完全断掉。
+
+**修复（两处）：**
+
+1. **`hand_card_container.gd:swap_two_cards()`** — 末尾添加 `layout_changed.emit()`，确保每次视觉交换后都通知监听方。
+   ```gdscript
+   tgt_card.move(src_target, 0.0)
+   src_card.move(tgt_target, 0.0)
+
+   layout_changed.emit()  # ← 新增
+   ```
+
+2. **`debug_controller.gd`** — 监听 `_card_grid.layout_changed` 信号，从 CardGrid 的实际卡牌数据同步 `_slot_data` 并刷新标签：
+   ```gdscript
+   # _ready() 中
+   _card_grid.layout_changed.connect(_on_grid_layout_changed)
+
+   func _on_grid_layout_changed() -> void:
+       var cards: Array = _card_grid._held_cards
+       if cards.size() != 9:
+           return
+       for i: int in range(9):
+           var c = cards[i]
+           if c is NinKingCard and c.playing_card_data != null:
+               _slot_data[i] = c.playing_card_data
+       _preview_dun_labels()
+       _update_button_states()
+   ```
+
+**设计要点：** Debug 场景的数据模型（`_slot_data`）与主场景（`NinKingGameState.hand`）不同。主场景通过 `hand_swapped` → `HandTypeLabeler.update_all(hand)` 读取 `gs.hand` 刷新标签；Debug 场景没有 `gs.hand`，必须从 CardGrid 的实际卡片数据反推。`layout_changed` 信号适合做这种"不管数据源是什么，UI 层需要知道布局变了"的通知。
+
+**排查方法论：** 当怀疑信号链路断裂时，沿链路逐节点加 `print()` → 运行 → 看 Output 面板。哪个 `print` 没出现，断点就在上一环。避免纯静态分析耗光回合。
+
+**受影响的文件：** `hand_card_container.gd`、`debug_controller.gd`
+
+**实例：** 2026-06-17 Debug 场景交换卡牌后行列/喜标签不刷新。

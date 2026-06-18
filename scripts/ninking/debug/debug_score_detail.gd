@@ -249,6 +249,7 @@ func _build_result_column(title: String, result: ScoreResult, is_ninja: bool) ->
 	rtl.fit_content = true
 	rtl.scroll_active = false
 	rtl.add_theme_font_size_override("normal_font_size", 18)
+	rtl.add_theme_constant_override("line_separation", 4)
 	rtl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	rtl.text = _build_all_groups_bbcode(result, is_ninja)
 	vbox.add_child(rtl)
@@ -259,6 +260,7 @@ func _build_result_column(title: String, result: ScoreResult, is_ninja: bool) ->
 	final_rtl.fit_content = true
 	final_rtl.scroll_active = false
 	final_rtl.add_theme_font_size_override("normal_font_size", 18)
+	final_rtl.add_theme_constant_override("line_separation", 4)
 	final_rtl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	final_rtl.text = _build_final_score_bbcode(result)
 	vbox.add_child(final_rtl)
@@ -537,6 +539,7 @@ func _build_delta_section() -> void:
 		lbl.fit_content = true
 		lbl.scroll_active = false
 		lbl.add_theme_font_size_override("normal_font_size", 17)
+		lbl.add_theme_constant_override("line_separation", 4)
 		lbl.add_theme_color_override("default_color", Color(CLR_NORMAL))
 		lbl.text = line_str
 		wrapper.add_child(lbl)

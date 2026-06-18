@@ -13,8 +13,8 @@ var tail_eval: HandEvaluator3.EvalResult
 
 
 func _init(h: Array, m: Array, t: Array,
-		   he: HandEvaluator3.EvalResult, me: HandEvaluator3.EvalResult,
-		   te: HandEvaluator3.EvalResult) -> void:
+		he: HandEvaluator3.EvalResult, me: HandEvaluator3.EvalResult,
+		te: HandEvaluator3.EvalResult) -> void:
 	head = _to_typed(h)
 	mid = _to_typed(m)
 	tail = _to_typed(t)
@@ -23,9 +23,19 @@ func _init(h: Array, m: Array, t: Array,
 	tail_eval = te
 
 
-## Check if this arrangement satisfies the head ≤ mid ≤ tail constraint.
-func is_legal() -> bool:
-	return head_eval.strength <= mid_eval.strength and mid_eval.strength <= tail_eval.strength
+## Check if this arrangement satisfies the constraint.
+## @param constraint: "ascending" (head <= mid <= tail), "descending" (head >= mid >= tail),
+##                    "none" (always legal), "equal" (all same hand type).
+func is_legal(constraint: String = "ascending") -> bool:
+	match constraint:
+		"none":
+			return true
+		"equal":
+			return head_eval.hand_type == mid_eval.hand_type and mid_eval.hand_type == tail_eval.hand_type
+		"descending":
+			return head_eval.strength >= mid_eval.strength and mid_eval.strength >= tail_eval.strength
+		_:  # "ascending" and any unknown values default to ascending
+			return head_eval.strength <= mid_eval.strength and mid_eval.strength <= tail_eval.strength
 
 
 static func _to_typed(arr: Array) -> Array[CardData.PlayingCard]:

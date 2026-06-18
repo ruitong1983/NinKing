@@ -219,3 +219,5 @@ func swap_two_cards(src_idx: int, tgt_idx: int) -> void:
 	var tgt_target := global_position + _card_local_pos(tgt_idx)
 	tgt_card.move(src_target, 0.0)
 	src_card.move(tgt_target, 0.0)
+
+	layout_changed.emit()

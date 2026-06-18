@@ -2,15 +2,15 @@
 
 [ext_resource type="Theme" uid="uid://bqb2i07k0v8jt" path="res://assets/themes/manga_theme.tres" id="1_theme"]
 [ext_resource type="PackedScene" uid="uid://c7u8hryloq7hy" path="res://addons/card-framework/card_manager.tscn" id="2_cm"]
-[ext_resource type="Texture2D" uid="uid://deelue8r4tqif" path="res://assets/images/background/table_bg.png" id="3_bg"]
+[ext_resource type="Texture2D" uid="uid://cmh6fgxip28j3" path="res://assets/images/background/table_bg.png" id="3_bg"]
 [ext_resource type="PackedScene" uid="uid://4jkp5mgq3d6t" path="res://scenes/ninking/ninking_card_factory.tscn" id="4_factory"]
 [ext_resource type="Shader" uid="uid://v8sl5wp6qlqi" path="res://shaders/panel_edge_fade.gdshader" id="5_shader"]
-[ext_resource type="Script" uid="uid://plki4nqvse4n" path="res://scripts/ninking/debug/debug_card_tray.gd" id="7_tray"]
-[ext_resource type="Script" uid="uid://dlyk22r2thr0n" path="res://scripts/ninking/debug/debug_panel.gd" id="8_rwsde"]
-[ext_resource type="Script" uid="uid://bvwoeasc8o6eb" path="res://scripts/ninking/debug/debug_controller.gd" id="9_ctrl"]
-[ext_resource type="Script" uid="uid://btor5q756bk78" path="res://scripts/ninking/ui/hand_card_container.gd" id="10_hcc"]
+[ext_resource type="Script" uid="uid://dgug0lj2v2uoh" path="res://scripts/ninking/debug/debug_card_tray.gd" id="7_tray"]
+[ext_resource type="Script" uid="uid://urvcvxvssicb" path="res://scripts/ninking/debug/debug_panel.gd" id="8_rwsde"]
+[ext_resource type="Script" uid="uid://b5wb4af5a6w1a" path="res://scripts/ninking/debug/debug_controller.gd" id="9_ctrl"]
+[ext_resource type="Script" uid="uid://dkduntlls22m2" path="res://scripts/ninking/ui/hand_card_container.gd" id="10_hcc"]
 [ext_resource type="PackedScene" uid="uid://dkdy7pt5uve0" path="res://scenes/ninking/debug_score_detail.tscn" id="11_enlh0"]
-[ext_resource type="Script" uid="uid://bhsy8ww8j2k2n" path="res://scripts/ninking/debug/debug_ninja_selector.gd" id="11_sel_script"]
+[ext_resource type="Script" uid="uid://c56l87nvs3gi5" path="res://scripts/ninking/debug/debug_ninja_selector.gd" id="11_sel_script"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_match_fade"]
 shader = ExtResource("5_shader")
@@ -722,30 +722,30 @@ grow_vertical = 0
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.6, 0.4, 0.1, 1)
+theme_override_colors/font_color = Color(0.55, 0.4, 0.12, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.5)
-theme_override_constants/outline_size = 1
-theme_override_font_sizes/font_size = 24
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 28
 horizontal_alignment = 1
 
 [node name="Col1Label" type="Label" parent="MainVBox/ContentRow/CenterColumn/DunArea/ColumnLabelRow" unique_id=352208415]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.6, 0.4, 0.1, 1)
+theme_override_colors/font_color = Color(0.55, 0.4, 0.12, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.5)
-theme_override_constants/outline_size = 1
-theme_override_font_sizes/font_size = 24
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 28
 horizontal_alignment = 1
 
 [node name="Col2Label" type="Label" parent="MainVBox/ContentRow/CenterColumn/DunArea/ColumnLabelRow" unique_id=1069861185]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.6, 0.4, 0.1, 1)
+theme_override_colors/font_color = Color(0.55, 0.4, 0.12, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.5)
-theme_override_constants/outline_size = 1
-theme_override_font_sizes/font_size = 24
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 28
 horizontal_alignment = 1
 
 [node name="HeadLabel" type="Label" parent="MainVBox/ContentRow/CenterColumn/DunArea" unique_id=310000001]
@@ -756,10 +756,10 @@ offset_left = 15.0
 offset_top = 130.0
 offset_right = 55.0
 offset_bottom = 165.0
-theme_override_colors/font_color = Color(0.6, 0.4, 0.1, 1)
+theme_override_colors/font_color = Color(0.55, 0.4, 0.12, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.5)
-theme_override_constants/outline_size = 1
-theme_override_font_sizes/font_size = 24
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 28
 text = "影"
 horizontal_alignment = 1
 
@@ -771,10 +771,10 @@ offset_left = 540.0
 offset_top = 130.0
 offset_right = 626.0
 offset_bottom = 165.0
-theme_override_colors/font_color = Color(0.6, 0.4, 0.1, 1)
+theme_override_colors/font_color = Color(0.55, 0.4, 0.12, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.5)
-theme_override_constants/outline_size = 1
-theme_override_font_sizes/font_size = 24
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 28
 text = "散牌"
 horizontal_alignment = 1
 
@@ -786,10 +786,10 @@ offset_left = 15.0
 offset_top = 324.0
 offset_right = 55.0
 offset_bottom = 359.0
-theme_override_colors/font_color = Color(0.6, 0.4, 0.1, 1)
+theme_override_colors/font_color = Color(0.55, 0.4, 0.12, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.5)
-theme_override_constants/outline_size = 1
-theme_override_font_sizes/font_size = 24
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 28
 text = "瞬"
 horizontal_alignment = 1
 
@@ -801,10 +801,10 @@ offset_left = 540.0
 offset_top = 324.0
 offset_right = 626.0
 offset_bottom = 359.0
-theme_override_colors/font_color = Color(0.6, 0.4, 0.1, 1)
+theme_override_colors/font_color = Color(0.55, 0.4, 0.12, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.5)
-theme_override_constants/outline_size = 1
-theme_override_font_sizes/font_size = 24
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 28
 text = "对子"
 horizontal_alignment = 1
 
@@ -816,10 +816,10 @@ offset_left = 15.0
 offset_top = 516.0
 offset_right = 55.0
 offset_bottom = 551.0
-theme_override_colors/font_color = Color(0.6, 0.4, 0.1, 1)
+theme_override_colors/font_color = Color(0.55, 0.4, 0.12, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.5)
-theme_override_constants/outline_size = 1
-theme_override_font_sizes/font_size = 24
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 28
 text = "滅"
 horizontal_alignment = 1
 
@@ -831,10 +831,10 @@ offset_left = 540.0
 offset_top = 516.0
 offset_right = 626.0
 offset_bottom = 551.0
-theme_override_colors/font_color = Color(0.6, 0.4, 0.1, 1)
+theme_override_colors/font_color = Color(0.55, 0.4, 0.12, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.5)
-theme_override_constants/outline_size = 1
-theme_override_font_sizes/font_size = 24
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 28
 text = "同花"
 horizontal_alignment = 1
 

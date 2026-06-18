@@ -1,6 +1,8 @@
 class_name ShopManager
 extends RefCounted
 
+const GameRunLogger = preload("res://scripts/ninking/logging/game_logger.gd")
+
 ## Manages the 萬屋 between seals.
 ## Phase D: fixed 4 ninjas + 2 items for all shop types.
 ## Also handles inventory operations (buy/sell/apply) moved from NinKingGameState.
@@ -43,6 +45,7 @@ static func buy_ninja(gs: Node, ninja: Dictionary) -> bool:
 	gs.gold -= ninja["cost"]
 	gs.gold_changed.emit(gs.gold)
 	gs.owned_ninjas.append(ninja.duplicate(true))
+	GameRunLogger.on_ninja_acquired(ninja, "shop")
 	return true
 
 
@@ -71,6 +74,7 @@ static func buy_item(gs: Node, item: Dictionary) -> bool:
 	gs.gold -= item["cost"]
 	gs.gold_changed.emit(gs.gold)
 	gs.owned_items.append(item)
+	GameRunLogger.on_item_purchased(item, item["cost"])
 	return true
 
 
