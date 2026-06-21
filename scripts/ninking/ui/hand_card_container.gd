@@ -16,17 +16,20 @@ const CARD_H: float = 175.0
 const ROW_0_Y_MIN: float = 34.0  # minimum top offset for row 0
 
 
-func _card_can_be_added(_cards: Array) -> bool:
+func _card_can_be_added(cards: Array) -> bool:
+	for c in cards:
+		if not c is NinKingCard:
+			return false
 	# If all cards are already in this container (same-container reorder),
 	# skip the capacity check — the card count won't change.
 	var all_contained: bool = true
-	for c in _cards:
+	for c in cards:
 		if not _held_cards.has(c):
 			all_contained = false
 			break
 	if all_contained:
 		return true
-	return _held_cards.size() + _cards.size() <= ROWS * COLS
+	return _held_cards.size() + cards.size() <= ROWS * COLS
 
 
 func _update_target_positions() -> void:

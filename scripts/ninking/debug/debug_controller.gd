@@ -503,11 +503,15 @@ func _update_score_display(
 
 	if xi_result and xi_result.has_any():
 		var xi_parts: Array[String] = []
-		for xi_name: String in xi_result.triggered:
-			xi_parts.append(xi_name)
+		for i: int in range(xi_result.triggered.size()):
+			var xi_name: String = xi_result.triggered[i]
+			var x_mult: int = xi_result.mult_x_stack[i]
+			xi_parts.append("%s [font_size=22]×%d[/font_size]" % [xi_name, x_mult])
 		_col_xi_label.text = "喜: " + "  ".join(xi_parts)
+		_col_xi_label.visible = true
 	else:
 		_col_xi_label.text = "喜: -"
+		_col_xi_label.visible = false
 
 
 func _update_hand_type_labels(
@@ -606,11 +610,15 @@ func _update_xi_preview(
 	var xi_result := XiDetector.detect(head_cards, mid_cards, tail_cards, head_eval, mid_eval, tail_eval)
 	if xi_result and xi_result.has_any():
 		var xi_parts: Array[String] = []
-		for xi_name: String in xi_result.triggered:
-			xi_parts.append(xi_name)
+		for i: int in range(xi_result.triggered.size()):
+			var xi_name: String = xi_result.triggered[i]
+			var x_mult: int = xi_result.mult_x_stack[i]
+			xi_parts.append("%s [font_size=22]×%d[/font_size]" % [xi_name, x_mult])
 		_col_xi_label.text = "喜: " + "  ".join(xi_parts)
+		_col_xi_label.visible = true
 	else:
 		_col_xi_label.text = "喜: -"
+		_col_xi_label.visible = false
 
 
 func _clear_all_type_labels() -> void:
@@ -629,7 +637,8 @@ func _clear_all_type_labels() -> void:
 	%Col0Label.text = ""
 	%Col1Label.text = ""
 	%Col2Label.text = ""
-	_col_xi_label.text = ""
+	_col_xi_label.text = "喜: -"
+	_col_xi_label.visible = false
 
 
 func _fmt_chips_x_mult(chips: int, mult: int, score: int) -> String:

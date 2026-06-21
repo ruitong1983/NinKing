@@ -5,7 +5,7 @@ extends RefCounted
 ## Changes: suit cards 1→4 split (B5), 放逐令 skipped (B5 not implemented).
 
 # ══════════════════════════════════════════
-# 符術 (Fujutsu) — 12 total (was 16)
+# 符術 (Fujutsu) — 15 total
 # Applied to a selected card in hand
 # ══════════════════════════════════════════
 

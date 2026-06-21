@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bd5by1ah8j3ky"]
 
-[ext_resource type="Script" uid="uid://py2jsudkqhq" path="res://scripts/ninking/ui/shop_ui.gd" id="1_v2fv5"]
+[ext_resource type="Script" uid="uid://dlrutxdiac0k8" path="res://scripts/ninking/ui/shop_ui.gd" id="1_v2fv5"]
 
 [node name="ShopPanel" type="Control" unique_id=876907262]
 layout_mode = 3

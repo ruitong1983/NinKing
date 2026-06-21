@@ -1,0 +1,14 @@
+{
+  "_comment": "NinKing game config — 启动参数。缺失或非法字段将退回内置默认值。",
+  "starting_gold": 8,
+  "plays_per_seal": 3,
+  "max_ninja_slots": 5,
+  "interest_divisor": 5,
+  "interest_cap": 5,
+  "shop_ninja_count": 4,
+  "shop_item_count": 2,
+  "reroll_base_cost": 3,
+  "starter_ninja_ids": [
+    "n_001", "n_052", "n_059", "n_105", "n_151"
+  ]
+}

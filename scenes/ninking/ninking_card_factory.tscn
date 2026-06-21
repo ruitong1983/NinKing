@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://4jkp5mgq3d6t"]
 
-[ext_resource type="Script" uid="uid://cn4mjt6qkddu0" path="res://scripts/ninking/ui/ninking_card_factory.gd" id="1_factory"]
+[ext_resource type="Script" uid="uid://di8n62paforf" path="res://scripts/ninking/ui/ninking_card_factory.gd" id="1_factory"]
 
 [node name="NinKingCardFactory" type="Node" unique_id=1200067664]
 script = ExtResource("1_factory")

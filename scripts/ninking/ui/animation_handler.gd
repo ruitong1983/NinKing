@@ -172,7 +172,7 @@ func _run_scoring_animation() -> void:
 				GlobalTweens.color_flash(ll, Color.GOLD, 0.4)
 
 			# -- Wait for score tween to finish FIRST --
-			if score_tw != null:
+			if is_instance_valid(score_tw):
 				await score_tw.finished
 
 			# -- punch_in AFTER score completes (emphasis) --

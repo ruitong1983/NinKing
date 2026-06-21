@@ -235,15 +235,15 @@ static func _complete_seal(gs, summary: Dictionary = {}) -> void:
 	gs.gold_changed.emit(gs.gold)
 
 	# Interest (every $5 = $1, cap $5)
-	var interest_cap: int = 5 + extra_interest
-	# Legacy fallback
-	if extra_interest == 0:
+	var interest_cap: int = ConfigManager.interest_cap + extra_interest
+	# Legacy fallback when summary not provided
+	if not summary.has("interest_cap_bonus"):
 		for ninja: Dictionary in gs.owned_ninjas:
 			var eff: Dictionary = ninja.get("effect", {})
 			if eff.get("interest_cap_bonus", 0) > 0:
 				interest_cap += eff["interest_cap_bonus"]
 
-	var interest: int = mini(floori(float(gs.gold) / 5.0), interest_cap)
+	var interest: int = mini(floori(float(gs.gold) / float(ConfigManager.interest_divisor)), interest_cap)
 	gs.gold += interest
 	gs.gold_changed.emit(gs.gold)
 

@@ -150,48 +150,18 @@ NinKingTween.play_shop_entrance_manga() (漫画格展开版):
 
 每个 `await` 后 `is_instance_valid(panel)` 守卫，防场景切换崩溃。
 
-### 5.2 购买 (不变)
+### 5.2 购买
+
+- 点击朱砂印章购买按钮 → `purchase_requested` 信号
+- 点击卡牌本体同样触发购买（`ninja_card.card_clicked.connect(_on_buy_pressed)`）
+- 右键卡牌弹出详情浮层（NinjaInventoryCard 内置处理）
+- **忍者栏满员时：** Toast "忍者栏已满，请先出售" (2.0s) + 忍者栏集体脉冲动画 + UI_ERROR 音效，玩家自行出售后购买
+
+### 5.3 Reroll (不变)
 
 同 v5。
 
-### 5.3 槽位已满 → 替换购买 (B14) <sup style="color:#B83A2A">NEW</sup>
-
-忍者栏满员（5/5）时购买忍者触发替换流程：
-
-```
-点击购买 → 满员检测
-  │
-  ├── 金币不足 → Toast "金币不足!"
-  │
-  └── 金币足够 → 先扣钱（先买后换）
-        │
-        ├── _replace_guard = true（锁定所有其他操作）
-        │
-        ├── 弹出 NinjaReplaceOverlay（全屏模态 CanvasLayer layer=128）
-        │   ├── 左：新牌大图 (160×224) + 花费 $N
-        │   ├── 右：5 张现有忍者 (120×168) + 退还 $X（半价向上取整）
-        │   └── 取消按钮
-        │
-        ├── await overlay.replacement_chosen
-        │
-        ├── CONFIRM →
-        │   ├── ShopManager.replace_ninja() 替换
-        │   ├── 退还半价金币 (max(1, ceil(cost×0.5)))
-        │   ├── refresh_ninjas (diff 模式，旧牌 dissolve_out → 新牌 pop_in)
-        │   └── Toast "X → Y (退还 $Z)"
-        │
-        └── CANCEL → 全额退款 → Toast "已取消"
-```
-
-**替换期间操作锁定：** 购买、刷新、出售、继续全部被 `_replace_guard` 拦截。
-
-**实现文件：** `scripts/ninking/ui/ninja_replace_overlay.gd`（class_name NinjaReplaceOverlay, 167行）+ `shop_handler.gd`（+ _replace_guard + 流程）+ `ui_manager.gd`（show/hide 委托）+ `shop_manager.gd`（replace_ninja 静态方法）
-
-### 5.4 Reroll (不变)
-
-同 v5。
-
-### 5.5 继续闯关 — 反向卷起退场 (~0.55s)
+### 5.4 继续闯关 — 反向卷起退场 (~0.55s)
 
 ```
 点击"討伐へ ▶" →

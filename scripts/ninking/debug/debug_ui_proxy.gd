@@ -83,3 +83,8 @@ func update_score(_score: int, _target: int) -> void:
 
 func update_xi_display(_text: String) -> void:
 	pass  # Debug scene has %ColXiLabel but managed separately
+
+
+func pulse_ninja_bar() -> void:
+	if ninja_bar and ninja_bar.has_method("pulse_cards"):
+		ninja_bar.pulse_cards()

@@ -3,7 +3,7 @@ extends Card
 ## Unified ninja card for both NinjaBar inventory and Shop display.
 ##
 ## Single scene (ninja_card.tscn) serving two modes:
-##   - Ninja bar: drag-to-reorder (card-framework), right-click detail, dissolve exit
+##   - Ninja bar: drag-to-reorder (card-framework), right-click sell, hover tooltip
 ##   - Shop:      left-click emits card_clicked (ShopSlot handles buy), right-click detail
 ##
 ## Mode is set via setup() for ninja bar or setup_shop() for shop.
@@ -19,8 +19,10 @@ extends Card
 ## Rarity flash materials (Foil/Holo/Polychrome): fak3d_flash shader via FLASH_MATERIAL_PATHS.
 ## All shader param animations go through GlobalTweens.shader_pulse / tween_shader_param.
 
-signal detail_requested(ninja_data: Dictionary)
 signal card_clicked(ninja_data: Dictionary)
+signal hover_started
+signal hover_ended
+signal sell_requested
 
 var ninja_data: Dictionary = {}
 var slot_index: int = -1
@@ -53,8 +55,8 @@ const NAME_FONT_SIZE: int = 12
 func _init() -> void:
 	card_size = Vector2(125, 175)
 	custom_minimum_size = Vector2(125, 175)
-	hover_scale = 1.15
-	hover_distance = 6
+	hover_scale = 1.0
+	hover_distance = 12
 
 
 func _ready() -> void:
@@ -111,8 +113,20 @@ func dissolve_out(duration: float = 1.0) -> void:
 	if not _dissolve_mat or not is_instance_valid(self):
 		queue_free()
 		return
-	# Temporarily swap this Control's material to dissolve2d
+	# Guard: already dissolving — don't double-start
+	if material is ShaderMaterial and material.shader == _dissolve_mat.shader:
+		return
+	# Swap this Control's material to dissolve2d so frame and face share it
 	material = _dissolve_mat.duplicate()
+	# Manually set use_parent_material on nested TextureRects inside
+	# FrontFace/BackFace — find_children("TextureRect", recursive=false)
+	# inside TweenFX only hits FrameOverlay and misses these.
+	for face_name: String in ["FrontFace", "BackFace"]:
+		if has_node(face_name):
+			var face := get_node(face_name)
+			for child in face.find_children("*", "TextureRect", false, false):
+				if child is TextureRect:
+					child.use_parent_material = true
 	# Delegate to TweenFX which handles use_parent_material + tween + queue_free
 	GlobalTweens.dissolve_out(self, duration)
 
@@ -434,16 +448,41 @@ func _handle_mouse_pressed() -> void:
 
 
 ## Override DraggableObject state transitions for frame-only hover glow
-## and flash material acceleration.
+## and flash material acceleration. Emits hover_started/hover_ended for
+## NinjaBarNode to manage tooltip timer.
 func _enter_state(state: DraggableState, from_state: DraggableState) -> void:
 	super._enter_state(state, from_state)
 	match state:
 		DraggableState.HOVERING:
 			CardVisualComposer.apply_hover_glow(frame_overlay, true)
+			_apply_hover_shadow(true)
 			_on_hover_start()
+			hover_started.emit()
 		DraggableState.IDLE:
 			CardVisualComposer.apply_hover_glow(frame_overlay, false)
+			_apply_hover_shadow(false)
 			_on_hover_end()
+			if from_state == DraggableState.HOVERING:
+				hover_ended.emit()
+
+
+func _apply_hover_shadow(enable: bool) -> void:
+	var rarity: String = ninja_data.get("rarity", "common")
+	if enable:
+		var border_color: Color = AssetRegistry.RARITY_BORDER_COLORS.get(rarity, Color.BLACK)
+		var hover_style := StyleBoxFlat.new()
+		hover_style.bg_color = CardVisualComposer.CARD_BG_COLOR
+		hover_style.set_corner_radius_all(6)
+		hover_style.shadow_size = 10
+		hover_style.shadow_color = Color(border_color, 0.35)
+		add_theme_stylebox_override("panel", hover_style)
+	else:
+		# Restore only the stylebox, NOT _apply_rarity_frame() —
+		# that would recreate flash material and break _on_hover_end() tween.
+		if frame_overlay and frame_overlay.texture:
+			add_theme_stylebox_override("panel", CardVisualComposer.create_rarity_stylebox(rarity, "bg"))
+		else:
+			add_theme_stylebox_override("panel", CardVisualComposer.create_rarity_stylebox(rarity, "full"))
 
 
 func _on_right_click(event: InputEvent) -> void:
@@ -454,7 +493,7 @@ func _on_right_click(event: InputEvent) -> void:
 			if _shop_mode:
 				_show_detail_popup()
 			else:
-				detail_requested.emit(ninja_data)
+				sell_requested.emit()
 
 
 # ============================================================

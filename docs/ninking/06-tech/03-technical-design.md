@@ -1,6 +1,6 @@
 # NinKing 技术设计文档
 
-> **最后更新:** 2026-06-16 (§ HandCardContainer 拖拽交换)
+> **最后更新: 2026-06-20** — 配置外部化：ConfigManager 加载 `game_config.json`，游戏启动参数（金币/次数/槽位/利息/商店）统一配置。
 
 ## 技术栈
 
@@ -119,7 +119,7 @@ enum State {
 
 | Autoload | 脚本路径 | 职责 |
 |---|---|---|
-| ConfigManager | `scripts/config/config_manager.gd` | 配置管理 |
+| ConfigManager | `scripts/config/config_manager.gd` | 配置管理 — 加载 `config/game_config.json`，校验后暴露只读参数（默认值硬编码兜底） |
 | MusicManager | `scripts/system/music_manager.gd` | 音乐播放 |
 | ToastManager | `scripts/ui/toast_manager.gd` | 轻提示 |
 | LeaderboardManager | `scripts/system/leaderboard_manager.gd` | 排行榜 |
@@ -198,8 +198,9 @@ NinKingMain (Control) [game_manager.gd]
     ├── ScoringOverlay (Control) — ⛔ 未使用 (Balatro 风内联动画)
     │   ⛔ LevelComplete (已删除, 2026-06-12 Phase E)
     │      Phase E 移除: 计分动画结束后金币飞入左面板, ~1.5s 自动进 Shop
-    ├── ShopOverlay (Control) — ← **Phase C 新增** 商店覆盖层
-    │   └── 运行时: add_child(load("res://scenes/ninking/shop_panel.tscn").instantiate())
+    ├── ShopOverlay (Control, z_index=1100, mouse_filter=IGNORE) — ← **Phase C 新增** 商店覆盖层
+    │   └── IGNORE 使事件穿透到 GameLayout，游戏交互由 state guard 保护
+│   └── 运行时: add_child(load("res://scenes/ninking/shop_panel.tscn").instantiate())
     ├── GameOver (Control) — 失败弹窗
     │   └── OverlayBg / GameOverLabel / ScoreSummary / RetryButton / BackToMenuButton
     ├── VictoryOverlay (Control) — 通关弹窗
@@ -547,7 +548,9 @@ DeckManager (RefCounted)
 NinKingGameState (Node, Autoload)
 ├── current_state, barrier_num, seal_idx, gold, hand, owned_ninjas, star_chart_levels
 ├── current_arrangement, current_col_evals
-├── start_new_run() / continue_run() / has_saved_run()
+├── gold/plays_remaining/max_ninja_slots ← ConfigManager 初始化（game_config.json）
+├── start_new_run() → 读取 ConfigManager.starting_gold + 校验/填充 starter_ninja_ids
+├── continue_run() / has_saved_run()
 ├── auto_arrange() / re_evaluate_arrangement() / get_scoring_rules()
 ├── swap_cards() / execute_play()
 ├── go_to_shop() / continue_from_shop() / skip_seal()
@@ -558,7 +561,7 @@ SealController (RefCounted, 静态方法)
 ├── execute_play(gs) / prepare_play(gs) / finalize_play(gs, data) — 出牌流程
 ├── swap_cards(gs, idx1, idx2) — 交换（原地重评估，不触发 AI 重排）
 ├── go_to_shop(gs) / continue_from_shop(gs) / skip_seal(gs, tag_reward)
-├── _complete_seal(gs) — 过关奖励 + 利息
+├── _complete_seal(gs) — 过关奖励 + 利息（divisor/cap 来自 ConfigManager）
 ├── _collect_play_gold(gs, cards, xi) — 经济效果统一结算
 └── _advance_seal(gs) → bool — 封印/結界推进
 
@@ -569,8 +572,8 @@ ArrangeController (RefCounted, 静态方法)
 └── collect_ninja_effect(gs, key, threshold) → Array
 
 NinjaData (RefCounted)
-├── ALL_NINJAS: Array[Dictionary] — 47 张定义（45 active + 2 deferred）
-├── STARTER_IDS: Array[String] — 初始 10 张
+├── ALL_NINJAS: Array[Dictionary] — 45 张定义（45 active + 2 deferred）
+├── STARTER_IDS: Array[String] — 初始 9 张（硬编码参考，实际起始忍者由 ConfigManager.starter_ninja_ids 控制）
 ├── get_by_id(id) → Dictionary
 └── get_starter_ninjas() → Array[Dictionary]
 
@@ -593,13 +596,23 @@ BarrierTheme (RefCounted)
 └── BARRIER_COLORS: 8 結界冷暖交替配色（紫/青/蓝/翠 冷 → 红/橙/金/粉 暖）
 
 ShopManager (RefCounted)
-├── available_ninjas, available_fujutsu, available_star_charts, available_kinjutsu
+├── available_ninjas, available_star_charts
+├── 商店数量由 ConfigManager: shop_ninja_count（默认 4）/ shop_item_count（默认 2）
 ├── generate_stock(yasha_shop, exclude_ninja_ids)
-├── get_ninjas_for_display() / get_fujutsu_for_display() / get_star_charts_for_display() / get_kinjutsu_for_display()
-├── buy_ninja(gs, ninja) / sell_ninja(gs, idx) / buy_item(gs, item) / apply_star_chart(gs, hand_type)
+├── get_ninjas_for_display() / get_star_charts_for_display()
+├── buy_ninja(gs, ninja) / replace_ninja(gs, idx, new_ninja) / sell_ninja(gs, idx) / buy_item(gs, item) / apply_star_chart(gs, hand_type)
 └── is_yasha_shop: bool
 
 SaveManager (RefCounted)
 ├── save_run() / load_run() / delete_run() / has_run_save() / build_run_data()
 └── load_progress() / save_progress() / record_run_result() / unlock_deck()
+
+ConfigManager (Node, Autoload)
+├── _ready() → FileAccess 读 `res://config/game_config.json` → JSON.parse_string()
+├── 校验: 9 必填字段 + 值域（divisor>0, counts≥1 等）+ starter_ninja_ids 非空数组
+├── 失败兜底: 硬编码 DEFAULT Dictionary + push_warning(原因清单)
+├── 暴露只读属性: starting_gold, plays_per_seal, max_ninja_slots,
+│   interest_divisor, interest_cap, shop_ninja_count, shop_item_count,
+│   reroll_base_cost, starter_ninja_ids
+└── is_loaded() → bool — 确认配置已加载
 ```

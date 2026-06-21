@@ -105,12 +105,7 @@ func _on_state_changed(new_state: NinKingGameState.State) -> void:
 			ui.show_view("scoring")
 			animation_handler.run_scoring()
 		NinKingGameState.State.SEAL_COMPLETE:
-			var seal_cfg: Dictionary = BarrierConfig.get_seal(NinKingGameState.barrier_num, NinKingGameState.seal_idx)
-			var gold_reward: int = seal_cfg.get("gold", 0)
-			var old_gold: int = animation_handler.current_play_data.get(
-				"gold_before_settlement",
-				max(0, NinKingGameState.gold - gold_reward - mini(floori(NinKingGameState.gold / 5.0), 5))
-			)
+			var old_gold: int = animation_handler.current_play_data.get("gold_before_settlement", NinKingGameState.gold)
 			_play_gold_settlement(old_gold, NinKingGameState.gold, NinKingGameState.gold - old_gold)
 
 			# Auto-shop with skip-on-click
@@ -144,6 +139,8 @@ func _on_plays_changed(remaining: int) -> void:
 
 func _on_gold_changed(amount: int) -> void:
 	ui.update_gold(amount)
+	if ui.is_shop_open():
+		ui.shop_panel_update_gold(amount)
 
 
 func _on_hand_updated(_hand: Array) -> void:
@@ -215,6 +212,7 @@ func _on_play_pressed() -> void:
 		var col_cards: Array[CardData.PlayingCard] = [arr.head[i], arr.mid[i], arr.tail[i]]
 		col_evals.append(HandEvaluator3.evaluate(col_cards))
 	animation_handler.current_play_data["col_evals"] = col_evals
+	animation_handler.current_play_data["gold_before_settlement"] = NinKingGameState.gold
 	NinKingGameState._transition_to(NinKingGameState.State.SCORING)
 
 

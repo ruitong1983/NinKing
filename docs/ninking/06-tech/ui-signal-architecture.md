@@ -77,10 +77,8 @@ func shop_panel_update_reroll_cost(cost: int) -> void
 func shop_panel_refresh_stock() -> void
 func shop_panel_mark_item_purchased(item_id: String) -> void  # 标记星图卡为已购
 func get_current_shop_panel() -> Control
-func show_replace_overlay(new_ninja: Dictionary, old_ninjas: Array[Dictionary]) -> NinjaReplaceOverlay
-  # 创建替换弹窗（全屏模态 CanvasLayer），返回 overlay 实例供 await replacement_chosen
-func hide_replace_overlay() -> void
-  # queue_free 当前替换弹窗
+func pulse_ninja_bar() -> void
+  # 忍者栏满员购买时触发集体脉冲动画
 ```
 
 ## UIManager 信号

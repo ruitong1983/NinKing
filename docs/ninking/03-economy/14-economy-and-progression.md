@@ -1,6 +1,6 @@
 # NinKing 经济与进程
 
-> **最后更新: 2026-06-17** — 移除已删除的 n_e03 俭约。
+> **最后更新: 2026-06-20** — 配置外部化：起始金币/利息/商店/重掷参数迁移至 `config/game_config.json`，由 ConfigManager autoload 加载。
 > **独立维护文档** — 金币经济、关卡奖励、利息、解锁进度的完整参数。
 > 关联文档: [`../02-cards/11-ninja-cards.md`](../02-cards/11-ninja-cards.md)（定价）、[`../02-cards/12-consumable-cards.md`](../02-cards/12-consumable-cards.md)（定价）、[`../01-gameplay/13-blinds-and-bosses.md`](../01-gameplay/13-blinds-and-bosses.md)（关卡）。
 
@@ -10,12 +10,14 @@
 
 ### 核心参数
 
-| 参数 | 值 | 状态 |
+| 参数 | 值 | 来源 |
 |------|-----|------|
-| 起始金币 | **$8** | ⚠️ v3.1 调整 ($4→$8) |
-| 利息 | 每 $5 余额 +$1 | ✅ |
-| 利息上限 | $5（基础） | ✅ |
-| 利息计算时机 | 每封印达成时 | ✅ |
+| 起始金币 | **$8** | `ConfigManager.starting_gold` ← `game_config.json` |
+| 利息 | 每 $N 余额 +$1 | `ConfigManager.interest_divisor`（默认 5）← `game_config.json` |
+| 利息上限 | $5（基础） | `ConfigManager.interest_cap` ← `game_config.json` |
+| 利息计算时机 | 每封印达成时 | `SealController._complete_seal()` |
+| 每封印出牌次数 | 3 次（基础） | `ConfigManager.plays_per_seal` ← `game_config.json` |
+| 最大忍者槽位 | 5 个 | `ConfigManager.max_ninja_slots` ← `game_config.json` |
 
 ### 过关奖励
 
@@ -66,10 +68,9 @@
 
 ### 商品刷新
 
-| 商店类型 | 忍者牌 | 附魔卡 | 星图卡 |
-|---------|--------|--------|--------|
-| Small/Big Blind 后 | 2 张（均可购买） | 1 张 | 1 张 |
-| Boss Blind 后 | 3 张（均可购买） | 2 张 | 2 张 |
+| 商店类型 | 忍者牌 | 星图卡 |
+|---------|--------|--------|
+| 所有封印后 | `ConfigManager.shop_ninja_count` 张（默认 4） | `ConfigManager.shop_item_count` 张（默认 2） |
 
 ### 定价参考
 
@@ -90,8 +91,9 @@
 |------|---------|---------|---------|---------|----------|
 | **费用** | **$3** | **$4** | **$5** | **$6** | **+$1/次** |
 
+- **底数可配** — `ConfigManager.reroll_base_cost`（默认 3），递进 +$1/次
 - **无硬上限** — 递进本身即上限，钱包自然限制
-- **每次商店刷新后重置** — 新商店入口第一刷回到 $3
+- **每次商店刷新后重置** — 新商店入口第一刷回到底数
 - **第 1 刷便宜**（$3），鼓励偶尔刷新体验
 - **多刷惩罚**（第 3 次起 ≥$5），防止过度消耗经济深度
 

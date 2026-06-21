@@ -278,6 +278,10 @@ func get_all_cards() -> Array[Node]:
 
 
 func mark_item_purchased(item_id: String) -> void:
+	for card in ability_cards:
+		if is_instance_valid(card) and card.get_card_id() == item_id:
+			card.set_purchased()
+			return
 	for card in item_cards:
 		if is_instance_valid(card) and card.get_card_id() == item_id:
 			card.set_purchased()

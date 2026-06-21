@@ -10,7 +10,7 @@ extends RefCounted
 ## @param exclude_ids: IDs already owned (to avoid duplicates)
 ## @param rarity_filter: optional rarity filter ("common", "uncommon", "rare")
 static func get_random_ninjas(count: int, exclude_ids: Array = [], rarity_filter: String = "") -> Array[Dictionary]:
-	var pool: Array[Dictionary] = NinjaData.ALL_NINJAS.duplicate()
+	var pool: Array[Dictionary] = NinjaData.ALL_NINJAS.duplicate(true)
 
 	# Filter out deferred cards (not yet active)
 	pool = pool.filter(func(n: Dictionary) -> bool: return not n.get("deferred", false))

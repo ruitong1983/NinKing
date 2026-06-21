@@ -67,6 +67,7 @@ var star_chart_levels: Dictionary = {}   # { HandType3: int }
 func _ready() -> void:
 	deck_manager = DeckManager.new()
 	_reset_star_chart_levels()
+	max_ninja_slots = ConfigManager.max_ninja_slots
 
 
 func _reset_star_chart_levels() -> void:
@@ -84,10 +85,16 @@ func start_new_run(deck_name: String = "standard") -> void:
 	current_deck_name = deck_name
 	barrier_num = 1
 	seal_idx = 0
-	gold = 8
+	gold = ConfigManager.starting_gold
 	owned_ninjas.clear()
 	owned_items.clear()
 	_reset_star_chart_levels()
+	for id: String in ConfigManager.starter_ninja_ids:
+		var ninja: Dictionary = NinjaData.get_by_id(id)
+		if not ninja.is_empty():
+			owned_ninjas.append(ninja.duplicate())
+		else:
+			push_warning("GameState: starter ninja '%s' not found in NinjaData" % id)
 	deck_manager = DeckManager.new()
 	GameRunLogger.start_run(deck_name)
 	GameRunLogger.on_run_started(deck_name, gold)
@@ -102,7 +109,7 @@ func _start_seal() -> void:
 
 	target_score = seal_cfg["target"]
 	current_score = 0
-	plays_remaining = 3
+	plays_remaining = ConfigManager.plays_per_seal
 
 	# Tool effects from owned ninjas: extra_plays (火遁已改同花顺倍率 / 赌命-1)
 	for ninja: Dictionary in owned_ninjas:

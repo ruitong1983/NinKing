@@ -309,6 +309,26 @@ StyleBoxFlat: `content_margin(16,...)`，无边框、无圆角。`bg_color #0F28
 | 管理节点 | `NinjaBarNode` (Node)，%NinjaBar 的子节点 |
 | 行为详见 | [`02-cards/22-display-card-base-spec.md`](../02-cards/22-display-card-base-spec.md) |
 
+**交互行为 (v2026-06-21 重设计)：**
+
+| 操作 | 反馈 | 管理组件 |
+|------|------|---------|
+| 悬停 0.3s | 卡片下方弹出 `NinjaDetailTooltip` 浮层（名称+效果+描述），离卡即消 | `NinjaBarNode` |
+| 右键单击 | 卡片右侧弹出红色 `NinjaSellButton`（价格=⌈cost/2⌉），卡片 `scale_pop(1.15)` 确认反馈 | `NinjaBarNode` |
+| 再次右键同卡 | 关闭售卖按钮（toggle） | `NinjaBarNode` |
+| 右键另一张卡 | 替换售卖按钮到新卡 | `NinjaBarNode` |
+| 左键空白区 | 关闭售卖按钮 | `NinjaBarNode._unhandled_input` |
+| 点击售卖按钮 | 卖出忍者 → 即时移除 + 金币返还 + 刷新忍者栏 | `NinjaBarNode` |
+
+**Tooltip 与 SellButton 场景：**
+
+| 场景文件 | 类 | 位置规则 | 视觉属性 |
+|---------|------|---------|---------|
+| `scenes/ninking/ninja_detail_tooltip.tscn` | `NinjaDetailTooltip` | 卡片底部偏左：`card.global_position + Vector2(0, card_size.y) + root.position` | 全部在 .tscn 编辑器中调整（Panel/MarginContainer/Label 字号颜色等） |
+| `scenes/ninking/ninja_sell_button.tscn` | `NinjaSellButton` | 卡片右侧居中：`card.global_position + Vector2(card_size.x, 0) + root.position` | 全部在 .tscn 编辑器中调整（Button 尺寸/颜色/字体等） |
+
+> **设计约束：** Tooltip 和 SellButton 的位置偏移、尺寸、颜色等**全部在 Godot 编辑器的 .tscn 文件中调整**，代码只读取 root 节点的初始 `position` 作为偏移量，不硬编码任何视觉属性。
+
 ##### b. 操作按钮区 `HandArea` (HBoxContainer)
 
 | 属性 | 值 |
@@ -414,7 +434,7 @@ Overlay  (封印达成)    (忍気不足)  (全结界制霸)
 | `"game"` | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | `"scoring"` | ✅ | ❌ | ✅(Balatro内联) | ❌ | ❌ | ❌ | ❌ | ❌ |
 | `"complete"` | ⛔ 已废弃 (Phase E) — 不再调用 | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ |
-| `"shop"` | ✅(游戏背景可见) | ❌ | ✅(底部面板遮挡) | ❌ | ❌ | ✅(mouse_filter=STOP) | ❌ | ❌ |
+| `"shop"` | ✅(游戏背景可见) | ❌ | ✅(底部面板遮挡) | ❌ | ❌ | ✅(mouse_filter=IGNORE) | ❌ | ❌ |
 | `"gameover"` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
 | `"victory"` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 
@@ -422,7 +442,8 @@ Overlay  (封印达成)    (忍気不足)  (全结界制霸)
 > ScoringOverlay 始终隐藏——计分文字由 ResultScreenDisplay 在 scene tree 内联操作。
 > **v2026-06-12 (底部滑入):** `"shop"` 视图下 GameBg + GameLayout 保持可见。
 > 商店面板只覆盖屏幕底部 364~1080 区域，左边栏+顶部忍者牌栏始终可见。
-> ShopOverlay 设 `mouse_filter=STOP` 防止误操作游戏区，面板无需全屏遮罩。
+> ShopOverlay 设 `mouse_filter=IGNORE` — 游戏交互已由 state guard 保护（Play/Deck/AI 按钮在非 PLAYING 状态下禁用），ShopPanel 作为 ShopOverlay 子节点仍独立接收事件（Godot 4 的 `gui_find_control()` 会遍历所有节点而不管父级的 mouse_filter）。
+> **⚠️ CardGrid 是 UIManager 的兄弟节点（z_index=10），在 shop/gameover/victory 视图下显式隐藏，防止其 MOUSE_FILTER_STOP 卡牌拦截 ShopOverlay/GameOver 等覆盖层的鼠标事件。**
 > `"complete"` 视图 **⛔ 已废弃 (Phase E)** — 不再调用。计分动画结束后金币飞入左面板 MatchPanel/GoldLabel，~1.5s 后自动进 Shop。
 
 ---
@@ -482,9 +503,11 @@ Overlay  (封印达成)    (忍気不足)  (全结界制霸)
 | `scripts/ninking/ui/hand_display.gd` | 手牌渲染（HandDisplay delegate） |
 | `scripts/ninking/ui/hand_interaction.gd` | 交互状态机（点击/拖拽交换） |
 | `scripts/ninking/ui/dun_highlighter.gd` | 三墩约束高亮 |
-| `scripts/ninking/ui/ninja_bar_node.gd` | 忍者栏管理（diff 刷新/拖拽排序/详情浮层） |
+| `scripts/ninking/ui/ninja_bar_node.gd` | 忍者栏管理（diff 刷新/拖拽排序/悬停 tooltip/右键售卖按钮） |
 | `scripts/ninking/ui/ninja_bar_container.gd` | 🆕 忍者栏 CardContainer（水平线性布局/DropZone 分区/拖拽重排） |
 | `scripts/ninking/ui/ninja_inventory_card.gd` | 🆕 忍者库存卡（Card 子类 125×175/稀有度边框/名称标签） |
+| `scripts/ninking/ui/ninja_detail_tooltip.gd` | 🆕 悬停详情浮层（名称+效果+描述，0.3s 延迟，编辑器可调视觉属性） |
+| `scripts/ninking/ui/ninja_sell_button.gd` | 🆕 右键售卖按钮（红色，价格=⌈cost/2⌉，编辑器可调视觉属性） |
 | `scripts/ninking/ui/result_screen_display.gd` | 结果屏幕渲染（计分/过关/失败/喜） |
 | `scripts/ninking/ui/nin_king_tween.gd` | 项目级动画序列（商店入场/出场/reroll） |
 | `scripts/ninking/ui/deck_viewer_controller.gd` | 牌库查看器 |

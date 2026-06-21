@@ -39,10 +39,10 @@ static func process_scaling(ninjas: Array[Dictionary], trigger_type: String,
 			var current: int = ninja["effect"].get("add_mult", 0)
 			ninja["effect"]["add_mult"] = min(current + add_mult, cap)
 
-		var x_growth: int = scaling.get("x_mult_growth", 0)
+		var x_growth: float = scaling.get("x_mult_growth", 0.0)
 		if x_growth > 0:
 			var current_x: int = ninja["effect"].get("x_mult", 1)
-			var x_cap: int = scaling.get("x_cap", 999)
+			var x_cap: float = scaling.get("x_cap", 999.0)
 			ninja["effect"]["x_mult"] = min(current_x + x_growth, x_cap)
 
 

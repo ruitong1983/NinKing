@@ -1,10 +1,7 @@
 class_name BarrierConfig
 extends RefCounted
 
-## Barrier + Seal structure for NinKing (v5.2 — 30% global reduction, round to 5).
-## Based on 100 full-run simulations across 10 strategies. Cross-barrier regression ≤25%.
-## Corrected: H_CHIPS[0]=0 (散牌 base chips), arrangement scoring mismatch noted.
-## Thresholds reduced 30% from v5.1 to match real-playtest difficulty.
+## Barrier + Seal structure for NinKing (v5.3 — v5.2 thresholds reduced 50%).
 ## 8 Barriers × 3 Seals (Shura / Myouou / Yasha) = 24 total seals.
 
 enum SealType { SHURA, MYOUOU, YASHA }
@@ -14,72 +11,72 @@ const BARRIERS: Array[Dictionary] = [
 	{
 		"barrier": 1,
 		"seals": [
-			{ "type": SealType.SHURA,   "target": 10500,  "gold": 3, "seal_lord": "" },
-			{ "type": SealType.MYOUOU,  "target": 17500,  "gold": 5, "seal_lord": "" },
-			{ "type": SealType.YASHA,   "target": 28000,  "gold": 8, "seal_lord": "" },
+			{ "type": SealType.SHURA,   "target": 5250,   "gold": 3, "seal_lord": "" },
+			{ "type": SealType.MYOUOU,  "target": 8750,   "gold": 5, "seal_lord": "" },
+			{ "type": SealType.YASHA,   "target": 14000,  "gold": 8, "seal_lord": "" },
 		]
 	},
 	# 弐ノ結界
 	{
 		"barrier": 2,
 		"seals": [
-			{ "type": SealType.SHURA,   "target": 28000,  "gold": 3, "seal_lord": "" },
-			{ "type": SealType.MYOUOU,  "target": 42000,  "gold": 5, "seal_lord": "" },
-			{ "type": SealType.YASHA,   "target": 56000,  "gold": 8, "seal_lord": "random" },
+			{ "type": SealType.SHURA,   "target": 14000,  "gold": 3, "seal_lord": "" },
+			{ "type": SealType.MYOUOU,  "target": 21000,  "gold": 5, "seal_lord": "" },
+			{ "type": SealType.YASHA,   "target": 28000,  "gold": 8, "seal_lord": "random" },
 		]
 	},
 	# 参ノ結界
 	{
 		"barrier": 3,
 		"seals": [
-			{ "type": SealType.SHURA,   "target": 42000,  "gold": 3, "seal_lord": "" },
-			{ "type": SealType.MYOUOU,  "target": 70000,  "gold": 5, "seal_lord": "" },
-			{ "type": SealType.YASHA,   "target": 105000, "gold": 8, "seal_lord": "random" },
+			{ "type": SealType.SHURA,   "target": 21000,  "gold": 3, "seal_lord": "" },
+			{ "type": SealType.MYOUOU,  "target": 35000,  "gold": 5, "seal_lord": "" },
+			{ "type": SealType.YASHA,   "target": 52500,  "gold": 8, "seal_lord": "random" },
 		]
 	},
 	# 肆ノ結界
 	{
 		"barrier": 4,
 		"seals": [
-			{ "type": SealType.SHURA,   "target": 70000,  "gold": 3, "seal_lord": "" },
-			{ "type": SealType.MYOUOU,  "target": 105000, "gold": 5, "seal_lord": "" },
-			{ "type": SealType.YASHA,   "target": 140000, "gold": 8, "seal_lord": "random" },
+			{ "type": SealType.SHURA,   "target": 35000,  "gold": 3, "seal_lord": "" },
+			{ "type": SealType.MYOUOU,  "target": 52500,  "gold": 5, "seal_lord": "" },
+			{ "type": SealType.YASHA,   "target": 70000,  "gold": 8, "seal_lord": "random" },
 		]
 	},
 	# 伍ノ結界
 	{
 		"barrier": 5,
 		"seals": [
-			{ "type": SealType.SHURA,   "target": 105000, "gold": 3, "seal_lord": "" },
-			{ "type": SealType.MYOUOU,  "target": 140000, "gold": 5, "seal_lord": "" },
-			{ "type": SealType.YASHA,   "target": 210000, "gold": 8, "seal_lord": "random" },
+			{ "type": SealType.SHURA,   "target": 52500,  "gold": 3, "seal_lord": "" },
+			{ "type": SealType.MYOUOU,  "target": 70000,  "gold": 5, "seal_lord": "" },
+			{ "type": SealType.YASHA,   "target": 105000, "gold": 8, "seal_lord": "random" },
 		]
 	},
 	# 陸ノ結界
 	{
 		"barrier": 6,
 		"seals": [
-			{ "type": SealType.SHURA,   "target": 140000, "gold": 3, "seal_lord": "" },
-			{ "type": SealType.MYOUOU,  "target": 210000, "gold": 5, "seal_lord": "" },
-			{ "type": SealType.YASHA,   "target": 280000, "gold": 8, "seal_lord": "random" },
+			{ "type": SealType.SHURA,   "target": 70000,  "gold": 3, "seal_lord": "" },
+			{ "type": SealType.MYOUOU,  "target": 105000, "gold": 5, "seal_lord": "" },
+			{ "type": SealType.YASHA,   "target": 140000, "gold": 8, "seal_lord": "random" },
 		]
 	},
 	# 漆ノ結界
 	{
 		"barrier": 7,
 		"seals": [
-			{ "type": SealType.SHURA,   "target": 210000, "gold": 3, "seal_lord": "" },
-			{ "type": SealType.MYOUOU,  "target": 280000, "gold": 5, "seal_lord": "" },
-			{ "type": SealType.YASHA,   "target": 350000, "gold": 8, "seal_lord": "random" },
+			{ "type": SealType.SHURA,   "target": 105000, "gold": 3, "seal_lord": "" },
+			{ "type": SealType.MYOUOU,  "target": 140000, "gold": 5, "seal_lord": "" },
+			{ "type": SealType.YASHA,   "target": 175000, "gold": 8, "seal_lord": "random" },
 		]
 	},
 	# 捌ノ結界
 	{
 		"barrier": 8,
 		"seals": [
-			{ "type": SealType.SHURA,   "target": 280000, "gold": 3, "seal_lord": "" },
-			{ "type": SealType.MYOUOU,  "target": 350000, "gold": 5, "seal_lord": "" },
-			{ "type": SealType.YASHA,   "target": 455000, "gold": 8, "seal_lord": "random" },
+			{ "type": SealType.SHURA,   "target": 140000, "gold": 3, "seal_lord": "" },
+			{ "type": SealType.MYOUOU,  "target": 175000, "gold": 5, "seal_lord": "" },
+			{ "type": SealType.YASHA,   "target": 227500, "gold": 8, "seal_lord": "random" },
 		]
 	},
 ]
@@ -88,7 +85,7 @@ const BARRIERS: Array[Dictionary] = [
 ## 10 Seal Lords (封印ノ主) (v3.1 — redesigned per grill session)
 ## Pool order reflects Barrier assignment:
 ##   0-1: 弐ノ結界  (断尾/无头)
-##   2-3: 参ノ結界  (独柱/铁链)
+##   2-3: 参ノ結界  (独柱/反目)
 ##   4-6: 肆ノ結界  (反目/封印师/散牌王)
 ##   6-7: 伍ノ結界  (散牌王/饿鬼)
 ##   7-8: 陸ノ結界  (饿鬼/喜之克星)
@@ -150,7 +147,7 @@ static func assign_seal_lord(barrier_num: int) -> Dictionary:
 		2:
 			pool_start = 0; pool_end = 2    # 断尾, 无头
 		3:
-			pool_start = 2; pool_end = 4    # 独柱, 铁链
+			pool_start = 2; pool_end = 4    # 独柱, 反目
 		4:
 			pool_start = 4; pool_end = 7    # 反目, 封印师, 散牌王
 		5:

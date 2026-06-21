@@ -306,8 +306,7 @@ static func _get_effect_subtype_suffix(ninja_id: String, effect: Dictionary) -> 
 
 ## Starter set for Phase A testing
 const STARTER_IDS: Array[String] = [
-	"n_001", "n_002", "n_052", "n_054", "n_059",
-	"n_105", "n_111", "n_113", "n_151",
+	"n_001", "n_052", "n_059", "n_105", "n_151",
 ]
 
 

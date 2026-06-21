@@ -96,7 +96,7 @@ NinjaCard (Control, 125×175)
 | 方法 | 说明 |
 |------|------|
 | `setup(ninja_name: String, data: Dictionary)` | 设置卡名、加载插画+稀有度框、显示 NameLabel |
-| `dissolve_out(duration: float = 1.0)` | 溶解消散动画（切换 dissolve2d shader + tween） |
+| `dissolve_out(duration: float = 1.0)` | 溶解消散动画（切换 dissolve2d shader + tween）。注意：售卖流程已改为即时移除，不再调用此方法 |
 
 ### Shop 模式
 
@@ -129,7 +129,7 @@ NinjaCard (Control, 125×175)
 
 | 行为 | Ninja bar 模式 | Shop 模式 |
 |------|----------------|-----------|
-| 悬停 | scale 1.15 + **框 `self_modulate` 亮至白色** (`CardVisualComposer.apply_hover_glow`) | 同左（**不进入拖拽态**，但悬停动画由 DraggableObject.`_can_start_hovering` 控制） |
+| 悬停 | **float 12px 上浮** + 框 `self_modulate` 亮至白色 (`CardVisualComposer.apply_hover_glow`) + flash 加速 + 稀有度色阴影 (`_apply_hover_shadow`) | 同左（**不进入拖拽态**，但悬停动画由 DraggableObject.`_can_start_hovering` 控制） |
 | 左键 | 进入 HOLDING → 拖拽重排 | emit `card_clicked`，ShopSlot 的 `buy_button` 处理购买 |
 | 右键 | emit `detail_requested` | 直接打开 `CardDetailPopup` |
 | ESC | — | 关闭详情弹窗 |

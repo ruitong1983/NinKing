@@ -31,6 +31,8 @@ func update_deck_count(draw_count: int) -> void:
 
 
 func _on_deck_btn_pressed() -> void:
+	if NinKingGameState.current_state != NinKingGameState.State.PLAYING:
+		return
 	_build_deck_viewer_grid()
 	deck_viewer.modulate.a = 0.0
 	deck_viewer.visible = true

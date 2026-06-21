@@ -1,6 +1,6 @@
 # 疑难问题解决手册
 
-> **建立日期:** 2026-06-14 | **最后更新:** 2026-06-18 (§15)
+> **建立日期:** 2026-06-14 | **最后更新:** 2026-06-20 (§16)
 > **用途:** 记录开发中遇到的非显而易见的坑及其解决方案，避免重复踩坑。
 
 ## §1 素材替换后"缺少依赖项"
@@ -482,3 +482,62 @@ if src_idx == index:
 
 **实例：** 2026-06-18 用户报告左键点击卡牌后卡牌有少许偏移。日志确认 position 从 (322, 24) 变到 (328.39, 32.89)，偏移 +6.4×+8.9 像素。
 
+---
+
+## §16 NinjaBarContainer 视口大小 sensor 导致手牌拖放被忍者栏劫持
+
+**现象：** 加载开局配置（5 张忍者牌）后，在手牌区拖拽交换手牌（`NinKingCard`），松手后卡牌没有留在手牌容器内，而是跑到了忍者栏中。
+
+**根因（双重缺陷）：**
+
+1. **DropZone sensor 覆盖整个视口** — `NinjaBarContainer._update_target_positions()` 将 drop zone 的 sensor 设为 `get_viewport_rect().size` + offset `-global_position`，使 sensor 的全局矩形等于整个视口。`check_mouse_is_in_drop_zone()` 对忍者栏**永远返回 `true`**，无论鼠标实际在哪里。
+
+2. **`_card_can_be_added()` 无条件通过** — `NinjaBarContainer._card_can_be_added()` 返回 `true` 不检查卡牌类型，任何卡牌（包括 `NinKingCard`）都能被忍者栏接受。
+
+`CardManager._on_drag_dropped()` 遍历 `card_container_dict`（无序 Dictionary）调用 `check_card_can_be_dropped()`，**第一个返回 `true` 的容器获得卡牌**。因为忍者栏 sensor 视口覆盖 + 类型检查缺失，只要 Dictionary 迭代顺序中 `NinjaBarContainer` 排在 `HandCardContainer` 前面，手牌就会落入忍者栏。
+
+完整链路：
+```
+HandCardContainer.move_cards() → super.move_cards()
+  → release_holding_cards() → _on_drag_dropped()
+    → 遍历 card_container_dict:
+        NinjaBarContainer.check_card_can_be_dropped()
+          → check_mouse_is_in_drop_zone() → true (sensor = 全视口)
+          → _card_can_be_added() → true (无类型检查)
+        → ⚠️ 忍者栏抢先接受 NinKingCard
+```
+
+**修复（两文件三处）：**
+
+1. **`ninja_bar_container.gd:_update_target_positions()`** — sensor 从整个视口缩小为容器自身尺寸：
+   ```gdscript
+   # Before (BUG)
+   var vp_rect := get_viewport_rect()
+   drop_zone.set_sensor_size_flexibly(vp_rect.size, -global_position)
+   
+   # After (FIX)
+   drop_zone.set_sensor_size_flexibly(size, Vector2.ZERO)
+   ```
+
+2. **`ninja_bar_container.gd:_card_can_be_added()`** — 添加类型守卫，只接受 `NinjaInventoryCard`：
+   ```gdscript
+   func _card_can_be_added(cards: Array) -> bool:
+       for c in cards:
+           if not c is NinjaInventoryCard:
+               return false
+       return true
+   ```
+
+3. **`hand_card_container.gd:_card_can_be_added()`** — 同样添加类型守卫，只接受 `NinKingCard`（纵深防御）。
+
+**设计原则：**
+- **DropZone sensor 必须严格限制为容器自身大小**。视口大小的 sensor 是反模式——它会在 Dictionary 无序迭代中随机劫持其他容器的拖放事件。
+- **每个 `CardContainer` 子类必须在 `_card_can_be_added()` 中做类型守卫**，拒绝不属自己管理的卡牌类型。这是纵深防御，即使 sensor 正确也不应跳过。
+
+**排查方法论：** 当卡牌"落错容器"时，在两处加 `print()` 最快定位：
+1. `CardManager._on_drag_dropped()` 中打印 `check_card_can_be_dropped()` 返回 `true` 的是哪个容器
+2. 可疑容器的 `check_mouse_is_in_drop_zone()` 打印 sensor 的全局矩形
+
+**受影响的文件：** `scripts/ninking/ui/ninja_bar_container.gd`（主修）、`scripts/ninking/ui/hand_card_container.gd`（防御加固）
+
+**实例：** 2026-06-20 加载 5 忍开局配置后拖拽交换手牌，手牌随机进入忍者栏。sensor 全局矩形 = `Rect2(0, 0, 1920, 1080)`（整个视口），confirm_root 的 drop zone sensor 缩小为 `Rect2(container_pos, container_size)` 后问题消失。

@@ -49,6 +49,11 @@ func setup(data: Dictionary) -> void:
 		buy_button.pressed.disconnect(_on_buy_pressed)
 	buy_button.pressed.connect(_on_buy_pressed)
 
+	# 4. Clicking card face also triggers purchase
+	if ninja_card.card_clicked.is_connected(_on_buy_pressed):
+		ninja_card.card_clicked.disconnect(_on_buy_pressed)
+	ninja_card.card_clicked.connect(_on_buy_pressed)
+
 	# Reset purchased state on fresh setup
 	is_purchased = false
 	visible = true
@@ -127,13 +132,6 @@ func _apply_seal_button_style(btn: Button, seal_color: Color) -> void:
 	pressed.content_margin_bottom = 0
 	btn.add_theme_stylebox_override("pressed", pressed)
 	btn.add_theme_color_override("font_pressed_color", Color(1, 1, 1, 0.85))
-
-
-# ══════════════════════════════════════════
-# Rarity — card border (ink-wash palette)
-# ══════════════════════════════════════════
-
-# Rarity frame — handled by ninja_card.set_frame(rarity) via apply_ink_wash_theme().
 
 
 # ══════════════════════════════════════════

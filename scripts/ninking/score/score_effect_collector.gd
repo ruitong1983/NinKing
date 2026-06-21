@@ -125,7 +125,7 @@ static func collect_ninja_per_group(
 							cards_arr = tail_cards
 					var has_ace: bool = false
 					for card: CardData.PlayingCard in cards_arr:
-						if card.rank == 14:
+						if card.rank == CardData.Rank.ACE:
 							has_ace = true
 							break
 					if not has_ace:

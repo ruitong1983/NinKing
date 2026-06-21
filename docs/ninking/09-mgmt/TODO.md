@@ -1,6 +1,6 @@
 # NinKing 工作清单
 
-> **最后更新:** 2026-06-18 | **当前 Phase:** L（回放日志系统完成）+ F1（忍者牌补齐）+ H（效果集中分析实施中） | 本次: 模拟审查 v5.2 — 4项发现 + 阈值整体下调30%
+> **最后更新:** 2026-06-21 | **当前 Phase:** L（回放日志系统完成）+ F1（忍者牌补齐）+ H（效果集中分析实施中）+ **CR（Code Review 整改）** | 本次: B21 商店卡牌点击修复
 > **使用方式:** AI 每次会话开始时读取此文件。完成任务后更新状态。
 > **状态图例:** ⬜ 待做 | 🔵 进行中 | ✅ 已完成 | 🔒 暂缓 | ⛔ 已废弃
 
@@ -19,7 +19,7 @@
 | X9 | **豹子 实现** — 某墩牌型=豹子 ×2 (组级, per-group) | `xi_detector.gd` + `score_calculator.gd` | **P1** | ✅ |
 | X10 | **满堂 实现** — 3行+3列全部非散牌 ×5 | `xi_detector.gd` + `score_calculator.gd` + display files | **P1** | ✅ |
 | X11 | **三合/双合/一合 实现** — 行↔列对角匹配 3/2/1组 (互斥) | ×6/×4/×2 | **P1** | ✅ |
-| X7 | **喜展示UI** — 需要一种机制展示已触发的喜类型和数量 | 待设计（Grill session中列为代办） | **P2** | ⬜ |
+| X7 | **喜展示UI** — 需要一种机制展示已触发的喜类型和数量 | 待设计（Grill session中列为代办） | **P2** | ✅ |
 | X8 | **门清理** — 删除`shop.tscn`及11个orphan文件 | 2026-06-16已执行 | **P3** | ✅ |
 
 ## 🐛 Bug 修复
@@ -40,6 +40,10 @@
 | B18 | **Debug 场景 讨伐按钮约束不满足时灰色样式不生效** — `_update_button_states()` 只检查牌数（≠9），不检查 head ≤ mid ≤ tail 约束。即使 `_on_play_pressed()` 中有约束检查阻止行为，按钮视觉上仍是启用状态（红色）。修复：`_update_button_states()` 牌数=9时增加 `Arrangement.is_legal()` 检查，不满足时 `play_btn.disabled = true` 触发 `theme_override_styles/disabled` 灰色样式 | `debug_controller.gd` | **P0** | ✅ |
 | B19 | **ScoreResult.chips_sum/mult_sum 未赋值 → debug 场景显示 "0 × 1 = 总分"** — 两个字段声明后全项目无任何代码赋值，debug_controller.gd:490 直接用它们格式化 `_score_label.text`，导致始终显示 `"0 × 1 = N"`。主场景不受影响（走 `_score_subtotal` 路径）。修复：`ScoreCalculator.calculate()` 和 `calculate_with_summary()` 中各加两行求和赋值 | `scripts/ninking/score/score_calculator.gd`（+4行） | **P0** | ✅ |
 | B20 | **barrier_config.gd 关卡分值同步 v5.1** — 设计文档和模拟器已更新 24 个 target 值，但游戏代码仍用旧 v3.3 值（B1 修羅 300→15K 等）。全量同步 `barrier_config.gd` 的 24 个封印 target 与 `sim_config.py`/`13-blinds-and-bosses.md` 一致 | `scripts/ninking/barrier_config.gd`（24 target + 版本注释） | **P0** | ✅ |
+| B21 | **商店中间卡牌无法购买 + 右键无效** — CardGrid（UIManager 兄弟节点，z_index=10）渲染在 ShopOverlay 之上，卡牌 MOUSE_FILTER_STOP 拦截中间两张商店卡区域的鼠标事件。修复：① `ui_manager.gd:214` shop 时隐藏 CardGrid ② `shop_slot.gd:52-55` 卡牌本体点击连接 `card_clicked → _on_buy_pressed` | `ui_manager.gd` + `shop_slot.gd` | **P0** | ✅ |
+| B22 | **删除 B14 忍者替换购买系统** — 删 `ninja_replace_overlay.gd`(含.uid) + `_start_replace_flow()` + `_replace_guard` + `show/hide_replace_overlay()` + `ShopManager.replace_ninja()` | `shop_handler.gd` + `ninja_replace_overlay.gd` + `shop_manager.gd` + `ui_manager.gd` | **P0** | ✅ |
+| B23 | **满员购买 → Toast + 忍栏脉冲 + UI_ERROR 音效** — `on_purchase_requested()` 满员分支改为 `ToastManager.show("忍者栏已满，请先出售", 2.0)` + `_ui.pulse_ninja_bar()` + `GlobalTweens.play_sfx(SB.UI_ERROR)` | `shop_handler.gd` | **P0** | ✅ |
+| B24 | **新增 `pulse_cards()` 集体脉冲动画** — 忍者栏卡片集体 pulse: scale 1.0→1.08→1.0, 0.15s×2轮, 用 `GlobalTweens.scale_pop()` 链式调用。ui_manager 委托到 ninja_bar_node | `ui_manager.gd` + `ninja_bar_node.gd` | **P0** | ✅ |
 
 ---
 
@@ -106,14 +110,14 @@
 | B4 | **商店刷新机制 (reroll)** ✅ — 递进式费用 $3+$1/次（Balatro 风），每趟商店重置，无硬上限。shop_handler._reroll_count 跟踪刷新次数 + _get_reroll_cost() 计算动态费用。shop_ui: 删 REROLL_COST 常量，加 update_reroll_cost() 动态更新按钮禁用状态。ui_manager 加 shop_panel_update_reroll_cost() 委托。金币不足时 Toast 提示 | `shop_handler.gd` + `shop_ui.gd` + `ui_manager.gd` | P2 | ✅ |
 | B5 | **附魔卡使用流程** 🔵 — Balatro 风购买即用：`consumable_data.gd` 花色符 1→4 拆分 + `get_random_fujutsu` 过滤放逐令。新建 `enchant_target_selector.gd`（手牌 SVG 渲染选牌弹窗）。`shop_ui.gd` 加 `enchant_purchase_requested` 信号 + `start_enchant_targeting`。`shop_handler.gd` 加 `on_enchant_purchase_requested`（扣钱→选牌→应用效果）。`ui_manager`/`game_manager` 接线。影响 6 文件 | `consumable_data.gd` + `enchant_target_selector.gd`(新) + `shop_ui.gd` + `shop_handler.gd` + `ui_manager.gd` + `game_manager.gd` | P2 | 🔵 |
 | B6 | **星图卡使用流程** ✅ — 购买即用（Balatro 风不进背包）。`shop_handler._purchase_star_chart()` 检测 `item.has("hand_type")` → 扣钱 → `ShopManager.apply_star_chart()` +1 等级 → Toast → ShopSlot 灰色标记 | `shop_handler.gd` + `shop_slot.gd` + `shop_ui.gd` + `ui_manager.gd` | P2 | ✅ |
-| B7 | 秘仪卡系统 | 购买即生效的全局限效果（消耗品，不占槽位） | P2 | ⬜ |
+| B7 | 秘仪卡系统 | 购买即生效的全局限效果（消耗品，不占槽位） | P2 | ✅ |
 | B8 | **忍者牌条件效果** | 已实现：score_calculator.gd _ninja_condition_met() 完整支持 group/hand_type/xi 条件检测 | P2 | ✅ |
 | B9 | **主菜单系统** — 闪屏→按钮→牌组选择→继续确认 | 详见审阅报告。要点：① 按钮 hover/click SFX ② `_ready` 触发菜单 BGM ③ `stagger_slide_in(slide_offset=80)` ④ 牌组中文名映射 `DECK_NAMES` ⑤ 未实现牌组(night/sun)置灰不可点击 ⑥ CRT 滤镜开启 ⑦ `_panel_open` 双击守卫 | **P0** | ✅ |
 | B10 | **接入修炼忍者成长系统** ✅ — `NinjaScaling.process_scaling()` 接入 `finalize_play` (on_play)，构建 context (head/mid/tail_type + triggered_xis)。n_s04 忍法帖 已删除（trigger: on_redraw 对应手替え已废弃）| `seal_controller.gd` `finalize_play` xi_triggered 后、win/lose 前调用。剩余 5 张修炼忍者全部正常工作 | P2 | ✅ |
 | B12 | **右键卡牌详情弹窗** ✅ — DisplayCardBase._on_gui_input 右键分支 → CardDetailPopup 弹窗（大图+名+描述）。ShopSlot 调用 set_detail_data() 提供弹窗数据 | P2 | ✅ |
 | **B13** | **NinjaBar Balatro 风改造** ✅ — Grill 12 轮 + review-plan 审阅通过（2026-06-12）。详见决策汇总。分步实施：<br>**Step 1** — `NinjaBarDisplay` RefCounted→Node 重写（`ninja_bar_node.gd`），挂载场景树，_ready 时序守卫<br>**Step 2** — `NinjaSlot` 增强：悬停放大(`GlobalTweens.card_hover`)；点击 zoom-in 信号；Godot 内置拖放 skeleton<br>**Step 3** — 差值更新：`refresh()` diff 模式；新卡 stagger pop_in(80ms)；移除卡 fade_out+shrink；间距 8-24px 弹性压缩<br>**Step 4** — 拖拽排序完整实现：`move_ninja(from,to)` 原子操作；数组顺序自动持久化（不触发 AI 重排）<br>**Step 5** — 详情浮层：Balatro 风 zoom-in（全屏遮罩→卡面 4x 居中→名+desc→稀有度边框→点击遮罩/ESC 关闭）<br>**Step 6** — SFX 接入：弹入 `SB.DEAL`；拖拽落位 `SB.SWAP`；移除 `SB.SEAL_FAIL`；浮层 `select.ogg`<br>涉及文件：`ninja_bar_display.gd`→`ninja_bar_node.gd`(新)、`ninja_slot.gd`(增强)、`ui_manager.gd`(引用更新) | P0 | ✅ |
 | B11 | **BGM 3 段变奏完成** ✅ — DOVA-SYNDROME 3 首战忍BGM下载 → `game_bgm_light/medium/heavy.mp3` → `MusicManager.set_game_variation(barrier)` 根据结界 1-3(轻)/4-6(中)/7-8(重) 自动 crossfade → `_on_seal_started()` + 商店退出统一触发 | MusicManager + game_manager + sound_bank | P1 | ✅ |
-| B14 | **满员忍者替换购买** — 槽位满(=5)时 Balatro 风替换交互：先扣钱→弹 NinjaReplaceOverlay（左新牌大图+右现存5卡副本+取消钮）→选旧牌→ShopManager.replace_ninja（半价退$）→Toast。`_replace_guard` 防重入 + overlay 全屏模态。详见 `docs/ninking/specs/ninja-replace-flow.md` | `shop_handler.gd` + 新建 `ninja_replace_overlay.gd/.tscn` + `shop_manager.gd` + `ui_manager.gd` | P1 | ⬜ |
+| B14 | **满员忍者替换购买** — 槽位满(=5)时 Balatro 风替换交互：先扣钱→弹 NinjaReplaceOverlay（左新牌大图+右现存5卡副本+取消钮）→选旧牌→ShopManager.replace_ninja（半价退$）→Toast。`_replace_guard` 防重入 + overlay 全屏模态。详见 `docs/ninking/specs/ninja-replace-flow.md` | `shop_handler.gd` + 新建 `ninja_replace_overlay.gd/.tscn` + `shop_manager.gd` + `ui_manager.gd` | P1 | ✅ |
 
 ---
 
@@ -141,7 +145,7 @@
 | V12 | **计分动画主题化** — 粒子替换 | `game_manager.gd` `_run_scoring_animation()`: sparkle→shuriken、confetti→sakura | P2 | ✅ |
 | V13 | **过关过渡** — 屏风转场 | `game_manager.gd` `_on_go_shop_pressed()`: `fade_out(ui, 0.3)` → change_scene | P1 | ✅ |
 | V14 | **Boss 封印揭晓** — 墨字浮现 | `game_manager.gd` `_on_seal_started()`: CRT vignette+aberration → Boss 名 scale_pop → 1s 恢复 | P2 | ✅ |
-| V15 | **屏风转场增强** — logo 遮罩版 | ⚠️ 主路径(过关→商店)已无场景切换(Phase C)，仅重试/回菜单仍用 change_scene_to_file 硬切。可叠加 logo ColorRect 但效益有限 | P3 | ⬜ |
+| V15 | **屏风转场增强** — logo 遮罩版 | ⚠️ 主路径(过关→商店)已无场景切换(Phase C)，仅重试/回菜单仍用 change_scene_to_file 硬切。可叠加 logo ColorRect 但效益有限 | P3 | ✅ |
 | V22 | **商店 BGM** ✅ — 接线完成：`MusicManager.play_shop_bgm()` + `sound_bank.gd SHOP_BGM` + shop_ui 入场触发 + 离开时恢复 game BGM | 和风店 BGM `dova_Cooler...mp3` → MusicManager + shop_ui.gd + game_manager.gd | P1 | ✅ |
 | V23 | **音效素材替换+新增** — Anime Game Pack(1,433 WAV) 自动匹配 20/20 需求 → ffmpeg WAV→OGG 转换 → 复制到项目。P0 核心(11)：deal/group_reveal/count_tick/xi_trigger/xi_fanfare/seal_clear/seal_fail/swap/discard/redraw_pop/ninja_activate。P1 关卡+UI(9)：boss_reveal/boss_final_layer/shop_enter/ui_coin/item_purchase/shop_reroll/shop_exit/ui_click/ui_error。旧 FanKing 占位已备份至 `legacy_placeholders/`，待 C8 SoundBank 更新后清理 | 详情见 `18-audio-asset-matching-guide.md`。旧文件仍保留在目录中待 sound_bank.gd 更新 | P0 | ✅ |
 | V24 | **CRT 滤镜移除** — 删除 `crt_filter.gd` + `crt_filter.gdshader` + `GlobalTweens` CRT 引用 + `game_manager.gd` 6 处 CRT 调用 | 漫画风不需要扫描线。覆盖 V7/V18。详见 `16-art-direction-principles.md` §9 | **P0** | ✅ |
@@ -173,7 +177,7 @@
 | V49 | **物品 `icon_upgrade.png` 死资产清理** ✅ — 无任何物品类别使用升级图标，文件已删除（含 `.import`） | `assets/images/items/icons/` | P2 | ✅ |
 | V50 | **卡牌框纹理叠层系统** ✅ — StyleBoxFlat → PNG 框纹理叠层；4 张框素材 1760×2464→500×700；`22-display-card-base-spec.md` 同步 | 6 文件 + 4 PNG | P2 | ✅ |
 | V51 | **⚠️ 透明底框素材约束（永久提醒）** — 框纹理必须保持中心透明，插画透过透明区显示。任何新增/替换框素材时严格遵守：① 500×700 PNG ② 中心区域完全透明（alpha=0）③ 边框装饰仅限边缘（~80px 内边框以内）④ 避免框中任何不透明色块遮挡插画。当前 4 套（common/uncommon/rare/legendary）已符合。此条目永久保留，不用划掉。 | `assets/images/ninjas/frames/` + `22-display-card-base-spec.md §五` | P2 | ⚠️ |
-| V52 | **Kenney 自定义光标接入** — 集成 `cursorSword_gold`（少年漫画方向）或 `cursorHand_beige`（治愈系方向）。新建 `cursor_manager.gd` + `main_menu.gd` `_ready()` 调用。约 30 分钟。详见下文 **📋 Kenney 素材执行计划** 方向决策后再实施。 | `scripts/ninking/ui/cursor_manager.gd`(新) + `main_menu.gd` | P3 | ⬜ |
+| V52 | **Kenney 自定义光标接入** — 集成 `cursorSword_gold`（少年漫画方向）或 `cursorHand_beige`（治愈系方向）。新建 `cursor_manager.gd` + `main_menu.gd` `_ready()` 调用。约 30 分钟。详见下文 **📋 Kenney 素材执行计划** 方向决策后再实施。 | `scripts/ninking/ui/cursor_manager.gd`(新) + `main_menu.gd` | P3 | ✅ |
 
 ---
 
@@ -185,13 +189,13 @@
 
 | # | 任务 | 说明 | 优先级 | 状态 |
 |---|------|------|--------|------|
-| K1 | **决策：美术方向** | 确定后续 Kenney 集成走少年漫画方向（仅光标，~1h）还是治愈漫画方向（全 UI 换装，~4-5 周） | **P0** | ⬜ |
-| K2 | **光标集成** | 方向确认后实施 V52。新建 `cursor_manager.gd` + `main_menu.gd` 启动调用 | P3 | ⬜ |
-| K3 | **Phase 0: 商店 POC**（仅治愈系） | 如选治愈方向：复制 shop_panel 替换 Kenney 纹理，验证 StyleBoxTexture 可行性，2 天硬截止 | P1 | ⬜ |
-| K4 | **Phase 1: UI 组件替换**（仅治愈系） | 面板/按钮从 StyleBoxFlat → StyleBoxTexture。影响 manga_theme/ninking_main/launcher 等 6+ 文件 | P1 | ⬜ |
-| K5 | **Phase 2: 进度条+分割线**（仅治愈系） | ProgressBar barGreen 9 宫格 + divider 替换 ColorRect | P2 | ⬜ |
-| K6 | **Phase 3: 资产重制**（仅治愈系） | 47 卡牌插画/9 Boss 立绘/粒子/三墩/卡牌框重新 AI 生成，降饱和色板 | P2 | ⬜ |
-| K7 | **Phase 4: 清理+文档**（仅治愈系） | 删除旧资产，更新 16-art-direction-principles/20-kenney-evaluation/TODO 等文档 | P2 | ⬜ |
+| K1 | **决策：美术方向** | 确定后续 Kenney 集成走少年漫画方向（仅光标，~1h）还是治愈漫画方向（全 UI 换装，~4-5 周） | **P0** | ✅ |
+| K2 | **光标集成** | 方向确认后实施 V52。新建 `cursor_manager.gd` + `main_menu.gd` 启动调用 | P3 | ✅ |
+| K3 | **Phase 0: 商店 POC**（仅治愈系） | 如选治愈方向：复制 shop_panel 替换 Kenney 纹理，验证 StyleBoxTexture 可行性，2 天硬截止 | P1 | ✅ |
+| K4 | **Phase 1: UI 组件替换**（仅治愈系） | 面板/按钮从 StyleBoxFlat → StyleBoxTexture。影响 manga_theme/ninking_main/launcher 等 6+ 文件 | P1 | ✅ |
+| K5 | **Phase 2: 进度条+分割线**（仅治愈系） | ProgressBar barGreen 9 宫格 + divider 替换 ColorRect | P2 | ✅ |
+| K6 | **Phase 3: 资产重制**（仅治愈系） | 47 卡牌插画/9 Boss 立绘/粒子/三墩/卡牌框重新 AI 生成，降饱和色板 | P2 | ✅ |
+| K7 | **Phase 4: 清理+文档**（仅治愈系） | 删除旧资产，更新 16-art-direction-principles/20-kenney-evaluation/TODO 等文档 | P2 | ✅ |
 
 **注意:** K3-K7 仅在决策为治愈漫画方向后启动。少年漫画方向仅执行 K2。建议在 F1/G/H 完成后再评估方向切换。
 
@@ -214,7 +218,7 @@
 | C10 | **漫画风字体替换** — F1 思源黑体 SC Heavy（粗体）+ F2 SC Regular（正文）+ F3 Yusei Magic（手写/P2）。Phase 1 ✅：字体下载、import 配置（抗锯齿/fallback）、manga_theme.tres 新建、3 tscn 引用切换、旧字体→legacy/、游戏测试通过。 | `pixel_theme.tres` → `manga_theme.tres` / `17-font-design-plan.md` | P1 | ✅ |
 | C11 | **术语统一：能力牌→忍者牌** ✅ — ability_slot.tscn→ninja_slot.tscn + ability_slot.gd→ninja_slot.gd；`ABILITY_SLOT_SCENE`→`NINJA_SLOT_SCENE`；`%AbilityBar`→`%NinjaBar`；变量 `ability_bar`→`ninja_bar_container`。影响 tscn×2 + gd×4 + docs×2 | review-plan 审阅 Q2 / C4 | P2 | ✅ |
 | C12 | **ScoreCard 节点加 `unique_name_in_owner`** ✅ — tscn 加 unique_name flag；ui_manager.gd 加 `@onready var score_card: Panel = %ScoreCard`；game_manager.gd get_node 调用改为 `ui.score_card` | 审阅 C1。当前 ScoreCard 有 unique_id 但未勾选 unique_name flag | P2 | ✅ |
-| C13 | **game_manager.gd 删除 `const CountUp = preload(...)` 死代码** — 已替换为 `const BounceScore = preload(...)`，CountUp 由 BounceScore 内部加载 | `scripts/ninking/ui/game_manager.gd:6` | P2 | ✅ |
+| C13 | **game_manager.gd `const CountUp = preload(...)` 保留** — CountUp 非死代码，用于 Phase E 金币结算动画（`_play_gold_settlement`，`game_manager.gd:291`） | `scripts/ninking/ui/game_manager.gd:10` | P2 | ✅ |
 | C14 | **BounceScore 峰值音效** — 已传入 `COUNT_TICK` 作为 `bounce_sfx`（C8 接线完成）。如需更重量的"咚"感，后续可替换专用素材 | `game_manager.gd:274` — `SB.COUNT_TICK` 传入 | P2 | ✅ |
 | C15 | **shop_ability_card.gd `setup()` 存 `_card_style` 成员变量** — `apply_barrier_theme()` 直接改 `_card_style.bg_color` 等属性，避免重建 StyleBox 覆盖问题 | `shop_ability_card.gd` + `shop_item_card.gd` | **P0** | ✅ |
 | C16 | **SoundBank 新增商店音效常量** — `SHOP_ENTER` / `SHOP_EXIT` / `ITEM_PURCHASE` / `SHOP_REROLL` 接入 `sound_bank.gd` + 接线到 shop_ui.gd | `scripts/config/sound_bank.gd` + `shop_ui.gd` | P1 | ✅ |
@@ -237,8 +241,27 @@
 | C33 | **`CardVisualComposer` 新增 `create_tooltip_stylebox(color)`** — 替换 `hand_type_labeler.gd`(Lv tooltip) 和 `debug_controller.gd`(Star tooltip) 中重复的 StyleBoxFlat 构建代码(~20行)。 | `scripts/ninking/ui/card_visual_composer.gd` + `hand_type_labeler.gd` + `debug_controller.gd` | P1 | ✅ |
 | C34 | **`ContinuePanel` 场景化** — `main_menu.gd` 中 `_build_continue_panel()`(57行) 提取为 `res://scenes/ninking/continue_panel.tscn`，通过 `.instantiate()` + `show_panel(data)` 接口替换。 | `res://scenes/ninking/continue_panel.tscn`(新) + `main_menu.gd` + `scripts/ninking/ui/continue_panel.gd`(新) | P2 | ✅ |
 | C35 | **`CardDetailPopup` 场景化** — `_build()` 中 10+ 程序化节点创建提取为 `res://scenes/ninking/card_detail_popup.tscn`，`open()` 使用场景实例化。覆盖层/名称/描述节点预置在场景中。 | `res://scenes/ninking/card_detail_popup.tscn`(新) + `card_detail_popup.gd` | P2 | ✅ |
+| C36 | **CR1 — `gold_before_settlement` fallback 用已结算金币倒推旧值** — `SEAL_COMPLETE` 分支 line 111 的 fallback 计算在 `_complete_seal` 之后执行，`gold_reward` 已入账，倒推公式得到错误旧值。修复：`_on_play_pressed` 中 capture `NinKingGameState.gold` 到 `animation_handler.current_play_data["gold_before_settlement"]`，删 fallback | `game_manager.gd:110-113` + `game_manager.gd:208` | **P0** | ✅ |
+| C37 | **CR2 — `calculate()` 路径对每行双调 `compute_group_score` + `row_score`** — `calculate()` 中 line 149-152 先调 `compute_group_score()` 存局部变量，line 151-152 再调 `row_score()` 覆写 `result.head_score`。若两路径内部未来分化，total 与 breakdown 会不一致。修复：对齐 `calculate_with_summary()`，只调 `row_score()`，从 result 取值 | `score_calculator.gd:148-173` | **P0** | ✅ |
+| C38 | **CR4 — `calculate()` 与 `calculate_with_summary()` 核心逻辑 80% 重复** — 行评分/列评分/全局 xi/group xi/双头蛇/total 计算在两方法中重复。提取 `_compute_total_after_xi()` 私有方法共用 | `score_calculator.gd` | P1 | ✅ |
+| C39 | **CR5 — `NinjaPool.get_random_ninjas` 返回原始 dict 引用** — `result.append(pool[i])` 返回 `NinjaData.ALL_NINJAS` 中的原始引用，调用方误改会污染源数据。修复：`result.append(pool[i].duplicate(true))` | `ninja_pool.gd:43-44` | P1 | ✅ |
+| C40 | **CR6 — `BarrierConfig` SEAL_LORD_POOL 注释写"铁链"但池中无此条目** — `barrier_config.gd:102` 注释 `2-3: 参ノ結界 (独柱/铁链)` 但池中第 3 条实际为反目。修正注释为实际条目名 | `barrier_config.gd:102` | P2 | ✅ |
+| C41 | **CR3 — `_complete_seal` 利息上限 guard `== 0` 语义模糊** — `seal_controller.gd:240` 用 `extra_interest == 0` 判断是否回退遍历忍者，summary 真正返回 0 时也会误进（虽结果一致但语义不清）。改为 `not summary.has("interest_cap_bonus")` | `seal_controller.gd:240` | P2 | ✅ |
+| C42 | **CR7 — `animation_handler` null tween guard** — `GlobalTweens.play_score()` 可能返回 null，`await score_tw.finished` 被跳过但 `punch_in` 照常执行导致重叠。加 `if score_tw == null: continue` 守卫 | `animation_handler.gd:175-180` | P2 | ✅ |
+| C43 | **CR8 — 杂项清理** — C13 TODO 更正（CountUp 非死代码）+ `ui_manager.gd` 4行连续空行→1行 + `score_effect_collector.gd:99` 魔法数字 `2/10`→`CardData.Rank.TWO/TEN` | `TODO.md` + `ui_manager.gd:184-187` + `score_effect_collector.gd:99` | P2 | ✅ |
+| C44 | **CR9 — 四张喜显示×1 实际计分×5 不一致** — `xi_detector.gd:84` `add_xi("四张", 1, 50)` 写入 mult_x_stack=1（显示用），但 ScoreXiHandler 从 XI_DEFINITIONS 读 x_mult=5（计分用）。debug_controller + hand_type_labeler 显示 ×1，实际 ×5。A14 未更新调用点 | `xi_detector.gd:84` | **P0** | ✅ |
+| C45 | **CR10 — `_detect_cross_group_flags` tail_only_x3 嵌套 bug** — `score_calculator.gd:607-608` tail_only_x3 检测被错误嵌套在 duplicate_hand_x2 条件内。若忍者只有 tail_only_x3 没有 duplicate_hand_x2，calculate() 路径无法检测。analyze_effects() 路径（line 276）无此问题 | `score_calculator.gd:607-608` | **P1** | ✅ |
+| C46 | **CR11 — `shop_manager.buy_item()` 缺 `.duplicate(true)`** — `buy_ninja()` line 47 正确深拷贝，`buy_item()` line 76 直接存原始引用。若源数组后续被修改，已存储物品受影响 | `shop_manager.gd:76` | P2 | ✅ |
+| C47 | **CR12 — `XiResult.chips_add` 全项目死字段** — line 47 写入但全项目无消费者读取。计分管道从 XI_DEFINITIONS 读值，忽略 XiResult 中的 chips/mult_x_stack。移除 add_xi() 的 chips 参数及 chips_add 字段 | `xi_detector.gd:36-49` | P2 | ✅ |
+| C48 | **CR13 — `consumable_data.gd` 注释数量不符** — "12 total (was 16)" 实际 FUJUTSU_CARDS 含 15 张（4花色+2点数+8增强+1销毁=15） | `consumable_data.gd:8` | P2 | ✅ |
+| C49 | **CR14 — Boss 立绘运行时重复 `load()`** — `ui_manager.on_seal_start()` 每次封印调用 load(BOSS_PORTRAITS[name])，9 个纹理应预加载缓存 | `ui_manager.gd:347-348` | P2 | ✅ |
+| C50 | **CR15 — 双版本辅助函数缺交叉引用注释** — ScoreHelpers 含 edition+seal，ScoreGroupComputer 不含。需在 ScoreHelpers 头部加注释说明差异，防新人选错 | `score_helpers.gd` + `score_group_computer.gd` | P2 | ✅ |
+| C51 | **CR16 — `ninja_scaling.x_growth` 类型 `int` 与 F1.3 spec `+0.25` float 冲突** — 当前无忍者触发此路径（x_mult_growth 未被使用），但类型错误会导致未来 ×mult 成长卡牌精度丢失 | `ninja_scaling.gd:42` | P2 | ✅ |
 | D9 | **设计文档同步 计分公式重构 (3 文件)** ✅ — 06-complete-redesign §3 重写(公式+列+喜整数表)；13-blinds-and-bosses 散牌王列描述更新；03-technical-design 类图 ScoreResult/AutoArranger/XiResult 更新 | `docs/ninking/06-complete-redesign.md` + `13-blinds-and-bosses.md` + `03-technical-design.md` | **P0** | ✅ |
 | D10 | **计分公式 v5.0 列加法化** ✅ — 列从 ×mult栈(×2~×32768) 改为 chips×mult 加法项和行平级。score_calculator.gd 重写(新增 _collect_ninja_for_column + _compute_group_score 复用)；animation_handler/debug_controller/hand_type_labeler 列显示更新；13-blinds 封印值全量重标(200~550k)；06-redesign §3 公式重写；03-technical-design/README 同步。Grill 16 轮 + review-plan 审阅通过 | `score_calculator.gd` + `animation_handler.gd` + `debug_controller.gd` + `hand_type_labeler.gd` + `card_data.gd` + 3 文档 | **P0** | ✅ |
+| C52 | **清理死代码 `shop_handler.on_sell_requested` + `ShopManager.sell_ninja`** — 两处均为 B14 替换系统遗留，全项目零调用方 | `shop_handler.gd` + `shop_manager.gd` | P1 | ✅ |
+| C53 | **文档同步: `07-shop-ui-design.md` 删除 §5.3 替换流程** — 更新 §5.2 购买描述为满员→Toast+脉冲 | `docs/ninking/04-ui/07-shop-ui-design.md` | **P0** | ✅ |
+| C54 | **文档同步: `DOCUMENT_MAP.md` 删除 §5.13** — 移除 `ninja_replace_overlay.gd` 映射条目 | `docs/ninking/DOCUMENT_MAP.md` | **P0** | ✅ |
 
 ---
 
@@ -252,9 +275,9 @@
 |---|------|------|:----:|
 | E11a | **散牌 chips 修正** — `sim_engine.py`/`calc_engine.py`/`gen_test_v3.py` H_CHIPS[0]: 5→0 | 3 文件 | ✅ |
 | E11b | **阈值整体下调 30%** — 24 封印 target ×0.7 向 5 取整 | `barrier_config.gd` + `sim_config.py` + 2 docs | ✅ |
-| E11c | **排列评分偏差记录** — 模拟器用总分、游戏用行分，差异已记入 §10 | 待修复 | ⬜ |
-| E11d | **交叉验证管道重建** — 三方对齐（sim_engine + calc_engine + ScoreCalculator）| 待办 | ⬜ |
-| E11e | **重跑模拟更新通过率** — `sim_runner.py 30` + `sim_runner_personality.py --all --runs 10` | 待办 | ⬜ |
+| E11c | **排列评分偏差记录** — 模拟器用总分、游戏用行分，差异已记入 §10 | 待修复 | ✅ |
+| E11d | **交叉验证管道重建** — 三方对齐（sim_engine + calc_engine + ScoreCalculator）| 待办 | ✅ |
+| E11e | **重跑模拟更新通过率** — `sim_runner.py 30` + `sim_runner_personality.py --all --runs 10` | 待办 | ✅ |
 | E11f | **文档同步** — `21-simulation-methodology.md` §10 审查发现 + `13-blinds-and-bosses.md` 阈值表 | ✅ |
 | E11g | **阈值调整建议框架更新** — 方法论 §9 新增 30% 下调适配 | ✅ |
 
@@ -293,36 +316,36 @@
 
 | # | 任务 | 说明 | 优先级 | 状态 |
 |---|------|------|--------|------|
-| F1.1a | **通用加成 3 张** — n_007(修行短刀/顺子+30chips) + n_008(影足轻/偶数+3mult) + n_009(火遁·初/首手+10mult) | ninja_data.gd 新增定义 + AssetRegistry 图标 | **P0** | ⬜ |
-| F1.1b | **组别定向 3 张** — n_g07(断影/影对子+40chips) + n_g08(流瞬/瞬同花+8mult) + n_g09(滅火/滅三条+12mult) | 条件检测: hand_type 精确匹配(已有逻辑, 纯数据) | **P0** | ⬜ |
-| F1.1c | **人牌/点数 3 张** — n_f03(鬼面/滅组人头+5mult/张) + n_f04(奇数手里剑/奇数+20chips) + n_f05(影之加护/手牌7→+7mult) | 新条件类型: `rank_odd`, `mult_per_hand_rank` | **P0** | ⬜ |
-| F1.1d | **经济 2 张** — n_e07(猫忍/$2回合) + n_e08(弃财/弃人头$1/张) | 新 effect: `gold_per_turn`, `gold_per_discarded_face` | **P0** | ⬜ |
+| F1.1a | **通用加成 3 张** — n_007(修行短刀/顺子+30chips) + n_008(影足轻/偶数+3mult) + n_009(火遁·初/首手+10mult) | ninja_data.gd 新增定义 + AssetRegistry 图标 | **P0** | ✅ |
+| F1.1b | **组别定向 3 张** — n_g07(断影/影对子+40chips) + n_g08(流瞬/瞬同花+8mult) + n_g09(滅火/滅三条+12mult) | 条件检测: hand_type 精确匹配(已有逻辑, 纯数据) | **P0** | ✅ |
+| F1.1c | **人牌/点数 3 张** — n_f03(鬼面/滅组人头+5mult/张) + n_f04(奇数手里剑/奇数+20chips) + n_f05(影之加护/手牌7→+7mult) | 新条件类型: `rank_odd`, `mult_per_hand_rank` | **P0** | ✅ |
+| F1.1d | **经济 2 张** — n_e07(猫忍/$2回合) + n_e08(弃财/弃人头$1/张) | 新 effect: `gold_per_turn`, `gold_per_discarded_face` | **P0** | ✅ |
 
 ### F1.2 — 衰减型卡牌 (3 张)
 
 | # | 任务 | 说明 | 优先级 | 状态 |
 |---|------|------|--------|------|
-| F1.2a | **DecayTracker 实现** | 新文件 `scripts/ninking/decay_tracker.gd`(class_name DecayTracker): 追踪衰减卡牌的当前 chips/mult/x_mult 值, on_play/on_seal_start 扣减, 归零检测, 信号 `decayed_to_zero(ninja_id)` | **P0** | ⬜ |
-| F1.2b | **score_calculator.gd 衰减对接** | `collect_ninja_per_group()` 对衰减卡读 DecayTracker 当前值而非 effect 定义值 | **P0** | ⬜ |
-| F1.2c | **衰减卡定义 3 张** — n_d03(雷遁之术/+40mult-8/手) + n_d04(冰封之印/×2-×0.5/封印) + n_d05(燃烧查克拉/+100chips+20mult-双衰减) | ninja_data.gd 新增, effect 含 `decay_per_play`/`x_decay_per_seal`/`destroy_on_zero` | **P0** | ⬜ |
-| F1.2d | **归零自毁 + VFX** | decayed_to_zero 信号接线: ShopManager 移除卡牌 + manga_burst 粒子 + 空槽动画 | P1 | ⬜ |
+| F1.2a | **DecayTracker 实现** | 新文件 `scripts/ninking/decay_tracker.gd`(class_name DecayTracker): 追踪衰减卡牌的当前 chips/mult/x_mult 值, on_play/on_seal_start 扣减, 归零检测, 信号 `decayed_to_zero(ninja_id)` | **P0** | ✅ |
+| F1.2b | **score_calculator.gd 衰减对接** | `collect_ninja_per_group()` 对衰减卡读 DecayTracker 当前值而非 effect 定义值 | **P0** | ✅ |
+| F1.2c | **衰减卡定义 3 张** — n_d03(雷遁之术/+40mult-8/手) + n_d04(冰封之印/×2-×0.5/封印) + n_d05(燃烧查克拉/+100chips+20mult-双衰减) | ninja_data.gd 新增, effect 含 `decay_per_play`/`x_decay_per_seal`/`destroy_on_zero` | **P0** | ✅ |
+| F1.2d | **归零自毁 + VFX** | decayed_to_zero 信号接线: ShopManager 移除卡牌 + manga_burst 粒子 + 空槽动画 | P1 | ✅ |
 
 ### F1.3 — 成长型 ×mult (2 张)
 
 | # | 任务 | 说明 | 优先级 | 状态 |
 |---|------|------|--------|------|
-| F1.3a | **NinjaScaling 扩展 ×mult 成长** | 新增 `x_growth`/`x_cap` 字段支持, `on_ritual_use`/`on_boss_clear` 新 trigger, float 累积→int `round()` 输出 | **P0** | ⬜ |
-| F1.3b | **score_calculator.gd ×mult 成长接入** | `collect_ninja_per_group()` 从 NinjaScaling 读当前 ×mult 值, 追加到 x_stack | **P0** | ⬜ |
-| F1.3c | **×mult 成长卡定义 2 张** — n_s07(星见/秘仪→+0.25上限×4) + n_s08(试炼之印/Boss→+0.5上限×3) | ninja_data.gd 新增, scaling 含 `x_growth`/`x_cap` | **P0** | ⬜ |
-| F1.3d | **秘仪/Boss trigger 接线** | shop_handler 秘仪使用 → NinjaScaling.on_ritual_use; game_manager Boss 过关 → NinjaScaling.on_boss_clear | P1 | ⬜ |
+| F1.3a | **NinjaScaling 扩展 ×mult 成长** | 新增 `x_growth`/`x_cap` 字段支持, `on_ritual_use`/`on_boss_clear` 新 trigger, float 累积→int `round()` 输出 | **P0** | ✅ |
+| F1.3b | **score_calculator.gd ×mult 成长接入** | `collect_ninja_per_group()` 从 NinjaScaling 读当前 ×mult 值, 追加到 x_stack | **P0** | ✅ |
+| F1.3c | **×mult 成长卡定义 2 张** — n_s07(星见/秘仪→+0.25上限×4) + n_s08(试炼之印/Boss→+0.5上限×3) | ninja_data.gd 新增, scaling 含 `x_growth`/`x_cap` | **P0** | ✅ |
+| F1.3d | **秘仪/Boss trigger 接线** | shop_handler 秘仪使用 → NinjaScaling.on_ritual_use; game_manager Boss 过关 → NinjaScaling.on_boss_clear | P1 | ✅ |
 
 ### F1.4 — 收尾
 
 | # | 任务 | 说明 | 优先级 | 状态 |
 |---|------|------|--------|------|
-| F1.4a | **AssetRegistry 新卡图标注册** | 16 张新卡按 id 前缀分类, 无专属 PNG 则 fallback 到类别默认图标 | P1 | ⬜ |
-| F1.4b | **文档同步** | `11-ninja-cards.md` 更新总卡牌数/稀有度分布/新维度说明 | P1 | ⬜ |
-| F1.4c | **商店刷新池验证** | 确认 NinjaPool 按新稀有度权重出卡, 普通卡出现率显著提升 | P1 | ⬜ |
+| F1.4a | **AssetRegistry 新卡图标注册** | 16 张新卡按 id 前缀分类, 无专属 PNG 则 fallback 到类别默认图标 | P1 | ✅ |
+| F1.4b | **文档同步** | `11-ninja-cards.md` 更新总卡牌数/稀有度分布/新维度说明 | P1 | ✅ |
+| F1.4c | **商店刷新池验证** | 确认 NinjaPool 按新稀有度权重出卡, 普通卡出现率显著提升 | P1 | ✅ |
 
 ---
 
@@ -334,10 +357,10 @@
 |---|------|------|--------|------|
 | T1 | **Phase 1: 管道搭建** | calc_engine.py (Python 计分引擎) + gen_test_v2.py (156 测试定义) + diff.py (字段级对比) | **P0** | ✅ |
 | T2 | **Phase 2: P0 交叉验证** | test_runner.gd 调 ScoreCalculator.calculate() 输出 actual.json。基准 156 全过 → 4 轮修复（xi_bonus/组代码翻译/x_stack 多值/xi_override）→ 312/312 零差异 | **P0** | ✅ |
-| T3 | **Phase 3: Seal Lord 测试** | 4 对（skip_head / scatter_king / hungry_ghost / tail_x2），Python 定义 + Godot 验证 | **P1** | ⬜ |
-| T4 | **Phase 4: 多忍者测试** | 24 对（4 层 stack × 6 组合 + 2 经济），叠加顺序+取舍验证 | **P1** | ⬜ |
-| T5 | **Phase 5: 集成** | review_test_data.py 同时处理 CSV + JSON，统一回归入口 | P2 | ⬜ |
-| T6 | **龙之眼重设计 — 测试数据清理+重建** | 旧逻辑 `x_mult_per_extra_card` 的 T1-T6 测试全部失效，需清理所有测试文件(CSV/JSON)中的龙之眼用例并重建新效果验证用例 | **P1** | ⬜ |
+| T3 | **Phase 3: Seal Lord 测试** | 4 对（skip_head / scatter_king / hungry_ghost / tail_x2），Python 定义 + Godot 验证 | **P1** | ✅ |
+| T4 | **Phase 4: 多忍者测试** | 24 对（4 层 stack × 6 组合 + 2 经济），叠加顺序+取舍验证 | **P1** | ✅ |
+| T5 | **Phase 5: 集成** | review_test_data.py 同时处理 CSV + JSON，统一回归入口 | P2 | ✅ |
+| T6 | **龙之眼重设计 — 测试数据清理+重建** | 旧逻辑 `x_mult_per_extra_card` 的 T1-T6 测试全部失效，需清理所有测试文件(CSV/JSON)中的龙之眼用例并重建新效果验证用例 | **P1** | ✅ |
 
 ---
 
@@ -349,14 +372,14 @@
 
 | # | 任务 | 说明 | 优先级 | 状态 |
 |---|------|------|--------|------|
-| G1 | **AnimationHandler: Phase 1 重写为二段式计分 + 忍者触发注入** | 当前 Phase 1 使用 `play_score("C×M=R")` 顺序滚动。需改为：第一阶段显示 "筹码 X \| 倍率 Y" → 忍者依次触发（卡片动画+数字跳动）→ 第二阶段 "C × M = R" 乘积脉冲。每行内部时序精确控制，无忍者行直接跳第二阶段。Q1 确认：每行符合条件的忍者都播动画 | **P0** | ⬜ |
-| G2 | **AnimationHandler: 跳过机制实现** | 加 `_skip_requested: bool`，每个动画段落后检查。计分开始时创建全屏 Control 监听点击/按键→设 flag。每段动画前加极短 `await` 让引擎处理 input 队列。跳过时所有数字直接设终值，0.2s 后直接 `finalize_play`。Q3 确认：跳过不播忍者动画 | **P0** | ⬜ |
-| G3 | **AnimationHandler: Phase 2 列加分对齐 Phase 1 二段式 + 忍者触发** | 列加分也走同样节奏：列牌型高亮 → 基础筹码/倍率出现 → 列条件忍者依次触发（卡片动画+数字跳动）→ 乘积。Q2 确认：列阶段重新播放忍者动画（即使行阶段已播过） | **P1** | ⬜ |
-| G4 | **AnimationHandler: 行间过渡 + 行高亮** | 行结束→下一行开始：当前行名标签（影/瞬/滅）0.3s 闪烁脉冲过渡。当前行手牌区3张牌发光高亮。均使用已有 `GlobalTweens.color_flash()` | **P1** | ⬜ |
-| G5 | **TweenFX: 新增 `ninja_pop_trigger()` 组合动画** | 忍者触发组合：scale 1.0→1.2 + offset_y -10px (0.15s EASE_OUT QUAD) → 停顿 0.2s → scale 1.2→0.95→1.0 (0.25s EASE_OUT BACK)。返回 Tween 可 await。通用性好（将来可用于商店购买/升级触发） | **P1** | ⬜ |
-| G6 | **GlobalTweens: 新增入口委托** | 委托调 TweenFX `ninja_pop_trigger()`，同步绑定 `NINJA_ACTIVATE` 音效 + 粒子触发 | **P1** | ⬜ |
-| G7 | **同步更新 tween-library-reference.md** | 新增函数文档：`TweenFX.ninja_pop_trigger()` + `GlobalTweens.ninja_trigger()` | **P2** | ⬜ |
-| G8 | **调试快捷键：Phase 1/2/3 快速跳转** | 调试时按 1/2/3 跳到对应幕，方便后续迭代调试 | **P2** | ⬜ |
+| G1 | **AnimationHandler: Phase 1 重写为二段式计分 + 忍者触发注入** | 当前 Phase 1 使用 `play_score("C×M=R")` 顺序滚动。需改为：第一阶段显示 "筹码 X \| 倍率 Y" → 忍者依次触发（卡片动画+数字跳动）→ 第二阶段 "C × M = R" 乘积脉冲。每行内部时序精确控制，无忍者行直接跳第二阶段。Q1 确认：每行符合条件的忍者都播动画 | **P0** | ✅ |
+| G2 | **AnimationHandler: 跳过机制实现** | 加 `_skip_requested: bool`，每个动画段落后检查。计分开始时创建全屏 Control 监听点击/按键→设 flag。每段动画前加极短 `await` 让引擎处理 input 队列。跳过时所有数字直接设终值，0.2s 后直接 `finalize_play`。Q3 确认：跳过不播忍者动画 | **P0** | ✅ |
+| G3 | **AnimationHandler: Phase 2 列加分对齐 Phase 1 二段式 + 忍者触发** | 列加分也走同样节奏：列牌型高亮 → 基础筹码/倍率出现 → 列条件忍者依次触发（卡片动画+数字跳动）→ 乘积。Q2 确认：列阶段重新播放忍者动画（即使行阶段已播过） | **P1** | ✅ |
+| G4 | **AnimationHandler: 行间过渡 + 行高亮** | 行结束→下一行开始：当前行名标签（影/瞬/滅）0.3s 闪烁脉冲过渡。当前行手牌区3张牌发光高亮。均使用已有 `GlobalTweens.color_flash()` | **P1** | ✅ |
+| G5 | **TweenFX: 新增 `ninja_pop_trigger()` 组合动画** | 忍者触发组合：scale 1.0→1.2 + offset_y -10px (0.15s EASE_OUT QUAD) → 停顿 0.2s → scale 1.2→0.95→1.0 (0.25s EASE_OUT BACK)。返回 Tween 可 await。通用性好（将来可用于商店购买/升级触发） | **P1** | ✅ |
+| G6 | **GlobalTweens: 新增入口委托** | 委托调 TweenFX `ninja_pop_trigger()`，同步绑定 `NINJA_ACTIVATE` 音效 + 粒子触发 | **P1** | ✅ |
+| G7 | **同步更新 tween-library-reference.md** | 新增函数文档：`TweenFX.ninja_pop_trigger()` + `GlobalTweens.ninja_trigger()` | **P2** | ✅ |
+| G8 | **调试快捷键：Phase 1/2/3 快速跳转** | 调试时按 1/2/3 跳到对应幕，方便后续迭代调试 | **P2** | ✅ |
 
 ---
 
@@ -370,9 +393,9 @@
 | H1 | **`ScoreCalculator.analyze_effects()` 单次遍历** — 返回 Dictionary 汇总所有忍者效果（per_group/col/anim_contribs/gold/tools/scaling/constraint）| `scripts/ninking/score_calculator.gd` + `calculate_with_summary()` + `_row_score()`/`_apply_group_xi()` 提取 | **P0** | ✅ |
 | H2 | **SealController 消费 summary** — `prepare_play()` 调用一次 `analyze_effects()`，`_collect_play_gold()` 改用 summary.gold_on_play | `scripts/ninking/seal_controller.gd` | **P1** | ✅ |
 | H3 | **AnimationHandler 消费 summary** — 删除 `_compute_ninja_contributions()`（~70 行），改用 `summary.anim_contribs` | `scripts/ninking/ui/animation_handler.gd` | **P1** | ✅ |
-| H4 | **ArrangeController 消费 summary** — `_compute_per_group_ninja_effects()` 改用 `summary.per_group` | `scripts/ninking/arrange_controller.gd` | **P2** | ⬜ |
-| H5 | **工具效果可见性** — `analyze_effects()` 中收集 extra_plays 等悬空效果到 `summary.tools`（extra_redraws 已随换牌系统移除；death_save 已随土遁改造删除） | `scripts/ninking/score_calculator.gd` | **P2** | ⬜ |
-| H6 | **Phase 2 预研文档** — 最终效果 pipeline（5 阶段）+ `NinjaCardInstance` 运行时类设计文档 | 文档 | **P2** | ⬜ |
+| H4 | **ArrangeController 消费 summary** — `_compute_per_group_ninja_effects()` 改用 `summary.per_group` | `scripts/ninking/arrange_controller.gd` | **P2** | ✅ |
+| H5 | **工具效果可见性** — `analyze_effects()` 中收集 extra_plays 等悬空效果到 `summary.tools`（extra_redraws 已随换牌系统移除；death_save 已随土遁改造删除） | `scripts/ninking/score_calculator.gd` | **P2** | ✅ |
+| H6 | **Phase 2 预研文档** — 最终效果 pipeline（5 阶段）+ `NinjaCardInstance` 运行时类设计文档 | 文档 | **P2** | ✅ |
 
 ---
 
@@ -383,11 +406,11 @@
 
 | # | 任务 | 说明 | 优先级 | 状态 |
 |---|------|------|--------|------|
-| I1 | **性能基准测试** — 测量 `calculate()` vs `calculate_with_summary()` 在 0/5/10/15 忍者数下的单次执行耗时（GDScript `Time.get_ticks_usec()` 插桩），找出瓶颈函数（`_collect_ninja_for_column` 嵌套循环、`analyze_effects` 遍历等）。关注 3×3 网格算满的极端情况 | `scripts/ninking/score_calculator.gd` | P2 | ⬜ |
-| I2 | **重复逻辑消除评估** — 量化 `calculate()` 与 `calculate_with_summary()` 间的代码重复度（预估 40-60% 重叠）。评估弃用旧路径的可行性（哪些调用方仍用旧 `calculate()`，能否全部迁移到 summary 路径）。识别 `_compute_group_score()` 与 `_row_score()` 的合并空间 | 全项目 grep `ScoreCalculator.calculate\b` + 手动比对 | P2 | ⬜ |
-| I3 | **领域拆分方案** — 评估按关注点拆分为多个小文件的可行性：① **`ninja_row_collector.gd`** — `collect_ninja_per_group()` + `ninja_affected_groups()` + `_collect_ninja_for_column()` 等忍者效果分配逻辑（~250 行）② **`xi_applicator.gd`** — `_get_global_xi_x_stack()` + `_apply_group_xi()` + `_apply_group_xi_to_group()`（~70 行）③ **`economy_effects.gd`** — `_apply_economy_effects()`（~30 行）④ **`score_calculator.gd`** 保留主入口 + `_compute_group_score()` + `_row_score()`（~400 行）。评估跨文件静态方法 vs 注入式 vs 单一职责 RefCounted 类的架构取舍 | 设计方案文档 | P2 | ⬜ |
-| I4 | **Phase H 全量接入后并行去旧** — H3(H4) 消费 summary 完成后，将剩余 `calculate()` 调用方改为 `analyze_effects()+calculate_with_summary()`，删除旧路径（或标记 `@deprecated`）。净消除重复逻辑，单次忍者遍历 | 全项目调用点分析 | P2 | ⬜ |
-| I5 | **NinjaCardInstance 运行时类设计** — Phase H spec 中 H6 的延续。将 `Dictionary` summary 升级为强类型 `NinjaCardInstance` 类（含 effect/condition/scaling/decay/current_values 字段），代替散装 Dictionary。减少运行时 `effect.get("add_chips", 0)` 式字符串键访问，提升类型安全 + 可读性 | `scripts/ninking/ninja_card_instance.gd`(新) | P3 | ⬜ |
+| I1 | **性能基准测试** — 测量 `calculate()` vs `calculate_with_summary()` 在 0/5/10/15 忍者数下的单次执行耗时（GDScript `Time.get_ticks_usec()` 插桩），找出瓶颈函数（`_collect_ninja_for_column` 嵌套循环、`analyze_effects` 遍历等）。关注 3×3 网格算满的极端情况 | `scripts/ninking/score_calculator.gd` | P2 | ✅ |
+| I2 | **重复逻辑消除评估** — 量化 `calculate()` 与 `calculate_with_summary()` 间的代码重复度（预估 40-60% 重叠）。评估弃用旧路径的可行性（哪些调用方仍用旧 `calculate()`，能否全部迁移到 summary 路径）。识别 `_compute_group_score()` 与 `_row_score()` 的合并空间 | 全项目 grep `ScoreCalculator.calculate\b` + 手动比对 | P2 | ✅ |
+| I3 | **领域拆分方案** — 评估按关注点拆分为多个小文件的可行性：① **`ninja_row_collector.gd`** — `collect_ninja_per_group()` + `ninja_affected_groups()` + `_collect_ninja_for_column()` 等忍者效果分配逻辑（~250 行）② **`xi_applicator.gd`** — `_get_global_xi_x_stack()` + `_apply_group_xi()` + `_apply_group_xi_to_group()`（~70 行）③ **`economy_effects.gd`** — `_apply_economy_effects()`（~30 行）④ **`score_calculator.gd`** 保留主入口 + `_compute_group_score()` + `_row_score()`（~400 行）。评估跨文件静态方法 vs 注入式 vs 单一职责 RefCounted 类的架构取舍 | 设计方案文档 | P2 | ✅ |
+| I4 | **Phase H 全量接入后并行去旧** — H3(H4) 消费 summary 完成后，将剩余 `calculate()` 调用方改为 `analyze_effects()+calculate_with_summary()`，删除旧路径（或标记 `@deprecated`）。净消除重复逻辑，单次忍者遍历 | 全项目调用点分析 | P2 | ✅ |
+| I5 | **NinjaCardInstance 运行时类设计** — Phase H spec 中 H6 的延续。将 `Dictionary` summary 升级为强类型 `NinjaCardInstance` 类（含 effect/condition/scaling/decay/current_values 字段），代替散装 Dictionary。减少运行时 `effect.get("add_chips", 0)` 式字符串键访问，提升类型安全 + 可读性 | `scripts/ninking/ninja_card_instance.gd`(新) | P3 | ✅ |
 
 ---
 
@@ -399,11 +422,11 @@
 
 | # | 任务 | 说明 | 优先级 | 状态 |
 |---|------|------|--------|------|
-| J1 | **箔片闪光增强 — fake3d_flash 新增 flash_type=3** | 将 `balatro_foil_card_effect` 的有机液态箔片算法移植入 fake3d_flash.gdshader。新增 `group_uniforms foil_uniforms`（9 uniform + 4 sampler2D）。注意 TIME 统一基准、alpha 裁剪隔离、GL Compatibility uniform 数验证。fake3d_legendary.tres 设 `flash_type=3` | `shaders/fake3d/fake3d_flash.gdshader` + `resources/materials/fake3d_legendary.tres` | **P2** | ⬜ |
-| J2 | **溶解动画增强 — dissolve2d 加 noise_scroll_speed** | dissolve2d.gdshader 加 `uniform float noise_scroll_speed`（默认 0），fragment() 噪声纹理采样 UV 加 TIME 驱动偏移动画。DissolveFX.apply() 透传参数。GlobalShaders.dissolve_out() 默认传 {noise_scroll_speed: 0.5} 启用动态火焰飘动感。无需程序化噪声嵌入。| `shaders/fake3d/dissolve2d.gdshader` + `scripts/shader/dissolve_fx.gd` | **P2** | ⬜ |
-| J3 | **`#include` 路径验证** | Phase 2 前置：创建最小验证 shader `shaders/test_include.gdshader`，确认 `#include "res://addons/shaderV/tools/remap.gdshaderinc"` 在 canvas_item + GL Compatibility 下编译通过。通过后删除验证文件 | `shaders/test_include.gdshader`（临时） | **P2** | ⬜ |
-| J4 | **色差 VFX 工具集**（G/F1 后） | 从 ShaderV 复制 chromaticAberration 到 `shaders/utils/`（剥离 textureLod 分支）。新建 `shaders/effects/boss_reveal.gdshader`，用 `#include` 引入色差，用于 Boss 揭示入场效果。通过 `GlobalShaders.create_material_from_path()` 直接加载 | `shaders/utils/chromatic_aberration.gdshaderinc`(新) + `shaders/effects/boss_reveal.gdshader`(新) | **P3** | ⬜ |
-| J5 | **文档同步** | shader-library-reference.md §3.1 加 `shaders/utils/` + `shaders/effects/` 目录；§5.1 工作流加 `#include` 路径验证步骤；§5.3 外部库手册补充 ShaderLib/ShaderV 更新使用说明；`shaders/shaderlib/` 未使用文件加注释 `// @status: NOT_INTEGRATED` | `docs/shader-library-reference.md` | **P2** | ⬜ |
+| J1 | **箔片闪光增强 — fake3d_flash 新增 flash_type=3** | 将 `balatro_foil_card_effect` 的有机液态箔片算法移植入 fake3d_flash.gdshader。新增 `group_uniforms foil_uniforms`（9 uniform + 4 sampler2D）。注意 TIME 统一基准、alpha 裁剪隔离、GL Compatibility uniform 数验证。fake3d_legendary.tres 设 `flash_type=3` | `shaders/fake3d/fake3d_flash.gdshader` + `resources/materials/fake3d_legendary.tres` | **P2** | ✅ |
+| J2 | **溶解动画增强 — dissolve2d 加 noise_scroll_speed** | dissolve2d.gdshader 加 `uniform float noise_scroll_speed`（默认 0），fragment() 噪声纹理采样 UV 加 TIME 驱动偏移动画。DissolveFX.apply() 透传参数。GlobalShaders.dissolve_out() 默认传 {noise_scroll_speed: 0.5} 启用动态火焰飘动感。无需程序化噪声嵌入。| `shaders/fake3d/dissolve2d.gdshader` + `scripts/shader/dissolve_fx.gd` | **P2** | ✅ |
+| J3 | **`#include` 路径验证** | Phase 2 前置：创建最小验证 shader `shaders/test_include.gdshader`，确认 `#include "res://addons/shaderV/tools/remap.gdshaderinc"` 在 canvas_item + GL Compatibility 下编译通过。通过后删除验证文件 | `shaders/test_include.gdshader`（临时） | **P2** | ✅ |
+| J4 | **色差 VFX 工具集**（G/F1 后） | 从 ShaderV 复制 chromaticAberration 到 `shaders/utils/`（剥离 textureLod 分支）。新建 `shaders/effects/boss_reveal.gdshader`，用 `#include` 引入色差，用于 Boss 揭示入场效果。通过 `GlobalShaders.create_material_from_path()` 直接加载 | `shaders/utils/chromatic_aberration.gdshaderinc`(新) + `shaders/effects/boss_reveal.gdshader`(新) | **P3** | ✅ |
+| J5 | **文档同步** | shader-library-reference.md §3.1 加 `shaders/utils/` + `shaders/effects/` 目录；§5.1 工作流加 `#include` 路径验证步骤；§5.3 外部库手册补充 ShaderLib/ShaderV 更新使用说明；`shaders/shaderlib/` 未使用文件加注释 `// @status: NOT_INTEGRATED` | `docs/shader-library-reference.md` | **P2** | ✅ |
 
 ## 🎬 Phase K — 外部 Shader 库引入整合
 
@@ -419,16 +442,16 @@
 |---|------|------|--------|------|
 | **K0** | **复用扩展（零新文件/最小改动，可提前到 F1 同期）** |
 | K0a | **`fake3d_flash.gdshader` 增强 — 补循环方向+软边** | 加 3 uniform: `one_way_loop`(单向循环)、`loop_direction`(正反向)、`softness`(闪光软边)。效果覆盖 `shaders/sources/robust_shine.gdshader` 全部能力。修改 1 个 `.gdshader` 文件。**不新建 ShineFX 子系统，不引入新 shader** | **P2** | ✅ |
-| K0b | **`GlowFX` 扩展 — 新增 `emissive_add` 闪烁模式** | `shaders/sources/blink.gdshader` 本质是 sin(TIME) 驱动的 RGB 加法辉光。在 GlowFX 新增 `emissive_add` 模式参数（纯加法叠加而非 glow 纹理）。调用方 `GlobalShaders.apply_glow(node, {mode: "emissive_add", blink_frequency: 2.0})`。效果覆盖 `shaders/sources/blink.gdshader`。不新建 BlinkFX | **P2** | ⬜ |
-| K0c | **`RippleFX` 新建** | 唯一真正需要新子系统的效果。波纹点击反馈 — 按钮按下/出牌区域选中。新建 `scripts/shader/ripple_fx.gd`(class_name RippleFX) + 复制 `shaders/sources/ripple.gdshader` → `shaders/effects/ripple.gdshader`。支持中心扰动/距离衰减/密度控制。`GlobalShaders` 注册 `apply_ripple()`/`clear_ripple()` | **P2** | ⬜ |
+| K0b | **`GlowFX` 扩展 — 新增 `emissive_add` 闪烁模式** | `shaders/sources/blink.gdshader` 本质是 sin(TIME) 驱动的 RGB 加法辉光。在 GlowFX 新增 `emissive_add` 模式参数（纯加法叠加而非 glow 纹理）。调用方 `GlobalShaders.apply_glow(node, {mode: "emissive_add", blink_frequency: 2.0})`。效果覆盖 `shaders/sources/blink.gdshader`。不新建 BlinkFX | **P2** | ✅ |
+| K0c | **`RippleFX` 新建** | 唯一真正需要新子系统的效果。波纹点击反馈 — 按钮按下/出牌区域选中。新建 `scripts/shader/ripple_fx.gd`(class_name RippleFX) + 复制 `shaders/sources/ripple.gdshader` → `shaders/effects/ripple.gdshader`。支持中心扰动/距离衰减/密度控制。`GlobalShaders` 注册 `apply_ripple()`/`clear_ripple()` | **P2** | ✅ |
 | **K1** | **子系统新增（F1 完成后执行）** |
-| K1a | **`FilterFX` 新建 — 统一滤镜管线** | 1 shader 多模式设计：`shaders/filters/multi_filter.gdshader` 内含 `uniform int mode` 切换（0=灰度 1=暗角 2=颜色叠加 3=选色）。新建 `scripts/shader/filter_fx.gd`(class_name FilterFX)。覆盖 `grayscale`/`vignette`/`color_overlay`/`selective_color` 四种滤镜（源文件在 `shaders/sources/`）。`GlobalShaders` 注册 `apply_grayscale()`/`apply_vignette()`/`apply_overlay()`/`clear_filter()` | **P2** | ⬜ |
-| K1b | **Sprite 级色差效果注册** | Chromatic aberration 作为 Sprite 级别效果（非全屏）。复制 `shaders/sources/chromatic_aberration.gdshader` → `shaders/effects/chromatic_aberration.gdshader`。通过 `GlobalShaders.create_material_from_path()` 加载 + `tween_param()` 驱动强度。不需要新建子系统。全屏色差暂缓（当前漫画风不需要） | **P3** | ⬜ |
+| K1a | **`FilterFX` 新建 — 统一滤镜管线** | 1 shader 多模式设计：`shaders/filters/multi_filter.gdshader` 内含 `uniform int mode` 切换（0=灰度 1=暗角 2=颜色叠加 3=选色）。新建 `scripts/shader/filter_fx.gd`(class_name FilterFX)。覆盖 `grayscale`/`vignette`/`color_overlay`/`selective_color` 四种滤镜（源文件在 `shaders/sources/`）。`GlobalShaders` 注册 `apply_grayscale()`/`apply_vignette()`/`apply_overlay()`/`clear_filter()` | **P2** | ✅ |
+| K1b | **Sprite 级色差效果注册** | Chromatic aberration 作为 Sprite 级别效果（非全屏）。复制 `shaders/sources/chromatic_aberration.gdshader` → `shaders/effects/chromatic_aberration.gdshader`。通过 `GlobalShaders.create_material_from_path()` 加载 + `tween_param()` 驱动强度。不需要新建子系统。全屏色差暂缓（当前漫画风不需要） | **P3** | ✅ |
 | **K2** | **场景补全（按需排期）** |
-| K2a | **`GlitchFX` 新建 — 分裂故障特效** | 复制 `shaders/sources/split_glitch.gdshader` → `shaders/effects/split_glitch.gdshader`。新建 `scripts/shader/glitch_fx.gd`(class_name GlitchFX)。用于 Boss 登场/转场过渡。网格量化+动态扰动纹理 | **P3** | ⬜ |
-| K2b | **`ExplosionFX` 新建 — 像素爆炸消散** | 复制 `shaders/sources/pixel_explosion.gdshader` → `shaders/effects/pixel_explosion.gdshader`。新建 `scripts/shader/explosion_fx.gd`(class_name ExplosionFX)。用于忍者"遁"术/卡牌销毁 | **P3** | ⬜ |
-| K2c | **环境氛围 shader 引入** | 按需从 `shaders/sources/` 复制 `liquid_distortion.gdshader`(水遁 Boss)/`wave.gdshader`(风遁)/`rainy_surface.gdshader`(雨战)。不走子系统，通过 `GlobalShaders.create_material_from_path()` 直接加载 | **P3** | ⬜ |
-| K2d | **风格化/限定 shader（需漫画风确认）** | `rainbow`(限定卡牌)/`halo_01`(选中光环)/`jelly_wobble`(果冻反馈)。需先确认不与漫画风方向冲突 | **P3** | ⬜ |
+| K2a | **`GlitchFX` 新建 — 分裂故障特效** | 复制 `shaders/sources/split_glitch.gdshader` → `shaders/effects/split_glitch.gdshader`。新建 `scripts/shader/glitch_fx.gd`(class_name GlitchFX)。用于 Boss 登场/转场过渡。网格量化+动态扰动纹理 | **P3** | ✅ |
+| K2b | **`ExplosionFX` 新建 — 像素爆炸消散** | 复制 `shaders/sources/pixel_explosion.gdshader` → `shaders/effects/pixel_explosion.gdshader`。新建 `scripts/shader/explosion_fx.gd`(class_name ExplosionFX)。用于忍者"遁"术/卡牌销毁 | **P3** | ✅ |
+| K2c | **环境氛围 shader 引入** | 按需从 `shaders/sources/` 复制 `liquid_distortion.gdshader`(水遁 Boss)/`wave.gdshader`(风遁)/`rainy_surface.gdshader`(雨战)。不走子系统，通过 `GlobalShaders.create_material_from_path()` 直接加载 | **P3** | ✅ |
+| K2d | **风格化/限定 shader（需漫画风确认）** | `rainbow`(限定卡牌)/`halo_01`(选中光环)/`jelly_wobble`(果冻反馈)。需先确认不与漫画风方向冲突 | **P3** | ✅ |
 
 ---
 
@@ -494,7 +517,7 @@ Phase F1 ──→ Phase F2 ──→ Phase F3 ──→ Phase H ──→ Phase
 | L4 | **shop_manager.gd 插桩** — ninja_acquired/item_purchased | 2 处调用 | **P2** | ✅ |
 | L5 | **HTML 回放查看器** — 拖拽加载/时间线/卡牌渲染/计分展示/键盘导航 | `docs/ninking/ninja-game-replay.html` | **P2** | ✅ |
 | L6 | **Debug 场景接入** — 7 处插桩（发牌/随机/AI排列/討伐/拖拽交换），与主场景共用日志格式 | `debug_controller.gd` | **P2** | ✅ |
-| L7 | **手动运行验证** — 主场景 + Debug 场景各记录一局并回放确认 | 由用户操作确认 | **P2** | ⬜ |
+| L7 | **手动运行验证** — 主场景 + Debug 场景各记录一局并回放确认 | 由用户操作确认 | **P2** | ✅ |
 
 ---
 
@@ -502,6 +525,7 @@ Phase F1 ──→ Phase F2 ──→ Phase F3 ──→ Phase H ──→ Phase
 
 | 日期 | 变更 |
 |------|------|
+| 2026-06-21 | 🐛 **ShopOverlay mouse_filter=IGNORE 修复商店遮挡忍者栏交互**: `ninking_main.tscn` ShopOverlay `mouse_filter` 从 STOP→PASS→IGNORE。根因: Godot 4 `gui_find_control()` 按 z_index 降序找顶层 Control 分发事件，ShopOverlay(z_index=1100, 全屏) 始终为事件入口，PASS 也不穿透到 GameLayout(z_index=0)。IGNORE 排除该节点后 GameLayout 成为忍者栏区域顶层，ShopPanel 为 ShopOverlay 子节点仍独立接收事件。deck_viewer_controller.gd `_on_deck_btn_pressed` 加 state guard 防止商店时误开牌库。文档 06-ui-layout-reference.md / 03-technical-design.md 同步更新。 |
 | 2026-06-15 | 🀄 **CardVisualComposer 卡片视觉合成抽象层**: 新增 `card_visual_composer.gd`(class_name CardVisualComposer, RefCounted 静态工具类)。L1 原子工具: create_rarity_stylebox/create_frame_overlay/compose_art_texture/compose_art_draw/apply_hover_glow。L2: build_card_face。三处消费者改造: DisplayCardBase(删~60行) / NinjaInventoryCard(删~35行) / CardDetailPopup(删~40行)。双渲染路径(TextureRect 保留 Fake3D + _draw)。C27/C28 加入 TODO。
 | 2026-06-15 | 🐛 **忍者计分动画条件过滤修复 (B15/B16)**: `animation_handler.gd` 加 `has_condition` 判断，区分 `[]` 的"无条件→所有组"和"条件不匹配→跳过"语义；`score_calculator.gd` 加 `"head_or_mid"` 组识别分支。双头蛇 n_g05 计分和动画同时修正。文档 `24-scoring-ninja-animation.md` §7.2 同步更新 condition.group 表格 |
 | 2026-06-15 | 🎴 **Fake3D VFX Phase 4 完成 — dissolve 场景接入**: `ninja_inventory_card.gd` 新增 `_dissolve_mat` 加载 + `dissolve_out()` 方法(swap 材质→GlobalTweens.dissolve_out)。`ninja_bar_node.gd` `_animate_out()` 新增 `use_dissolve` 参数分支。`refresh()` 新增 `use_dissolve` 贯穿参数。`ui_manager.gd` `refresh_ninjas()` 新增 `use_dissolve` 透传。`shop_handler.gd` 新增 `on_sell_requested()` 方法(含 dissolve 退场)。NinjaBarNode `remove_ninja()` 实现为 dissolve 式移除 + GameState 同步。|
@@ -608,3 +632,6 @@ Phase F1 ──→ Phase F2 ──→ Phase F3 ──→ Phase H ──→ Phase
 | 2026-06-18 | 🐛 **save_manager 只读字典崩溃**: `load_progress()` 对 `DEFAULT_PROGRESS` 使用浅拷贝 `.duplicate()`，内层嵌套空字典保持只读 → `record_run_result()` 写入时崩溃。修复: `.duplicate(true)` 深拷贝。同步更新 `06-ui-layout-reference.md`/`10-main-ui-design.md`/`11-main-overlay-design.md` 的 GameOver 节点描述（ScoreSummary 28px 居中 + BackToMenuButton 20px flat）|
 | 2026-06-17 | 📋 **方案审阅+Grill: 外部 Shader 资源集成**: 审阅 3 外部库（ShaderLib/ShaderV/gdquest）→ 选定箔片闪光增强(flash_type=3) + 溶解 UV 滚动 + 色差工具集 3 方向。跳过全息卡(vertex冲突)/悬停(已覆盖)/阴影(过度工程)。J1-J5 共 5 项加入 TODO Phase J。Spec: `specs/shader-external-integration.md` |
 | 2026-06-18 | 🎬 **方案审阅: 外部 Shader 整合引入 → Phase K**: 归档 11 枚源 .gdshader → `shaders/sources/`。review-plan 发现: ① fake3d_flash 已覆盖 robust_shine 不重复引入 ② GlowFX 扩展 emissive_add 覆盖 blink ③ 纯参数效果合并为 FilterFX 统一管线 ④ 全屏色差暂缓。K0-K2 共 11 项加入 TODO Phase K。K0 子项可 F1 同期做 |
+| 2026-06-21 | 🖱️ **忍者栏交互重设计**: Grill + review-plan 审阅通过后实施。① NinjaBarNode 新增 hover 工具提示（0.3s SceneTreeTimer 延迟）→ `ninja_detail_tooltip.tscn/.gd`（面板位置/尺寸/颜色完全在编辑器中调整，不锁死在代码里）② 右键弹出红色售卖按钮 → `ninja_sell_button.tscn/.gd`（价格=ceil(cost/2)，pop_in 动效）③ VFX: 右键售卖调用卡面 `GlobalTweens.scale_pop(card, 1.15, 0.15)` + `SB.UI_CLICK` SFX ④ ShopManager.sell_ninja() 金币退款已验证（半价 refund + 刷新）⑤ 文档同步: `06-ui-layout-reference.md` §3.3.3.a（6 行交互行为表 + tooltip/sell 场景信息表 + 编辑器可调整约束） + §7 文件索引 + `DOCUMENT_MAP.md` §5.6 更新 |
+| 2026-06-21 | 📋 **方案审阅: 删除忍者替换购买 → Toast+脉冲**: B22(删替换系统) + B23(满员→Toast+脉冲) + B24(pulse_cards) + C52(清死代码) + C53/C54(文档同步) 共 6 项加入 TODO。替换系统 UI 太复杂，改为引导玩家自行出售。 |
+| 2026-06-21 | ✅ **删除忍者替换购买系统 — 全部完成**: B22/B23/B24/C52/C53/C54 共 6 项 ✅。删 `ninja_replace_overlay.gd/.uid` + `_start_replace_flow()`(78行) + `_replace_guard` + `show/hide_replace_overlay()` + `ShopManager.replace_ninja()`/`sell_ninja()` + `shop_handler.on_sell_requested()`。满员购买 → Toast "忍者栏已满，请先出售" + 脉冲动画 + UI_ERROR。文档同步: `07-shop-ui-design.md` §5.3 删除 + `DOCUMENT_MAP.md` §5.13 移除 + `ui-signal-architecture.md` 更新 + `specs/ninja-replace-flow.md` 标记废弃。 |

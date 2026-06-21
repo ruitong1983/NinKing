@@ -370,8 +370,8 @@ GlobalTweens ──┬── TweenFX         (Autoload, 纯静态) — 含 move_
 | ✅ 宝牌链式 VFX | `scoring_animation.gd:Phase 2` | 每步 `fade_in()`+`punch_in()`，大幅跳跃震屏 |
 | ✅ Fake3D shader 集成 | Phase 1-4 | fake3d 透视 / fake3d_flash 辉光 / dissolve2d 溶解 |
 | ✅ NinKingCard fake3d 材质 | `ninking_card.gd` | 默认透视 + 交换红蓝闪光 |
-| ✅ NinjaInventoryCard fake3d 材质 | `ninja_inventory_card.gd` | 默认透视 + dissolve 出售退场 |
-| ✅ dissolve 接入忍槽 | `ninja_bar_node.gd` | `use_dissolve` 参数向上贯穿 |
+| ✅ NinjaInventoryCard fake3d 材质 | `ninja_inventory_card.gd` | 默认透视。`dissolve_out()` 方法保留但售卖流程已改为即时移除 |
+| ✅ dissolve 接入忍槽 | `ninja_bar_node.gd` | `use_dissolve` 参数向上贯穿（现为即时移除，不再调用 dissolve_out） |
 | ✅ 弧线补间 move_arc | `tween_fx.gd` | 贝塞尔弧线+弹性归位 |
 | ✅ 溶解消散 dissolve_out | `tween_fx.gd` | 噪声溶解+燃烧边缘 |
 | ✅ CRT 移除 (V24) | 全项目 | 扫描线/色差/暗角已删除 |

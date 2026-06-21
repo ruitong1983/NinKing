@@ -6,6 +6,9 @@ extends RefCounted
 ##
 ## Key difference: score_calculator includes seal ×2 (red seal), auto_arranger
 ## skips seal for fast estimation. Use `include_seal` parameter to control.
+##
+## NOTE: See ScoreGroupComputer for the alternative low-level card helpers
+## that intentionally exclude edition chips/mult and seal ×2 (AI estimation path).
 
 
 ## Sum card base chip values in a group.

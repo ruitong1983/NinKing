@@ -34,6 +34,17 @@ const BOSS_PORTRAITS: Dictionary = {
 	"终焉": "res://assets/images/boss/boss_countdown.png",
 }
 
+# Preloaded boss portrait textures (loaded once at class load time)
+static var _boss_texture_cache: Dictionary = {}
+static var _boss_cache_ready: bool = false
+
+static func _ensure_boss_cache() -> void:
+	if _boss_cache_ready:
+		return
+	for boss_name: String in BOSS_PORTRAITS:
+		_boss_texture_cache[boss_name] = load(BOSS_PORTRAITS[boss_name])
+	_boss_cache_ready = true
+
 # ═══ Left panel ═══
 @onready var left_panel: Control = %LeftPanel
 @onready var panel_bg: ColorRect = %PanelBg
@@ -197,6 +208,10 @@ func show_view(view: String) -> void:
 	shop_overlay.visible = (view == "shop")
 	game_over.visible = (view == "gameover")
 	victory_overlay.visible = (view == "victory")
+	# CardGrid is a sibling of UIManager at z_index=10, so it renders above
+	# all UIManager children. Hide during overlay views so cards don't block
+	# clicks to buttons (e.g. RetryButton on GameOver screen).
+	card_grid.visible = (view in ["game", "scoring"])
 
 
 # ══════════════════════════════════════════
@@ -287,33 +302,6 @@ func shop_panel_mark_item_purchased(item_id: String) -> void:
 		_current_shop_panel.mark_item_purchased(item_id)
 
 
-# ══════════════════════════════════════════
-# B14: Ninja replace overlay
-# ══════════════════════════════════════════
-
-var _replace_overlay: NinjaReplaceOverlay = null
-
-
-## Show the ninja replace overlay. Returns the overlay instance so caller
-## can await replacement_chosen signal. The overlay auto-queues on hide.
-func show_replace_overlay(new_ninja: Dictionary, old_ninjas: Array[Dictionary]) -> NinjaReplaceOverlay:
-	if _replace_overlay != null and is_instance_valid(_replace_overlay):
-		_replace_overlay.queue_free()
-		_replace_overlay = null
-
-	var overlay := NinjaReplaceOverlay.new()
-	overlay.setup(new_ninja, old_ninjas)
-	add_child(overlay)
-	_replace_overlay = overlay
-	return overlay
-
-
-func hide_replace_overlay() -> void:
-	if _replace_overlay != null and is_instance_valid(_replace_overlay):
-		_replace_overlay.queue_free()
-	_replace_overlay = null
-
-
 # 🏪 Shop signal relay — game_manager connects to these
 signal shop_purchase_requested(ability_data: Dictionary)
 signal shop_item_purchase_requested(item_data: Dictionary)
@@ -345,7 +333,8 @@ func on_seal_start(barrier: int, seal_idx: int, target: int, seal_lord_name: Str
 	if seal_lord_name != "":
 		intro_target_label.text = "封印 %d | 封印ノ主: %s" % [target, seal_lord_name]
 		if BOSS_PORTRAITS.has(seal_lord_name):
-			boss_portrait.texture = load(BOSS_PORTRAITS[seal_lord_name])
+			_ensure_boss_cache()
+			boss_portrait.texture = _boss_texture_cache[seal_lord_name]
 			boss_portrait.visible = true
 	else:
 		intro_target_label.text = "封印 %d" % target
@@ -435,6 +424,10 @@ func on_cards_swapped(src: int, tgt: int) -> void:
 
 func refresh_ninjas(owned_ninjas: Array, max_slots: int, use_dissolve: bool = false) -> void:
 	ninja_bar.refresh(owned_ninjas, max_slots, use_dissolve)
+
+
+func pulse_ninja_bar() -> void:
+	ninja_bar.pulse_cards()
 
 
 # ══════════════════════════════════════════

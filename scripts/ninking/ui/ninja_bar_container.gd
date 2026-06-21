@@ -29,14 +29,6 @@ func _ready() -> void:
 	# Minimum size ensures container tall enough to vertically center
 	# the 175px-tall NinjaInventoryCard with equal top/bottom padding.
 	custom_minimum_size = Vector2(0, 195)
-	# Explicit minimum height as runtime fallback — if anchor-based sizing
-	# hasn't been processed yet, size.y stays at 0 and the Y-offset formula
-	# (size.y - card.card_size.y) / 2.0 produces a hugely negative value,
-	# placing cards far above the container.
-	# NOTE: Non-equal opposite anchors override direct size.y in _ready(),
-	# so set_deferred is used to apply after anchor sizing settles.
-	if size.y < 195.0:
-		set_deferred("size", Vector2(size.x, 195.0))
 
 
 func _notification(what: int) -> void:
@@ -48,7 +40,10 @@ func _notification(what: int) -> void:
 #  CardContainer overrides
 # ════════════════════════════════════════════════════════════════
 
-func _card_can_be_added(_cards: Array) -> bool:
+func _card_can_be_added(cards: Array) -> bool:
+	for c in cards:
+		if not c is NinjaInventoryCard:
+			return false
 	return true
 
 
@@ -82,6 +77,12 @@ func _update_target_positions() -> void:
 			drop_zone.set_vertical_partitions([])
 		return
 
+	# Guard: defer layout until container has been sized by the anchor system.
+	# Without this, size.y can be 0 during early NOTIFICATION_RESIZED fires,
+	# producing a hugely negative Y offset that places cards far above the bar.
+	if size.y < 1.0:
+		return
+
 	var container_w: float = size.x
 	var sep: float = 0.0
 	if count > 1:
@@ -92,8 +93,7 @@ func _update_target_positions() -> void:
 	var start_x: float = (container_w - total_w) / 2.0
 
 	if drop_zone:
-		var vp_rect := get_viewport_rect()
-		drop_zone.set_sensor_size_flexibly(vp_rect.size, -global_position)
+		drop_zone.set_sensor_size_flexibly(size, Vector2.ZERO)
 
 	var partitions: Array[float] = []
 	for i: int in range(count):

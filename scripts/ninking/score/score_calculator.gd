@@ -141,41 +141,24 @@ static func calculate(
 		score_mid = false
 
 	# ── Compute each row's score ──
-	var head_score_val: int = 0
-	var mid_score_val: int = 0
-	var tail_score_val: int = 0
-
 	if score_head:
-		head_score_val = ScoreGroupComputer.compute_group_score(
-			head_cards, head_type, star_chart_levels, head_ninja, hungry_ghost)
 		ScoreGroupComputer.row_score(result, "head",
 			head_cards, head_type, star_chart_levels, head_ninja, hungry_ghost)
 
 	if score_mid:
-		mid_score_val = ScoreGroupComputer.compute_group_score(
-			mid_cards, mid_type, star_chart_levels, mid_ninja, hungry_ghost)
 		ScoreGroupComputer.row_score(result, "mid",
 			mid_cards, mid_type, star_chart_levels, mid_ninja, hungry_ghost)
 
 	if score_tail:
-		tail_score_val = ScoreGroupComputer.compute_group_score(
-			tail_cards, tail_type, star_chart_levels, tail_ninja, hungry_ghost)
 		ScoreGroupComputer.row_score(result, "tail",
 			tail_cards, tail_type, star_chart_levels, tail_ninja, hungry_ghost)
 
 	# ─── 独尊之印: 尾行×3 ───
 	if flags.get("tail_only_x3", false):
-		tail_score_val *= 3
 		result.tail_score *= 3
-
-	result.head_score = head_score_val
-	result.mid_score = mid_score_val
-	result.tail_score = tail_score_val
 
 	# ── v5.0: Column chip×mult scoring (independent of rows) ──
 	var col_scores: Array[int] = []
-	var col_total: int = 0
-	var total_raw: int = 0
 
 	if col_evals.size() == 3:
 		# Build column cards from head/mid/tail
@@ -210,58 +193,12 @@ static func calculate(
 				var cs: int = ScoreGroupComputer.compute_group_score(
 					col_cards_array[i], col_types[i], star_chart_levels, col_ninja_eff, hungry_ghost)
 				col_scores.append(cs)
-				col_total += cs
 
-	# ── v5.0 Global xi ×mult ──
-	result.global_xi_x_stack = ScoreXiHandler.get_global_xi_x_stack(xi_result, xi_bonus, xi_override, xi_max_mult)
-
-	# ── v5.0 Group-level xi ×mult ──
-	if xi_result and xi_result.has_any():
-		ScoreXiHandler.apply_group_xi(result, xi_result, xi_override, xi_bonus,
-			score_head, score_mid, score_tail, head_eval, mid_eval, tail_eval,
-			col_scores)
-
-	# ── v5.0 Recompute totals after xi ──
-	total_raw = result.head_score + result.mid_score + result.tail_score
-	col_total = 0
-	for cs_val: int in col_scores:
-		col_total += cs_val
-	total_raw += col_total
-
-	# ── 双头蛇: 行+列 相同牌型计分×2 ──
-	if flags.duplicate_hand_x2:
-		ScoreXiHandler.apply_duplicate_hand_x2(result, head_type, mid_type, tail_type,
-			col_evals, override_type, col_scores)
-		total_raw = result.head_score + result.mid_score + result.tail_score
-		col_total = 0
-		for cs_val2: int in col_scores:
-			col_total += cs_val2
-		total_raw += col_total
-
-	if tail_x2:
-		total_raw *= 2
-	total_raw = max(total_raw, 1)
-
-	result.total_score = total_raw
-	for x: int in result.global_xi_x_stack:
-		result.total_score *= x
-	result.total_score = max(result.total_score, 1)
-
-	# Breakdown for debugging
-	result.col_scores = col_scores
-	result.col_total = col_total
-	result.chips_sum = result.head_chips + result.mid_chips + result.tail_chips
-	result.mult_sum = result.head_mult + result.mid_mult + result.tail_mult
-
-	result.breakdown = {
-		"head_score": result.head_score,
-		"mid_score": result.mid_score,
-		"tail_score": result.tail_score,
-		"col_total": col_total,
-		"col_scores": col_scores,
-		"global_xi_x_stack": result.global_xi_x_stack,
-	}
-
+	_finalize(result, col_scores, xi_result, xi_bonus, xi_override, xi_max_mult,
+		score_head, score_mid, score_tail,
+		head_eval, mid_eval, tail_eval,
+		head_type, mid_type, tail_type,
+		col_evals, flags.get("duplicate_hand_x2", false), override_type, tail_x2)
 	return result
 
 
@@ -547,7 +484,6 @@ static func calculate_with_summary(
 
 		# ── Column scoring ──
 	var col_scores: Array[int] = []
-	var col_total: int = 0
 	if col_evals.size() == 3:
 		var col_cards_array: Array[Array] = [
 			[head_cards[0], mid_cards[0], tail_cards[0]],
@@ -570,10 +506,32 @@ static func calculate_with_summary(
 				col_cards_array[i], ct, star_chart_levels,
 				col_ninja_eff, hungry_ghost)
 			col_scores.append(cs)
-			col_total += cs
 
-	var total_raw: int = result.head_score + result.mid_score + result.tail_score + col_total
+	_finalize(result, col_scores, xi_result, xi_bonus, xi_override, xi_max_mult,
+		score_head, score_mid, score_tail,
+		head_eval, mid_eval, tail_eval,
+		head_type, mid_type, tail_type,
+		col_evals, summary.get("duplicate_hand_x2", false), override_type, tail_x2)
+	return result
 
+
+## Shared final-phase: global/group xi → recompute totals → 双头蛇 → final score.
+## Called by both calculate() and calculate_with_summary() after row + column scoring.
+static func _finalize(
+	result: ScoreResult,
+	col_scores: Array[int],
+	xi_result,
+	xi_bonus: int,
+	xi_override: Dictionary,
+	xi_max_mult: bool,
+	score_head: bool, score_mid: bool, score_tail: bool,
+	head_eval, mid_eval, tail_eval,
+	head_type, mid_type, tail_type,
+	col_evals: Array,
+	duplicate_hand_x2: bool,
+	override_type: bool,
+	tail_x2: bool
+) -> void:
 	# ── Global xi ×mult ──
 	result.global_xi_x_stack = ScoreXiHandler.get_global_xi_x_stack(xi_result, xi_bonus, xi_override, xi_max_mult)
 
@@ -584,14 +542,14 @@ static func calculate_with_summary(
 			col_scores)
 
 	# ── Recompute totals after xi ──
-	total_raw = result.head_score + result.mid_score + result.tail_score
-	col_total = 0
+	var total_raw: int = result.head_score + result.mid_score + result.tail_score
+	var col_total: int = 0
 	for cs_val: int in col_scores:
 		col_total += cs_val
 	total_raw += col_total
 
 	# ── 双头蛇: 行+列 相同牌型计分×2 ──
-	if summary.get("duplicate_hand_x2", false):
+	if duplicate_hand_x2:
 		ScoreXiHandler.apply_duplicate_hand_x2(result, head_type, mid_type, tail_type,
 			col_evals, override_type, col_scores)
 		total_raw = result.head_score + result.mid_score + result.tail_score
@@ -623,8 +581,6 @@ static func calculate_with_summary(
 		"global_xi_x_stack": result.global_xi_x_stack,
 	}
 
-	return result
-
 
 # ──────────────────────────── Cross-group bonuses (shared) ────────────────────────────
 
@@ -648,8 +604,8 @@ static func _detect_cross_group_flags(ninjas: Array) -> Dictionary:
 			share_tail_hand = true
 		if eff.get("duplicate_hand_x2", false):
 			dup_hand_x2 = true
-			if eff.get("tail_only_x3", false):
-				tail_only_x3 = true
+		if eff.get("tail_only_x3", false):
+			tail_only_x3 = true
 
 	return {
 		"eq_chips": eq_chips,

@@ -2,7 +2,7 @@
 
 > **用途：** 每次代码变更后，对照此表检查受影响文档是否需要同步更新。
 > **原则：** 改代码前先查此表，改完代码后逐项同步。
-> **建立日期：** 2026-06-17 | **最后更新：** 2026-06-18 | 自动生成的 HTML 由 pre-commit hook 触发，不列在此表。
+> **建立日期：** 2026-06-17 | **最后更新：** 2026-06-20 | 自动生成的 HTML 由 pre-commit hook 触发，不列在此表。
 
 ---
 
@@ -168,11 +168,11 @@
 |---------|------|---------|
 | `04-ui/06-ui-layout-reference.md` | UI 布局参考 | 牌型标签显示逻辑变更时同步 |
 
-### 5.6 `scripts/ninking/ui/ninja_bar_container.gd` + `ninja_bar_display.gd` + `ninja_bar_node.gd` + `ninja_inventory_card.gd`
+### 5.6 `scripts/ninking/ui/ninja_bar_container.gd` + `ninja_bar_display.gd` + `ninja_bar_node.gd` + `ninja_inventory_card.gd` + `ninja_detail_tooltip.gd` + `ninja_sell_button.gd`
 
 | 影响文档 | 说明 | 同步要点 |
 |---------|------|---------|
-| `04-ui/06-ui-layout-reference.md` | UI 布局 — 忍者栏 | 忍者栏布局/交互变更时同步 |
+| `04-ui/06-ui-layout-reference.md` | UI 布局 — 忍者栏（含悬停 tooltip + 右键售卖按钮） | 忍者栏布局/交互变更时同步 |
 | `02-cards/22-display-card-base-spec.md` | NinjaCard 规格书 | 忍者卡场景规格变更时同步 |
 
 ### 5.7 `scripts/ninking/ui/ninking_card.gd` + `ninking_card_factory.gd`
@@ -213,13 +213,7 @@
 | **`04-ui/09-launch-ui-design.md`** | Launch UI 设计 | 主菜单/牌组选择/继续确认变更时同步 |
 | `06-tech/03-technical-design.md` | 技术架构 | 场景切换/存档读取变更时同步 |
 
-### 5.13 `scripts/ninking/ui/ninja_replace_overlay.gd`
-
-| 影响文档 | 说明 | 同步要点 |
-|---------|------|---------|
-| `04-ui/06-ui-layout-reference.md` | UI 布局参考 | 忍者替换交互变更时同步 |
-
-### 5.14 `scripts/ninking/ui/nin_king_tween.gd` + `launch_ambience.gd`
+### 5.13 `scripts/ninking/ui/nin_king_tween.gd` + `launch_ambience.gd`
 
 | 影响文档 | 说明 | 同步要点 |
 |---------|------|---------|
@@ -355,6 +349,13 @@
 | `05-art/05-image-asset-generation-plan.md` | 素材生成计划 | 资产路径/加载逻辑变更时同步 |
 | `05-art/19-image-asset-matching-guide.md` | 图像素材匹配 | 资产映射变更时同步 |
 
+### 10.3 `scripts/config/config_manager.gd`（autoload: `ConfigManager`）
+
+| 影响文档 | 说明 | 同步要点 |
+|---------|------|---------|
+| **`06-tech/03-technical-design.md`** | 技术架构 — Autoload / 配置系统 | 新增/修改可配置参数、校验逻辑、默认值时同步 |
+| `03-economy/14-economy-and-progression.md` | 经济参数 | 起始金币/利息/商店/重掷等参数默认值变更时同步 |
+
 ---
 
 ## 十一、VFX 与 Tween/Shader 系统
@@ -417,7 +418,7 @@
 | `02-cards/12-consumable-cards.md` | `consumable_data.gd`, `card_data.gd` |
 | `02-cards/22-display-card-base-spec.md` | `ninking_card.gd`, `ninking_card_factory.gd`, `ninja_inventory_card.gd` |
 | `02-cards/23-ninja-card-expansion-plan.md` | —（规划文档，无直接代码依赖） |
-| `03-economy/14-economy-and-progression.md` | `shop_manager.gd`, `seal_controller.gd`, `ninja_data.gd`（价格）, `consumable_data.gd`（价格） |
+| `03-economy/14-economy-and-progression.md` | `config_manager.gd`, `shop_manager.gd`, `seal_controller.gd`, `ninja_data.gd`（价格）, `consumable_data.gd`（价格） |
 | `04-ui/06-ui-layout-reference.md` | **所有 `.tscn` + `ui_manager.gd` + `game_manager.gd`** |
 | `04-ui/07-shop-ui-design.md` | `shop_handler.gd`, `shop_ui.gd` |
 | `04-ui/09-launch-ui-design.md` | `main_menu.gd`, `deck_select_panel.gd`, `continue_panel.gd`, `ninking_launcher.tscn` |
@@ -427,7 +428,7 @@
 | `05-art/15-sound-design-plan.md` | `sound_bank.gd` |
 | `05-art/18-audio-asset-matching-guide.md` | `sound_bank.gd` |
 | `05-art/19-image-asset-matching-guide.md` | `asset_registry.gd` |
-| `06-tech/03-technical-design.md` | `game_state.gd`, `seal_controller.gd`, `arrange_controller.gd`, 所有 UI 相关 |
+| `06-tech/03-technical-design.md` | `config_manager.gd`, `game_state.gd`, `seal_controller.gd`, `arrange_controller.gd`, `save_manager.gd`, 所有 UI 相关 |
 | `docs/ninking/ninja-game-replay.html` | `game_logger.gd` — 日志事件结构决定 HTML 解析逻辑 |
 | `06-tech/ui-signal-architecture.md` | `game_state.gd`（信号）, `ui_manager.gd`（API） |
 | `07-data/game-save-schema.md` | `save_manager.gd`, `game_state.gd` |
@@ -459,3 +460,7 @@
 | 2026-06-18 | 🧠 **新增 §7.6**: `player_personality.py` + `sim_runner_personality.py` 玩家人格模型映射；模拟报告同步更新
 | 2026-06-18 | 🐛 **save_manager.gd 修复 + GameOver 布局优化**: `.duplicate(true)` 修复只读字典崩溃；`06-ui-layout-reference.md`/`10-main-ui-design.md`/`11-main-overlay-design.md` 同步更新 GameOver ScoreSummary/BackToMenuButton 节点描述 |
 | 2026-06-18 | ✨ **CardDetailPopup 入场动效 + Flash 材质**: `asset_registry.gd` 新增共享 flash 常量；`card_visual_composer.gd` 新增 L3 `build_card_face_with_flash()`；`card_detail_popup.gd` rarity 分阶入场/退场动效 + 卡面 flash shader |
+| 2026-06-20 | 📝 **配置外部化**: 新增 §10.3 `config_manager.gd` 映射；快速查找表追加 `config_manager.gd` 引用；`03-economy/14-economy-and-progression.md` 和 `06-tech/03-technical-design.md` 同步更新 |
+| 2026-06-20 | 📉 **封印阈值减半**: `barrier_config.gd` v5.3 整体 ×0.5；同步 `01-gameplay/13-blinds-and-bosses.md` 封印值表 + 难度曲线 + 变更日志 |
+| 2026-06-21 | 🗑️ **删除 B14 替换系统**: 移除 §5.13 `ninja_replace_overlay.gd` 映射条目（文件已删除）。§5.13 → `nin_king_tween.gd`，节号前移（14→13）。 |
+| 2026-06-21 | 🎨 **Toast 视觉强化**: 深色半透明背景面板 (rgba 0,0,0,0.75 + 圆角12px) + 位置从底部移至顶部 20%。`toast_manager.gd` 改为 Panel 容器包裹 Label，动画修正为 toast() 完整淡入→停留→淡出。 |
