@@ -1,7 +1,7 @@
 [gd_resource type="ShaderMaterial" format=3 uid="uid://d2lg0opwdwjrg"]
 
 [ext_resource type="Shader" path="res://shaders/fake3d/dissolve2d.gdshader" id="1_2q3ox"]
-[ext_resource type="Texture2D" uid="uid://dltabmwdl82th" path="res://resources/materials/dissolve_noise.tres" id="2_w2hyk"]
+[ext_resource type="Texture2D" path="res://resources/materials/dissolve_noise.tres" id="2_w2hyk"]
 
 [resource]
 shader = ExtResource("1_2q3ox")

@@ -29,6 +29,7 @@ MCPGameInspector="*res://addons/godot_mcp/mcp_game_inspector_service.gd"
 TweenFX="*res://scripts/tween/tween_fx.gd"
 RangeHighlighter="*res://scripts/system/range_highlighter.gd"
 NinKingGameState="*res://scripts/ninking/game_state.gd"
+CursorManager="*res://scripts/ninking/ui/cursor_manager.gd"
 GlobalShaders="*res://scripts/shader/global_shaders.gd"
 
 [display]

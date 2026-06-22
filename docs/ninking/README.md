@@ -50,6 +50,7 @@
 | [`18-audio-asset-matching-guide.md`](05-art/18-audio-asset-matching-guide.md) | **音效匹配指南:** Anime Game 素材包 → NinKing 需求逐项映射 |
 | [`19-image-asset-matching-guide.md`](05-art/19-image-asset-matching-guide.md) | **图像素材匹配指南:** 现成包匹配 + AI 兜底生成混合策略、三层分类、5 阶段流程 |
 | [`20-kenney-ui-pack-evaluation.md`](05-art/20-kenney-ui-pack-evaluation.md) | **Kenney UI 素材包双方向评估:** 少年漫画/治愈漫画下的完整匹配度矩阵及实施方案 |
+| [`21-ui-interaction-enhancements.md`](05-art/21-ui-interaction-enhancements.md) | **UI 交互增强素材指南:** 光标系统等界面交互优化素材的架构/替换/扩展指引 |
 
 ## ⚙️ 技术架构 (06-tech/)
 

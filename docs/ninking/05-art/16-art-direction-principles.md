@@ -116,7 +116,7 @@ var c := BarrierTheme.get_colors(barrier_num)
 
 | 状态 | 表现 |
 |------|------|
-| **normal** | 属性 accent 色底 + 2px 深黑描边 + 圆角 6px。白色粗体文字。 |
+| **normal** | 属性 accent 色底 + 深黑描边 + 圆角 8px。白色粗体文字。三级尺寸：L(4px描边), M(3px描边), S(2px描边)。 |
 | **hover** | 底色调亮 10% + 描边加粗至 3px。鼠标悬浮时附加轻微 scale 1.03（`GlobalTweens.scale_pop`）。 |
 | **pressed** | 底色调暗 15% + content 下移 2px（漫画按钮的"被按下去"感）。 |
 | **disabled** | 灰色底 `#CCCCCC` + 浅灰描边 `#999999`。 |

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dkdy7pt5uve0"]
 
-[ext_resource type="Script" uid="uid://b4dqfcdlnr03g" path="res://scripts/ninking/debug/debug_score_detail.gd" id="1_4vcu1"]
+[ext_resource type="Script" path="res://scripts/ninking/debug/debug_score_detail.gd" id="1_4vcu1"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel_bg"]
 content_margin_left = 16.0

@@ -153,8 +153,11 @@ func play_score(label: Control, chips: int, mult: int, result: int, duration: fl
 
 # ── 粒子 ──
 
-func burst_particles(position: Vector2, preset: String = "sparkle") -> void:
-	particles.burst(position, preset)
+func burst_particles(position: Vector2, preset: String = "sparkle", color: Color = Color(1, 1, 1, 0)) -> void:
+	if color.a > 0.0:
+		particles.burst_custom(position, 24, 0.6, color)
+	else:
+		particles.burst(position, preset)
 
 
 # ── 音效 ──

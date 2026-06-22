@@ -1,6 +1,6 @@
 # NinKing Main Game UI 设计方案
 
-> **建立日期:** 2026-06-10 | **最后同步:** 2026-06-18 | **关联场景:** `ninking_main.tscn` + `ui_manager.gd`
+> **建立日期:** 2026-06-10 | **最后同步:** 2026-06-22 | **关联场景:** `ninking_main.tscn` + `ui_manager.gd`
 > **风格权威:** [`../05-art/16-art-direction-principles.md`](../05-art/16-art-direction-principles.md) · 少年漫画风
 ## §1 概述
 
@@ -82,9 +82,9 @@ NinKingMain (Control) [game_manager.gd]
 │       │   │   └── NinjaInventoryCard ×N (Card, 125×175)  ← 差值刷新 / stagger pop-in / zoom-in 详情
 │       │   └── NinjaBarNode (Node) ← 生命周期管理
     │       ├── StatusLabel (24px 绿)   ← "影 <= 瞬 <= 滅 -- 可以出牌"
-    │       ├── HandArea (HBox 1138×728)
-    │       │   ├── PlayBtn (84×116)    ← 「討伐」
-    │       │   ├── DunArea (Panel 620×728)
+    │       ├── HandArea (HBox 1138×728) ← 操作按钮区（空闲中）
+    │       ├── PlayBtn (160×56)    ← 「討伐」28px 手牌区左侧
+    │       ├── DunArea (Panel 620×728)
     │       │   │   ├── DunHead (Panel 620×224)
     │       │   │   │   ├── HeadLabel   ← "影"
     │       │   │   │   ├── HeadTypeLabel ← 牌型名
@@ -97,7 +97,7 @@ NinKingMain (Control) [game_manager.gd]
     │       │   │       ├── TailLabel    ← "滅"
     │       │   │       ├── TailTypeLabel
     │       │   │       └── TailCards (Hand)
-    │       │   └── AiRearrangeBtn (84×116) ← 「陣形」
+    │       ├── AiRearrangeBtn (200×48) ← 「陣形」24px 底栏居中
     │       ├── DeckBtn (200×48)        ← "牌库: 52"
     │       └── ColumnLabelRow (HBox)   ← 列分标签 (Col0/Col1/Col2)
     │
@@ -125,26 +125,31 @@ NinKingMain (Control) [game_manager.gd]
 ### 3.1 布局
 
 - 宽度 `420px`，`size_flags_horizontal = 0`（固定宽度）
-- **三块锚定布局 (2026-06-11)：** 移除旧 `ContentVBox`，三面板直属于 `LeftPanel`，全部 `layout_mode=1`（锚定）
-  - ScoreCard: `anchor_top=0`, `anchor_bottom=0.5` → 上半 1/2
-  - MatchPanel: `anchor_top=0.5`, `anchor_bottom=0.75` → 中间 1/4
-  - AntePanel: `anchor_top=0.75`, `anchor_bottom=1.0` → 底部 1/4
-- 三块互不重叠、响应式填充分区
+- **四面板锚定布局 (2026-06-22)：** 四面板直属于 `LeftPanel`，全部 `layout_mode=1`（锚定）
+  - HandTypePanel: `anchor_top=0`, `anchor_bottom=0.3` → 顶部 30%
+  - ScorePanel: `anchor_top=0.3`, `anchor_bottom=0.7` → 中部 40%
+  - MatchPanel: `anchor_top=0.7`, `anchor_bottom=0.9` → 中部 20%
+  - AntePanel: `anchor_top=0.9`, `anchor_bottom=1.0` → 底部 10%
+- 四块互不重叠、响应式填充分区
 - PanelBg 全透明，左侧面板区域透出 `table_bg` 牌桌纹理
-- **右侧全高度 ink-bleed 渐隐**（`panel_edge_fade.gdshader`，`fade_start=0.64`，渐隐范围加大）
-- ScoreCardVBox 使用 `layout_mode=1` + `anchors_preset=15`（VBoxContainer 自动排列子项）
+- **右侧全高度 ink-bleed 渐隐**（`panel_edge_fade.gdshader`，`fade_start=0.64`)
+- 面板使用 Kenney 暖纸风纹理（`panel_beige`/`panel_beigeLight`），`texture_filter=1`（NEAREST）
+- 各 VBox 容器统一 `offset_left=24`、`offset_top=10`、`offset_bottom=-10` 留出内边距
+- 文字色统一深褐 `Color(0.24, 0.18, 0.11)`，特殊标注除外
 
-### 3.2 ScoreCard (310px)
+### 3.2 ScorePanel (中部 40%) — 喜/分数/进度
+
+`panel_beigeLight` 纹理。使用 VBoxSpacer 实现底部锚定：ColXiLabel 居顶部自然高度，VBoxSpacer 撑满中间，ScoreLabel/ProgressBar/TargetScoreLabel 固定在底部。
 
 | 元素 | 字号 | 颜色 | 用途 |
 |------|------|------|------|
-| ColXiLabel | 32px | 喜accent `#D93333` | 喜名称列表，autowrap 自动换行，自然高度不撑开 |
-| ScoreLabel | 48px | `(0.941, 0.929, 0.894)` 白 | "気 N" |
+| ColXiLabel | 40px | `#D93333` 喜红 | 喜名称列表，autowrap 自动换行，自然高度不撑开 |
+| ScoreLabel | 48px | `#3D2B1A` 深褐 | "気 N" |
 | ProgressBar | 28px | 灰底+金 fill, 圆角 6px | 进度条 |
-| TargetScoreLabel | **28px** | `(0.478, 0.478, 0.416)` 灰 | "封印 N" |
+| TargetScoreLabel | **28px** | `#3D2B1A` 深褐 | "封印 N" |
 
-StyleBox: `content_margin(16,16,68,16)`，`bg_color #0F281F` 不透明度 0.6。**无边框、无圆角。**
-ScoreCardVBox 子序：`ColXiLabel → HandTypeRow → ScoreLabel → ProgressBar → TargetScoreLabel`
+ScoreVBox 子序：`ColXiLabel → VBoxSpacer → ScoreLabel → ProgressBar → TargetScoreLabel`
+ColXiLabel 不可见时（喜为空）`ui_manager.gd` 自动隐藏，VBoxSpacer 自适应调整。
 
 ### 3.3 HandTypeRow (合入 ScoreCardVBox 内)
 
@@ -168,23 +173,28 @@ Lv badge 色阶：Lv.1-2 `#7A7A7A` 灰 | Lv.3-4 `#588CF2` 蓝 | Lv.5-6 `#C4A843`
 
 由 `HandTypeLabeler._update_dun_types()` 实时更新。Lv hover tooltip 由同文件 `_show_lv_tooltip()` 实现。
 
-### 3.4 MatchPanel (中间 1/4) — 直属于 LeftPanel
+### 3.4 MatchPanel (中部 20%) — 直属于 LeftPanel
 
-**面板颜色：** 全透明（无 StyleBoxFlat）。无圆角、无边框。
+`panel_beige` 纹理。标题和金币在暖米色面板上使用加深色保证可读性。
 **渐隐：** `ShaderMaterial_match_fade` (panel_edge_fade.gdshader)
-**锚定：** `anchor_top=0.5`, `anchor_bottom=0.75`（ScoreCard 底部 → AntePanel 顶部）
+**锚定：** `anchor_top=0.7`, `anchor_bottom=0.9`
 
-| 字段 | text 示例 | 字号 |
-|------|----------|------|
-| MatchTitle | "比赛信息" | 20px |
-| HandsLabel | "討伐 2" | 28px |
-| GoldLabel | "$12" | 28px |
+| 字段 | text 示例 | 字号 | 颜色 |
+|------|----------|------|------|
+| MatchTitle | "比赛信息" | 20px | `#66471E` 暖铜褐 |
+| HandsLabel | "討伐 2" | 28px | `#3D2B1A` 深褐 |
+| GoldLabel | "$12" | 48px | `#B8852E` 暗金 |
 
-### 3.5 AntePanel (底部 1/4) — 直属于 LeftPanel
+### 3.5 AntePanel (底部 10%) — 直属于 LeftPanel
 
-**面板颜色：** 全透明（无 StyleBoxFlat）。无圆角、无边框。
+`panel_beige` 纹理。
 **渐隐：** `ShaderMaterial_ante_fade` (panel_edge_fade.gdshader)
-**锚定：** `anchor_top=0.75`, `anchor_bottom=1.0` (LeftPanel 底部 1/4)
+**锚定：** `anchor_top=0.9`, `anchor_bottom=1.0` (LeftPanel 底部 10%)
+
+| 字段 | text 示例 | 字号 | 颜色 |
+|------|----------|------|------|
+| BarrierLabel | "结界 3/8" | 28px | `#3D2B1A` 深褐 |
+| RoundLabel | "回合 1" | 28px | `#3D2B1A` 深褐 |
 
 | 字段 | text 示例 | 字号 |
 |------|----------|------|

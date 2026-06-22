@@ -15,7 +15,7 @@ var _current_hand: Array[CardData.PlayingCard] = []
 func setup(
 	card_grid: HandCardContainer,
 	head_type: Label, mid_type: Label, tail_type: Label,
-	col0: Label, col1: Label, col2: Label, col_xi: RichTextLabel,
+	col0: Label, col1: Label, col2: Label, col_xi: Label,
 	shadow_type: Label, flash_type: Label, destroy_type: Label,
 	shadow_score: RichTextLabel, flash_score: RichTextLabel, destroy_score: RichTextLabel,
 	shadow_lv: Label, flash_lv: Label, destroy_lv: Label,

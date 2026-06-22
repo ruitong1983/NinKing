@@ -3,10 +3,10 @@
 [ext_resource type="Script" uid="uid://b5wb4af5a6w1a" path="res://scripts/ninking/debug/debug_controller.gd" id="1_ctrl"]
 [ext_resource type="Script" uid="uid://dgug0lj2v2uoh" path="res://scripts/ninking/debug/debug_card_tray.gd" id="2_tray"]
 [ext_resource type="Script" uid="uid://c56l87nvs3gi5" path="res://scripts/ninking/debug/debug_ninja_selector.gd" id="3_sel"]
-[ext_resource type="PackedScene" uid="uid://c7u8hryloq7hy" path="res://addons/card-framework/card_manager.tscn" id="4_cm"]
-[ext_resource type="Theme" uid="uid://bqb2i07k0v8jt" path="res://assets/themes/manga_theme.tres" id="5_theme"]
-[ext_resource type="PackedScene" uid="uid://bkpjlq7ggckg6" path="res://addons/card-framework/hand.tscn" id="6_hand"]
-[ext_resource type="Texture2D" uid="uid://cmh6fgxip28j3" path="res://assets/images/background/table_bg.png" id="7_bg"]
+[ext_resource type="PackedScene" path="res://addons/card-framework/card_manager.tscn" id="4_cm"]
+[ext_resource type="Theme" path="res://assets/themes/manga_theme.tres" id="5_theme"]
+[ext_resource type="PackedScene" path="res://addons/card-framework/hand.tscn" id="6_hand"]
+[ext_resource type="Texture2D" path="res://assets/images/background/table_bg.png" id="7_bg"]
 
 [node name="NinKingDebug" type="Control" unique_id=633977509]
 layout_mode = 3
@@ -65,15 +65,13 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 8
 
-[node name="ColXiLabel" type="RichTextLabel" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox" unique_id=1205393969]
+[node name="ColXiLabel" type="Label" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox" unique_id=1205393969]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_vertical = 0
-theme_override_colors/default_color = Color(0.769, 0.659, 0.263, 1)
-theme_override_font_sizes/normal_font_size = 40
-bbcode_enabled = true
-fit_content = true
-scroll_active = false
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.85, 0.2, 0.2, 1)
+theme_override_font_sizes/font_size = 40
+autowrap_mode = 3
 
 [node name="HandTypeRow" type="VBoxContainer" parent="MainVBox/ContentRow/LeftPanel/ScoreCard/ScoreCardVBox" unique_id=1493402944]
 layout_mode = 2

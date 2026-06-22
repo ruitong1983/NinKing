@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bq5sru3f2ol7t"]
 
-[ext_resource type="Script" uid="uid://bhsy8ww8j2k2n" path="res://scripts/ninking/debug/debug_ninja_selector.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/ninking/debug/debug_ninja_selector.gd" id="1_script"]
 
 [node name="NinjaSelector" type="Control" unique_id=1259498117]
 layout_mode = 3

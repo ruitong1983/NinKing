@@ -34,7 +34,7 @@ var _slot_data: Array = []
 @onready var _score_label: Label = %ScoreLabel
 @onready var _target_label: Label = %TargetScoreLabel
 @onready var _progress: ProgressBar = %ProgressBar
-@onready var _col_xi_label: RichTextLabel = %ColXiLabel
+@onready var _col_xi_label: Label = %ColXiLabel
 @onready var _status_label: Label = %StatusLabel
 @onready var _play_btn: Button = %PlayBtn
 @onready var _ai_btn: Button = %AiRearrangeBtn
@@ -125,6 +125,8 @@ func _ready() -> void:
 	_ui_proxy.ninja_bar = _ninja_bar_node
 	_ui_proxy.panel_bg = $MainVBox/ContentRow/LeftPanel/PanelBg
 	_ui_proxy.game_bg = $GameBg
+
+	_ui_proxy.col_xi_label = %ColXiLabel
 
 	_anim_handler = AnimationHandler.new()
 	_anim_handler.setup(_ui_proxy, func(): pass)
@@ -502,12 +504,7 @@ func _update_score_display(
 		%RightColType.text = CardData.get_hand_type3_name(col_evals[2].hand_type)
 
 	if xi_result and xi_result.has_any():
-		var xi_parts: Array[String] = []
-		for i: int in range(xi_result.triggered.size()):
-			var xi_name: String = xi_result.triggered[i]
-			var x_mult: int = xi_result.mult_x_stack[i]
-			xi_parts.append("%s [font_size=22]×%d[/font_size]" % [xi_name, x_mult])
-		_col_xi_label.text = "喜: " + "  ".join(xi_parts)
+		_col_xi_label.text = "喜: " + "  ".join(xi_result.triggered)
 		_col_xi_label.visible = true
 	else:
 		_col_xi_label.text = "喜: -"
@@ -609,12 +606,7 @@ func _update_xi_preview(
 ) -> void:
 	var xi_result := XiDetector.detect(head_cards, mid_cards, tail_cards, head_eval, mid_eval, tail_eval)
 	if xi_result and xi_result.has_any():
-		var xi_parts: Array[String] = []
-		for i: int in range(xi_result.triggered.size()):
-			var xi_name: String = xi_result.triggered[i]
-			var x_mult: int = xi_result.mult_x_stack[i]
-			xi_parts.append("%s [font_size=22]×%d[/font_size]" % [xi_name, x_mult])
-		_col_xi_label.text = "喜: " + "  ".join(xi_parts)
+		_col_xi_label.text = "喜: " + "  ".join(xi_result.triggered)
 		_col_xi_label.visible = true
 	else:
 		_col_xi_label.text = "喜: -"

@@ -469,7 +469,7 @@ footer a:hover { color: var(--gold); }
 <!-- ═══ Header ═══ -->
 <header>
   <h1>🏯 NinKing 参考手册 <small id="card-count"></small></h1>
-  <p class="subtitle">基于 <span id="data-date">2026-06-18</span> · 忍者牌 / 喜系统 / 场景树 · 点击卡牌查看详情 · ESC 清空搜索</p>
+  <p class="subtitle">基于 <span id="data-date">2026-06-22</span> · 忍者牌 / 喜系统 / 场景树 · 点击卡牌查看详情 · ESC 清空搜索</p>
 </header>
 
 <!-- ═══ Recent Updates (auto-injected by tools/inject_recent_updates.py) ═══ -->
@@ -477,9 +477,9 @@ footer a:hover { color: var(--gold); }
   <h3>📋 最近更新</h3>
   <!-- RECENT_UPDATES_PLACEHOLDER -->
 <ul>
-  <li><span class="date">2026-06-18</span><span class="tag tag-docs">docs</span>feat: 新增MBTI模拟测试框架 + CLAUDE.md结构重组 + 仿真工具集</li>
+  <li><span class="date">2026-06-21</span><span class="tag tag-fix">fix</span><span class="tag tag-ninja">ninja</span><span class="tag tag-xi">xi</span>feat: 忍者栏出售+详情浮层系统, XiDetector喜检测器扩展, ShopOverlay事件穿透修复</li>
 </ul>
-<p style="font-size:11px;color:var(--text-dim);margin-top:6px">最新提交 · 部署于 2026-06-18 18:31</p>
+<p style="font-size:11px;color:var(--text-dim);margin-top:6px">最新提交 · 部署于 2026-06-22 21:38</p>
 </div>
 
 <!-- ═══ Tab Bar ═══ -->
@@ -1218,6 +1218,24 @@ const XI_PHASE_E = [
   { id: 15, name: "均爵", cond: "每墩至少一张 J/Q/K", mult: 3, chips: 0, tier: "special", tierLabel: "均匀分配" },
   { id: 16, name: "三等", cond: "三行 chip 总和相等", mult: 5, chips: 0, tier: "special", tierLabel: "平衡型" },
   { id: 17, name: "满堂", cond: "3 行 + 3 列全部非散牌 (≥ONE_PAIR_3)", mult: 5, chips: 0, tier: "special", tierLabel: "行列全判" },
+  { name: "四角", cond: "四角", mult: 3, chips: 0, tier: "", tierLabel: "" },
+  { name: "中十字", cond: "中十字", mult: 4, chips: 0, tier: "", tierLabel: "" },
+  { name: "倒影", cond: "倒影", mult: 3, chips: 0, tier: "", tierLabel: "" },
+  { name: "双壁", cond: "双壁", mult: 3, chips: 0, tier: "", tierLabel: "" },
+  { name: "对影", cond: "对影", mult: 2, chips: 0, tier: "", tierLabel: "" },
+  { name: "连环", cond: "连环", mult: 6, chips: 0, tier: "", tierLabel: "" },
+  { name: "天九", cond: "天九", mult: 5, chips: 0, tier: "", tierLabel: "" },
+  { name: "压牌", cond: "压牌", mult: 4, chips: 0, tier: "", tierLabel: "" },
+  { name: "至尊", cond: "至尊", mult: 4, chips: 0, tier: "", tierLabel: "" },
+  { name: "独尊", cond: "独尊", mult: 6, chips: 0, tier: "", tierLabel: "" },
+  { name: "廿一点", cond: "廿一点", mult: 4, chips: 0, tier: "", tierLabel: "" },
+  { name: "文武", cond: "文武", mult: 4, chips: 0, tier: "", tierLabel: "" },
+  { name: "一气", cond: "一气", mult: 3, chips: 0, tier: "", tierLabel: "" },
+  { name: "无将", cond: "无将", mult: 4, chips: 0, tier: "", tierLabel: "" },
+  { name: "长套", cond: "长套", mult: 5, chips: 0, tier: "", tierLabel: "" },
+  { name: "无忧角", cond: "无忧角", mult: 4, chips: 0, tier: "", tierLabel: "" },
+  { name: "慢打", cond: "慢打", mult: 5, chips: 0, tier: "", tierLabel: "" },
+  { name: "四对半", cond: "四对半", mult: 4, chips: 0, tier: "", tierLabel: "" },
 ];  // ── xi-auto-extracted:phase-e ──
 const XI_COMBOS = [
   { name: "三合", cond: "3 行牌型各匹配一列（散牌行不计）", mult: 6, tier: "exclusive" },
@@ -1766,6 +1784,9 @@ const SCENES = {
                               unique: true
                             },
 {
+                              type: 'Control', name: 'VBoxSpacer'
+                            },
+{
                               type: 'ProgressBar', name: 'ProgressBar',
                               unique: true
                             },
@@ -1822,11 +1843,6 @@ const SCENES = {
                             },
                           ],
                         },
-{
-                          type: 'Control', name: 'CardGrid',
-                          unique: true,
-                          script: 'hand_card_container.gd'
-                        },
                       ],
                     },
 {
@@ -1834,14 +1850,12 @@ const SCENES = {
                       unique: true
                     },
 {
-                      type: 'HBoxContainer', name: 'HandArea',
-                      unique: true,
-                      children: [
+                      type: 'Button', name: 'PlayBtn',
+                      unique: true
+                    },
 {
-                          type: 'Button', name: 'PlayBtn',
-                          unique: true
-                        },
-                      ],
+                      type: 'HBoxContainer', name: 'HandArea',
+                      unique: true
                     },
 {
                       type: 'Control', name: 'NinjaBar',
@@ -1936,6 +1950,11 @@ const SCENES = {
               ],
             },
           ],
+        },
+{
+          type: 'Control', name: 'CardGrid',
+          unique: true,
+          script: 'hand_card_container.gd'
         },
       ],
     },
@@ -2082,6 +2101,11 @@ const SCENES = {
       note: '1920×1080 [debug_controller.gd]',
       children: [
 {
+          type: 'Control', name: 'CardGrid',
+          unique: true,
+          script: 'hand_card_container.gd'
+        },
+{
           type: 'Control', name: 'DebugPanel',
           script: 'debug_panel.gd',
           note: '调试控制面板',
@@ -2197,6 +2221,9 @@ const SCENES = {
                           type: 'VBoxContainer', name: 'ScoreVBox',
                           children: [
 {
+                              type: 'Control', name: 'VBoxSpacer'
+                            },
+{
                               type: 'Label', name: 'TargetScoreLabel',
                               unique: true
                             },
@@ -2273,6 +2300,10 @@ const SCENES = {
                               type: 'Control', name: 'Row瞬',
                               children: [
 {
+                                  type: 'Label', name: 'FlashLv',
+                                  unique: true
+                                },
+{
                                   type: 'Label', name: 'FlashDun'
                                 },
 {
@@ -2281,10 +2312,6 @@ const SCENES = {
                                 },
 {
                                   type: 'RichTextLabel', name: 'FlashScore',
-                                  unique: true
-                                },
-{
-                                  type: 'Label', name: 'FlashLv',
                                   unique: true
                                 },
                               ],
@@ -2373,16 +2400,14 @@ const SCENES = {
                   children: [
 {
                       type: 'HBoxContainer', name: 'HandArea',
-                      unique: true,
-                      children: [
-{
-                          type: 'Button', name: 'PlayBtn',
-                          unique: true
-                        },
-                      ],
+                      unique: true
                     },
 {
                       type: 'Control', name: 'NinjaBar',
+                      unique: true
+                    },
+{
+                      type: 'Button', name: 'PlayBtn',
                       unique: true
                     },
 {
@@ -2411,11 +2436,6 @@ const SCENES = {
 {
                           type: 'Label', name: 'TailTypeLabel',
                           unique: true
-                        },
-{
-                          type: 'Control', name: 'CardGrid',
-                          unique: true,
-                          script: 'hand_card_container.gd'
                         },
 {
                           type: 'HBoxContainer', name: 'ColumnLabelRow',

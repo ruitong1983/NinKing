@@ -2,7 +2,7 @@
 
 > **用途：** 每次代码变更后，对照此表检查受影响文档是否需要同步更新。
 > **原则：** 改代码前先查此表，改完代码后逐项同步。
-> **建立日期：** 2026-06-17 | **最后更新：** 2026-06-20 | 自动生成的 HTML 由 pre-commit hook 触发，不列在此表。
+> **建立日期：** 2026-06-17 | **最后更新：** 2026-06-22 (新增 §5.16 交互增强指南, §5.15 CursorManager 更新) | 自动生成的 HTML 由 pre-commit hook 触发，不列在此表。
 
 ---
 
@@ -220,6 +220,35 @@
 | `docs/tween-library-reference.md` | Tween API | 新增公开 Tween 方法时同步 |
 | `05-art/15-sound-design-plan.md` | 音效设计 | 背景音乐/环境音变更时同步 |
 | `05-art/18-audio-asset-matching-guide.md` | 音效匹配 | 音效素材映射变更时同步 |
+
+### 5.14 `scripts/ninking/ui/xi_strike_overlay.gd` (v9 新增)
+
+| 影响文档 | 说明 | 同步要点 |
+|---------|------|---------|
+| **`04-ui/24-scoring-ninja-animation.md`** §5 | 喜 Strike Reveal 三段式动画 | 动画流程/时序/视觉效果变更时同步 |
+
+### 5.15 `CursorManager` Autoload — `scripts/ninking/ui/cursor_manager.gd` (Kenney 光标集成)
+
+> Autoload 注册名: `CursorManager` (`*res://scripts/ninking/ui/cursor_manager.gd`)
+
+| 影响文档 | 说明 | 同步要点 |
+|---------|------|---------|
+| `05-art/20-kenney-ui-pack-evaluation.md` | Kenney 素材评估报告 | 光标图片路径/形状映射变更时同步 |
+| `06-tech/03-technical-design.md` | 技术架构 — 光标系统 | Autoload 注册 / `SceneTree.node_added` 策略变更时同步 |
+| **`05-art/21-ui-interaction-enhancements.md`** | UI 交互增强指南（含 Kenney 光标/面板/按钮改造） | **新增/修改任何交互增强素材时必同步** |
+
+### 5.16 Kenney 暖纸风 UI 改造 — `kenney-beige-ui-transformation.md` 方案 + 实现
+
+> **方案文件:** `docs/ninking/09-mgmt/specs/kenney-beige-ui-transformation.md`
+> **相关脚本:** `barrier_theme.gd` / `main_menu.gd` / `game_manager.gd` / `shop_ui.gd` / `shop_slot.gd`
+
+| 影响文档 | 说明 | 同步要点 |
+|---------|------|---------|
+| `05-art/21-ui-interaction-enhancements.md` §3 | Kenney 面板/按钮纹理映射 | 新增纹理或修改映射表时同步 |
+| `04-ui/06-ui-layout-reference.md` | UI 布局参考 | 面板样式变更不影响布局，无需同步 |
+| `04-ui/10-main-ui-design.md` | Main Game UI | 按钮样式不影响结构，无需同步 |
+
+---
 
 ---
 

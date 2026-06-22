@@ -1,10 +1,10 @@
 class_name UIManager
 extends Control
 
-## Centralized UI management for NinKing (忍者牌 × 比鸡).
+## Centralized UI management for NinKing (忍者牌 比鸡).
 ## Delegates to HandDisplay, DeckViewerController,
 ## DunHighlighter, ResultScreenDisplay, NinjaBarNode (preloaded).
-## All display updates go through this class — game_manager.gd only handles flow.
+## All display updates go through this class game_manager.gd only handles flow.
 ## NinjaBarNode loaded dynamically (avoids editor cache conflicts).
 
 
@@ -15,6 +15,7 @@ extends Control
 @onready var scoring_overlay: Control = %ScoringOverlay
 @onready var game_over: Control = %GameOver
 @onready var shop_overlay: Control = %ShopOverlay  # Phase C 🏪
+@onready var settlement_overlay: SettlementCard = %SettlementOverlay  # Phase E 🎴
 
 # ═══ Level intro ═══
 @onready var intro_level_label: Label = %LevelLabel
@@ -48,11 +49,13 @@ static func _ensure_boss_cache() -> void:
 # ═══ Left panel ═══
 @onready var left_panel: Control = %LeftPanel
 @onready var panel_bg: ColorRect = %PanelBg
-@onready var col_xi_label: RichTextLabel = %ColXiLabel
+@onready var col_xi_label: Label = %ColXiLabel
 
 func update_xi_display(text: String) -> void:
 	col_xi_label.text = text
 	col_xi_label.visible = (text != "" and text != "喜: -")
+	# Label is inside ScoreVBox; VBox handles height adjustment automatically
+
 
 @onready var shadow_type_label: Label = %ShadowType
 @onready var flash_type_label: Label = %FlashType
@@ -176,7 +179,7 @@ func _ready() -> void:
 		hand_name_label, score_value_label, score_breakdown
 	)
 
-	# Ninja bar — CardContainer + manager Node
+	# Ninja bar  CardContainer + manager Node
 	var bar_container := NinjaBarContainer.new()
 	ninja_bar_wrapper.add_child(bar_container)
 	ninja_bar = NinjaBarNode.new()
@@ -193,8 +196,8 @@ func _ready() -> void:
 
 	status_label.text = ""
 
-
-
+	# ── ColXiLabel autowrap (inside ScoreVBox, VBox handles layout) ──
+	col_xi_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
 
 # ══════════════════════════════════════════
@@ -202,12 +205,13 @@ func _ready() -> void:
 # ══════════════════════════════════════════
 
 func show_view(view: String) -> void:
-	game_bg.visible = (view in ["game", "intro", "scoring", "shop"])
+	game_bg.visible = (view in ["game", "intro", "scoring", "shop", "settlement"])
 	level_intro.visible = (view == "intro")
-	game_layout.visible = (view in ["game", "scoring", "shop"])
+	game_layout.visible = (view in ["game", "scoring"])
 	shop_overlay.visible = (view == "shop")
 	game_over.visible = (view == "gameover")
 	victory_overlay.visible = (view == "victory")
+	settlement_overlay.visible = (view == "settlement")
 	# CardGrid is a sibling of UIManager at z_index=10, so it renders above
 	# all UIManager children. Hide during overlay views so cards don't block
 	# clicks to buttons (e.g. RetryButton on GameOver screen).
@@ -269,9 +273,6 @@ func hide_shop() -> void:
 		panel.queue_free()
 	_current_shop_panel = null
 	shop_overlay.visible = false
-	# Restore hand area visibility (dimmed during shop entry)
-	if game_layout.has_node("CenterColumn/HandArea"):
-		game_layout.get_node("CenterColumn/HandArea").modulate = Color.WHITE
 
 
 func is_shop_open() -> bool:
@@ -302,7 +303,7 @@ func shop_panel_mark_item_purchased(item_id: String) -> void:
 		_current_shop_panel.mark_item_purchased(item_id)
 
 
-# 🏪 Shop signal relay — game_manager connects to these
+# 🏪 Shop signal relay  game_manager connects to these
 signal shop_purchase_requested(ability_data: Dictionary)
 signal shop_item_purchase_requested(item_data: Dictionary)
 signal shop_reroll_requested()
@@ -347,7 +348,7 @@ func on_seal_start(barrier: int, seal_idx: int, target: int, seal_lord_name: Str
 
 
 # ══════════════════════════════════════════
-# Left panel — formula display
+# Left panel  formula display
 # ══════════════════════════════════════════
 
 var _score_subtotal: int = 0
@@ -396,7 +397,7 @@ func update_target(target: int) -> void:
 
 
 # ══════════════════════════════════════════
-# Hand display — thin wrappers to HandDisplay
+# Hand display  thin wrappers to HandDisplay
 # ══════════════════════════════════════════
 
 func _refresh_internal(hand: Array[CardData.PlayingCard]) -> void:
@@ -410,7 +411,7 @@ func refresh_hand(hand: Array[CardData.PlayingCard]) -> void:
 	_refresh_internal(hand)
 
 
-## Called after two cards swap — animate in-place, no full rebuild.
+## Called after two cards swap  animate in-place, no full rebuild.
 func on_cards_swapped(src: int, tgt: int) -> void:
 	card_grid.swap_two_cards(src, tgt)
 	hand_display.update_labels(NinKingGameState.hand)
@@ -419,7 +420,7 @@ func on_cards_swapped(src: int, tgt: int) -> void:
 
 
 # ══════════════════════════════════════════
-# Ninja bar — delegated to NinjaBarDisplay
+# Ninja bar  delegated to NinjaBarDisplay
 # ══════════════════════════════════════════
 
 func refresh_ninjas(owned_ninjas: Array, max_slots: int, use_dissolve: bool = false) -> void:
@@ -431,7 +432,7 @@ func pulse_ninja_bar() -> void:
 
 
 # ══════════════════════════════════════════
-# Result screens — delegated to ResultScreenDisplay
+# Result screens  delegated to ResultScreenDisplay
 # ══════════════════════════════════════════
 
 func set_victory(barrier: int, score: int) -> void:
@@ -451,7 +452,7 @@ func show_scoring_result(head_eval: HandEvaluator3.EvalResult, mid_eval: HandEva
 
 
 # ══════════════════════════════════════════
-# Card flash — delegated to DunHighlighter
+# Card flash  delegated to DunHighlighter
 # ══════════════════════════════════════════
 
 func flash_all_hand_cards() -> void:
@@ -480,7 +481,7 @@ func restore_ui_state() -> void:
 
 
 # ══════════════════════════════════════════
-# Deck display — delegated to DeckViewerController
+# Deck display  delegated to DeckViewerController
 # ══════════════════════════════════════════
 
 func update_deck_count(draw_count: int) -> void:

@@ -1,6 +1,6 @@
 # 计分忍者触发动画设计（Phase G — 三幕式）
 
-> **最后更新:** 2026-06-15 (Balatro 打击感强化) | **实现文件:** `scripts/ninking/ui/animation_handler.gd` (~579 行)
+> **最后更新:** 2026-06-22 (v10 累积式展示) | **实现文件:** `scripts/ninking/ui/animation_handler.gd` (~405 行) + `scripts/ninking/ui/xi_strike_overlay.gd`
 > **基础设施:** `scripts/tween/tween_fx.gd` → `scripts/tween/global_tweens.gd`
 > **数据源:** `scripts/ninking/score_calculator.gd` — `ninja_affected_groups()`
 > **决策溯源:** 记忆 `scoring-ninja-trigger-animation-2026-06-15.md`（Grill 12 轮）+ review-plan 审阅
@@ -273,11 +273,15 @@ def _contribs_for_column(contribs):
 
 ---
 
-## 5. Phase 3：公式展示 & 喜×判定
+## 5. Phase 3：喜 Strike Reveal — 三段式
+
+> **v9 (2026-06-22):** 取消旧版 toast+粒子，改用全屏 `XiStrikeOverlay` 三段式动画。
+> **v10 (2026-06-22):** Stage B 从逐个替换改为**累积式展示** — 喜名逐行堆叠在屏幕上，超过 4 个时最早喜折叠为 "+N 喜" 行。水印不再隐藏，淡化后持续呼吸作为背景层。
+> **实现文件:** `scripts/ninking/ui/xi_strike_overlay.gd` (`class_name XiStrikeOverlay extends Control`)
 
 ### 5.1 Xi 检测与触发
 
-**代码位置:** `animation_handler.gd:300-355`
+**代码位置:** `animation_handler.gd:285-371`
 
 ```
 row_total = Phase 1 累计
@@ -295,25 +299,128 @@ has_xi = xi_result.has_any()    （有喜条件触发，但不一定产生全局
 
 | 分支 | 视觉效果 | 适用场景 |
 |------|---------|---------|
-| `has_global_xi` (xi_product>1) | 公式展示 `set_score_formula(total, xi_product)` + `scale_pop(1.2)` + `color_flash(GOLD, 0.5)` + 进度条推进 | 四张、全黑、全红等喜生效时 |
-| `!has_global_xi && has_xi` | 仅展示喜文本，不做公式 pop | 三清、顺清打头等仅修饰性喜 |
+| `has_global_xi` (xi_product>1) | **三段式 XiStrikeOverlay** + 公式 `set_score_formula` + 进度条推进 | 四张、全黑、全红等全局喜生效时 |
+| `!has_global_xi && has_xi` | 仅展示喜文本，不做公式 pop + 轻量 burst/shake | 三清、顺清打头等仅修饰性喜 |
 | `!has_global_xi && !has_xi` | 0.3s 停顿后直接进入结果判定 | 无喜触发 |
 
-### 5.2 喜触发仪式感（has_xi 时触发）
+### 5.2 XiStrikeOverlay — 三段式动画
 
-```gdscript
-play_sfx(SB.XI_TRIGGER)          # 喜触发音
-burst_particles(viewport_center, "shuriken")  # 手里剑粒子
-do_hit_stop(0.08, 0.06)          # 顿帧 80ms
-screen_shake(0.15, 0.10)         # 屏幕震动 100ms
-_show_breakdown_toast("喜: 全黑, 四张", Color.GOLD)  # 金色喜名单 Toast
-await 0.8s
-play_sfx(SB.XI_FANFARE)          # 喜号角
+`XiStrikeOverlay` 是一个全屏 `Control`（z_index=15，高于 CardGrid），渲染在游戏画面之上。**无暗幕** — 游戏画面保持可见，喜文字在正常场景上直接炸出。
+
+#### 结构
+
+```
+XiStrikeOverlay (Control, z=15, anchors=full)
+└── center_box (Control, z=1, 居中对齐 600×400)         ← v10: enlarged
+    ├── [水印 Label] "喜" 280px 深红, 12px 描边         (Stage A, 淡化后保留)
+    ├── [溢出行 Label] "+N 喜" 32px 淡金                  (overflow, 可选)
+    ├── [行 Label] ×4 max: "{name}    ×{x_mult}" 56px    (Stage B, 累积)
+    ├── [分割线 Label] "────────────" 24px 金色 60%      (Stage C 前)
+    └── [乘积 Label] "×N" 200px 金字红描边                (Stage C)
 ```
 
-### 5.3 Phase 4：结果判定
+**Tier 映射:**
 
-**代码位置:** `animation_handler.gd:359-391`
+| x_mult | Tier | 名称颜色 | ×N 颜色 | 描边 |
+|:------:|:----:|----------|---------|:----:|
+| ×2 | 1 | 金色 `#FFD700` | 金色 | 4px |
+| ×3 | 2 | 深金 `#FFBF1A` | 深金 | 6px |
+| ×4 | 3 | 橙红 `#FF8C1A` | 橙红 | 8px |
+| ×5 | 4 | 猩红 `#FF400D` | 猩红 | 10px |
+| ×6+ | 5 | 血红 `#FF1A1A` | 血红 | 14px |
+
+#### 动画流程
+
+```
+Stage A — 喜気降臨 (~1.0s)
+  ├─ "喜" 水印 280px 从 scale 3× crash-in → 1.0× (0.5s TRANS_BACK)
+  ├─ modulate 0→0.35 红 (0.35s)
+  ├─ do_hit_stop(0.06, 0.04) + screen_shake(0.08, 0.06)
+  └─ watermark_breathe(Vector2(1.3, 1.3), 1.0) 循环呼吸
+
+Stage A→B 过渡 — 水印淡化
+  ├─ dim_watermark(): modulate 0.35→0.12 透明, scale 不变 (0.2s)
+  └─ 水印继续保持呼吸循环作为背景层 (不销毁)
+
+Overflow (可选, triggered>4时)
+  ├─ 折叠行 "+N 喜" 从 x=600 快速滑入 (0.1s TRANS_QUAD)
+  ├─ font_size=32, 淡金色, 无 tier 特效
+  └─ 之后 animation_handler 只遍历最后 4 个喜
+
+Stage B — 累积式展示 (~0.9s/行)
+  ├─ 1. 累积行单 Label: "{name}    ×{x_mult}" 56px
+  │    颜色按 tier 分级, 整体从 x=600 滑入至居中 (0.35s TRANS_SPRING)
+  ├─ 2. Tier 特效 (hit-stop + shake + burst_particles + color_flash)
+  │    依 tier 递增: 1(轻)→2(中)→3(强)→4(双重)→5(三重+全屏红闪)
+  └─ 3. 脉冲回正: scale 1.1→1.0 (0.32s)
+  └─ 已有行保持可见, 不消失, 新行加入时上方行不动
+
+Stage C — 乘积衝擊 (~1.7s)
+  ├─ 0. 分割线 "────────────────" 淡入 (0.2s) [v10 新增]
+  ├─ 1. ×N 从 scale 0.01→2.2 explode (0.25s TRANS_BACK)
+  ├─ 2. settle 2.2→1.0 (0.4s TRANS_SPRING)
+  ├─ 3. do_hit_stop(0.1, 0.04) + manga_burst + shake(0.2, 0.15)
+  ├─ 4. 第二重 hit_stop(0.06, 0.04) + shake (强调)
+  └─ 5. 最终脉冲 1.35→1.0 + gold_flash(0.6s) + hold
+```
+
+**Tier 冲击特效明细:**
+
+| Tier | hit-stop | shake | particle | flash |
+|:----:|:--------:|:-----:|:--------:|:-----:|
+| 1 (×2) | 0.03/0.06 | 0.04/0.03 | manga_burst | — |
+| 2 (×3) | 0.05/0.05 | 0.08/0.05 | manga_burst | — |
+| 3 (×4) | 0.06/0.04 | 0.10/0.06 | shuriken | 橙红 0.15s |
+| 4 (×5) | 0.06/0.04 + 0.04/0.04 双重 | 0.12/0.08 + 0.06/0.04 | shuriken | 红色 0.2s |
+| 5 (×6+) | 三重 0.07→0.05→0.03 | 0.15→0.08→0.05 | shuriken | 全屏红闪 0.35s |
+
+#### 代码摘要
+
+```gdscript
+# animation_handler.gd Phase 3 入口 (line 293)
+if has_xi or has_global_xi:
+    var xi_overlay := XI_STRIKE.new()
+    _ui.get_parent().add_child(xi_overlay)
+    xi_overlay.z_index = 15
+
+    # Stage A — 喜気降臨
+    play_sfx(SB.XI_TRIGGER)
+    await xi_overlay.stage_a_buildup(tree)
+    xi_overlay.dim_watermark()  # v10: 水印淡化保留
+
+    # Overflow folding (v10)
+    var max_show := 4
+    if triggered.size() > max_show:
+        xi_overlay.show_overflow(triggered.size() - max_show)
+        triggered = triggered.slice(-max_show)
+
+    # Stage B — 累积式展示
+    for xi_name in triggered:
+        await xi_overlay.stage_b_reveal(xi_name, x_m, tree)
+        play_sfx(SB.XI_TRIGGER)
+        _ui.set_score_formula(col_cumulative, show_product)
+
+    # Stage C — 乘积衝擊
+    play_sfx(SB.XI_FANFARE)
+    await xi_overlay.stage_c_final(actual_product, tree)
+
+    xi_overlay.queue_free()
+```
+
+### 5.3 组级喜特殊处理（无全局乘积时）
+
+当只有组级喜（三清/三顺清/顺清打头/豹子）触发、无全局喜时，走轻量化分支：
+
+```gdscript
+play_sfx(SB.XI_FANFARE)
+burst_particles(viewport_center, "manga_burst")
+screen_shake(0.08, 0.06)
+await 0.5s
+```
+
+### 5.4 Phase 4：结果判定
+
+**代码位置:** `animation_handler.gd:378-401`
 
 | 条件 | 视觉效果 | 后续行为 |
 |------|---------|---------|
@@ -321,9 +428,7 @@ play_sfx(SB.XI_FANFARE)          # 喜号角
 | `is_fail` (plays_remaining ≤ 1 && 未达标) | `play_sfx(SEAL_FAIL)` + `screen_shake(0.2, 0.12)` + `color_flash(game_bg, dark_red, 0.3)` | `finalize_play` → 失败结算 |
 | 继续 | 0.4s 停顿 | `finalize_play` → PLAYING 状态 |
 
-### 5.4 标签恢复
-
-**代码位置:** `animation_handler.gd:703-709`
+### 5.5 标签恢复
 
 `_restore_type_labels()` 在 Phase 3 结束后执行：从 `_saved_original_texts` 恢复三墩牌型标签原文（计分动画中将标签替换为当前揭示的牌型名，结束后需要恢复）。
 
@@ -601,7 +706,7 @@ Stage 1         Stage 2 (忍者触发时)     Stage 3
 
 | 段 | 内容 | 最短 | 最长 | 说明 |
 |----|------|------|------|------|
-| 启动 | 初始停顿 | 1.0s | 1.0s | |
+| 启动 | 初始停顿 | 1.2s | 1.2s | |
 | **Phase 1 行×3** | | **(3.5s)** | **(6.5s)** | |
 | 行_i Stage 1 | fade_in + 等待 | 0.35s | 0.35s | 必有 |
 | 行_i Stage 2 | 每张忍者 0.6s | 0s | N × 0.6s | 跳过时不执行 |
@@ -613,14 +718,17 @@ Stage 1         Stage 2 (忍者触发时)     Stage 3
 | 列_i Stage 2 | 忍者重播 | 0s | M × 0.6s | 列仅全局忍者 |
 | 列_i Stage 3 | 乘积 + 累计 | 0.3s | 0.3s | |
 | 列后 | 总分飘字 | 0.1s | 0.1s | |
-| **Phase 3 喜** | | **(1.0s)** | **(2.8s)** | |
-| 全局×展示 | 公式 pop | 0.5s | 0.5s | 仅 `xi_product>1` |
-| 喜触发仪式 | shake+粒子+toast | 0s | 1.3s | 仅 `has_xi` |
-| 结果停顿 | 等待 | 0.5s | 0.8s | |
+| **Phase 3 喜三段式** | | **(1.5s)** | **(3.8s)** | |
+| A 喜気降臨 | watermask crash-in + 呼吸 → 水印淡化 | 1.0s | 1.0s | 仅 `has_xi` |
+| A→B 溢出折叠 | "+N 喜" 快速滑入 | 0s | 0.1s | 仅 triggered>4 时 |
+| B 累积行展示 | 每行 ~0.9s (滑入+tier特效+脉冲) | 0s | min(K,4) × 0.9s | K=触发喜数, 只展示最后 4 个 |
+| C 乘积衝擊 | 分割线 + ×N explode + 脉冲 | 0s | 1.7s | 仅 `xi_product>1` |
+| 组级喜轻量 | burst + shake | 0s | 0.5s | 仅组级喜 |
+| 公式更新 + 停顿 | set_score_formula | 0.5s | 0.5s | |
 | **Phase 4** | | **(0.8s)** | **(0.8s)** | |
 | 过关VFX | punch_in + 粒子 | 0.8s | 0.8s | |
 | 失败VFX | shake + 闪红 | 0.8s | 0.8s | |
-| **合计** | | **~7s** | **~13s** | |
+| **合计** | | **~7.5s** | **~15s** | |
 
 ### 跳过时长
 
@@ -663,9 +771,16 @@ func _on_play():
 | `_skip_requested` | `bool` | 跳过标志 |
 | `_skip_listener` | `Control` | 全屏跳过覆盖层 |
 | `_saved_original_texts` | `Array[String]` | 计分前保存的牌型标签文本 |
-| `_active_toast` | `Label` | 当前活跃的喜 Toast（避免重叠） |
+| `SFX_TICK` | `Callable` | count-up 音效回调 |
 
-**注：** 作为 `RefCounted`，AnimationHandler **不是 Node**，不参与场景树。其子函数创建的临时节点（飘字 Label、Toast 等）通过 `_ui.add_child()` 挂入场景树，由 Tween 的 `queue_free` 自行清理。
+**Xi Strike Overlay (v9 新增):**
+
+| 临时对象 | 类型 | 用途 |
+|----------|------|------|
+| `XI_STRIKE` | `GDScript` | `preload("xi_strike_overlay.gd")` 静态引用 |
+| `xi_overlay` | `XiStrikeOverlay` | Phase 3 运行时创建，动画结束后 `queue_free` |
+
+**注：** 作为 `RefCounted`，AnimationHandler **不是 Node**，不参与场景树。其子函数创建的临时节点（飘字 Label、XiStrikeOverlay 等）通过 `_ui.add_child()` 或 `_ui.get_parent().add_child()` 挂入场景树，由 Tween 的 `queue_free` 自行清理。
 
 ### 10.2 TweenFX / GlobalTweens 新增函数
 

@@ -40,7 +40,7 @@
 
 ## 2. 场景树全图
 
-> **校验依据：** `scenes/ninking/ninking_main.tscn` 实际节点结构（2026-06-18 同步）。
+> **校验依据：** `scenes/ninking/ninking_main.tscn` 实际节点结构（2026-06-22 同步）。
 > `[game_manager.gd]` = 脚本绑定 ｜ `[%Name]` = unique_name_in_owner ｜ `（运行时动态加载）` = 代码创建
 
 ```
@@ -60,8 +60,8 @@ NinKingMain (Control) 1920×1080                      [game_manager.gd]
     │   ├── LeftPanel (Control) [%LeftPanel]           — 左侧 420px 信息面板
     │   │   ├── PanelBg (ColorRect) [%PanelBg]         — 全透明 (结界动态 modulate)
     │   │   │
-    │   │   ├── HandTypePanel (Panel) [%HandTypePanel] — anchor_top=0 anchor_bottom=0.5
-    │   │   │   └── HandTypeVBox (Control)
+    │   │   ├── HandTypePanel (Panel) [%HandTypePanel] — anchor_top=0 anchor_bottom=0.3
+    │   │   │   └── HandTypeVBox (Control) offset_top=10 offset_bottom=-10
     │   │   │       ├── Row影 (Control)
     │   │   │       │   ├── ShadowDun (Label)          "影" 20px #588CF2
     │   │   │       │   ├── ShadowType (Label) [%ShadowType]
@@ -92,28 +92,29 @@ NinKingMain (Control) 1920×1080                      [game_manager.gd]
     │   │   │           ├── RightColLv (Label)
     │   │   │           └── RightColScore (RichTextLabel)
     │   │   │
-    │   │   ├── ScorePanel (Panel) [%ScorePanel]       — anchor_top=0.5 anchor_bottom=0.75
-    │   │   │   └── ScoreVBox (VBoxContainer)
-    │   │   │       ├── ColXiLabel (Label) [%ColXiLabel] "喜: 昇龍 背水" 32px autowrap
-    │   │   │       ├── ScoreLabel (Label) [%ScoreLabel] "忍気 0" 48px
+    │   │   ├── ScorePanel (Panel) [%ScorePanel]       — anchor_top=0.3 anchor_bottom=0.7
+    │   │   │   └── ScoreVBox (VBoxContainer) offset_left=24 offset_top=10 offset_right=-200 offset_bottom=-10
+    │   │   │       ├── ColXiLabel (Label) [%ColXiLabel] "喜: 昇龍 背水" 40px #D93333 autowrap 自然撑高
+    │   │   │       ├── VBoxSpacer (Control)            — SIZE_EXPAND 推底部元素到底
+    │   │   │       ├── ScoreLabel (Label) [%ScoreLabel] "忍気 0" 48px #3D2B1A
     │   │   │       ├── ProgressBar (ProgressBar) [%ProgressBar] 28px
-    │   │   │       └── TargetScoreLabel (Label) [%TargetScoreLabel] "封印 0" 28px
+    │   │   │       └── TargetScoreLabel (Label) [%TargetScoreLabel] "封印 0" 28px #3D2B1A
     │   │   │
-    │   │   ├── MatchPanel (Panel) [%MatchPanel]       — anchor_top=0.75 anchor_bottom=0.875
-    │   │   │   └── MatchVBox (VBoxContainer)
-    │   │   │       ├── MatchTitle (Label)              "比赛信息" 20px 金
-    │   │   │       ├── HandsLabel (Label) [%HandsLabel] "討伐 X" 28px
-    │   │   │       └── GoldLabel (Label) [%GoldLabel]  "$X" 28px
+    │   │   ├── MatchPanel (Panel) [%MatchPanel]       — anchor_top=0.7 anchor_bottom=0.9
+    │   │   │   └── MatchVBox (VBoxContainer) offset_left=24 offset_top=10 offset_bottom=-10
+    │   │   │       ├── MatchTitle (Label)              "比赛信息" 20px #66471E (暖铜褐)
+    │   │   │       ├── HandsLabel (Label) [%HandsLabel] "討伐 X" 28px #3D2B1A
+    │   │   │       └── GoldLabel (Label) [%GoldLabel]  "$X" 48px #B8852E (暗金)
     │   │   │
-    │   │   └── AntePanel (Panel) [%AntePanel]          — anchor_top=0.875 anchor_bottom=1.0
+    │   │   └── AntePanel (Panel) [%AntePanel]          — anchor_top=0.9 anchor_bottom=1.0
     │   │       └── AnteVBox (VBoxContainer)
     │   │           ├── BarrierLabel (Label) [%BarrierLabel] "结界 X/8" 28px
     │   │           └── RoundLabel (Label) [%RoundLabel]     "回合 X" 28px
     │   │
     │   ├── CenterColumn (Control) [%CenterColumn]      — 中央游戏区 (fill)
     │   │   ├── NinjaBar (Control) [%NinjaBar]           — 忍者牌栏（运行时动态加载）
-    │   │   ├── HandArea (HBoxContainer) [%HandArea]    — 操作按钮区
-    │   │   │   └── PlayBtn (Button) [%PlayBtn]         "討伐" 84×116
+    │   │   ├── HandArea (HBoxContainer) [%HandArea]    — 操作按钮容器（空闲中）
+    │   │   ├── PlayBtn (Button) [%PlayBtn]            "討伐" 160×56 28px 手牌区右侧
     │   │   ├── DunArea (Panel) [%DunArea]              — 三墩卡牌区 620×728
     │   │   │   ├── ColumnLabelRow (HBoxContainer)      — 列牌型标签行
     │   │   │   │   ├── Col0Label (Label) [%Col0Label]
@@ -127,7 +128,7 @@ NinKingMain (Control) 1920×1080                      [game_manager.gd]
     │   │   │   ├── TailTypeLabel (Label) [%TailTypeLabel]
     │   │   │   └── CardGrid (Control) [%CardGrid]       — 3×3 卡牌网格
     │   │   │       [hand_card_container.gd]
-    │   │   └── AiRearrangeBtn (Button) [%AiRearrangeBtn] "陣\n形" 84×116
+    │   │   └── AiRearrangeBtn (Button) [%AiRearrangeBtn] "陣形" 200×48 24px
     │   │
     │   ├── StatusLabel (Label) [%StatusLabel]          — 约束提示 24px
     │   └── DeckBtn (Button) [%DeckBtn]                 "牌库: XX" 200×48
@@ -205,24 +206,25 @@ NinKingMain (Control) 1920×1080                      [game_manager.gd]
 | 渐隐 | `panel_edge_fade.gdshader` 挂载于 HandTypePanel + ScorePanel + MatchPanel + AntePanel |
 | 用途 | 显示全部计分与状态数据 |
 
-**布局方案 (v2026-06-16)：** LeftPanel 四面板锚定分区布局。
+**布局方案 (v2026-06-22)：** LeftPanel 四面板锚定分区布局。纹理使用 Kenney 暖纸风面板（`panel_beige`/`panel_beigeLight`），`texture_filter=1`（NEAREST）避免拉伸模糊。
 
-| 面板 | 节点 | 锚定 | 高度 |
-|------|------|------|------|
-| 牌型+列展示 | `HandTypePanel` | `top=0, bottom=0.4` | 40% |
-| 分数/进度 | `ScorePanel` | `top=0.4, bottom=0.65` | 25% |
-| 讨伐/金币 | `MatchPanel` | `top=0.65, bottom=0.85` | 20% |
-| 结界/回合 | `AntePanel` | `top=0.85, bottom=1.0` | 15% |
+| 面板 | 节点 | 纹理 | 锚定 | 高度 |
+|------|------|------|------|------|
+| 牌型+列展示 | `HandTypePanel` | `panel_beigeLight` | `top=0, bottom=0.3` | 30% |
+| 分数/进度 | `ScorePanel` | `panel_beigeLight` | `top=0.3, bottom=0.7` | 40% |
+| 讨伐/金币 | `MatchPanel` | `panel_beige` | `top=0.7, bottom=0.9` | 20% |
+| 结界/回合 | `AntePanel` | `panel_beige` | `top=0.9, bottom=1.0` | 10% |
 
-四块互不重叠、响应式填充分区，各面板保持独立底色。
+四块互不重叠、响应式填充分区。文字色统一深褐 `Color(0.24, 0.18, 0.11)`（特殊标注除外）。
 
 **Ink-bleed 渐隐：** 4 节点挂载 `panel_edge_fade.gdshader`, `fade_start=0.64`，右边缘渐隐。
+**VBox 间距：** 所有 VBox 容器统一 `offset_left=24`、`offset_top=10`、`offset_bottom=-10`，与面板 9-patch 边框留出间距。
 
 **子区域：**
 
-##### a. HandTypePanel (顶部 0~40%) — 三墩牌型 + 列牌型
+##### a. HandTypePanel (顶部 0~30%) — 三墩牌型 + 列牌型
 
-节点路径 `UIManager/GameLayout/LeftPanel/HandTypePanel`，`bg_color #0F281F` 不透明度 0.6。
+节点路径 `UIManager/GameLayout/LeftPanel/HandTypePanel`，`panel_beigeLight` 纹理。
 
 ```
 HandTypePanel (Panel) [%HandTypePanel]
@@ -253,37 +255,45 @@ HandTypePanel (Panel) [%HandTypePanel]
 分数 = (卡牌筹码 + 牌型筹码) × 牌型倍率，由 `HandTypeLabeler._update_dun_types()` 实时预览。
 Lv badge 色阶：Lv.1-2 `#7A7A7A` 灰 | Lv.3-4 `#588CF2` 蓝 | Lv.5-6 `#C4A843` 金。Lv.0 不显示。
 
-##### b. ScorePanel (中部 40%~65%) — 分数/进度
+##### b. ScorePanel (中部 30%~70%) — 喜 / 分数 / 进度
+
+`panel_beigeLight` 纹理。`ScoreVBox` 使用 VBoxSpacer 实现底部锚定：
+
+- ColXiLabel 居顶部自然高度（autowrap 自动换行撑高不撑开）
+- VBoxSpacer（`size_flags_vertical=2`）撑满中间，推底部元素到下沿
+- ScoreLabel / ProgressBar / TargetScoreLabel 固定在底部
 
 | 元素 | 字号 | 颜色 | 用途 |
 |------|------|------|------|
-| ColXiLabel [%ColXiLabel] | 32px | 喜 accent `#D93333` | 喜名称列表，autowrap 自动换行，自然高度不撑开 |
-| ScoreLabel [%ScoreLabel] | 48px | `(0.941, 0.929, 0.894)` 白 | "気 N" |
+| ColXiLabel [%ColXiLabel] | 40px | `#D93333` 喜红 | 喜名列表，autowrap 自然换行撑高 |
+| ScoreLabel [%ScoreLabel] | 48px | `#3D2B1A` 深褐 | "気 N" |
 | ProgressBar [%ProgressBar] | 28px | 灰底 + 金 fill | 进度条 |
-| TargetScoreLabel [%TargetScoreLabel] | 28px | 灰 `#7A7A6A` | "封印 N" |
+| TargetScoreLabel [%TargetScoreLabel] | 28px | `#3D2B1A` 深褐 | "封印 N" |
 
-ScoreVBox 子序：`ColXiLabel → ScoreLabel → ProgressBar → TargetScoreLabel`
-StyleBoxFlat: `content_margin(16,...)`，无边框、无圆角。`bg_color #0F281F` 0.6。
+ScoreVBox 子序：`ColXiLabel → VBoxSpacer → ScoreLabel → ProgressBar → TargetScoreLabel`
+ColXiLabel 可见性变化（喜为空时隐藏）由 `ui_manager.gd` 控制，VBoxSpacer 自动适应调整。
 
-##### c. MatchPanel (中部 65%~85%) — 比赛信息
+##### c. MatchPanel (中部 70%~90%) — 比赛信息
 
-| 字段 | 节点 | 格式 | 字号 |
-|------|------|------|------|
-| 标题 | `MatchTitle` | "比赛信息" | 20px |
-| 已出牌数 | `HandsLabel` [%HandsLabel] | "討伐 X" | 28px |
-| 金币 | `GoldLabel` [%GoldLabel] | "$X" | 28px |
+`panel_beige` 纹理。标题和金币在暖米色面板上使用加深色调保证可读性。
 
-**面板颜色：** `StyleBoxFlat_match_panel` — `bg_color #4A2020` (暗红褐)。无边框、无圆角。
+| 字段 | 节点 | 格式 | 字号 | 颜色 |
+|------|------|------|------|------|
+| 标题 | `MatchTitle` | "比赛信息" | 20px | `#66471E` 暖铜褐 |
+| 已出牌数 | `HandsLabel` [%HandsLabel] | "討伐 X" | 28px | `#3D2B1A` 深褐 |
+| 金币 | `GoldLabel` [%GoldLabel] | "$X" | 48px | `#B8852E` 暗金 |
+
 **渐隐：** `ShaderMaterial_match_fade` (panel_edge_fade.gdshader, `fade_start=0.64`)
 
-##### d. AntePanel (底部 85%~100%) — 结界/回合
+##### d. AntePanel (底部 90%~100%) — 结界/回合
 
-| 字段 | 节点 | 格式 | 字号 |
-|------|------|------|------|
-| 结界 | `BarrierLabel` [%BarrierLabel] | "结界 X/8" | 28px |
-| 回合 | `RoundLabel` [%RoundLabel] | "回合 X" | 28px |
+`panel_beige` 纹理。
 
-**面板颜色：** `StyleBoxFlat_ante_panel` — `bg_color #3D2B1A` (暗金琥珀)。无边框、无圆角。
+| 字段 | 节点 | 格式 | 字号 | 颜色 |
+|------|------|------|------|------|
+| 结界 | `BarrierLabel` [%BarrierLabel] | "结界 X/8" | 28px | `#3D2B1A` 深褐 |
+| 回合 | `RoundLabel` [%RoundLabel] | "回合 X" | 28px | `#3D2B1A` 深褐 |
+
 **渐隐：** `ShaderMaterial_ante_fade` (panel_edge_fade.gdshader, `fade_start=0.64`)
 
 #### 3.3.3 中央列 `CenterColumn`
@@ -334,9 +344,18 @@ StyleBoxFlat: `content_margin(16,...)`，无边框、无圆角。`bg_color #0F28
 | 属性 | 值 |
 |------|-----|
 | 节点 | `UIManager/GameLayout/CenterColumn/HandArea` [%HandArea] |
-| 用途 | 存放操作按钮 (PlayBtn) |
-| 子节点 | `PlayBtn` (Button) [%PlayBtn] "討伐" 84×116 |
-| 注意 | DunArea 是 HandArea 的**平级兄弟节点**，非子节点 |
+| 用途 | 操作按钮容器（当前空闲，PlayBtn 已移出至 CenterColumn） |
+| 子节点 | （无） |
+
+##### b2. 讨伐按钮 `PlayBtn` (移至 CenterColumn)
+
+| 属性 | 值 |
+|------|-----|
+| 节点 | `UIManager/GameLayout/CenterColumn/PlayBtn` [%PlayBtn] |
+| 用途 | 讨伐（出牌）主操作按钮 |
+| 位置 | 绝对定位 `(60,605)` ~ `(220,661)`（手牌区左侧，垂直居中） |
+| 尺寸 | 160×56 / 28px / "討伐" 横排 |
+| 风格 | manga L 级（4px 墨黑描边，accent 色底，8px 圆角）— 运行时注入 |
 
 ##### c. 三墩卡牌区 `DunArea` (Panel, 620×728)
 

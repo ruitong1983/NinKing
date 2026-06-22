@@ -1,6 +1,6 @@
 # Debug 计分测试场景
 
-> **建立日期:** 2026-06-12 | **最后更新:** 2026-06-17 | **关联场景:** `debug_ninking_main.tscn` + `debug_controller.gd` + `debug_panel.gd`
+> **建立日期:** 2026-06-12 | **最后更新:** 2026-06-22 | **关联场景:** `debug_ninking_main.tscn` + `debug_controller.gd` + `debug_panel.gd`
 > **风格权威:** 独立于主场景，零侵入设计。场景结构已与 `ninking_main.tscn` 对齐命名和层级。
 
 ## §1 概述
@@ -65,15 +65,15 @@ NinKingDebug (Control) [debug_controller.gd]
 │   │   ├── CenterColumn (VBoxContainer, stretch=1)
 │   │   │   ├── NinjaBar (Control)          ← 已选忍者展示
 │   │   │   ├── StatusLabel                 ← 操作提示
-│   │   │   ├── HandArea (HBoxContainer)
-│   │   │   │   ├── PlayBtn [討伐]          ← 触发计分
-│   │   │   │   └── DunArea (Panel)
-│   │   │   │       ├── ColumnLabelRow (HBox)  ← 列牌型标签 (Col0/Col1/Col2)
-│   │   │   │       ├── CardGrid (Control, hand_card_container.gd)  ← 3×3 卡牌网格
-│   │   │   │       ├── DunHead → HeadCards (Hand)   ← 影 3 格
-│   │   │   │       ├── DunMiddle → MiddleCards      ← 瞬 3 格
-│   │   │   │       └── DunTail → TailCards          ← 滅 3 格
-│   │   │   └── AiRearrangeBtn [陣形]       ← disabled
+│   │   │   ├── HandArea (HBoxContainer)    ← 操作按钮容器（空闲中）
+│   │   │   ├── PlayBtn [討伐]              ← 触发计分（手牌区左侧，160×56 28px）
+│   │   │   ├── DunArea (Panel)
+│   │   │   │   ├── ColumnLabelRow (HBox)  ← 列牌型标签 (Col0/Col1/Col2)
+│   │   │   │   ├── CardGrid (Control, hand_card_container.gd)  ← 3×3 卡牌网格
+│   │   │   │   ├── DunHead → HeadCards (Hand)   ← 影 3 格
+│   │   │   │   ├── DunMiddle → MiddleCards      ← 瞬 3 格
+│   │   │   │   └── DunTail → TailCards          ← 滅 3 格
+│   │   │   ├── AiRearrangeBtn [陣形]       ← disabled
 │   │   │
 │   │   └── DebugPanel (Control, 540px)
 │   │       ├── PanelBg (ColorRect, full rect)
@@ -137,8 +137,8 @@ NinKingDebug (Control) [debug_controller.gd]
 | GameBg | `NinKingMain/GameBg` | `NinKingDebug/GameBg` | 同 `table_bg.png` |
 | LeftPanel 及全部子节点 | `UIManager/GameLayout/LeftPanel` | `MainVBox/ContentRow/LeftPanel` | 内部结构完全一致 |
 | CenterColumn 及全部子节点 | `UIManager/GameLayout/CenterColumn` | `MainVBox/ContentRow/CenterColumn` | 内部结构完全一致 |
-| DunArea 及全部子节点 | `.../CenterColumn/HandArea/DunArea` | `.../CenterColumn/HandArea/DunArea` | **9 个标签 + CardGrid 命名严格一致** |
-| PlayBtn | `.../HandArea/PlayBtn` | `.../HandArea/PlayBtn` | 文本 `討\n伐`、unique_name |
+| DunArea 及全部子节点 | `.../CenterColumn/DunArea` | `.../CenterColumn/DunArea` | **9 个标签 + CardGrid 命名严格一致** |
+| PlayBtn | `.../CenterColumn/PlayBtn` | `.../CenterColumn/PlayBtn` | 文本 `討伐` 横排、160×56 28px、unique_name |
 | AiRearrangeBtn | `.../CenterColumn/AiRearrangeBtn` | `.../CenterColumn/AiRearrangeBtn` | 文本 `陣形` |
 | DeckBtn | `UIManager/DeckBtn` | `NinKingDebug/DeckBtn` | 文本 `牌库: N` |
 | StatusLabel | `UIManager/StatusLabel` | `MainVBox/ContentRow/CenterColumn/StatusLabel` | 提示文本 |
@@ -193,7 +193,7 @@ NinKingDebug (Control) [debug_controller.gd]
 ```
 点击右侧牌库卡牌 → 加入选牌队列（再次点击同一张→从队列移除）
     → 队列横向展示在 CardTray 下方（白底标签，红/黑花色文字）
-    → 满 9 张 →「发牌」按钮亮起
+    → 满 9 张→「发牌」按钮亮起
     → 点击「发牌」→ 9 张牌按队列顺序填入 影/瞬/滅（每行 3 张）
     → 发牌后队列不清空，可反复调整顺序后重新发牌
     → 发牌后 _preview_dun_labels() 自动触发，左边栏牌型+喜即刻更新
@@ -230,7 +230,7 @@ NinKingDebug (Control) [debug_controller.gd]
     → 计分动画 → 更新 LeftPanel：ScoreLabel / ProgressBar / ColXiLabel（最终结果）
 ```
 
-> **约束视觉反馈：** 约束不满足时，PlayBtn 的 `theme_override_styles/disabled` 样式生效（`bg_color = Color(0.4, 0.18, 0.13, 0.5)` 半透明暗红 + 灰色字体 `Color(0.8, 0.8, 0.8, 0.5)`），玩家可以明确看到按钮不可用。主场景与 Debug 场景均同步了此样式。
+> **约束视觉反馈：** 约束不满足时，PlayBtn 的 disabled 样式生效（漫画风灰色底 `#CCCCCC` + 浅灰描边 `#999999`），玩家可以明确看到按钮不可用。主场景与 Debug 场景均同步了此样式。
 
 ### 5.4 忍者选择
 

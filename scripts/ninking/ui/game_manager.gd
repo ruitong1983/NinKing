@@ -4,10 +4,9 @@ extends Control
 ## NinKing v2: 9 cards -> 3 groups x 3 cards (比鸡 + 忍者牌)
 ## Phase C: 同场景 immersive flow — shop as overlay, no scene switching.
 ## C21: Shop logic -> ShopHandler, scoring animation -> AnimationHandler.
-## Phase E: No LevelComplete overlay — gold flies into left panel, then auto-shop.
+## Phase E: No LevelComplete overlay — settlement card with 封印解除 button → shop.
 
 const SB = preload("res://scripts/config/sound_bank.gd")
-const CountUp = preload("res://scripts/tween/count_up.gd")
 
 @onready var ui: UIManager = %UIManager
 
@@ -20,10 +19,6 @@ var _boss_revealed: bool = false
 
 # Auto-shop: SCORING -> shop transition without click (Balatro-style)
 var _auto_shop_pending: bool = false
-
-# Phase E: skip overlay for shop transition
-var _shop_skip_overlay: Control = null
-var _shop_skip_requested: bool = false
 
 
 func _ready() -> void:
@@ -40,6 +35,8 @@ func _ready() -> void:
 	ui.retry_button.pressed.connect(_on_retry_pressed)
 	ui.back_to_menu_button.pressed.connect(_on_back_to_menu_pressed)
 	ui.victory_menu_button.pressed.connect(_on_back_to_menu_pressed)
+
+	# Phase E: Settlement card button (await in _show_settlement_card, no direct connection)
 
 	# Phase C: Shop overlay signals -> delegate
 	ui.shop_purchase_requested.connect(shop_handler.on_purchase_requested)
@@ -105,13 +102,10 @@ func _on_state_changed(new_state: NinKingGameState.State) -> void:
 			ui.show_view("scoring")
 			animation_handler.run_scoring()
 		NinKingGameState.State.SEAL_COMPLETE:
-			var old_gold: int = animation_handler.current_play_data.get("gold_before_settlement", NinKingGameState.gold)
-			_play_gold_settlement(old_gold, NinKingGameState.gold, NinKingGameState.gold - old_gold)
-
-			# Auto-shop with skip-on-click
+			ui.show_view("settlement")
 			if _auto_shop_pending:
 				_auto_shop_pending = false
-				_create_shop_skip_overlay()
+				_show_settlement_card()
 		NinKingGameState.State.SHOP:
 			shop_handler.on_enter_shop()
 		NinKingGameState.State.GAME_OVER:
@@ -166,16 +160,13 @@ func _on_seal_started(barrier: int, seal_idx: int, target: float, seal_lord_name
 	# BGM: auto-switch variation based on barrier difficulty (B11)
 	MusicManager.set_game_variation(barrier)
 
-	# Accent font only for neutral-bg buttons
-	var btns: Array[Button] = [
-		ui.ai_rearrange_btn,
-		ui.retry_button, ui.back_to_menu_button,
-		ui.victory_menu_button,
-	]
-	for btn: Button in btns:
-		btn.add_theme_color_override("font_color", Color.WHITE)
-		btn.add_theme_color_override("font_hover_color", Color(0.9, 0.9, 0.9))
-		btn.add_theme_color_override("font_pressed_color", Color(0.7, 0.7, 0.7))
+	# Manga-style impact buttons — apply_manga_button_style handles all font colors
+	BarrierTheme.apply_manga_button_style(ui.play_btn, c.accent, "L")
+	BarrierTheme.apply_manga_button_style(ui.ai_rearrange_btn, c.accent, "M")
+	BarrierTheme.apply_manga_button_style(ui.deck_btn, c.accent, "S")
+	BarrierTheme.apply_manga_button_style(ui.retry_button, c.accent, "S")
+	BarrierTheme.apply_manga_button_style(ui.back_to_menu_button, c.accent, "S")
+	BarrierTheme.apply_manga_button_style(ui.victory_menu_button, c.accent, "S")
 
 	# Phase C: Boss reveal moved to PLAYING state (_trigger_boss_reveal_in_playing).
 	# No more 1s wait here. Theme + intro watermark only.
@@ -281,78 +272,31 @@ func _trigger_boss_reveal_in_playing() -> void:
 		GlobalTweens.fade_out(ui.boss_portrait, 0.3)
 
 # ══════════════════════════════════════════
-# Phase E: Gold settlement animation
+# Phase E: Settlement card — 封印解除
 # ══════════════════════════════════════════
 
-func _play_gold_settlement(old_gold: int, new_gold: int, gain: int) -> void:
-	## Animate gold count-up on GoldLabel + float text flying to MatchPanel.
-	if gain <= 0:
+func _show_settlement_card() -> void:
+	## Show settlement card with score/gold info, then wait for button press.
+	var old_gold: int = animation_handler.current_play_data.get("gold_before_settlement", -1)
+	var gain: int = max(0, NinKingGameState.gold - old_gold) if old_gold >= 0 else 0
+	ui.settlement_overlay.show_card({
+		barrier_num = NinKingGameState.barrier_num,
+		seal_idx = NinKingGameState.seal_idx,
+		num = NinKingGameState.current_score,
+		gold_gained = gain,
+		total_gold = NinKingGameState.gold,
+		seal_lord_name = NinKingGameState.current_seal_lord_name,
+	})
+
+	# Wait for button press (card manages its own lifecycle)
+	await ui.settlement_overlay.unlock_pressed
+	_on_settlement_unlock()
+
+
+func _on_settlement_unlock() -> void:
+	## Handle settlement card button — proceed to shop.
+	if not is_instance_valid(ui):
 		return
-
-	# Count up gold label from old to new value (0.5s)
-	CountUp.play(ui.gold_label, old_gold, new_gold, 0.5, "$")
-
-	# Create float text "+X$" near score area, fly to GoldLabel
-	var floater := Label.new()
-	floater.text = "+%d$" % gain
-	floater.add_theme_font_size_override("font_size", 36)
-	floater.add_theme_color_override("font_color", Color(0.941, 0.816, 0.376))
-	floater.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	# Position above the score label (center of left panel area)
-	var start_pos: Vector2 = ui.score_label.global_position + Vector2(ui.score_label.size.x * 0.5 - 60, -40)
-	floater.global_position = start_pos
-	floater.size = Vector2(120, 40)
-	ui.panel_bg.add_child(floater)
-
-	# Fly to GoldLabel position
-	var target_pos: Vector2 = ui.gold_label.global_position + Vector2(ui.gold_label.size.x * 0.5 - 20, 0)
-	var tw := floater.create_tween()
-	tw.set_ignore_time_scale(true)
-	tw.tween_property(floater, "global_position", target_pos, 0.5).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_SINE)
-	tw.parallel().tween_property(floater, "scale", Vector2(0.7, 0.7), 0.5).set_ease(Tween.EASE_IN)
-
-	# On arrival: flash + SFX
-	tw.tween_callback(func():
-		if is_instance_valid(floater):
-			floater.queue_free()
-		if is_instance_valid(ui.gold_label):
-			GlobalTweens.scale_pop(ui.gold_label, 1.15, 0.2)
-		GlobalTweens.play_sfx(SB.UI_COIN)
-	)
-
-
-# ══════════════════════════════════════════
-# Phase E: Shop skip overlay + auto-enter
-# ══════════════════════════════════════════
-
-func _create_shop_skip_overlay() -> void:
-	## Create transparent fullscreen overlay to skip shop wait on click/key.
-	_shop_skip_requested = false
-	_shop_skip_overlay = Control.new()
-	_shop_skip_overlay.name = "ShopSkipOverlay"
-	_shop_skip_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
-	_shop_skip_overlay.anchor_right = 1.0
-	_shop_skip_overlay.anchor_bottom = 1.0
-	_shop_skip_overlay.gui_input.connect(_on_skip_overlay_input)
-	add_child(_shop_skip_overlay)
-
-	# Wait for 0.9s dwell, then enter shop (unless already skipped)
-	await get_tree().create_timer(0.9).timeout
-	_do_shop_transition()
-
-
-func _on_skip_overlay_input(event: InputEvent) -> void:
-	if _shop_skip_requested:
+	if NinKingGameState.current_state != NinKingGameState.State.SEAL_COMPLETE:
 		return
-	if (event is InputEventMouseButton and event.pressed) or (event is InputEventKey and event.pressed):
-		_shop_skip_requested = true
-		_do_shop_transition()
-
-
-func _do_shop_transition() -> void:
-	## Clean up skip overlay and enter shop (guarded against double call by shop_handler).
-	if _shop_skip_overlay != null and is_instance_valid(_shop_skip_overlay):
-		_shop_skip_overlay.queue_free()
-		_shop_skip_overlay = null
-	if is_instance_valid(ui) and NinKingGameState.current_state == NinKingGameState.State.SEAL_COMPLETE:
-		shop_handler.go_shop_pressed()
+	shop_handler.go_shop_pressed()

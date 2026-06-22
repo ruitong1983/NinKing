@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://me6pr1t82qb3"]
 
-[ext_resource type="Script" uid="uid://btf5e0u131ub4" path="res://scripts/ninking/ui/main_menu.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/ninking/ui/main_menu.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://assets/images/background/launch_bg.png" id="2_bg"]
 [ext_resource type="Theme" path="res://assets/themes/manga_theme.tres" id="3_theme"]
 

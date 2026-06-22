@@ -10,9 +10,11 @@ extends RefCounted
 ##     panel_bg glow pulse on cumulative updates (2026-06-15).
 ## v7: Column score inline count-up on type labels (removed hidden col_score_labels).
 ## v8: Removed _compute_ninja_contributions fallback (H3 — use summary.anim_contribs only).
+## v9: Xi Strike Reveal — 三段式 (2026-06-22)。
 
 const FX = preload("res://scripts/tween/tween_fx.gd")
 const SB = preload("res://scripts/config/sound_bank.gd")
+const XI_STRIKE = preload("res://scripts/ninking/ui/xi_strike_overlay.gd")
 
 const GLOW_DUR: float = 0.45
 const PROGRESS_DUR: float = 0.60
@@ -280,7 +282,7 @@ func _run_scoring_animation() -> void:
 				)
 				GlobalTweens.color_flash(col_labels[i], Color(0.831, 0.659, 0.263, 1.0), 0.2)
 
-	# ═══ Phase 3: Formula reveal ═══
+		# ═══ Phase 3: Xi Strike Reveal ═══
 	var xi_product: int = 1
 	for x: int in score_result.global_xi_x_stack:
 		xi_product *= x
@@ -288,32 +290,95 @@ func _run_scoring_animation() -> void:
 	var has_xi: bool = xi_result and xi_result.has_any()
 	var has_global_xi: bool = xi_product > 1
 
-	if has_global_xi:
-		await tree.create_timer(0.5).timeout
-		_ui.set_score_formula(col_cumulative, xi_product)
-		GlobalTweens.scale_pop(_ui.score_label, 1.2, 0.35)
+	if has_xi or has_global_xi:
+		print("[DEBUG] Xi animation START - has_xi=" + str(has_xi) + " has_global_xi=" + str(has_global_xi) + " triggered=" + str(xi_result.triggered if xi_result else []))
+		# ── Create overlay above CardGrid ──
+		var xi_overlay: XiStrikeOverlay = XI_STRIKE.new()
+		var _xi_parent: Node = _ui.get_parent() if _ui and is_instance_valid(_ui) else null
+		print("[DEBUG] _ui=" + str(_ui) + " parent=" + str(_xi_parent))
+		if _xi_parent:
+			_xi_parent.add_child(xi_overlay)
+			xi_overlay.z_index = 15
+			print("[DEBUG] Xi overlay ADDED to tree, z=15")
+		else:
+			print("[DEBUG] Xi overlay NOT added - parent is null")
+		# Stage A removed (user feedback: watermark buildup was redundant).
+		# Phase 3 starts directly with Stage B accumulative rows.
+		GlobalTweens.play_sfx(SB.XI_TRIGGER)  # "喜来了" alert at entry
+
+
+		# Build per-xi ×mult lookup from triggered list
+		var triggered: Array[String] = xi_result.triggered if xi_result else []
+		var xi_mult_of: Dictionary = {}
+		for xi_name: String in triggered:
+			for defn: Dictionary in XiDetector.XI_DEFINITIONS:
+				if defn["name"] == xi_name:
+					xi_mult_of[xi_name] = defn.get("x_mult", 1)
+					break
+
+		# Overflow: fold earliest xi into "+N 喜" line if triggered > 4
+		var max_show: int = 4
+		if triggered.size() > max_show:
+			xi_overlay.show_overflow(triggered.size() - max_show)
+			triggered = triggered.slice(-max_show)
+
+		# Stage B — 累积式展示 (last 4 xi, earlier ones folded if overflow)
+		var show_product: int = 1
+		for xi_name: String in triggered:
+			var x_m: int = xi_mult_of.get(xi_name, 1)
+			if x_m <= 1:
+				continue
+
+			# Accumulate global xi product for formula (name-based, not value-based)
+			if xi_name in ScoreXiHandler.GLOBAL_XI_NAMES:
+				show_product *= x_m
+
+			await xi_overlay.stage_b_reveal(xi_name, x_m, tree)
+			GlobalTweens.play_sfx(SB.XI_TRIGGER)
+
+			# Update left panel formula with running product
+			if show_product > 1:
+				_ui.set_score_formula(col_cumulative, show_product)
+			else:
+				_ui.set_score_formula(col_cumulative, 1)
+
+			GlobalTweens.scale_pop(_ui.score_label, 1.15, 0.25)
+
+			# Progress bar tracks toward final score
+			var interim_total: int = old_score + col_cumulative * max(show_product, 1)
+			_tween_progress(_ui.progress_bar, float(interim_total), 0.2)
+
+			await tree.create_timer(0.5).timeout
+
+		# Actual global xi product
+		var actual_product: int = max(xi_product, 1)
+
+		# Stage C — 乘积衝擊 (SFX inside overlay)
+		if actual_product > 1:
+			await xi_overlay.stage_c_final(actual_product, tree)
+		else:
+			# Group-only xi: brief celebration
+			GlobalTweens.play_sfx(SB.XI_FANFARE)
+			GlobalTweens.burst_particles(
+				_ui.card_grid.global_position + _ui.card_grid.size * 0.5,
+				"manga_burst"
+			)
+			GlobalTweens.screen_shake(0.08, 0.06)
+			await tree.create_timer(0.5).timeout
+
+		# Cleanup overlay
+		if is_instance_valid(xi_overlay):
+			xi_overlay.queue_free()
+
+		# Final formula settle
+		_ui.set_score_formula(col_cumulative, actual_product)
+		GlobalTweens.punch_in(_ui.score_label, 0.4, 2.0)
 		GlobalTweens.color_flash(_ui.score_label, Color.GOLD, 0.5)
 		_tween_progress(_ui.progress_bar, float(new_score), PROGRESS_DUR)
-		if not has_xi:
-			await tree.create_timer(0.5).timeout
-	elif has_xi:
-		await tree.create_timer(0.4).timeout
-	else:
-		await tree.create_timer(0.3).timeout
-
-	if has_xi:
-		GlobalTweens.play_sfx(SB.XI_TRIGGER)
-		GlobalTweens.burst_particles(_ui.get_viewport_rect().size * 0.5, "shuriken")
-		GlobalTweens.do_hit_stop(0.08, 0.06)
-		GlobalTweens.screen_shake(0.15, 0.10)
-		var xi_names: Array[String] = []
-		for xi_name: String in xi_result.triggered:
-			xi_names.append(xi_name)
-		_show_breakdown_toast("喜: " + ", ".join(xi_names), Color.GOLD)
-		await tree.create_timer(0.8).timeout
-		GlobalTweens.play_sfx(SB.XI_FANFARE)
-	else:
 		await tree.create_timer(0.5).timeout
+	else:
+		# No xi — brief pause
+		await tree.create_timer(0.3).timeout
 
 	# Restore dun type labels
 	for i: int in range(3):

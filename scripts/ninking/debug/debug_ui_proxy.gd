@@ -48,6 +48,9 @@ var ninja_bar: Node
 var panel_bg: ColorRect
 var game_bg: TextureRect
 
+# — ColXiLabel (left panel Xi summary)
+var col_xi_label: Label
+
 # — Host node for add_child (debug scene root)
 var _host: Node
 
@@ -62,6 +65,10 @@ func get_tree() -> SceneTree:
 
 func get_viewport_rect() -> Rect2:
 	return _host.get_viewport_rect()
+
+
+func get_parent() -> Node:
+	return _host
 
 
 func add_child(node: Node) -> void:
@@ -81,8 +88,10 @@ func update_score(_score: int, _target: int) -> void:
 	pass  # Debug scene uses score_label directly
 
 
-func update_xi_display(_text: String) -> void:
-	pass  # Debug scene has %ColXiLabel but managed separately
+func update_xi_display(text: String) -> void:
+	if col_xi_label:
+		col_xi_label.text = text
+		col_xi_label.visible = true
 
 
 func pulse_ninja_bar() -> void:

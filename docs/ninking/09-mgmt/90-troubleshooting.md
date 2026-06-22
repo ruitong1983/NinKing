@@ -1,6 +1,6 @@
 # 疑难问题解决手册
 
-> **建立日期:** 2026-06-14 | **最后更新:** 2026-06-20 (§16)
+> **建立日期:** 2026-06-14 | **最后更新:** 2026-06-22 (§17)
 > **用途:** 记录开发中遇到的非显而易见的坑及其解决方案，避免重复踩坑。
 
 ## §1 素材替换后"缺少依赖项"
@@ -541,3 +541,33 @@ HandCardContainer.move_cards() → super.move_cards()
 **受影响的文件：** `scripts/ninking/ui/ninja_bar_container.gd`（主修）、`scripts/ninking/ui/hand_card_container.gd`（防御加固）
 
 **实例：** 2026-06-20 加载 5 忍开局配置后拖拽交换手牌，手牌随机进入忍者栏。sensor 全局矩形 = `Rect2(0, 0, 1920, 1080)`（整个视口），confirm_root 的 drop zone sensor 缩小为 `Rect2(container_pos, container_size)` 后问题消失。
+
+---
+
+## §17 `StyleBoxTexture.patch_margin_*` 不能直接属性赋值
+
+**现象：** 运行时报错 `Invalid assignment of property or key 'patch_margin_left' with value of type 'int' on a base object of type 'StyleBoxTexture'`。
+
+```gdscript
+# ❌ 两种方式都失败
+var s := StyleBoxTexture.new()
+s.patch_margin_left = 8                  # 方式 A: 属性赋值 → Invalid assignment
+s.set_patch_margin(SIDE_LEFT, 8)         # 方式 B: 方法调用 → Nonexistent function
+```
+
+**根因：** Godot 4.6.2 中 `StyleBoxTexture`（继承 `StyleBox`）的 `patch_margin_*` 属性虽然会在编辑器中显示，但在运行时通过 GDScript 无法直接赋值或通过 `set_patch_margin()` 方法设置。这是一个引擎绑定层面的问题。
+
+**修复：** 使用 `set()` 方法通过属性名字符串赋值：
+
+```gdscript
+# ✅ 正确
+var s := StyleBoxTexture.new()
+s.set("patch_margin_left", 8)
+s.set("patch_margin_top", 8)
+s.set("patch_margin_right", 8)
+s.set("patch_margin_bottom", 8)
+```
+
+**注意：** `patch_margin_*` 属性值单位是像素，Kenney UI 纹理边角约 5px，推荐 8px 缓冲。
+
+**实例：** 2026-06-22 Kenney UI 暖纸风改造中，所有 StyleBoxTexture 的 patch_margin 设置均使用 `s.set("patch_margin_*", 8)`。涉及文件：`main_menu.gd`、`barrier_theme.gd`、`shop_ui.gd`、`shop_slot.gd`。

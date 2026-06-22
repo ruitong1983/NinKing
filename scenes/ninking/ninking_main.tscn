@@ -2,45 +2,48 @@
 
 [ext_resource type="Theme" uid="uid://bqb2i07k0v8jt" path="res://assets/themes/manga_theme.tres" id="1_pgq0x"]
 [ext_resource type="PackedScene" uid="uid://c7u8hryloq7hy" path="res://addons/card-framework/card_manager.tscn" id="2_ff38i"]
-[ext_resource type="Script" uid="uid://bs0iqxh63utdk" path="res://scripts/ninking/ui/game_manager.gd" id="2_pgq0x"]
-[ext_resource type="Script" uid="uid://csla30fhhqlyj" path="res://scripts/ninking/ui/ui_manager.gd" id="2_ui_mgr"]
-[ext_resource type="Texture2D" uid="uid://deelue8r4tqif" path="res://assets/images/background/table_bg.png" id="3_tblbg"]
+[ext_resource type="Script" uid="uid://ba3r5kv3bxlmg" path="res://scripts/ninking/ui/game_manager.gd" id="2_pgq0x"]
+[ext_resource type="Script" uid="uid://dgk1vdi44nj6m" path="res://scripts/ninking/ui/ui_manager.gd" id="2_ui_mgr"]
+[ext_resource type="Texture2D" uid="uid://cmh6fgxip28j3" path="res://assets/images/background/table_bg.png" id="3_tblbg"]
 [ext_resource type="PackedScene" uid="uid://4jkp5mgq3d6t" path="res://scenes/ninking/ninking_card_factory.tscn" id="4_ensa0"]
-[ext_resource type="Shader" uid="uid://demp43un45wvo" path="res://shaders/panel_edge_fade.gdshader" id="5_shader_fade"]
-[ext_resource type="Script" uid="uid://btor5q756bk78" path="res://scripts/ninking/ui/hand_card_container.gd" id="8_pgq0x"]
+[ext_resource type="Shader" uid="uid://v8sl5wp6qlqi" path="res://shaders/panel_edge_fade.gdshader" id="5_shader_fade"]
+[ext_resource type="Script" uid="uid://dkduntlls22m2" path="res://scripts/ninking/ui/hand_card_container.gd" id="8_pgq0x"]
+[ext_resource type="PackedScene" uid="uid://d1d3qx3a8b1bw" path="res://scenes/ninking/settlement_card.tscn" id="9_e7w8q"]
+[ext_resource type="Texture2D" uid="uid://du3jy44eij6xa" path="res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/panel_beige.png" id="10_beige"]
+[ext_resource type="Texture2D" uid="uid://oeae8mjgld5k" path="res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/panel_beigeLight.png" id="11_beigeLight"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_match_fade"]
 shader = ExtResource("5_shader_fade")
 shader_parameter/fade_start = 0.64
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_match_panel"]
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_match_panel"]
 content_margin_left = 16.0
 content_margin_top = 16.0
 content_margin_right = 16.0
 content_margin_bottom = 16.0
-bg_color = Color(0.29, 0.125, 0.125, 1)
+texture = ExtResource("10_beige")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ante_fade"]
 shader = ExtResource("5_shader_fade")
 shader_parameter/fade_start = 0.64
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ante_panel"]
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ante_panel"]
 content_margin_left = 16.0
 content_margin_top = 16.0
 content_margin_right = 16.0
 content_margin_bottom = 16.0
-bg_color = Color(0.239, 0.169, 0.102, 1)
+texture = ExtResource("10_beige")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_score_fade"]
 shader = ExtResource("5_shader_fade")
 shader_parameter/fade_start = 0.72
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_score_card"]
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_score_card"]
 content_margin_left = 16.0
 content_margin_top = 16.0
 content_margin_right = 16.0
 content_margin_bottom = 16.0
-bg_color = Color(0.059, 0.157, 0.133, 0.6)
+texture = ExtResource("11_beigeLight")
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uccuc"]
 bg_color = Color(0.227, 0.227, 0.227, 1)
@@ -55,56 +58,6 @@ corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7exmg"]
-bg_color = Color(0.722, 0.227, 0.165, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.169, 0.118, 0.063, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hwrj5"]
-content_margin_top = 4.0
-content_margin_bottom = 0.0
-bg_color = Color(0.614, 0.193, 0.14, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.169, 0.118, 0.063, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sbvwy"]
-bg_color = Color(0.75, 0.304, 0.249, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.169, 0.118, 0.063, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_play_disabled"]
-bg_color = Color(0.4, 0.18, 0.13, 0.5)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.169, 0.118, 0.063, 0.25)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dun_area"]
 content_margin_left = 12.0
@@ -154,6 +107,63 @@ corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7exmg"]
+bg_color = Color(0.722, 0.227, 0.165, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.102, 0.102, 0.102, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hwrj5"]
+content_margin_top = 4.0
+content_margin_bottom = 0.0
+bg_color = Color(0.614, 0.193, 0.14, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.102, 0.102, 0.102, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sbvwy"]
+bg_color = Color(0.75, 0.304, 0.249, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.102, 0.102, 0.102, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_play_disabled"]
+bg_color = Color(0.4, 0.18, 0.13, 0.5)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.102, 0.102, 0.102, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_deck_panel"]
+content_margin_left = 20.0
+content_margin_top = 15.0
+content_margin_right = 20.0
+content_margin_bottom = 15.0
+texture = ExtResource("11_beigeLight")
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v5l2m"]
 bg_color = Color(0.769, 0.639, 0.353, 1)
@@ -304,62 +314,70 @@ grow_vertical = 2
 color = Color(1, 1, 1, 0)
 
 [node name="MatchPanel" type="Panel" parent="UIManager/GameLayout/LeftPanel" unique_id=466541583]
+texture_filter = 1
 material = SubResource("ShaderMaterial_match_fade")
 custom_minimum_size = Vector2(0, 160)
 layout_mode = 1
 anchors_preset = -1
-anchor_top = 0.65
+anchor_top = 0.7
 anchor_right = 1.0
-anchor_bottom = 0.85
+anchor_bottom = 0.9
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_match_panel")
+theme_override_styles/panel = SubResource("StyleBoxTexture_match_panel")
 
 [node name="MatchVBox" type="VBoxContainer" parent="UIManager/GameLayout/LeftPanel/MatchPanel" unique_id=2100000011]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 10.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 10
 
 [node name="MatchTitle" type="Label" parent="UIManager/GameLayout/LeftPanel/MatchPanel/MatchVBox" unique_id=1246038194]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_colors/font_color = Color(0.40, 0.28, 0.12, 1)
 theme_override_font_sizes/font_size = 20
 text = "比赛信息"
 
 [node name="HandsLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/MatchPanel/MatchVBox" unique_id=1528298559]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
+theme_override_colors/font_color = Color(0.24, 0.18, 0.11, 1)
 theme_override_font_sizes/font_size = 28
 text = "討伐 0"
 
 [node name="GoldLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/MatchPanel/MatchVBox" unique_id=552145411]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.941, 0.816, 0.376, 1)
+theme_override_colors/font_color = Color(0.72, 0.52, 0.18, 1)
 theme_override_font_sizes/font_size = 48
 text = "0"
 
 [node name="AntePanel" type="Panel" parent="UIManager/GameLayout/LeftPanel" unique_id=1099072276]
+texture_filter = 1
 material = SubResource("ShaderMaterial_ante_fade")
 layout_mode = 1
 anchors_preset = -1
-anchor_top = 0.85
+anchor_top = 0.9
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_styles/panel = SubResource("StyleBoxFlat_ante_panel")
+theme_override_styles/panel = SubResource("StyleBoxTexture_ante_panel")
 
 [node name="AnteVBox" type="VBoxContainer" parent="UIManager/GameLayout/LeftPanel/AntePanel" unique_id=2100000013]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 10.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 10
@@ -367,36 +385,37 @@ theme_override_constants/separation = 10
 [node name="BarrierLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/AntePanel/AnteVBox" unique_id=1412664362]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
+theme_override_colors/font_color = Color(0.24, 0.18, 0.11, 1)
 theme_override_font_sizes/font_size = 28
 text = "結界 1/8"
 
 [node name="RoundLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/AntePanel/AnteVBox" unique_id=1189083565]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.478, 0.478, 0.416, 1)
+theme_override_colors/font_color = Color(0.24, 0.18, 0.11, 1)
 theme_override_font_sizes/font_size = 28
 text = "回合 1"
 
 [node name="HandTypePanel" type="Panel" parent="UIManager/GameLayout/LeftPanel" unique_id=2100000003]
+texture_filter = 1
 material = SubResource("ShaderMaterial_score_fade")
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
-anchor_bottom = 0.4
+anchor_bottom = 0.3
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_score_card")
+theme_override_styles/panel = SubResource("StyleBoxTexture_score_card")
 
 [node name="HandTypeVBox" type="Control" parent="UIManager/GameLayout/LeftPanel/HandTypePanel" unique_id=2100000004]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 16.0
-offset_top = 12.0
+offset_left = 24.0
+offset_top = 10.0
 offset_right = -112.0
-offset_bottom = -12.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -424,7 +443,7 @@ offset_left = 50.0
 offset_top = 4.0
 offset_right = 115.0
 offset_bottom = 42.0
-theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
+theme_override_colors/font_color = Color(0.24, 0.18, 0.11, 1)
 theme_override_font_sizes/font_size = 26
 text = "-"
 vertical_alignment = 1
@@ -475,7 +494,7 @@ offset_left = 50.0
 offset_top = 4.0
 offset_right = 115.0
 offset_bottom = 42.0
-theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
+theme_override_colors/font_color = Color(0.24, 0.18, 0.11, 1)
 theme_override_font_sizes/font_size = 26
 text = "-"
 vertical_alignment = 1
@@ -526,7 +545,7 @@ offset_left = 54.0
 offset_top = 4.0
 offset_right = 119.0
 offset_bottom = 42.0
-theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
+theme_override_colors/font_color = Color(0.24, 0.18, 0.11, 1)
 theme_override_font_sizes/font_size = 26
 text = "-"
 vertical_alignment = 1
@@ -571,7 +590,7 @@ layout_mode = 0
 offset_top = 3.0
 offset_right = 100.0
 offset_bottom = 24.0
-theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
+theme_override_colors/font_color = Color(0.24, 0.18, 0.11, 1)
 theme_override_font_sizes/font_size = 20
 text = "-"
 horizontal_alignment = 1
@@ -583,7 +602,7 @@ offset_left = 110.0
 offset_top = 3.0
 offset_right = 210.0
 offset_bottom = 24.0
-theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
+theme_override_colors/font_color = Color(0.24, 0.18, 0.11, 1)
 theme_override_font_sizes/font_size = 20
 text = "-"
 horizontal_alignment = 1
@@ -595,7 +614,7 @@ offset_left = 220.0
 offset_top = 3.0
 offset_right = 320.0
 offset_bottom = 24.0
-theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
+theme_override_colors/font_color = Color(0.24, 0.18, 0.11, 1)
 theme_override_font_sizes/font_size = 20
 text = "-"
 horizontal_alignment = 1
@@ -700,41 +719,46 @@ bbcode_enabled = true
 scroll_active = false
 
 [node name="ScorePanel" type="Panel" parent="UIManager/GameLayout/LeftPanel" unique_id=2100000091]
+texture_filter = 1
 material = SubResource("ShaderMaterial_score_fade")
 layout_mode = 1
 anchors_preset = -1
-anchor_top = 0.4
+anchor_top = 0.3
 anchor_right = 1.0
-anchor_bottom = 0.65
+anchor_bottom = 0.7
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_score_card")
+theme_override_styles/panel = SubResource("StyleBoxTexture_score_card")
 
 [node name="ScoreVBox" type="VBoxContainer" parent="UIManager/GameLayout/LeftPanel/ScorePanel" unique_id=2100000092]
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 8.0
+offset_left = 24.0
+offset_top = 10.0
 offset_right = -200.0
+offset_bottom = -10.0
 grow_vertical = 2
 theme_override_constants/separation = 8
 
-[node name="ColXiLabel" type="RichTextLabel" parent="UIManager/GameLayout/LeftPanel/ScorePanel/ScoreVBox" unique_id=763201303]
+[node name="ColXiLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/ScorePanel/ScoreVBox" unique_id=763201303]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_vertical = 0
-theme_override_colors/default_color = Color(0.85, 0.2, 0.2, 1)
-theme_override_font_sizes/normal_font_size = 40
-bbcode_enabled = true
-fit_content = true
-scroll_active = false
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.85, 0.2, 0.2, 1)
+theme_override_font_sizes/font_size = 40
+autowrap_mode = 3
+
+[node name="VBoxSpacer" type="Control" parent="UIManager/GameLayout/LeftPanel/ScorePanel/ScoreVBox" unique_id=999999001]
+layout_mode = 2
+size_flags_vertical = 2
 
 [node name="ScoreLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/ScorePanel/ScoreVBox" unique_id=523126247]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
+theme_override_colors/font_color = Color(0.24, 0.18, 0.11, 1)
 theme_override_font_sizes/font_size = 48
 text = "0 ×0 = 0"
 horizontal_alignment = 1
@@ -752,7 +776,7 @@ show_percentage = false
 [node name="TargetScoreLabel" type="Label" parent="UIManager/GameLayout/LeftPanel/ScorePanel/ScoreVBox" unique_id=560253541]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.478, 0.478, 0.416, 1)
+theme_override_colors/font_color = Color(0.24, 0.18, 0.11, 1)
 theme_override_font_sizes/font_size = 28
 
 [node name="CenterColumn" type="Control" parent="UIManager/GameLayout" unique_id=1744613414]
@@ -794,25 +818,6 @@ grow_vertical = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
 theme_override_constants/separation = 80
-
-[node name="PlayBtn" type="Button" parent="UIManager/GameLayout/CenterColumn/HandArea" unique_id=774580215]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(84, 116)
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 4
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 0.85)
-theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
-theme_override_colors/font_disabled_color = Color(0.8, 0.8, 0.8, 0.5)
-theme_override_font_sizes/font_size = 24
-theme_override_styles/normal = SubResource("StyleBoxFlat_7exmg")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_hwrj5")
-theme_override_styles/hover = SubResource("StyleBoxFlat_sbvwy")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_play_disabled")
-disabled = true
-text = "討
-伐"
 
 [node name="DunArea" type="Panel" parent="UIManager/GameLayout/CenterColumn" unique_id=248658335]
 layout_mode = 0
@@ -984,6 +989,28 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_ai_hover")
 disabled = true
 text = "陣形"
 
+[node name="PlayBtn" type="Button" parent="UIManager/GameLayout/CenterColumn" unique_id=774580215]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 56)
+layout_mode = 0
+offset_left = 60.0
+offset_top = 605.0
+offset_right = 220.0
+offset_bottom = 661.0
+size_flags_horizontal = 0
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 0.85)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.8, 0.8, 0.8, 0.5)
+theme_override_font_sizes/font_size = 28
+theme_override_styles/normal = SubResource("StyleBoxFlat_7exmg")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_hwrj5")
+theme_override_styles/hover = SubResource("StyleBoxFlat_sbvwy")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_play_disabled")
+disabled = true
+text = "討伐"
+
 [node name="ScoringOverlay" type="Control" parent="UIManager" unique_id=1136405108]
 unique_name_in_owner = true
 visible = false
@@ -1115,6 +1142,7 @@ offset_left = 510.0
 offset_top = 120.0
 offset_right = 1410.0
 offset_bottom = 760.0
+theme_override_styles/panel = SubResource("StyleBoxTexture_deck_panel")
 
 [node name="TitleBar" type="HBoxContainer" parent="UIManager/DeckViewer/CardPanel" unique_id=1968215991]
 layout_mode = 0
@@ -1187,17 +1215,22 @@ layout_mode = 0
 layout_mode = 0
 text = "返回主菜单"
 
+[node name="SettlementOverlay" parent="UIManager" unique_id=137805567 instance=ExtResource("9_e7w8q")]
+unique_name_in_owner = true
+z_index = 1100
+layout_mode = 1
+
 [node name="ShopOverlay" type="Control" parent="UIManager" unique_id=350425464]
 unique_name_in_owner = true
 visible = false
 z_index = 1100
-mouse_filter = 2
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
 [node name="StatusLabel" type="Label" parent="UIManager" unique_id=357275323]
 unique_name_in_owner = true
@@ -1250,4 +1283,3 @@ grow_vertical = 2
 mouse_filter = 1
 script = ExtResource("8_pgq0x")
 metadata/_script_path = "res://scripts/ninking/ui/hand_card_container.gd"
-

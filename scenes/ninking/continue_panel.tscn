@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://c8l3t6vmb3y5p"]
 
-[ext_resource type="Script" uid="uid://daqvrk2bu346b" path="res://scripts/ninking/ui/continue_panel.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/ninking/ui/continue_panel.gd" id="1_script"]
 [ext_resource type="Theme" path="res://assets/themes/manga_theme.tres" id="2_theme"]
 
 [node name="ContinuePanel" type="Control"]

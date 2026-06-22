@@ -74,8 +74,8 @@ func apply_ink_wash_theme() -> void:
 		# Hijack: pass paper as "panel" color — works because method sets bg_color = panel
 		ninja_card.apply_barrier_theme({"panel": COLOR_PAPER, "accent": COLOR_SUMI})
 
-	# ── Buy button: cinnabar seal (朱砂印章) ──
-	_apply_seal_button_style(buy_button, COLOR_CINNABAR)
+	# ── Buy button: Kenney buttonRound_beige ──
+	_apply_kenney_round_style(buy_button)
 
 	# ── Rarity border for ability cards ──
 	if not _is_item:
@@ -97,41 +97,27 @@ func get_card_id() -> String:
 # Seal button style
 # ══════════════════════════════════════════
 
-func _apply_seal_button_style(btn: Button, seal_color: Color) -> void:
-	## Seal (印章) button: solid mineral-pigment bg + ink border + white text.
-	var bg := seal_color
+func _apply_kenney_round_style(btn: Button) -> void:
+	## Kenney buttonRound_beige + dark brown text. No _pressed variant — use modulate_color.
+	var tex: Texture2D = preload("res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/buttonRound_beige.png")
 
-	var normal := StyleBoxFlat.new()
-	normal.bg_color = bg
-	normal.border_color = COLOR_SUMI
-	normal.border_width_left = 2
-	normal.border_width_right = 2
-	normal.border_width_top = 2
-	normal.border_width_bottom = 2
-	normal.set_corner_radius_all(4)
-	normal.content_margin_left = 8
-	normal.content_margin_top = 2
-	normal.content_margin_right = 8
-	normal.content_margin_bottom = 2
-	btn.add_theme_stylebox_override("normal", normal)
-	btn.add_theme_color_override("font_color", Color.WHITE)
+	var s_n := StyleBoxTexture.new()
+	s_n.texture = tex; s_n.set("patch_margin_left", 8); s_n.set("patch_margin_top", 8); s_n.set("patch_margin_right", 8); s_n.set("patch_margin_bottom", 8)
+	btn.add_theme_stylebox_override("normal", s_n)
+
+	var s_h := StyleBoxTexture.new()
+	s_h.texture = tex; s_h.modulate_color = Color(1.05, 1.03, 1.0)
+	s_h.set("patch_margin_left", 8); s_h.set("patch_margin_top", 8); s_h.set("patch_margin_right", 8); s_h.set("patch_margin_bottom", 8)
+	btn.add_theme_stylebox_override("hover", s_h)
+
+	var s_p := StyleBoxTexture.new()
+	s_p.texture = tex; s_p.modulate_color = Color(0.85, 0.85, 0.85)
+	s_p.set("patch_margin_left", 8); s_p.set("patch_margin_top", 8); s_p.set("patch_margin_right", 8); s_p.set("patch_margin_bottom", 8)
+	btn.add_theme_stylebox_override("pressed", s_p)
+
+	btn.add_theme_color_override("font_color", Color(0.24, 0.17, 0.10))
+	btn.add_theme_color_override("font_pressed_color", Color(0.24, 0.17, 0.10))
 	btn.add_theme_font_size_override("font_size", 14)
-
-	var hovered := normal.duplicate() as StyleBoxFlat
-	hovered.bg_color = Color(bg).lightened(0.10)
-	hovered.border_width_left = 3
-	hovered.border_width_right = 3
-	hovered.border_width_top = 3
-	hovered.border_width_bottom = 3
-	btn.add_theme_stylebox_override("hover", hovered)
-	btn.add_theme_color_override("font_hover_color", Color.WHITE)
-
-	var pressed := normal.duplicate() as StyleBoxFlat
-	pressed.bg_color = Color(bg).darkened(0.15)
-	pressed.content_margin_top = 4
-	pressed.content_margin_bottom = 0
-	btn.add_theme_stylebox_override("pressed", pressed)
-	btn.add_theme_color_override("font_pressed_color", Color(1, 1, 1, 0.85))
 
 
 # ══════════════════════════════════════════

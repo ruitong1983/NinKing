@@ -1,6 +1,6 @@
 # NinKing 工作清单
 
-> **最后更新:** 2026-06-21 | **当前 Phase:** L（回放日志系统完成）+ F1（忍者牌补齐）+ H（效果集中分析实施中）+ **CR（Code Review 整改）** | 本次: B21 商店卡牌点击修复
+> **最后更新:** 2026-06-22 | **当前 Phase:** Kenney 暖纸风 UI 改造 Phase KUI 启动 | 本次: 方案审阅通过，KUI1-KUI7 入 TODO
 > **使用方式:** AI 每次会话开始时读取此文件。完成任务后更新状态。
 > **状态图例:** ⬜ 待做 | 🔵 进行中 | ✅ 已完成 | 🔒 暂缓 | ⛔ 已废弃
 
@@ -26,6 +26,7 @@
 
 | # | 问题 | 位置 | 优先级 | 状态 |
 |---|------|------|--------|------|
+| B25 | **18 个布局喜未加入 `global_xi_names` 白名单，计分时不乘** — XiDetector 检测并显示这些喜，但 `ScoreXiHandler.get_global_xi_x_stack()` 的 `global_xi_names` 数组遗漏了 2026-06-19 新增的 18 个布局喜（四角/中十字/倒影/双壁/对影/连环/天九/压牌/至尊/独尊/文武/廿一点/一气/无将/长套/无忧角/慢打/四对半），导致它们仅显示在 Debug 面板中，不参与实际计分。修复：追加到白名单 | `scripts/ninking/score/score_xi_handler.gd:32-38` | **P0** | ✅ |
 | B1 | Boss "封印师" 仍用旧逻辑 `random_group_zero` — 已改为 `lowest_group_zero`（分数最低组×0） | `blind_controller.gd:33` | **P0** | ✅ |
 | B2 | Boss 效果字典 key 已对齐 10 Boss 定义 | `blind_controller.gd` + `score_calculator.gd` | **P0** | ✅ |
 | B3 | XiDetector: 全顺/三顺清/顺清打头/全三条/通锅 5 个喜模式未实现 — 全部 9 喜已实现（通锅=全顺） | `xi_detector.gd:76` | **P1** | ✅ |
@@ -108,7 +109,7 @@
 | # | 任务 | 说明 | 优先级 | 状态 |
 |---|------|------|--------|------|
 | B4 | **商店刷新机制 (reroll)** ✅ — 递进式费用 $3+$1/次（Balatro 风），每趟商店重置，无硬上限。shop_handler._reroll_count 跟踪刷新次数 + _get_reroll_cost() 计算动态费用。shop_ui: 删 REROLL_COST 常量，加 update_reroll_cost() 动态更新按钮禁用状态。ui_manager 加 shop_panel_update_reroll_cost() 委托。金币不足时 Toast 提示 | `shop_handler.gd` + `shop_ui.gd` + `ui_manager.gd` | P2 | ✅ |
-| B5 | **附魔卡使用流程** 🔵 — Balatro 风购买即用：`consumable_data.gd` 花色符 1→4 拆分 + `get_random_fujutsu` 过滤放逐令。新建 `enchant_target_selector.gd`（手牌 SVG 渲染选牌弹窗）。`shop_ui.gd` 加 `enchant_purchase_requested` 信号 + `start_enchant_targeting`。`shop_handler.gd` 加 `on_enchant_purchase_requested`（扣钱→选牌→应用效果）。`ui_manager`/`game_manager` 接线。影响 6 文件 | `consumable_data.gd` + `enchant_target_selector.gd`(新) + `shop_ui.gd` + `shop_handler.gd` + `ui_manager.gd` + `game_manager.gd` | P2 | 🔵 |
+| B5 | **附魔卡使用流程** 🔒 — Balatro 风购买即用：`consumable_data.gd` 花色符 1→4 拆分 + `get_random_fujutsu` 过滤放逐令。新建 `enchant_target_selector.gd`（手牌 SVG 渲染选牌弹窗）。`shop_ui.gd` 加 `enchant_purchase_requested` 信号 + `start_enchant_targeting`。`shop_handler.gd` 加 `on_enchant_purchase_requested`（扣钱→选牌→应用效果）。`ui_manager`/`game_manager` 接线。影响 6 文件 | `consumable_data.gd` + `enchant_target_selector.gd`(新) + `shop_ui.gd` + `shop_handler.gd` + `ui_manager.gd` + `game_manager.gd` | **P3** | 🔒 |
 | B6 | **星图卡使用流程** ✅ — 购买即用（Balatro 风不进背包）。`shop_handler._purchase_star_chart()` 检测 `item.has("hand_type")` → 扣钱 → `ShopManager.apply_star_chart()` +1 等级 → Toast → ShopSlot 灰色标记 | `shop_handler.gd` + `shop_slot.gd` + `shop_ui.gd` + `ui_manager.gd` | P2 | ✅ |
 | B7 | 秘仪卡系统 | 购买即生效的全局限效果（消耗品，不占槽位） | P2 | ✅ |
 | B8 | **忍者牌条件效果** | 已实现：score_calculator.gd _ninja_condition_met() 完整支持 group/hand_type/xi 条件检测 | P2 | ✅ |
@@ -181,23 +182,55 @@
 
 ---
 
-## 📋 Kenney 素材执行计划（待决策方向）
+## 🎯 Kenney 素材执行计划（少年漫画方向·光标集成）
 
-> **评估文档:** [`05-art/20-kenney-ui-pack-evaluation.md`](../05-art/20-kenney-ui-pack-evaluation.md)
-> **执行计划:** 详见 `.claude/plans/delightful-forging-cocke.md`
-> **核心问题:** 决定走 **少年漫画（当前方向）** 还是 **治愈漫画（备选方向）**
+> **评估文档:** [`05-art/20-kenney-ui-pack-evaluation.md`](../05-art/20-kenney-ui-pack-evaluation.md) | **交互增强指南:** [`05-art/21-ui-interaction-enhancements.md`](../05-art/21-ui-interaction-enhancements.md)
+> **重新审查:** 2026-06-22 | **2026-06-22 v2 修复:** `_ready`→`_enter_tree` 时序问题，Launch 界面光标生效
+> **决策结果:** ✅ 少年漫画方向（仅光标），撤销原 K2/K3-K7 错误标记已完成
+> **执行发现:** K2/V52 原标记 ✅ 但代码从未实现（无 `cursor_manager.gd`，无 `set_custom_mouse_cursor` 调用）。已重新规划为 KN1-KN4 实施
 
 | # | 任务 | 说明 | 优先级 | 状态 |
 |---|------|------|--------|------|
-| K1 | **决策：美术方向** | 确定后续 Kenney 集成走少年漫画方向（仅光标，~1h）还是治愈漫画方向（全 UI 换装，~4-5 周） | **P0** | ✅ |
-| K2 | **光标集成** | 方向确认后实施 V52。新建 `cursor_manager.gd` + `main_menu.gd` 启动调用 | P3 | ✅ |
-| K3 | **Phase 0: 商店 POC**（仅治愈系） | 如选治愈方向：复制 shop_panel 替换 Kenney 纹理，验证 StyleBoxTexture 可行性，2 天硬截止 | P1 | ✅ |
-| K4 | **Phase 1: UI 组件替换**（仅治愈系） | 面板/按钮从 StyleBoxFlat → StyleBoxTexture。影响 manga_theme/ninking_main/launcher 等 6+ 文件 | P1 | ✅ |
-| K5 | **Phase 2: 进度条+分割线**（仅治愈系） | ProgressBar barGreen 9 宫格 + divider 替换 ColorRect | P2 | ✅ |
-| K6 | **Phase 3: 资产重制**（仅治愈系） | 47 卡牌插画/9 Boss 立绘/粒子/三墩/卡牌框重新 AI 生成，降饱和色板 | P2 | ✅ |
-| K7 | **Phase 4: 清理+文档**（仅治愈系） | 删除旧资产，更新 16-art-direction-principles/20-kenney-evaluation/TODO 等文档 | P2 | ✅ |
+| K1 | **美术方向决策** | 确定少年漫画方向，仅光标 | **P0** | ✅ |
+| K2 | ~~光标集成~~ — 旧条目，从未实施 | 🔄 替换为 KN1-KN2 细化项 | P3 | 🔄 |
+| KN1 | **光标本体集成** — `cursorSword_gold` 全局默认 + `cursorHand_blue` hover 光标 | 新建 `cursor_manager.gd` → `main_menu.gd` 初始化调用。已实施 | P3 | ✅ |
+| KN2 | **全局 hover 光标反馈** — 按钮 hover 时自动切到 `cursorHand_blue` | **终版方案：** `cursor_manager.gd` 改为 **Autoload**，`_enter_tree()` 中注册金剑→ARROW + 蓝手→POINTING_HAND，并连接 `SceneTree.node_added` → 任何 Button 加入场景树时自动设 `mouse_default_cursor_shape = POINTING_HAND`。**零手动接入，全局生效。** `main_menu.gd` 已清空所有光标专用代码。<br>⚠️ **v2 修复:** 原用 `_ready()` 导致 Launch 界面不生效，改为 `_enter_tree()` 解决时序问题。| P3 | ✅ |
+| KN3 | **(可选) Kenney 星级图标** — `star.png`/`star_outline.png` 稀有度装饰 | `card_visual_composer.gd` 增补 rarity star 装饰层 ~0.5h | P3 | ⬜ |
+| KN4 | **(可选) Kenney divider 分割线** — 替换纯色 ColorRect | 装饰性，视觉提升有限 ~0.3h | P3 | ⬜ |
+| K3-K7 | ~~治愈漫画方向~~ — 🗑️ 已废弃 | 当前少年漫画方向稳定，无需切换 | — | 🗑️ |
 
-**注意:** K3-K7 仅在决策为治愈漫画方向后启动。少年漫画方向仅执行 K2。建议在 F1/G/H 完成后再评估方向切换。
+---
+
+## 🎨 Phase KUI — Kenney 暖纸风 UI 改造（方案B）
+
+> **方案文档:** [`09-mgmt/specs/kenney-beige-ui-transformation.md`](specs/kenney-beige-ui-transformation.md)
+> **审阅:** 2026-06-22 review-plan 通过（A1/B3/D1 修正）
+> **决策:** ✅ 面板+按钮改用 Kenney beige/brown 纹理，保留 BarrierTheme accent 文字色
+
+| # | 任务 | 说明 | 优先级 | 状态 |
+|---|------|------|--------|------|
+| KUI1 | **面板改造（6处）** — LeftPanel×4 / SettlementCard / DeckViewer 的 StyleBoxFlat → StyleBoxTexture 用 `panel_beige`/`panel_beigeLight`。Patch margins=8px。保留 `panel_edge_fade` shader | `ninking_main.tscn` + `settlement_card.tscn` + `barrier_theme.gd` PanelBg 色值调整 | **P1** | ✅ |
+| KUI2 | **GameOver/Victory 面板卡片化** — 新增 NinePatchRect 暖米面板，文字/按钮移入面板内。pop_in 入场（`GlobalTweens.pop_in()`） | `ninking_main.tscn` + `ui_manager.gd` | P2 | ⬜ |
+| KUI3 | **主菜单按钮换皮** — 4 主菜单按钮 + Debug 按钮改用 `buttonLong_beige`/`buttonSquare_grey` + pressed 纹理。深褐字 #3D2B1A。不删 theme 样式（用 override 覆盖） | `main_menu.gd` | **P1** | ✅ |
+| KUI4 | **游戏内操作按钮换皮** — `barrier_theme.gd` 新增 `apply_kenney_button_style()` + `apply_kenney_square_style()`，PlayBtn/AiRearrangeBtn/DeckBtn/重试/回菜单按钮改用 `buttonLong_brown`/`buttonSquare_brown` 纹理，白字 + pressed 时显示 accent 色 | `barrier_theme.gd` + `game_manager.gd` | **P1** | ✅ |
+| KUI5 | **商店按钮换皮** — 购买 `buttonRound_beige`（pressed 用 modulate_color 调暗），刷新 `buttonLong_brown`，继续 `buttonLong_beige` | `shop_ui.gd` + `shop_slot.gd` | P2 | ✅ |
+| KUI6 | **Debug 场景同步** — `debug_ninking_main.tscn` 同步面板/按钮改造（**DebugPanel 及其子面板除外**） | `debug_ninking_main.tscn` | P2 | ✅ |
+| KUI7 | **文档同步** — `21-ui-interaction-enhancements.md` + `DOCUMENT_MAP.md` 更新 | 2 文档 | P2 | ✅ |
+
+**旧 Kenney 任务：** KN3(星级图标) / KN4(分割线) 取消，KN1/KN2(光标) 已完成不在此阶段。
+
+---
+
+## 🖥️ UI 交互优化 — 待定项
+
+> **2026-06-22 评估后新增** — 4 个可选方向，优先级待定，实施前需确认方向。
+
+| # | 任务 | 说明 | 优先级 | 状态 |
+|---|------|------|--------|------|
+| U1 | **设置面板** — 设置按钮 `_on_settings_pressed` 当前为 `pass`，补全为弹出面板：BGM音量 + SFX音量 → ConfigManager 持久化。半透明遮罩 + 面板 pop_in 动画 | `main_menu.gd` + 新建 settings_panel.tscn/·gd | ? | ⬜ |
+| U2 | **卡牌拖拽手感增强** — 拖起时卡牌升起+阴影，合法落点发光高亮，非法落点淡红提示，松手弹回动画 | card-framework 相关文件 + `ninking_card.gd` | ? | ⬜ |
+| U3 | **GameOver/Victory 画面卡片化** — 当前为纯 Label + Button，改为带背景卡牌样式的面板 + pop_in 入场动效 | `ui_manager.gd` + `ninking_main.tscn` + 相关 gd | ? | ⬜ |
+| U4 | **结算金币 count-up 视觉加强** — 当前纯数字跳动，加金币粒子 + 音效 + 震动 | `settlement_card.gd` + `game_manager.gd` | ? | ⬜ |
 
 ## 📐 代码质量
 
@@ -281,20 +314,21 @@
 | E11f | **文档同步** — `21-simulation-methodology.md` §10 审查发现 + `13-blinds-and-bosses.md` 阈值表 | ✅ |
 | E11g | **阈值调整建议框架更新** — 方法论 §9 新增 30% 下调适配 | ✅ |
 
-> **Grill 8 轮决策 + review-plan 审阅通过。** 移除独立 LevelComplete（过关！+X 金币 + 进商店按钮）页面。计分动画结束后画面定格，金币飞入左面板 MatchPanel/GoldLabel（数值滚动 + 飘字），~1.5s 后自动进 Shop，任意点击/按键可跳过。
+> **Grill 8 轮决策 + review-plan 审阅通过。** 移除独立 LevelComplete。结算卡片「封印解除」：计分结束 → 弹出战果卡（封印名/分数/金币 count-up）→ 玩家点击按钮进商店。
 
 | # | 任务 | 说明 | 优先级 | 状态 |
 |---|------|------|--------|------|
 | E1 | **animation_handler.gd: 捕获金币旧值** | Phase 4 胜利分支 `finalize_play()` 前将 `gs.gold` 存入 `current_play_data["gold_before_settlement"]` | **P0** | ✅ |
-| E2 | **game_manager.gd: `_play_gold_settlement()` 方法** | 新方法实现金币飞入动画序列：① `GlobalTweens.count_up_gold(GoldLabel, new_gold, 0.6, "$")` 从旧值滚动到新值 ② 手写 `create_tween()` 创建 "+X💰" 飘字从封印区域飞向 MatchPanel ③ 到达时 `scale_pop(GoldLabel, 1.15, 0.2)` + `play_sfx(UI_COIN)` ④ 与 Phase 4 VFX（punch_in）重叠播放 | **P0** | ✅ |
-| E3 | **game_manager.gd: skip-on-click 机制** | SEAL_COMPLETE 进入时创建透明全屏 Control 接收 `gui_input`（点击/按键）→ 设 `_skip_requested = true` → 跳过等待直接进 Shop。Shop 打开后自动移除 | **P0** | ✅ |
-| E4 | **game_manager.gd: auto-shop 时序调整** | 移除 1.2s 硬 timer，改为：等待金币动画完成 → 再停留 0.9s（或 skip）→ `go_shop_pressed()`。总 ~1.5s 从计分结束算起 | **P0** | ✅ |
-| E5 | **game_manager.gd: SEAL_COMPLETE 分支重写** | 去掉 `show_view("complete")` + `set_level_complete()`，改为保持当前定格画面，调用 `_play_gold_settlement()` → 等待 → auto-shop | **P0** | ✅ |
+| E2 | ~~**`_play_gold_settlement()` 方法**~~ | ⛔ 已废弃 — 被 E12 结算卡片取代 | **P0** | 🗑️ |
+| E3 | ~~**skip-on-click 机制**~~ | ⛔ 已废弃 — 改为「封印解除」按钮 | **P0** | 🗑️ |
+| E4 | ~~**auto-shop 时序调整**~~ | ⛔ 已废弃 — 不再自动进商店 | **P0** | 🗑️ |
+| E5 | **game_manager.gd: SEAL_COMPLETE 分支重写** | 去掉 `show_view("complete")` + `set_level_complete()`，改为结算卡片 | **P0** | ✅ |
 | E6 | **ui_manager.gd: 清理 LevelComplete 引用** | 移除 `@onready var level_complete/complete_label/reward_label/to_shop_button` + `set_level_complete()` 包装方法 | P1 | ✅ |
 | E7 | **result_screen_display.gd: 清理 `set_level_complete()`** | 移除方法（或保留空壳防引用断裂） | P1 | ✅ |
 | E8 | **ninking_main.tscn: 移除 LevelComplete 子树** | 删除节点树 + 4 个 `unique_name_in_owner` | P1 | ✅ |
 | E9 | **game_manager.gd: 移除 `to_shop_button` 连线** | 删除 `ui.to_shop_button.pressed.connect(shop_handler.go_shop_pressed)` | P1 | ✅ |
-| E10 | **文档同步** | `06-ui-layout-reference.md`（场景树移除 LevelComplete、`show_view("complete")` 标记废弃）+ `03-technical-design.md`（状态机注释、场景树） | P1 | ✅ |
+| E10 | **文档同步 (旧)** | `06-ui-layout-reference.md` / `03-technical-design.md` | P1 | ✅ |
+| **E12** | **结算卡片「封印解除」** | 独立结算环节：卡片弹出 → 战果展示 → 金币 count-up → 按钮进商店。详见 [`specs/settlement-card-design.md`](specs/settlement-card-design.md) | **P0** | ✅ |
 
 ---
 
@@ -525,6 +559,16 @@ Phase F1 ──→ Phase F2 ──→ Phase F3 ──→ Phase H ──→ Phase
 
 | 日期 | 变更 |
 |------|------|
+| 2026-06-22 | 🖱️ **Kenney 光标集成完成** — `cursor_manager.gd` 新建，`main_menu.gd` 初始化 + 按钮 `mouse_default_cursor_shape=POINTING_HAND`。默认金剑+悬停蓝手，经实测验证通过。KN3/KN4 保留可选待办。 |
+| 2026-06-22 | 🖱️ **Kenney 评估重新审查 — KN1-KN4 入 TODO** — K2/V52 原标记 ✅ 但代码从未实现（无 `cursor_manager.gd`）。重新审查后拆分为 KN1(光标管理器)+KN2(hover 反馈)+KN3(星级图标)+KN4(分割线)。旧 K2/K3-K7 更新为正确状态。 |
+| 2026-06-22 | 🔒 **B5 附魔卡降级暂缓** — 附魔卡选牌弹窗 (enchant_target_selector) 优先级 P2→P3，状态 🔵→🔒。当前聚焦核心玩法与稳定性，附魔交互靠后处理。 |
+| 2026-06-22 | ✋ **光标扩展 Card 覆盖** — `_on_node_added` 新增 `or node is Card`，手牌/忍栏/商店卡牌悬停变蓝手。同步更新 `21-ui-interaction-enhancements.md` 和记忆文件。 |
+| 2026-06-22 | 🏗️ **Kenney 暖纸风 UI 改造方案 B 审阅通过** — spec `kenney-beige-ui-transformation.md` 经历 review-plan 四维审阅，A1(patch_margin 16→8px)/B3(buttonRound pressed)/D1(theme 只加不删) 已修正。KUI1-KUI7 入 TODO。KN3/KN4 废弃。 |
+| 2026-06-22 | 🏗️ **KUI3/KUI4 按钮换皮完成** — KUI3: main_menu.gd `_apply_kenney_button_style_to_all()` 为 4 主菜单按钮应用 buttonLong_beige + 深褐字，DebugBtn 用 buttonSquare_grey。KUI4: barrier_theme.gd 新增 `apply_kenney_button_style()`(buttonLong_brown) + `apply_kenney_square_style()`(buttonSquare_brown)；game_manager.gd `_on_seal_started()` 为 PlayBtn/AiRearrangeBtn/DeckBtn/Retry/Menu 6 按钮应用 Kenney 暖棕纹理 |
+| 2026-06-22 | 🏗️ **KUI5 商店按钮换皮完成** — shop_ui.gd 继续按钮用 buttonLong_beige + 深褐字，刷新按钮用 buttonLong_brown + 白字。shop_slot.gd 购买按钮用 buttonRound_beige + 深褐字，pressed 态用 modulate_color(0.85) 替代缺失的 _pressed 纹理 |
+| 2026-06-22 | 🏗️ **KUI6/KUI7 Debug 场景同步 + 文档同步完成** — KUI6: debug_ninking_main.tscn 面板(StyleBoxFlat→StyleBoxTexture) + 按钮(buttonLong_brown)同步改造，DebugPanel 及其子面板除外。KUI7: 21-ui-interaction-enhancements.md 新增§3 暖纸风面板/按钮改造记录 + DOCUMENT_MAP.md §5.16 新增 Kenney 改造条目 |
+| 2026-06-22 | 📋 **新增 U1-U4 UI 交互优化待定项** — 设置面板/拖拽手感/GameOver 卡片化/金币 count-up 加强。优先级待定，需确认方向后再实施。 |
+| 2026-06-22 | 🏗️ **左边栏喜信息重构 — ColXiLabel 移出 VBox 改为 Label**：去掉 `×N` 仅保留喜名；改用 `Label` + `fit_content`+`autowrap_mode` 自动换行；脱离 `ScoreVBox` 绝对定位 + `offset_top` 负值向上扩展（最多 4 行）；不推下方 ScoreLabel/ProgressBar。同步 debug 场景 + UI layout 文档。影响文件：`hand_type_labeler.gd`/`ui_manager.gd`/`hand_display.gd`/`debug_controller.gd`/`ninking_main.tscn`/`ninking_debug.tscn`/`06-ui-layout-reference.md` |
 | 2026-06-21 | 🐛 **ShopOverlay mouse_filter=IGNORE 修复商店遮挡忍者栏交互**: `ninking_main.tscn` ShopOverlay `mouse_filter` 从 STOP→PASS→IGNORE。根因: Godot 4 `gui_find_control()` 按 z_index 降序找顶层 Control 分发事件，ShopOverlay(z_index=1100, 全屏) 始终为事件入口，PASS 也不穿透到 GameLayout(z_index=0)。IGNORE 排除该节点后 GameLayout 成为忍者栏区域顶层，ShopPanel 为 ShopOverlay 子节点仍独立接收事件。deck_viewer_controller.gd `_on_deck_btn_pressed` 加 state guard 防止商店时误开牌库。文档 06-ui-layout-reference.md / 03-technical-design.md 同步更新。 |
 | 2026-06-15 | 🀄 **CardVisualComposer 卡片视觉合成抽象层**: 新增 `card_visual_composer.gd`(class_name CardVisualComposer, RefCounted 静态工具类)。L1 原子工具: create_rarity_stylebox/create_frame_overlay/compose_art_texture/compose_art_draw/apply_hover_glow。L2: build_card_face。三处消费者改造: DisplayCardBase(删~60行) / NinjaInventoryCard(删~35行) / CardDetailPopup(删~40行)。双渲染路径(TextureRect 保留 Fake3D + _draw)。C27/C28 加入 TODO。
 | 2026-06-15 | 🐛 **忍者计分动画条件过滤修复 (B15/B16)**: `animation_handler.gd` 加 `has_condition` 判断，区分 `[]` 的"无条件→所有组"和"条件不匹配→跳过"语义；`score_calculator.gd` 加 `"head_or_mid"` 组识别分支。双头蛇 n_g05 计分和动画同时修正。文档 `24-scoring-ninja-animation.md` §7.2 同步更新 condition.group 表格 |

@@ -9,11 +9,24 @@ extends RefCounted
 ##   - _apply_group_xi: apply group-level xi (三清/三顺清/顺清打头/豹子)
 ##   - _apply_duplicate_hand_x2: double groups where hand type appears ≥2
 
+## Global xi names — shared with animation_handler.gd for Stage B interim formula.
+const GLOBAL_XI_NAMES: Array[String] = [
+	"全黑", "全红", "全顺", "全同花", "四张", "全三条",
+	"昇龍", "背水", "貧打", "陣眼", "均爵", "三等", "满堂",
+	"三合", "双合", "一合",
+	"四角", "中十字", "倒影", "双壁", "对影", "连环",
+	"天九", "压牌", "至尊", "独尊", "文武", "廿一点",
+	"一气", "无将", "长套", "无忧角", "慢打", "四对半",
+]
+
 
 ## Extract global xi ×mult values from xi_result triggered list.
 ## Global xis: 全黑(×2), 全红(×2), 全顺(×2), 全同花(×3), 四张(×5), 全三条(×4),
 ##             昇龍(×3), 背水(×4), 貧打(×4), 陣眼(×3), 均爵(×3), 三等(×5), 满堂(×5),
-##             三合(×6), 双合(×4), 一合(×2)
+##             三合(×6), 双合(×4), 一合(×2),
+##             四角(×3), 中十字(×4), 倒影(×3), 双壁(×3), 对影(×2), 连环(×6),
+##             天九(×5), 压牌(×4), 至尊(×4), 独尊(×6), 文武(×4), 廿一点(×4),
+##             一气(×3), 无将(×4), 长套(×5), 无忧角(×4), 慢打(×5), 四对半(×4)
 ## xi_bonus is added to each multiplier (e.g. 喜鹊 +1).
 ## xi_max_mult: 龙之眼 — 多个喜时全部按最高倍率统一（仅影响全局喜栈，不影响组级喜）。
 static func get_global_xi_x_stack(xi_result: XiDetector.XiResult, xi_bonus: int = 0, xi_override: Dictionary = {}, xi_max_mult: bool = false) -> Array[int]:
@@ -26,9 +39,7 @@ static func get_global_xi_x_stack(xi_result: XiDetector.XiResult, xi_bonus: int 
 		var defn: Dictionary = XiDetector.XI_DEFINITIONS[i]
 		xi_map[defn["name"]] = defn["x_mult"]
 
-	var global_xi_names: Array[String] = ["全黑", "全红", "全顺", "全同花", "四张", "全三条",
-			"昇龍", "背水", "貧打", "陣眼", "均爵", "三等", "满堂",
-			"三合", "双合", "一合"]
+	var global_xi_names: Array[String] = GLOBAL_XI_NAMES
 	for name: String in xi_result.triggered:
 		if name in global_xi_names:
 			var x_val: int = xi_override.get(name, xi_map.get(name, 1))
