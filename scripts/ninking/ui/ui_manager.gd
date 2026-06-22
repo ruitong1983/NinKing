@@ -207,7 +207,7 @@ func _ready() -> void:
 func show_view(view: String) -> void:
 	game_bg.visible = (view in ["game", "intro", "scoring", "shop", "settlement"])
 	level_intro.visible = (view == "intro")
-	game_layout.visible = (view in ["game", "scoring"])
+	game_layout.visible = (view in ["game", "scoring", "shop"])
 	shop_overlay.visible = (view == "shop")
 	game_over.visible = (view == "gameover")
 	victory_overlay.visible = (view == "victory")
@@ -228,7 +228,7 @@ func get_current_shop_panel() -> Control:
 	return _current_shop_panel
 
 
-func show_shop(shop_mgr: ShopManager, gold: int, colors: Dictionary) -> void:
+func show_shop(shop_mgr: ShopManager, gold: int) -> void:
 	## Create and show shop_panel instance inside ShopOverlay.
 	## Also triggers panel entrance animation.
 	if _current_shop_panel != null and is_instance_valid(_current_shop_panel):
@@ -240,7 +240,7 @@ func show_shop(shop_mgr: ShopManager, gold: int, colors: Dictionary) -> void:
 	shop_overlay.add_child(panel)
 
 	_current_shop_panel = panel
-	panel.init(shop_mgr, gold, colors)
+	panel.init(shop_mgr, gold)
 
 	# Wire signals to game_manager (emitted via UIManager for relay)
 	panel.purchase_requested.connect(_on_shop_purchase_requested)
@@ -249,6 +249,14 @@ func show_shop(shop_mgr: ShopManager, gold: int, colors: Dictionary) -> void:
 	panel.continue_requested.connect(_on_shop_continue_requested)
 
 	show_view("shop")
+
+	# Hide center play area; LeftPanel + NinjaBar remain visible
+	hand_area.visible = false
+	if game_layout.has_node("CenterColumn/DunArea"):
+		game_layout.get_node("CenterColumn/DunArea").visible = false
+	play_btn.visible = false
+	ai_rearrange_btn.visible = false
+
 	MusicManager.play_shop_bgm()
 	panel.play_entrance_animation()
 
@@ -273,6 +281,13 @@ func hide_shop() -> void:
 		panel.queue_free()
 	_current_shop_panel = null
 	shop_overlay.visible = false
+
+	# Restore center play area elements hidden during shop
+	hand_area.visible = true
+	if game_layout.has_node("CenterColumn/DunArea"):
+		game_layout.get_node("CenterColumn/DunArea").visible = true
+	play_btn.visible = true
+	ai_rearrange_btn.visible = true
 
 
 func is_shop_open() -> bool:

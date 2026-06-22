@@ -1,7 +1,11 @@
-# 商店水墨风改造 — 实现规格
+# ⚠️ DEPRECATED — 商店水墨风改造
 
-> **日期:** 2026-06-13 | **来源:** grill-me 19 轮决策 | **状态:** 待实施
-> **关联:** [`../../04-ui/07-shop-ui-design.md`](../../04-ui/07-shop-ui-design.md) · [`../../05-art/16-art-direction-principles.md`](../../05-art/16-art-direction-principles.md)
+> **日期:** 2026-06-13 | **状态:** ❌ 已废弃 (2026-06-22)
+> **废弃原因:** 全线切换为 Kenney 暖纸风 (panel_beige + buttonLong/buttonSquare 纹理)，水墨风方案不再实施。
+> **替代方案:** [`../../04-ui/07-shop-ui-design.md`](../../04-ui/07-shop-ui-design.md) v8 (Kenney 暖纸风) · [`kenney-beige-ui-transformation.md`](kenney-beige-ui-transformation.md)
+> **历史关联:** [`../../05-art/16-art-direction-principles.md`](../../05-art/16-art-direction-principles.md)
+
+> ⚠️ 以下内容仅供历史参考，不代表当前设计方向。
 
 ---
 

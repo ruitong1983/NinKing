@@ -5,16 +5,17 @@
 
 ## §1 概述
 
-Main 场景内嵌 5 个覆盖层，各自对应一个游戏状态。它们通过 `ui_manager.show_view()` 互斥显示。
+Main 场景内嵌 6 个覆盖层，各自对应一个游戏状态。它们通过 `ui_manager.show_view()` 互斥显示。
 
 ```
 GameLayout (主游戏)
   visible = false → LevelIntro (关卡入场)
   visible = true  → PLAYING 交互
-    └── 出牌 → ScoringOverlay (计分动画)
-         └── 判定 ─┬→ LevelComplete (过关) → [商店]
-                   ├→ GameOver (失败) → [重试] / [返回主菜单]
-                   └→ VictoryOverlay (全通关) → [返回主菜单]
+    ├── 出牌 → ScoringOverlay (计分动画)
+    │    └── 判定 ─┬→ LevelComplete (过关) → [商店]
+    │              ├→ GameOver (失败) → [重试] / [返回主菜单]
+    │              └→ VictoryOverlay (全通关) → [返回主菜单]
+    └── [商店] → ShopOverlay (Phase C 内嵌, GameLayout 保持可见, 仅隐藏手牌/出牌区)
 ```
 
 ---
@@ -25,7 +26,8 @@ GameLayout (主游戏)
 |--------|---------|-----------|------|
 | LevelIntro | 新封印开始 | SEAL_INTRO → 2s → PLAYING | 自动 |
 | ScoringOverlay | [討伐] 点击 | SCORING → A7 逐墩动画 | 动画结束 |
-| LevelComplete | 忍気 ≥ 封印 (非最终) | 过关停留 | [商店] → shop.tscn |
+| LevelComplete | 忍気 ≥ 封印 (非最终) | 过关停留 | [商店] → ShopOverlay |
+| ShopOverlay | LevelComplete [商店] | SHOP, GameLayout 保持可见 | [討伐へ] → continue_from_shop |
 | GameOver | 讨伐次数耗尽且忍気不足 | 失败停留 | [重试] / [返回主菜单] |
 | VictoryOverlay | 最終封印突破 (VICTORY) | 通关停留 | [返回主菜单] → Launcher |
 
@@ -170,7 +172,7 @@ LevelComplete (Control 1920×1080)
 
 | 操作 | 结果 |
 |------|------|
-| [商店] | `GlobalTweens.fade_out(ui, 0.3)` → `change_scene_to_file("shop.tscn")` |
+| [商店] | `ShopHandler.go_shop_pressed()` → Phase C 内嵌 ShopOverlay（无场景切换） |
 
 > **注意:** Victory (全通关) 不走 LevelComplete，走专属 `VictoryOverlay`。
 
@@ -265,11 +267,12 @@ VictoryOverlay (Control 1920×1080)
 ```
 layer 0: GameBg (背景, ColorRect)
 layer 1: GameLayout (游戏 UI, HBoxContainer)
-layer 2: LevelIntro (入场覆盖层)
-layer 3: ScoringOverlay (计分覆盖层)
-layer 4: LevelComplete (过关覆盖层)
-layer 5: GameOver (失败覆盖层)
-layer 6: VictoryOverlay (通关覆盖层)
+layer 2: ShopOverlay (内嵌商店, Phase C — GameLayout 保持可见)
+layer 3: LevelIntro (入场覆盖层)
+layer 4: ScoringOverlay (计分覆盖层)
+layer 5: LevelComplete (过关覆盖层)
+layer 6: GameOver (失败覆盖层)
+layer 7: VictoryOverlay (通关覆盖层)
 ```
 
 所有覆盖层通过 `visible` 互斥。`ui_manager.gd:show_view()` 管理显示/隐藏切换。

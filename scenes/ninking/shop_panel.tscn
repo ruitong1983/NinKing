@@ -1,113 +1,103 @@
 [gd_scene format=3 uid="uid://bd5by1ah8j3ky"]
 
-[ext_resource type="Script" uid="uid://py2jsudkqhq" path="res://scripts/ninking/ui/shop_ui.gd" id="1_v2fv5"]
+[ext_resource type="Texture2D" uid="uid://du3jy44eij6xa" path="res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/panel_beige.png" id="1_panel_beige"]
+[ext_resource type="Texture2D" uid="uid://dw2wowafuulen" path="res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/panel_brown.png" id="2_panel_brown"]
+[ext_resource type="Script" uid="uid://dlrutxdiac0k8" path="res://scripts/ninking/ui/shop_ui.gd" id="3_script"]
 
-[node name="ShopPanel" type="Control" unique_id=876907262]
+[node name="ShopPanel" type="Control" unique_id=184316858]
 layout_mode = 3
 anchors_preset = 0
-offset_left = 776.0
-offset_top = 512.0
-offset_right = 1516.0
-offset_bottom = 1022.0
-script = ExtResource("1_v2fv5")
+offset_left = 460.0
+offset_top = 215.0
+offset_right = 1460.0
+offset_bottom = 865.0
+script = ExtResource("3_script")
 
-[node name="StageBg" type="ColorRect" parent="." unique_id=1914915915]
+[node name="StageBg" type="NinePatchRect" parent="." unique_id=1303302503]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_bottom = 40.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
-color = Color(0.9607843, 0.9411765, 0.9098039, 1)
+texture = ExtResource("1_panel_beige")
+patch_margin_left = 8
+patch_margin_top = 8
+patch_margin_right = 8
+patch_margin_bottom = 8
 
-[node name="TitleBar" type="ColorRect" parent="." unique_id=1075858990]
+[node name="TitleBar" type="NinePatchRect" parent="." unique_id=364208218]
 unique_name_in_owner = true
 layout_mode = 0
-offset_right = 740.0
-offset_bottom = 50.0
-color = Color(0.9098039, 0.8784314, 0.8352941, 1)
+offset_right = 1000.0
+offset_bottom = 44.0
+texture = ExtResource("2_panel_brown")
+patch_margin_left = 8
+patch_margin_top = 4
+patch_margin_right = 8
+patch_margin_bottom = 4
 
-[node name="ShopSubtitle" type="Label" parent="." unique_id=1309644081]
+[node name="GoldLabel" type="Label" parent="." unique_id=689599902]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 315.0
-offset_top = -1.0
-offset_right = 425.0
-offset_bottom = 49.0
-theme_override_font_sizes/font_size = 36
-text = "萬屋！"
+offset_left = 16.0
+offset_top = 8.0
+offset_right = 150.0
+offset_bottom = 38.0
+theme_override_colors/font_color = Color(1, 0.843137, 0, 1)
+theme_override_font_sizes/font_size = 22
+text = "0"
 vertical_alignment = 1
 
-[node name="RerollBtn" type="Button" parent="." unique_id=874043978]
+[node name="ShopSubtitle" type="Label" parent="." unique_id=1358196267]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 637.0
-offset_top = 10.0
-offset_right = 734.0
-offset_bottom = 45.0
-text = "入替 3"
-
-[node name="GoldLabel" type="Label" parent="." unique_id=1258927178]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 551.0
+offset_left = 880.0
 offset_top = 6.0
-offset_right = 611.0
-offset_bottom = 46.0
-theme_override_font_sizes/font_size = 20
-text = "0"
+offset_right = 984.0
+offset_bottom = 40.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "商店"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="AbilityGrid" type="GridContainer" parent="." unique_id=1317939004]
+[node name="AbilityGrid" type="GridContainer" parent="." unique_id=1095942083]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 40.0
-offset_top = 53.0
-offset_right = 700.0
-offset_bottom = 251.0
-theme_override_constants/h_separation = 20
+offset_left = 211.0
+offset_top = 76.0
+offset_right = 789.0
+offset_bottom = 297.0
+theme_override_constants/h_separation = 26
 theme_override_constants/v_separation = 0
 columns = 4
 
-[node name="Separator" type="ColorRect" parent="." unique_id=1910746012]
+[node name="ItemGrid" type="GridContainer" parent="." unique_id=829703105]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 40.0
-offset_top = 280.0
-offset_right = 700.0
-offset_bottom = 281.0
-mouse_filter = 2
-color = Color(0.4196078, 0.4196078, 0.4117647, 0.4)
-
-[node name="ItemColumn" type="GridContainer" parent="." unique_id=127680420]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 210.0
-offset_top = 283.0
-offset_right = 530.0
-offset_bottom = 473.0
-theme_override_constants/h_separation = 20
+offset_left = 362.0
+offset_top = 317.0
+offset_right = 638.0
+offset_bottom = 538.0
+theme_override_constants/h_separation = 26
 theme_override_constants/v_separation = 0
 columns = 2
 
-[node name="BottomBar" type="ColorRect" parent="." unique_id=61798574]
+[node name="RerollBtn" type="Button" parent="." unique_id=156924323]
 unique_name_in_owner = true
 layout_mode = 0
-offset_top = 509.0
-offset_right = 740.0
-offset_bottom = 549.0
-color = Color(0.9098039, 0.8784314, 0.8352941, 1)
+offset_left = 300.0
+offset_top = 558.0
+offset_right = 490.0
+offset_bottom = 607.0
+text = "入替 3"
 
-[node name="ContinueBtn" type="Button" parent="." unique_id=1638016468]
+[node name="ContinueBtn" type="Button" parent="." unique_id=950626274]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 280.0
-offset_top = 503.0
-offset_right = 460.0
-offset_bottom = 542.0
-theme_type_variation = &"ImpactButton"
-theme_override_colors/icon_normal_color = Color(1, 0.16078432, 0.16078432, 1)
+offset_left = 510.0
+offset_top = 558.0
+offset_right = 700.0
+offset_bottom = 607.0
 text = "討伐へ ▶"

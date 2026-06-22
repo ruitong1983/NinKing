@@ -1,7 +1,7 @@
-[gd_scene format=3 uid="uid://500j807noeht"]
+[gd_scene format=3 uid="uid://b27dfr3pmqqn"]
 
-[ext_resource type="Script" uid="uid://py2jsudkqhq" path="res://scripts/ninking/ui/shop_ui.gd" id="1_shop"]
-[ext_resource type="Theme" path="res://assets/themes/manga_theme.tres" id="2_theme"]
+[ext_resource type="Script" uid="uid://dlrutxdiac0k8" path="res://scripts/ninking/ui/shop_ui.gd" id="1_shop"]
+[ext_resource type="Theme" uid="uid://bqb2i07k0v8jt" path="res://assets/themes/manga_theme.tres" id="2_theme"]
 
 [node name="Shop" type="Control" unique_id=1001952410]
 layout_mode = 3

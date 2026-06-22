@@ -36,7 +36,6 @@ func go_shop_pressed() -> void:
 	_shop_cache = {
 		"mgr": shop_mgr,
 		"gold": NinKingGameState.gold,
-		"colors": BarrierTheme.get_colors(NinKingGameState.barrier_num),
 	}
 
 	# Keep LeftPanel + NinjaBar visible — only dim hand/dun play area
@@ -53,7 +52,7 @@ func on_enter_shop() -> void:
 	## Called from game_manager's _on_state_changed when SHOP state is entered.
 	_reroll_count = 0  # B4: 重置刷新次数
 	var s_data: Dictionary = _shop_cache
-	_ui.show_shop(s_data.get("mgr"), s_data.get("gold", 0), s_data.get("colors", {}))
+	_ui.show_shop(s_data.get("mgr"), s_data.get("gold", 0))
 	_ui.shop_panel_update_reroll_cost(_get_reroll_cost())  # B4: 通知 UI 当前刷新价格
 
 

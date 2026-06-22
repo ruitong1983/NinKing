@@ -1,27 +1,20 @@
 [gd_scene format=3 uid="uid://ptvq6q660kr6"]
 
-[ext_resource type="Script" uid="uid://m5jqnpwp2kmi" path="res://scripts/ninking/ui/shop_slot.gd" id="1_d08xc"]
-[ext_resource type="PackedScene" path="res://scenes/ninking/ninja_card.tscn" id="2_ste6h"]
+[ext_resource type="Script" uid="uid://m5jqnpwp2kmi" path="res://scripts/ninking/ui/shop_slot.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/ninking/ninja_card.tscn" id="2_card"]
 
-[node name="ShopSlot" type="Control" unique_id=1676553544]
-custom_minimum_size = Vector2(155, 225)
-layout_mode = 3
-anchors_preset = 0
-offset_right = 155.0
-offset_bottom = 225.0
-script = ExtResource("1_d08xc")
+[node name="ShopSlot" type="VBoxContainer"]
+custom_minimum_size = Vector2(125, 221)
+layout_mode = 2
+offset_right = 125.0
+offset_bottom = 221.0
+theme_override_constants/separation = 6
+alignment = 1
+script = ExtResource("1_script")
 
-[node name="NinjaCard" parent="." instance=ExtResource("2_ste6h")]
-layout_mode = 0
-offset_left = 15.0
-offset_top = 7.0
-offset_right = 140.0
-offset_bottom = 182.0
+[node name="NinjaCard" parent="." instance=ExtResource("2_card")]
+layout_mode = 2
 
-[node name="buy_button" type="Button" parent="." unique_id=1630024005]
-layout_mode = 0
-offset_left = 35.0
-offset_top = 184.0
-offset_right = 115.0
-offset_bottom = 218.0
+[node name="BuyBtn" type="Button" parent="."]
+layout_mode = 2
 text = "0"

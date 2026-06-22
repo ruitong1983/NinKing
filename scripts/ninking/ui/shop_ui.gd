@@ -1,47 +1,37 @@
 class_name ShopPanel
 extends Control
-## Shop UI panel — ink-wash (水墨) bottom-stage layout.
+## Shop UI panel — Kenney beige (暖纸风) layout.
 ##
-## Paper-textured 740px panel, calligraphy title/buttons,
-## 4 ability cards (grid) + 2 item cards (2-column centered grid).
+## 1000×650 panel, panel_beige background, panel_brown title bar,
+## 4 ninja cards (grid) + 2 item cards (grid),
+## buttonLong_brown reroll + buttonLong_beige continue.
 ##
 ## Usage:
 ##   var panel = preload("res://scenes/ninking/shop_panel.tscn").instantiate()
-##   panel.init(shop_mgr, gold, barrier_colors)
+##   panel.init(shop_mgr, gold)
 ##   panel.purchase_requested.connect(...)
 ##   shop_overlay.add_child(panel)
 
 const SLOT_SCENE: String = "res://scenes/ninking/shop_slot.tscn"
 
-# ═══ Ink-wash palette (independent of BarrierTheme) ═══
-const COLOR_PAPER      := Color(0.961, 0.941, 0.910)  # 和纸白 #F5F0E8
-const COLOR_PAPER_DARK := Color(0.910, 0.878, 0.835)  # 纸色暗 #E8E0D0
-const COLOR_SUMI       := Color(0.169, 0.118, 0.063)  # 焦墨 #2B1E10
-const COLOR_PALE_INK   := Color(0.420, 0.420, 0.412)  # 淡墨 #6B6B6B
-const COLOR_CINNABAR   := Color(0.722, 0.227, 0.165)  # 朱砂 #B83A2A
-const COLOR_BLUE_ZAN   := Color(0.180, 0.361, 0.541)  # 蓝锖 #2E5C8A
-const COLOR_GOLD_MUD   := Color(0.769, 0.639, 0.353)  # 金泥 #C4A35A
-
-# ═══ Signals (for game_manager to wire) ═══
+# ═══ Signals ═══
 signal purchase_requested(ability_data: Dictionary)
 signal item_purchase_requested(item_data: Dictionary)
 signal reroll_requested()
 signal continue_requested()
 
 # ═══ @onready references ═══
-@onready var stage_bg: ColorRect = $StageBg
+@onready var stage_bg: NinePatchRect = $StageBg
 @onready var gold_label: Label = %GoldLabel
 @onready var reroll_button: Button = %RerollBtn
-@onready var shop_title: Label = %ShopSubtitle
 @onready var ability_grid: GridContainer = %AbilityGrid
-@onready var item_column: GridContainer = %ItemColumn
+@onready var item_grid: GridContainer = %ItemGrid
 @onready var continue_button: Button = %ContinueBtn
 
 # ═══ State ═══
 var slot_scene: PackedScene = null
 var ability_cards: Array = []
 var item_cards: Array = []
-var barrier_colors: Dictionary = {}
 var _entrance_active: bool = false
 var _initialized: bool = false
 var _current_gold: int = 0
@@ -54,17 +44,15 @@ var shop_manager: ShopManager = null
 # Public API
 # ══════════════════════════════════════════
 
-func init(shop_mgr: ShopManager, gold: int, colors: Dictionary) -> void:
+func init(shop_mgr: ShopManager, gold: int) -> void:
 	if _initialized:
 		return
 	_initialized = true
 
 	slot_scene = load(SLOT_SCENE)
-
 	shop_manager = shop_mgr
-	barrier_colors = colors
 
-	_apply_ink_wash_theme()
+	_apply_button_textures()
 	_refresh_shop()
 	_update_gold_display(gold)
 
@@ -81,10 +69,12 @@ func update_gold(gold: int) -> void:
 func refresh_stock() -> void:
 	_render_abilities()
 	_render_items()
+	ability_grid.queue_sort()
+	item_grid.queue_sort()
 
 
 # ══════════════════════════════════════════
-# Entrance animation — panel opens
+# Entrance animation
 # ══════════════════════════════════════════
 
 func play_entrance_animation() -> void:
@@ -96,8 +86,8 @@ func play_entrance_animation() -> void:
 	all_cards.append_array(ability_cards)
 	all_cards.append_array(item_cards)
 
-	var whoosh_sfx = preload("res://scripts/config/sound_bank.gd").SHOP_ENTER
-	var impact_sfx = preload("res://scripts/config/sound_bank.gd").BOSS_REVEAL
+	var whoosh_sfx: AudioStream = preload("res://scripts/config/sound_bank.gd").SHOP_ENTER
+	var impact_sfx: AudioStream = preload("res://scripts/config/sound_bank.gd").BOSS_REVEAL
 
 	await NinKingTween.play_shop_entrance_manga({
 		top_border = get_node_or_null("TopBorder"),
@@ -113,81 +103,42 @@ func play_entrance_animation() -> void:
 
 
 # ══════════════════════════════════════════
-# Theme — ink-wash (水墨) styling
+# Button textures (Kenney 9-slice)
 # ══════════════════════════════════════════
 
-func _apply_ink_wash_theme() -> void:
-	# ── Stage: washi paper ──
-	stage_bg.color = COLOR_PAPER
-	# Remove edge-fade shader (paper doesn't fade to ink)
-	GlobalShaders.clear_edge_fade(stage_bg)
-
-	# ── TitleBar: darkened paper background + sumi ink text ──
-	var title_style := StyleBoxFlat.new()
-	title_style.bg_color = COLOR_PAPER_DARK
-	%TitleBar.add_theme_stylebox_override("normal", title_style)
-	%TitleBar.add_theme_color_override("font_color", COLOR_SUMI)
-	%TitleBar.add_theme_font_size_override("font_size", 40)
-
-	# ── Separator: pale ink ──
-	$Separator.color = Color(COLOR_PALE_INK, 0.4)
-
-	# ── Shop title: sumi ink ──
-	shop_title.add_theme_color_override("font_color", COLOR_SUMI)
-	shop_title.add_theme_font_size_override("font_size", 36)
-
-	# ── Gold label: sumi ink ──
-	gold_label.add_theme_color_override("font_color", COLOR_SUMI)
-
-	# ── Buttons: seal (印章) style ──
-	_apply_kenney_beige_style(continue_button)
-	_apply_kenney_brown_style(reroll_button)
+func _apply_button_textures() -> void:
+	_apply_long_button(reroll_button, "brown")
+	_apply_long_button(continue_button, "beige")
 
 
-func _apply_kenney_beige_style(btn: Button) -> void:
-	## Kenney buttonLong_beige + dark brown text for light-action buttons.
-	var tex: Texture2D = preload("res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/buttonLong_beige.png")
-	var tex_p: Texture2D = preload("res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/buttonLong_beige_pressed.png")
+func _apply_long_button(btn: Button, color: String) -> void:
+	var tex_n: Texture2D = load("res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/buttonLong_" + color + ".png")
+	var tex_p: Texture2D = load("res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/buttonLong_" + color + "_pressed.png")
 
 	var s_n := StyleBoxTexture.new()
-	s_n.texture = tex; s_n.set("patch_margin_left", 8); s_n.set("patch_margin_top", 8); s_n.set("patch_margin_right", 8); s_n.set("patch_margin_bottom", 8)
+	s_n.texture = tex_n
+	const PM: int = 8
+	s_n.set("patch_margin_left", PM); s_n.set("patch_margin_top", PM); s_n.set("patch_margin_right", PM); s_n.set("patch_margin_bottom", PM)
 	btn.add_theme_stylebox_override("normal", s_n)
 
 	var s_h := StyleBoxTexture.new()
-	s_h.texture = tex; s_h.modulate_color = Color(1.05, 1.03, 1.0)
-	s_h.set("patch_margin_left", 8); s_h.set("patch_margin_top", 8); s_h.set("patch_margin_right", 8); s_h.set("patch_margin_bottom", 8)
+	s_h.texture = tex_n; s_h.modulate_color = Color(1.05, 1.03, 1.0)
+	s_h.set("patch_margin_left", PM); s_h.set("patch_margin_top", PM); s_h.set("patch_margin_right", PM); s_h.set("patch_margin_bottom", PM)
 	btn.add_theme_stylebox_override("hover", s_h)
 
 	var s_p := StyleBoxTexture.new()
-	s_p.texture = tex_p; s_p.set("patch_margin_left", 8); s_p.set("patch_margin_top", 8); s_p.set("patch_margin_right", 8); s_p.set("patch_margin_bottom", 8)
+	s_p.texture = tex_p
+	s_p.set("patch_margin_left", PM); s_p.set("patch_margin_top", PM); s_p.set("patch_margin_right", PM); s_p.set("patch_margin_bottom", PM)
 	btn.add_theme_stylebox_override("pressed", s_p)
 
-	btn.add_theme_color_override("font_color", Color(0.24, 0.17, 0.10))
-	btn.add_theme_color_override("font_pressed_color", Color(0.24, 0.17, 0.10))
-	btn.add_theme_color_override("font_hover_color", Color(0.30, 0.22, 0.14))
-
-
-func _apply_kenney_brown_style(btn: Button) -> void:
-	## Kenney buttonLong_brown + white text for heavy-action buttons.
-	var tex: Texture2D = preload("res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/buttonLong_brown.png")
-	var tex_p: Texture2D = preload("res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/buttonLong_brown_pressed.png")
-
-	var s_n := StyleBoxTexture.new()
-	s_n.texture = tex; s_n.set("patch_margin_left", 8); s_n.set("patch_margin_top", 8); s_n.set("patch_margin_right", 8); s_n.set("patch_margin_bottom", 8)
-	btn.add_theme_stylebox_override("normal", s_n)
-
-	var s_h := StyleBoxTexture.new()
-	s_h.texture = tex; s_h.modulate_color = Color(1.05, 1.03, 1.0)
-	s_h.set("patch_margin_left", 8); s_h.set("patch_margin_top", 8); s_h.set("patch_margin_right", 8); s_h.set("patch_margin_bottom", 8)
-	btn.add_theme_stylebox_override("hover", s_h)
-
-	var s_p := StyleBoxTexture.new()
-	s_p.texture = tex_p; s_p.set("patch_margin_left", 8); s_p.set("patch_margin_top", 8); s_p.set("patch_margin_right", 8); s_p.set("patch_margin_bottom", 8)
-	btn.add_theme_stylebox_override("pressed", s_p)
-
-	btn.add_theme_color_override("font_color", Color.WHITE)
-	btn.add_theme_color_override("font_pressed_color", Color(0.95, 0.95, 0.98))
-	btn.add_theme_color_override("font_hover_color", Color(0.95, 0.95, 0.98))
+	if color == "brown":
+		btn.add_theme_color_override("font_color", Color.WHITE)
+		btn.add_theme_color_override("font_pressed_color", Color(0.95, 0.95, 0.98))
+		btn.add_theme_color_override("font_hover_color", Color(0.95, 0.95, 0.98))
+	else:
+		btn.add_theme_color_override("font_color", Color(0.24, 0.17, 0.10))
+		btn.add_theme_color_override("font_pressed_color", Color(0.24, 0.17, 0.10))
+		btn.add_theme_color_override("font_hover_color", Color(0.30, 0.22, 0.14))
 
 
 # ══════════════════════════════════════════
@@ -199,24 +150,27 @@ func _refresh_shop() -> void:
 	_render_items()
 
 
+func _is_ninja_bar_full() -> bool:
+	return NinKingGameState.owned_ninjas.size() >= NinKingGameState.max_ninja_slots
+
+
 func _render_abilities() -> void:
 	_clear_ability_grid()
+	var bar_full: bool = _is_ninja_bar_full()
 	for data: Dictionary in shop_manager.get_ninjas_for_display():
 		var slot: ShopSlot = slot_scene.instantiate()
 		ability_grid.add_child(slot)
-		slot.setup(data)
-		slot.apply_ink_wash_theme()
+		slot.setup(data, bar_full)
 		slot.purchase_requested.connect(_on_ability_purchase)
 		ability_cards.append(slot)
 
 
 func _render_items() -> void:
-	_clear_item_column()
+	_clear_item_grid()
 	for data: Dictionary in shop_manager.get_star_charts_for_display():
 		var slot: ShopSlot = slot_scene.instantiate()
-		item_column.add_child(slot)
-		slot.setup(data)
-		slot.apply_ink_wash_theme()
+		item_grid.add_child(slot)
+		slot.setup(data, false)
 		slot.purchase_requested.connect(_on_item_purchase)
 		item_cards.append(slot)
 
@@ -230,11 +184,11 @@ func _clear_ability_grid() -> void:
 	ability_cards.clear()
 
 
-func _clear_item_column() -> void:
+func _clear_item_grid() -> void:
 	for card in item_cards:
 		if is_instance_valid(card):
-			if card.get_parent() == item_column:
-				item_column.remove_child(card)
+			if card.get_parent() == item_grid:
+				item_grid.remove_child(card)
 			card.queue_free()
 	item_cards.clear()
 
@@ -255,12 +209,12 @@ func _update_reroll_state() -> void:
 
 func update_reroll_cost(cost: int) -> void:
 	_reroll_cost = cost
-	reroll_button.text = "入替 $%d" % _reroll_cost
+	reroll_button.text = "入替 ¥%d" % _reroll_cost
 	_update_reroll_state()
 
 
 # ══════════════════════════════════════════
-# Purchase handlers (emit signals)
+# Purchase handlers
 # ══════════════════════════════════════════
 
 func _on_ability_purchase(ability: Dictionary) -> void:

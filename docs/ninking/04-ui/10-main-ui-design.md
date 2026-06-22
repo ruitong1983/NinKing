@@ -26,10 +26,11 @@ GameLayout ───────────────────────
 │ │ 討伐 3        │ └──────────────────────────────┘
 │ │ $0            │
 │ ├───────────────┤   叠加层（按需显示/隐藏）:
-│ │ 结界 1/8      │   · LevelComplete
-│ │ 回合 1        │   · GameOver
-│ │               │   · VictoryOverlay
-│ └───────────────┘   · DeckViewer
+│ │ 结界 1/8      │   · ShopOverlay (内嵌商店, GameLayout 保持可见)
+│ │ 回合 1        │   · LevelComplete
+│ │               │   · GameOver
+│ └───────────────┘   · VictoryOverlay
+│                     · DeckViewer
 └──────────────────────────────────────────────────┘
 ```
 
@@ -106,6 +107,9 @@ NinKingMain (Control) [game_manager.gd]
     │   ├── HandNameLabel
     │   ├── ScoreValueLabel
     │   └── ScoreBreakdown
+    │
+    ├── ShopOverlay (Control)           ← 内嵌商店覆盖层 (Phase C, GameLayout 保持可见)
+    │   └── ShopPanel (1000×650 居中)    ← 通过 ui_manager 动态实例化
     │
     ├── LevelComplete (Control)         ← 过关覆盖层
     ├── GameOver (Control) [%GameOver]       ← 失败覆盖层

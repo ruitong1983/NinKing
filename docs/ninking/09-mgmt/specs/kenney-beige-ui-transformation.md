@@ -171,13 +171,15 @@ static func apply_kenney_button_style(btn: Button, accent: Color) -> void:
 
 关键：**按钮底色统一暖棕，accent 色通过文字和 pressed 态间接体现**，不丢失 BarrierTheme 身份。
 
-### 3.5 商店按钮适配
+### 3.5 商店按钮适配 ✅ 已实施
 
-商店按钮目前由 `shop_ui.gd` + `BarrierTheme.apply_impact_button_style()` 控制。
+商店按钮由 `shop_ui.gd` 和 `shop_slot.gd` 程序化设置，不再依赖 `BarrierTheme.apply_impact_button_style()`。
 
-- **购买按钮：** `buttonRound_beige`（轻感），深褐字。⚠️ 此纹理无 `_pressed` 变体，pressed 态用 `modulate_color = Color(0.85, 0.85, 0.85)` 调暗代替
-- **刷新按钮：** `buttonLong_brown`（重感强调），白字  
-- **继续按钮：** `buttonLong_beige`，深褐字
+- **购买按钮 (BuyBtn)：** `buttonSquare_brown`（125×40），白字，disabled 态用 `buttonSquare_grey`。由 `shop_slot.gd:_apply_purchase_button_style()` 实施
+- **刷新按钮 (RerollBtn)：** `buttonLong_brown`（190×49），白字。由 `shop_ui.gd:_apply_long_button(reroll_button, "brown")` 实施
+- **继续按钮 (ContinueBtn)：** `buttonLong_beige`（190×49），深褐字。由 `shop_ui.gd:_apply_long_button(continue_button, "beige")` 实施
+
+> 面板整体方案详见 [`../../04-ui/07-shop-ui-design.md`](../../04-ui/07-shop-ui-design.md) v8。
 
 ### 3.6 按钮映射汇总
 
@@ -191,7 +193,7 @@ static func apply_kenney_button_style(btn: Button, accent: Color) -> void:
 | PlayBtn | accent 色底 | `buttonLong_brown` | 暖棕 | 白（pressed→accent） |
 | AiRearrangeBtn | accent 色底 | `buttonLong_brown` | 暖棕 | 白 |
 | DeckBtn | accent 色底 | `buttonSquare_brown` | 暖棕 | 白 |
-| 商店购买 | accent 色底 | `buttonRound_beige` | 暖米 | 深褐 |
+| 商店购买 | accent 色底 | `buttonSquare_brown` | 暖棕 | 白（disabled→grey） |
 | 商店刷新 | accent 色底 | `buttonLong_brown` | 暖棕 | 白 |
 | 商店继续 | accent 色底 | `buttonLong_beige` | 暖米 | 深褐 |
 | 结算 UnlockBtn | theme 金边 | `buttonLong_beige` | 暖米 | 深褐 |

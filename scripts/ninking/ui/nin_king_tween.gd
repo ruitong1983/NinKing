@@ -29,7 +29,7 @@ static func play_shop_entrance_manga(config: Dictionary) -> void:
 	##   impact_sfx: AudioStream   — 卡片落地音效 (optional)
 
 	var top_border: ColorRect = config.get("top_border") as ColorRect
-	var stage_bg: ColorRect = config.get("stage_bg") as ColorRect
+	var stage_bg: Control = config.get("stage_bg") as Control
 	var title_bar: CanvasItem = config.get("title_bar") as CanvasItem
 	var panel: Control = config.get("panel") as Control
 	var all_cards: Array = config.get("all_cards", [])
@@ -158,7 +158,7 @@ static func play_reroll_vfx(old_cards: Array, new_cards_callback: Callable) -> v
 
 	# ── Phase 3: New cards slide in from above (0.3s stagger) ──
 	if not new_cards.is_empty():
-		GlobalTweens.stagger_slide_in(new_cards, 0.08, 0.3, -60.0)
+		GlobalTweens.stagger_pop_in(new_cards, 0.08, 0.3)
 
 
 static func play_ninja_pop_in(slot_node: CanvasItem) -> void:
