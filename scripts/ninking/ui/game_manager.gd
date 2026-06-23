@@ -23,8 +23,12 @@ var _boss_revealed: bool = false
 # Auto-shop: SCORING -> shop transition without click (Balatro-style)
 var _auto_shop_pending: bool = false
 
+var _game_mode: String = "bi_ji"
+
 
 func _ready() -> void:
+	_game_mode = NinKingGameState.game_mode
+
 	# Init delegates
 	shop_handler = ShopHandler.new()
 	shop_handler.setup(ui)

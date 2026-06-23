@@ -35,7 +35,7 @@ theme = ExtResource("3_theme")
 theme_override_font_sizes/font_size = 32
 text = "开始游戏"
 
-[node name="ContinueBtn" type="Button" parent="." unique_id=1680238989]
+[node name="CleanBtn" type="Button" parent="." unique_id=250623001]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 810.0
@@ -44,15 +44,26 @@ offset_right = 1110.0
 offset_bottom = 835.0
 theme = ExtResource("3_theme")
 theme_override_font_sizes/font_size = 32
-text = "继续游戏"
+text = "消除模式"
 
-[node name="SettingsBtn" type="Button" parent="." unique_id=1119098392]
+[node name="ContinueBtn" type="Button" parent="." unique_id=1680238989]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 810.0
 offset_top = 861.0
 offset_right = 1110.0
 offset_bottom = 931.0
+theme = ExtResource("3_theme")
+theme_override_font_sizes/font_size = 32
+text = "继续游戏"
+
+[node name="SettingsBtn" type="Button" parent="." unique_id=1119098392]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 810.0
+offset_top = 957.0
+offset_right = 1110.0
+offset_bottom = 1027.0
 theme = ExtResource("3_theme")
 theme_override_font_sizes/font_size = 32
 disabled = true
@@ -62,9 +73,9 @@ text = "设置"
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 810.0
-offset_top = 957.0
+offset_top = 1053.0
 offset_right = 1110.0
-offset_bottom = 1027.0
+offset_bottom = 1123.0
 theme = ExtResource("3_theme")
 theme_override_font_sizes/font_size = 32
 text = "退出游戏"

@@ -21,11 +21,13 @@ const BUTTON_SLIDE_OFFSET: float = 80.0
 @onready var _btn_settings: Button = %SettingsBtn
 @onready var _btn_quit: Button = %QuitBtn
 @onready var _btn_debug: Button = %DebugBtn
+@onready var _btn_clean: Button = %CleanBtn
 var _buttons: Array[Button] = []
 
 var _overlay: ColorRect
 var _continue_panel_scene: Control
 var _panel_open: bool = false
+var _pending_mode: String = "bi_ji"  # "bi_ji"=笔记模式, "clean"=消除模式
 
 # Delegates
 var _ambience: LaunchAmbience
@@ -67,9 +69,10 @@ func _load_assets() -> void:
 # ─── UI 构建 ───
 
 func _build_ui() -> void:
-	_buttons = [_btn_start, _btn_continue, _btn_settings, _btn_quit]
+	_buttons = [_btn_start, _btn_clean, _btn_continue, _btn_settings, _btn_quit]
 
 	_btn_start.pressed.connect(_on_start_pressed)
+	_btn_clean.pressed.connect(_on_clean_pressed)
 	_btn_continue.pressed.connect(_on_continue_pressed)
 	_btn_settings.pressed.connect(_on_settings_pressed)
 	_btn_quit.pressed.connect(_on_quit_pressed)
@@ -103,6 +106,7 @@ func _build_ui() -> void:
 	# Kenney 暖纸风按钮样式
 	for btn in _buttons:
 		ButtonStyles.apply_kenney_long(btn, "beige")
+	ButtonStyles.apply_kenney_long(_btn_clean, "brown")
 	ButtonStyles.apply_kenney_long(_btn_debug, "grey")
 
 
@@ -124,6 +128,17 @@ func _show_menu_buttons() -> void:
 func _on_start_pressed() -> void:
 	if _panel_open:
 		return
+	_pending_mode = "bi_ji"
+	_panel_open = true
+	_overlay.show()
+	GlobalTweens.fade_in(_overlay, 0.25)
+	_deck_select.show_panel()
+
+
+func _on_clean_pressed() -> void:
+	if _panel_open:
+		return
+	_pending_mode = "clean"
 	_panel_open = true
 	_overlay.show()
 	GlobalTweens.fade_in(_overlay, 0.25)
@@ -152,8 +167,14 @@ func _on_debug_pressed() -> void:
 
 func _on_deck_confirmed(deck_key: String) -> void:
 	_panel_open = false
-	NinKingGameState.start_new_run(deck_key)
-	get_tree().change_scene_to_file("res://scenes/ninking/ninking_main.tscn")
+	var target_scene: String
+	if _pending_mode == "clean":
+		NinKingGameState.start_new_run(deck_key, "clean")
+		target_scene = "res://scenes/ninking/ninking_clean_main.tscn"
+	else:
+		NinKingGameState.start_new_run(deck_key)
+		target_scene = "res://scenes/ninking/ninking_main.tscn"
+	get_tree().change_scene_to_file(target_scene)
 
 
 func _on_deck_cancelled() -> void:

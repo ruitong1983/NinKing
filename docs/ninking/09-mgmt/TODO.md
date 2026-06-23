@@ -708,6 +708,7 @@ Phase F1 ──→ Phase F2 ──→ Phase F3 ──→ Phase H ──→ Phase
 | 2026-06-23 | 📋 **shaderlist 优化方案审阅 + 修正**: 分析 shaderlist 85+ shader 对 NinKing 的优化价值。review-plan 发现 🔴A1(架构边界/GlobalTweens控制) + A2(pixel_explosion独子系统) 必须修正。用户确认后写入 S8-S14 共 7 项。**仅 S8(清理) + S10(HaloFX) 为 P1 优先实施，其余 P3/P4暂缓。**|
 | 2026-06-23 | ⚡ **S8 清理完成** — 删除 `shaderlib/` 3 个未用 shader(含 .uid) + `sources/` 中已覆盖的 robust_shine/blink。`SOURCES.md` 同步更新。shaderlib/ 目录已清空。|
 | 2026-06-23 | 🔥 **S10 HaloFX 实施完成** — `shaders/effects/halo.gdshader` 移植(halo_01 改造版: animate 开关+uniform 外部控制+稀有度色板适配) + `scripts/shader/halo_fx.gd`新建(遵循 EdgeFadeFX 模式) + `GlobalShaders` 注册 `apply_halo/clear_halo/has_halo`。脚本编译验证通过。|
+| 2026-06-23 | 🆕 **消除模式通道搭建** — game_state.gd 新增 `game_mode` 字段 + `start_new_run()` 扩展 `mode` 参数；启动器新增"消除模式"按钮(CleanBtn) + `_pending_mode` 路由；1:1 复制 `ninking_main.tscn`→`ninking_clean_main.tscn`；game_manager.gd 读取存储 game_mode。玩法尚未实现，仅创建从启动器到新场景的通道。|
 
 ## 🎨 按钮统一展示动效 — 弹跳入场 + 金色粒子 + 呼吸脉冲 + hover + 点击反馈
 
@@ -725,4 +726,33 @@ Phase F1 ──→ Phase F2 ──→ Phase F3 ──→ Phase H ──→ Phase
 | KUI17 | **SettlementCard UnlockBtn** mild | settlement_card.gd | P0 | ✅ |
 | KUI18 | **Debug 场景同步** (待接入 manga 样式后) | debug_controller.gd | P2 | ⬜ |
 | KUI19 | **呼吸脉冲重写**: direct scale pulse, StyleBoxFlat fallback, pulse config | tween_fx.gd + button_styles.gd | P0 | ✅ |
+
+---
+
+## 🆕 消除模式 (Clean Mode) — Balatro 风消除
+
+> **Grill 10 轮决策, 2026-06-23**
+> **核心:** 新建 game_mode="clean" 通道，1:1 复刻主场景。实际玩法待设计。
+
+| # | 任务 | 说明 | 优先级 | 状态 |
+|---|------|------|--------|------|
+| CL1 | **game_state.gd 新增 game_mode** | `var game_mode: String = "bi_ji"` + `start_new_run()` 新增 `mode` 参数 | **P1** | ✅ |
+| CL2 | **启动器新增消除模式按钮** | CleanBtn (810,765,300×70) "消除模式" + 下方按钮下移 96px | **P1** | ✅ |
+| CL3 | **main_menu.gd 路由** | `_pending_mode` + `_on_clean_pressed()` + `_on_deck_confirmed()` 路由到 `ninking_clean_main.tscn` | **P1** | ✅ |
+| CL4 | **复制 ninking_clean_main.tscn** | 1:1 复制 `ninking_main.tscn`，通过 Godot 编辑器 API 执行 | **P1** | ✅ |
+| CL5 | **game_manager.gd 读取 game_mode** | `_game_mode = NinKingGameState.game_mode`，暂不分支行为 | **P1** | ✅ |
+| CL6 | **消除模式玩法设计** | Balatro 风消除：打牌→移除→补牌→计分 | **P2** | ⬜ |
+| CL7 | **文档同步 (消除模式通道)** | 更新 `03-technical-design.md` / `09-launch-ui-design.md` / `DOCUMENT_MAP.md` / `06-ui-layout-reference.md` / `10-main-ui-design.md` / `11-main-overlay-design.md` (6 份) | **P1** | ✅ |
+| **CL8** | **新建 `clean_controller.gd`** — 消除模式独立控制器：拖拽相邻交换 → 行/列消除判定 → 重力下落补牌 → 连锁消除循环 → 交换次数递减。prepare/finalize 拆分模式对齐 `seal_controller.gd` | 新建 `scripts/ninking/clean_controller.gd` | **P0** | ⬜ |
+| **CL9** | **新建 `CleanLayoutGenerator`** — 替代 `auto_arranger.gd` 的 1680 枚举。随机抽 9 张 → 放入 3×3 网格 → 验证 6 组（3 行 + 3 列）全部为散牌（HIGH_CARD_3）。概率不足时支持重试上限 | 新建 `scripts/ninking/clean_layout_generator.gd` | **P0** | ⬜ |
+| **CL10** | **`game_state.gd` 模式分支** — `execute_play()`/`swap_cards()` 按 `game_mode` 分发 CleanController；`_begin_seal_phase()` clean 变体（跳过 auto_arrange → 调 CleanLayoutGenerator → 直接进入 PLAYING） | `scripts/ninking/game_state.gd` | **P0** | ⬜ |
+| **CL11** | **`game_state.gd` 加 `_cascading` 标志** — 连锁消除动画期间锁定拖拽输入，防止重力补牌中途玩家交换导致状态不一致 | `scripts/ninking/game_state.gd` | **P0** | ⬜ |
+| **CL12** | **`ConfigManager` clean 独立配置** — 新增 `clean_swaps_per_seal: 5`（独立于 `plays_per_seal: 3`），验证 `>= 1`。Q4 用户确认独立配置 | `scripts/config/config_manager.gd` | **P0** | ⬜ |
+| **CL13** | **消除计分管线** — `ScoreCalculator` 新增 `calculate_clean(grid)` 或新建 `clean_score_pipeline.gd`：仅行+列加法计分（无喜系统），每波消除单独计分后累加到 `current_score`。`SCORING` 状态复用 | `scripts/ninking/score/score_calculator.gd` + 可能新建 | **P0** | ⬜ |
+| **CL14** | **初始布局蒙特卡洛模拟** — Python 脚本估算 9 张随机牌在 3×3 网格中 6 组全为散牌的概率。概率 < 50% 则需设计重试策略（如重抽 N 次或允许 1-2 组非散牌保底） | `tools/clean_layout_sim.py`(新) | **P1** | ⬜ |
+| **CL15** | **忍者经济审计** — 量化 clean 模式下 `on_play` 触发频率：5 swaps × 平均连锁波数（估计 2-4 波）≈ 10-20 次/seal vs bi_ji 3 次/seal。评估通胀倍数，设计降频方案（如"每 swap 仅首波消除触发"或"每密封印限触发 N 次"） | 分析任务，不改代码 | **P1** | ⬜ |
+| **CL16** | **目标分数重标定** — `barrier_config.gd` 24 个封印 target 从 bi_ji 值（含喜×堆叠+行列双维）重新校准为纯行+列加法值。基于模拟器跑分基线 + 连锁波次预期确定新目标 | `scripts/ninking/barrier_config.gd` + `tools/sim_config.py` | **P1** | ⬜ |
+| **CL17** | **UI：消除模式 HUD 适配** — ① 移除 Xi 显示区域（ColXiLabel/喜预览/HandTypeLabeler 喜预览）② 移除升序约束显示 ③ 新增 SwapCounter（交换剩余次数，替代 PlayCounter）④ PlayBtn → 不可见 ⑤ AiRearrangeBtn → 不可见 | `ninking_clean_main.tscn` + `ui_manager.gd` + `game_manager.gd` | **P1** | ⬜ |
+| **CL18** | **Tween/VFX 消除动效接入** — ① 消除粒子碎裂 `GlobalTweens.burst_particles("manga_burst")` ② 分数飘字 `TweenFX.float_up()` ③ 新牌落地弹跳 `TweenFX.entrance_bounce()` ④ 连锁波次屏幕微震 `GlobalTweens.screen_shake()` ⑤ 关键消除 hit_stop `GlobalTweens.do_hit_stop()` | `clean_controller.gd` + 调 GlobalTweens API | **P1** | ⬜ |
+| **CL19** | **文档同步（6+ 文件）** — `06-complete-redesign.md`（消除模式玩法专章）/ `03-technical-design.md`（Cascading 状态旗标 + 新场景树）/ `DOCUMENT_MAP.md` / `13-blinds-and-bosses.md`（移除 Boss 引用）/ `06-ui-layout-reference.md`（HUD 差异）/ 相关 UI 设计文档 | `docs/ninking/` 6+ 文件 | **P1** | ⬜ |
 

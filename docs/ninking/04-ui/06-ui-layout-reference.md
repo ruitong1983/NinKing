@@ -520,7 +520,8 @@ Overlay  (封印达成)    (忍気不足)  (全结界制霸)
 | 文件 | 职责 |
 |------|------|
 | `scenes/ninking/ninking_launcher.tscn` | 启动场景（自动跳转） |
-| `scenes/ninking/ninking_main.tscn` | 主UI场景（本文档所述） |
+| `scenes/ninking/ninking_main.tscn` | 主UI场景（比鸡模式, 本文档所述） |
+| `scenes/ninking/ninking_clean_main.tscn` | 消除模式场景（1:1 复刻 ninking_main.tscn） |
 | `scripts/ninking/ui/game_manager.gd` | 游戏流程控制 |
 | `scripts/ninking/ui/ui_manager.gd` | UI显示管理（本文档 §5 所述） |
 | `scripts/ninking/ui/hand_display.gd` | 手牌渲染（HandDisplay delegate） |

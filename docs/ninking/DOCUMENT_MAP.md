@@ -89,7 +89,7 @@
 
 | 影响文档 | 说明 | 同步要点 |
 |---------|------|---------|
-| **`06-tech/03-technical-design.md`** | 技术架构 — 状态机 | State enum/信号定义/核心字段变更时同步 |
+| **`06-tech/03-technical-design.md`** | 技术架构 — 状态机 | State enum/信号定义/核心字段（含 `game_mode`）/`start_new_run()` 签名变更时同步 |
 | **`06-tech/ui-signal-architecture.md`** | UI 信号架构与数据流 | 信号定义/emit 时机变更时同步 |
 | `07-data/game-save-schema.md` | 存档格式 | 状态字段变更影响存档结构时同步 |
 
@@ -210,7 +210,7 @@
 
 | 影响文档 | 说明 | 同步要点 |
 |---------|------|---------|
-| **`04-ui/09-launch-ui-design.md`** | Launch UI 设计 | 主菜单/牌组选择/继续确认变更时同步 |
+| **`04-ui/09-launch-ui-design.md`** | Launch UI 设计 | 主菜单/牌组选择/继续确认变更时同步（含 CleanBtn / _pending_mode 路由） |
 | `06-tech/03-technical-design.md` | 技术架构 | 场景切换/存档读取变更时同步 |
 
 ### 5.13 `scripts/ninking/ui/nin_king_tween.gd` + `launch_ambience.gd`
@@ -263,15 +263,17 @@
 
 ## 六、场景文件（`.tscn`）
 
-### 6.1 `scenes/ninking/ninking_main.tscn` + `ninking_launcher.tscn`
+### 6.1 `scenes/ninking/ninking_main.tscn` + `ninking_clean_main.tscn` + `ninking_launcher.tscn`
 
 | 影响文档 | 说明 | 同步要点 |
 |---------|------|---------|
 | **`04-ui/06-ui-layout-reference.md`** | UI 布局参考 — §场景树全图 | 节点名/层级/%引用变更时**必须同步** |
 | **`04-ui/09-launch-ui-design.md`** | Launch UI — §场景结构 | Launch 场景结构变更时同步 |
-| **`04-ui/10-main-ui-design.md`** | Main Game UI — §场景结构 | Main 场景结构变更时同步 |
+| **`04-ui/10-main-ui-design.md`** | Main Game UI — §场景结构 | Main/CleanMain 场景结构变更时同步 |
 | `04-ui/11-main-overlay-design.md` | Overlay 设计 | 覆盖层结构变更时同步 |
 | `scene-tree-visualizer.html` | HTML 可视化 | 由 pre-commit 自动触发（`tools/tscn_parser.py`）⚠️ pre-commit hook 需手动安装：`sh tools/install-hooks.sh` |
+
+> `ninking_clean_main.tscn` 是 `ninking_main.tscn` 的 1:1 复刻，用于消除模式。玩法实现后需独立维护。
 
 ### 6.2 `scenes/ninking/debug_ninking_main.tscn`
 
@@ -506,3 +508,4 @@
 | 2026-06-23 | 🎨 **计分行配色调整**: ...略...
 | 2026-06-23 | 🖌️ **风格统一：少年漫画→治愈漫画**: 更新 `16-art-direction-principles.md` 全篇。同步 6 份文档风格引用。TODO.md 新增风格统一条目。|
 | 2026-06-23 | 🏗️ **KUI2 GameOver/Victory 面板卡片化**: ContentPanel 暖米面板 + pop_in 入场 + 文字配色适配。同步 `06-ui-layout-reference.md`/`10-main-ui-design.md`/`11-main-overlay-design.md`/`21-ui-interaction-enhancements.md` 场景树与文字配色描述。|
+| 2026-06-23 | 🆕 **消除模式通道**: §4.1 `game_state.gd` 新增 `game_mode` 字段映射；§5.12 `main_menu.gd` 新增 CleanBtn/_pending_mode 路由说明；§6.1 新增 `ninking_clean_main.tscn` 场景映射。同步 `03-technical-design.md` / `09-launch-ui-design.md`。|

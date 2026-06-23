@@ -1,6 +1,6 @@
 # NinKing Main Overlay 设计方案
 
-> **建立日期:** 2026-06-10 | **关联场景:** `ninking_main.tscn` 子节点
+> **建立日期:** 2026-06-10 | **关联场景:** `ninking_main.tscn` + `ninking_clean_main.tscn` 子节点
 > **风格权威:** [`../05-art/16-art-direction-principles.md`](../05-art/16-art-direction-principles.md) · 治愈漫画风（旧少年漫画方向已于 2026-06-23 废弃）
 
 ## §1 概述

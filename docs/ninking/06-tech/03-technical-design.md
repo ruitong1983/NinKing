@@ -8,7 +8,7 @@
 - **语言**: GDScript 2.0（纯脚本，无 C++ 扩展）
 - **渲染**: GL Compatibility (纯 2D)
 - **分辨率**: 1920×1080
-- **玩法**: 比鸡 9张牌三墩 + 小丑牌 Roguelike
+- **玩法**: 双模式 — 比鸡模式 (9张牌三墩 + 小丑牌 Roguelike) / 消除模式 (Balatro 式消除, 开发中)
 
 ---
 
@@ -28,7 +28,7 @@
 
 ### 全局主题
 
-**`assets/themes/manga_theme.tres`** — 挂载在 `ninking_main.tscn` / `ninking_launcher.tscn` 根节点
+**`assets/themes/manga_theme.tres`** — 挂载在 `ninking_main.tscn` / `ninking_clean_main.tscn` / `ninking_launcher.tscn` 根节点
 
 - `default_font` = LXGWWenKai-Medium (font_size=16)
 - StyleBoxFlat 全部 hard-edge（0 圆角、2px 边框、金色描边）
@@ -54,7 +54,7 @@
 ## 状态机
 
 ```
-   (启动器 main_menu.gd 调用 start_new_run() / continue_run() 后加载本场景)
+   (启动器 main_menu.gd 调用 start_new_run(deck_name, mode) / continue_run() 后加载本场景)
                     ┌──────────┐
                     │ SEAL_INTRO │ ← 0.5s 结界浮水印（Phase C 极简化）
                     └─────┬──────┘
@@ -135,7 +135,8 @@ enum State {
 res://
 ├── scenes/ninking/
 │   ├── ninking_launcher.tscn       ← 入口场景 (主菜单)
-│   ├── ninking_main.tscn           ← 主游戏场景（含 ShopOverlay Phase C）
+│   ├── ninking_main.tscn           ← 主游戏场景（含 ShopOverlay Phase C, 比鸡模式）
+│   ├── ninking_clean_main.tscn      ← 消除模式场景 (1:1 复刻 ninking_main.tscn, 玩法待实现)
 │   ├── debug_ninking_main.tscn          ← Debug 计分测试场景 (2026-06-12)
 │   ├── shop_panel.tscn             ← 🆕 商店面板场景片段 (替代旧 shop.tscn)
 │   ├── ninja_card.tscn               ← 🆕 统一忍者卡场景 (替代旧 display_card_base.tscn)
@@ -148,9 +149,15 @@ res://
 ### ninking_launcher.tscn
 
 ```
-Launcher (Node) [main_menu.gd]
-└── LaunchBg (TextureRect) — launch_bg.png 背景
-    (UI 全部由 main_menu.gd 程序化构建: CanvasLayer + 按钮 + 牌组面板 + 继续面板)
+Launcher (Control) [main_menu.gd]
+├── LaunchBg (TextureRect) — launch_bg.png 背景
+├── StartBtn (Button) "开始游戏"      ← 比鸡模式入口
+├── CleanBtn (Button) "消除模式"      ← 消除模式入口
+├── ContinueBtn (Button) "继续游戏"
+├── SettingsBtn (Button) "设置" (disabled)
+├── QuitBtn (Button) "退出游戏"
+├── DebugBtn (Button) "DEBUG"
+│   (牌组面板 + 继续面板由 main_menu.gd 程序化构建)
 ```
 
 ### ninking_main.tscn
@@ -542,9 +549,9 @@ DeckManager (RefCounted)
 
 NinKingGameState (Node, Autoload)
 ├── current_state, barrier_num, seal_idx, gold, hand, owned_ninjas, star_chart_levels
-├── current_arrangement, current_col_evals
+├── game_mode, current_arrangement, current_col_evals
 ├── gold/plays_remaining/max_ninja_slots ← ConfigManager 初始化（game_config.json）
-├── start_new_run() → 读取 ConfigManager.starting_gold + 校验/填充 starter_ninja_ids
+├── start_new_run(deck_name, mode) → 读取 ConfigManager.starting_gold + 校验/填充 starter_ninja_ids
 ├── continue_run() / has_saved_run()
 ├── auto_arrange() / re_evaluate_arrangement() / get_scoring_rules()
 ├── swap_cards() / execute_play()

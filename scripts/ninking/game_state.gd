@@ -57,6 +57,7 @@ var current_arrangement: Arrangement = null
 var current_col_evals: Array = []  # Array[HandEvaluator3.EvalResult], 3 elements or empty
 var deck_manager: DeckManager = null
 var current_deck_name: String = "standard"
+var game_mode: String = "bi_ji"  # "bi_ji"=笔记模式, "clean"=消除模式
 
 # Player inventory
 var owned_ninjas: Array[Dictionary] = []
@@ -80,9 +81,10 @@ func _reset_star_chart_levels() -> void:
 # Run lifecycle
 # ══════════════════════════════════════════
 
-func start_new_run(deck_name: String = "standard") -> void:
+func start_new_run(deck_name: String = "standard", mode: String = "bi_ji") -> void:
 	SaveManager.delete_run()
 	current_deck_name = deck_name
+	game_mode = mode
 	barrier_num = 1
 	seal_idx = 0
 	gold = ConfigManager.starting_gold
