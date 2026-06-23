@@ -143,27 +143,31 @@ NinKingMain (Control) 1920×1080                      [game_manager.gd]
     │   ⛔  LevelComplete (已删除, 2026-06-12 Phase E)
     │   ⛔  ShopPanel 详细子树 → 见 shop_panel.tscn / 07-shop-ui-design.md
     │
-    ├── GameOver (Control) [%GameOver]                  — 失败弹窗 (view: "gameover")
-    │   ├── OverlayBg (ColorRect)                      #000 80%
-    │   ├── GameOverLabel (Label) [%GameOverLabel]     "失败" 48px 红, 居中
-    │   ├── ScoreSummary (Label) [%ScoreSummary]        "战绩: 结界 X · 忍気 Y" 28px 居中
-    │   ├── RetryButton (Button) [%RetryButton]         "重新开始" 24px flat
-    │   └── BackToMenuButton (Button) [%BackToMenuButton] "返回主菜单" 20px flat
-    │
-    ├── VictoryOverlay (Control)                        — 通关弹窗 (view: "victory")
-    │   ├── OverlayBg (ColorRect)                      #000 70%
-    │   ├── VictoryLabel (Label)                        "忍道制霸!" 56px
-    │   ├── StatsSummary (Label)
-    │   └── MenuButton (Button)                         "返回主菜单"
-    │
-    ├── DeckViewer (Control) [%DeckViewer]              — 牌库查看器 (z_index:10)
+    ├── GameOver (Control) [%GameOver] 520x360                  — 失败弹窗 (view: "gameover")
+    │   ├── OverlayBg (ColorRect)                      #000 80%, 全屏
+    │   ├── ContentPanel (Panel) 520x360 居中            — Kenney 暖米卡牌面板 (KUI2)
+    │   │   ├── GameOverLabel (Label) [%GameOverLabel]  "失败" 48px 深红 #C0392B, 居中
+    │   │   ├── ScoreSummary (Label) [%ScoreSummary]     "战绩: 结界 X · 忍気 Y" 26px 深褐 #3D2B1A, 居中
+    │   │   ├── RetryButton (Button) [%RetryButton]      "重新开始" 24px flat (manga 样式)
+    │   │   └── BackToMenuButton (Button) [%BackToMenuButton] "返回主菜单" 20px flat
+    │   │   ⚡ pop_in 入场: scale 0.75→1.0 (TRANS_BACK) + 淡入 0.2s
+    │   │
+    │   ├── VictoryOverlay (Control) 全屏                — 通关弹窗 (view: "victory")
+    │   │   ├── OverlayBg (ColorRect)                   #000 70%, 全屏
+    │   │   ├── ContentPanel (Panel) 520x320 居中        — Kenney 暖米卡牌面板 (KUI2)
+    │   │   │   ├── VictoryLabel (Label)                 "忍道制霸!" 48px 金色 #D4A843, 居中
+    │   │   │   ├── StatsSummary (Label)                 "通关! 全N结界制霸 · 忍気 N" 26px 深褐 #3D2B1A, 居中
+    │   │   │   └── MenuButton (Button)                  "返回主菜单" 24px flat (manga 样式)
+    │   │   │   ⚡ pop_in 入场: scale 0.75→1.0 + 淡入 0.2s
+    │   │
+    │   ├── DeckViewer (Control) [%DeckViewer]              — 牌库查看器 (z_index:10 / toggle开关)
     │   ├── ViewerBg (ColorRect) [%ViewerBg]            #000 75%
     │   └── CardPanel (Panel) 900×640
     │       ├── TitleBar (HBoxContainer)
-    │       │   ├── ViewerTitle (Label)                 "牌库" 24px 金
-    │       │   └── CloseBtn (Button) [%CloseBtn]       "✕"
+    │       │   ├── ViewerTitle (Label)                 (空, 仅撑位)
+    │       │   └── CloseBtn (Button) [%CloseBtn]       "✕" 深褐
     │       ├── CountRow (HBoxContainer)
-    │       │   ├── DrawCountLabel (Label) [%DrawCountLabel] "牌堆: 0 张"
+    │       │   ├── DrawCountLabel (Label) [%DrawCountLabel] "牌堆: 0 张" 深褐
     │       └── CardScroll (ScrollContainer)
     │           └── DeckCardGrid (GridContainer) [%DeckCardGrid] 13 列
     │
@@ -253,7 +257,7 @@ HandTypePanel (Panel) [%HandTypePanel]
 ```
 
 分数 = (卡牌筹码 + 牌型筹码) × 牌型倍率，由 `HandTypeLabeler._update_dun_types()` 实时预览。
-Lv badge 色阶：Lv.1-2 `#7A7A7A` 灰 | Lv.3-4 `#588CF2` 蓝 | Lv.5-6 `#C4A843` 金。Lv.0 不显示。
+Lv badge 色阶：Lv.1-2 `#5C5C5C` 深灰 | Lv.3-4 `#3A6FD8` 深蓝 | Lv.5-6 `#9A8230` 暗金（2026-06-23 加深，在米色面板上保证对比度）。Lv.0 不显示。
 
 ##### b. ScorePanel (中部 30%~70%) — 喜 / 分数 / 进度
 
@@ -566,4 +570,4 @@ Overlay  (封印达成)    (忍気不足)  (全结界制霸)
 | [`docs/ninking/06-tech/ui-signal-architecture.md`](../06-tech/ui-signal-architecture.md) | UI 信号架构与数据流 |
 | [`docs/ninking/04-ui/07-shop-ui-design.md`](07-shop-ui-design.md) | 商店 UI 设计文档 |
 | [`docs/ninking/04-ui/10-main-ui-design.md`](10-main-ui-design.md) | 主 UI 设计文档 |
-| [`docs/ninking/05-art/05-image-asset-generation-plan.md`](../05-art/05-image-asset-generation-plan.md) | 素材生成方案 |
+| ~~[`docs/ninking/05-art/05-image-asset-generation-plan.md`](../05-art/05-image-asset-generation-plan.md)~~（已删除） | 素材生成方案（已废弃） |

@@ -340,7 +340,7 @@ theme_override_constants/separation = 10
 
 [node name="MatchTitle" type="Label" parent="UIManager/GameLayout/LeftPanel/MatchPanel/MatchVBox" unique_id=1246038194]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.40, 0.28, 0.12, 1)
+theme_override_colors/font_color = Color(0.4, 0.28, 0.12, 1)
 theme_override_font_sizes/font_size = 20
 text = "比赛信息"
 
@@ -835,10 +835,10 @@ anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 112.0
-offset_top = -643.0
-offset_right = -216.0
-offset_bottom = -609.0
+offset_left = 130.0
+offset_top = -645.0
+offset_right = -194.0
+offset_bottom = -611.0
 grow_horizontal = 2
 grow_vertical = 0
 
@@ -876,10 +876,10 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 z_index = 11
 layout_mode = 0
-offset_left = 15.0
-offset_top = 130.0
-offset_right = 55.0
-offset_bottom = 165.0
+offset_left = 34.0
+offset_top = 142.0
+offset_right = 74.0
+offset_bottom = 177.0
 theme_override_colors/font_color = Color(0.55, 0.4, 0.12, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.5)
 theme_override_constants/outline_size = 2
@@ -891,10 +891,10 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 z_index = 11
 layout_mode = 0
-offset_left = 540.0
-offset_top = 130.0
-offset_right = 626.0
-offset_bottom = 165.0
+offset_left = 550.0
+offset_top = 142.0
+offset_right = 636.0
+offset_bottom = 177.0
 theme_override_colors/font_color = Color(0.55, 0.4, 0.12, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.5)
 theme_override_constants/outline_size = 2
@@ -906,10 +906,10 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 z_index = 11
 layout_mode = 0
-offset_left = 15.0
-offset_top = 324.0
-offset_right = 55.0
-offset_bottom = 359.0
+offset_left = 34.0
+offset_top = 316.0
+offset_right = 74.0
+offset_bottom = 351.0
 theme_override_colors/font_color = Color(0.55, 0.4, 0.12, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.5)
 theme_override_constants/outline_size = 2
@@ -921,10 +921,10 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 z_index = 11
 layout_mode = 0
-offset_left = 540.0
-offset_top = 324.0
-offset_right = 626.0
-offset_bottom = 359.0
+offset_left = 550.0
+offset_top = 312.0
+offset_right = 636.0
+offset_bottom = 347.0
 theme_override_colors/font_color = Color(0.55, 0.4, 0.12, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.5)
 theme_override_constants/outline_size = 2
@@ -936,10 +936,10 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 z_index = 11
 layout_mode = 0
-offset_left = 15.0
-offset_top = 516.0
-offset_right = 55.0
-offset_bottom = 551.0
+offset_left = 34.0
+offset_top = 493.0
+offset_right = 74.0
+offset_bottom = 528.0
 theme_override_colors/font_color = Color(0.55, 0.4, 0.12, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.5)
 theme_override_constants/outline_size = 2
@@ -951,10 +951,10 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 z_index = 11
 layout_mode = 0
-offset_left = 540.0
-offset_top = 516.0
-offset_right = 626.0
-offset_bottom = 551.0
+offset_left = 550.0
+offset_top = 493.0
+offset_right = 636.0
+offset_bottom = 528.0
 theme_override_colors/font_color = Color(0.55, 0.4, 0.12, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.5)
 theme_override_constants/outline_size = 2
@@ -971,10 +971,10 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -100.0
-offset_top = -68.0
-offset_right = 100.0
-offset_bottom = -20.0
+offset_left = 48.0
+offset_top = -80.0
+offset_right = 248.0
+offset_bottom = -32.0
 grow_horizontal = 2
 grow_vertical = 0
 size_flags_horizontal = 0
@@ -993,10 +993,10 @@ text = "陣形"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(160, 56)
 layout_mode = 0
-offset_left = 60.0
-offset_top = 605.0
-offset_right = 220.0
-offset_bottom = 661.0
+offset_left = 526.0
+offset_top = 982.0
+offset_right = 686.0
+offset_bottom = 1046.0
 size_flags_horizontal = 0
 size_flags_vertical = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -1074,51 +1074,58 @@ offset_right = 1920.0
 offset_bottom = 1080.0
 color = Color(0, 0, 0, 0.8)
 
-[node name="GameOverLabel" type="Label" parent="UIManager/GameOver" unique_id=1835767358]
+[node name="ContentPanel" type="Panel" parent="UIManager/GameOver" unique_id=219543539]
+layout_mode = 0
+offset_left = 700.0
+offset_top = 360.0
+offset_right = 1220.0
+offset_bottom = 720.0
+
+[node name="GameOverLabel" type="Label" parent="UIManager/GameOver/ContentPanel" unique_id=1835767358]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 640.0
-offset_top = 380.0
-offset_right = 1280.0
-offset_bottom = 450.0
-theme_override_colors/font_color = Color(0.878, 0.251, 0.251, 1)
+offset_left = 60.0
+offset_top = 25.0
+offset_right = 460.0
+offset_bottom = 75.0
+theme_override_colors/font_color = Color(0.753, 0.224, 0.169, 1)
 theme_override_font_sizes/font_size = 48
 text = "失败"
 horizontal_alignment = 1
 
-[node name="RetryButton" type="Button" parent="UIManager/GameOver" unique_id=308434606]
+[node name="ScoreSummary" type="Label" parent="UIManager/GameOver/ContentPanel" unique_id=1143129712]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 830.0
-offset_top = 500.0
-offset_right = 1090.0
-offset_bottom = 560.0
-theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
+offset_left = 60.0
+offset_top = 95.0
+offset_right = 460.0
+offset_bottom = 135.0
+theme_override_colors/font_color = Color(0.239, 0.169, 0.102, 1)
+theme_override_font_sizes/font_size = 26
+text = "战绩: 结界 0 · 忍気 0"
+horizontal_alignment = 1
+
+[node name="RetryButton" type="Button" parent="UIManager/GameOver/ContentPanel" unique_id=308434606]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 110.0
+offset_top = 200.0
+offset_right = 410.0
+offset_bottom = 260.0
 theme_override_font_sizes/font_size = 24
 text = "重新开始"
 flat = true
 
-[node name="BackToMenuButton" type="Button" parent="UIManager/GameOver" unique_id=703436984]
+[node name="BackToMenuButton" type="Button" parent="UIManager/GameOver/ContentPanel" unique_id=703436984]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 845.0
-offset_top = 610.0
-offset_right = 1075.0
-offset_bottom = 665.0
+offset_left = 160.0
+offset_top = 285.0
+offset_right = 360.0
+offset_bottom = 330.0
 theme_override_font_sizes/font_size = 20
 text = "返回主菜单"
 flat = true
-
-[node name="ScoreSummary" type="Label" parent="UIManager/GameOver" unique_id=1143129712]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 735.0
-offset_top = 460.0
-offset_right = 1185.0
-offset_bottom = 500.0
-theme_override_font_sizes/font_size = 28
-text = "战绩: 结界 0 · 忍気 0"
-horizontal_alignment = 1
 
 [node name="DeckViewer" type="Control" parent="UIManager" unique_id=220409291]
 unique_name_in_owner = true
@@ -1138,29 +1145,27 @@ color = Color(0, 0, 0, 0.75)
 
 [node name="CardPanel" type="Panel" parent="UIManager/DeckViewer" unique_id=1083085139]
 layout_mode = 0
-offset_left = 510.0
-offset_top = 120.0
-offset_right = 1410.0
-offset_bottom = 760.0
+offset_left = 500.0
+offset_top = 300.0
+offset_right = 1420.0
+offset_bottom = 780.0
 theme_override_styles/panel = SubResource("StyleBoxTexture_deck_panel")
 
 [node name="TitleBar" type="HBoxContainer" parent="UIManager/DeckViewer/CardPanel" unique_id=1968215991]
 layout_mode = 0
 offset_left = 20.0
 offset_top = 15.0
-offset_right = 880.0
+offset_right = 900.0
 offset_bottom = 50.0
 
 [node name="ViewerTitle" type="Label" parent="UIManager/DeckViewer/CardPanel/TitleBar" unique_id=2108499990]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
-theme_override_font_sizes/font_size = 24
-text = "牌库"
 
 [node name="CloseBtn" type="Button" parent="UIManager/DeckViewer/CardPanel/TitleBar" unique_id=333994660]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(0.239, 0.169, 0.102, 1)
 theme_override_font_sizes/font_size = 24
 text = "✕"
 flat = true
@@ -1169,14 +1174,14 @@ flat = true
 layout_mode = 0
 offset_left = 20.0
 offset_top = 55.0
-offset_right = 880.0
+offset_right = 900.0
 offset_bottom = 80.0
 theme_override_constants/separation = 30
 
 [node name="DrawCountLabel" type="Label" parent="UIManager/DeckViewer/CardPanel/CountRow" unique_id=1382385425]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.941, 0.929, 0.894, 1)
+theme_override_colors/font_color = Color(0.239, 0.169, 0.102, 1)
 theme_override_font_sizes/font_size = 24
 text = "牌堆: 0 张"
 
@@ -1184,8 +1189,8 @@ text = "牌堆: 0 张"
 layout_mode = 0
 offset_left = 20.0
 offset_top = 90.0
-offset_right = 880.0
-offset_bottom = 620.0
+offset_right = 900.0
+offset_bottom = 470.0
 
 [node name="DeckCardGrid" type="GridContainer" parent="UIManager/DeckViewer/CardPanel/CardScroll" unique_id=258748802]
 unique_name_in_owner = true
@@ -1198,22 +1203,54 @@ columns = 13
 visible = false
 z_index = 1100
 anchors_preset = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
 metadata/_editor_unique_name_ = true
 
 [node name="OverlayBg" type="ColorRect" parent="UIManager/VictoryOverlay" unique_id=642608461]
 layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
 color = Color(0, 0, 0, 0.7)
 
-[node name="VictoryLabel" type="Label" parent="UIManager/VictoryOverlay" unique_id=474829960]
+[node name="ContentPanel" type="Panel" parent="UIManager/VictoryOverlay" unique_id=384824424]
 layout_mode = 0
+offset_left = 700.0
+offset_top = 380.0
+offset_right = 1220.0
+offset_bottom = 700.0
+
+[node name="VictoryLabel" type="Label" parent="UIManager/VictoryOverlay/ContentPanel" unique_id=474829960]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 30.0
+offset_right = 460.0
+offset_bottom = 80.0
+theme_override_colors/font_color = Color(0.831, 0.659, 0.263, 1)
+theme_override_font_sizes/font_size = 48
 text = "忍道制霸!"
+horizontal_alignment = 1
 
-[node name="StatsSummary" type="Label" parent="UIManager/VictoryOverlay" unique_id=453149600]
+[node name="StatsSummary" type="Label" parent="UIManager/VictoryOverlay/ContentPanel" unique_id=453149600]
 layout_mode = 0
+offset_left = 60.0
+offset_top = 100.0
+offset_right = 460.0
+offset_bottom = 140.0
+theme_override_colors/font_color = Color(0.239, 0.169, 0.102, 1)
+theme_override_font_sizes/font_size = 26
+text = "通关! 全N结界制霸 · 忍気 N"
+horizontal_alignment = 1
 
-[node name="MenuButton" type="Button" parent="UIManager/VictoryOverlay" unique_id=1631855430]
+[node name="MenuButton" type="Button" parent="UIManager/VictoryOverlay/ContentPanel" unique_id=1631855430]
 layout_mode = 0
+offset_left = 160.0
+offset_top = 220.0
+offset_right = 360.0
+offset_bottom = 280.0
+theme_override_font_sizes/font_size = 24
 text = "返回主菜单"
+flat = true
 
 [node name="SettlementOverlay" parent="UIManager" unique_id=137805567 instance=ExtResource("9_e7w8q")]
 unique_name_in_owner = true
@@ -1235,10 +1272,10 @@ mouse_filter = 2
 [node name="StatusLabel" type="Label" parent="UIManager" unique_id=357275323]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 424.0
-offset_top = 702.0
-offset_right = 821.0
-offset_bottom = 736.0
+offset_left = 600.0
+offset_top = 1000.0
+offset_right = 997.0
+offset_bottom = 1030.0
 theme_override_colors/font_color = Color(0.251, 0.753, 0.251, 1)
 theme_override_font_sizes/font_size = 24
 text = "影 <= 瞬 <= 滅 -- 可以出牌"
@@ -1274,10 +1311,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 840.0
-offset_top = 350.0
-offset_right = -700.0
-offset_bottom = -200.0
+offset_left = 880.0
+offset_top = 368.0
+offset_right = -660.0
+offset_bottom = -182.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1

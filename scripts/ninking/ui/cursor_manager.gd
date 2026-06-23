@@ -10,13 +10,16 @@ extends Node
 ##   - Card 及其子类   → 手牌卡牌、忍者栏卡牌、商店卡牌等所有交互卡牌
 ##
 ## 已注册形状：
-##   CURSOR_ARROW          → cursorSword_gold (金剑, 默认)
+##   CURSOR_ARROW          → cursorHand_beige (暖手, 默认, 治愈漫画风)
 ##   CURSOR_POINTING_HAND  → cursorHand_blue  (蓝手, 按钮悬停)
+##
+## ⚠️ 2026-06-23 风格统一: 默认光标从金剑(cursorSword_gold) 改为暖手(cursorHand_beige),
+## 匹配治愈漫画(Iyashikei)风格。旧金剑光标保留在 assets 中备用。
 ##
 ## 用 _enter_tree 而非 _ready，确保在首个场景（Launch）的节点加入场景树
 ## 之前就连接好 node_added 信号，避免首次加载时错过按钮的入场事件。
 
-const CURSOR_DEFAULT := preload("res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/cursorSword_gold.png")
+const CURSOR_DEFAULT := preload("res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/cursorHand_beige.png")
 const CURSOR_HOVER := preload("res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/cursorHand_blue.png")
 
 
@@ -43,10 +46,10 @@ func _on_node_added(node: Node) -> void:
 		node.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
 
-## 切换到金剑默认光标 (用于非 Button/Card 的自定义交互控件)
+## 切换到暖手默认光标 (用于非 Button/Card 的自定义交互控件)
 static func set_default() -> void:
 	if CURSOR_DEFAULT:
-		Input.set_custom_mouse_cursor(CURSOR_DEFAULT, Input.CURSOR_ARROW, Vector2(4, 2))
+		Input.set_custom_mouse_cursor(CURSOR_DEFAULT, Input.CURSOR_ARROW, Vector2(2, 2))
 
 ## 切换到蓝手 hover 光标 (用于非 Button/Card 的自定义交互控件)
 static func set_hover() -> void:

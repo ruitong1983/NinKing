@@ -53,7 +53,7 @@ static func _ensure_boss_cache() -> void:
 
 func update_xi_display(text: String) -> void:
 	col_xi_label.text = text
-	col_xi_label.visible = (text != "" and text != "喜: -")
+	col_xi_label.visible = (text != "" and text != "-")
 	# Label is inside ScoreVBox; VBox handles height adjustment automatically
 
 
@@ -126,9 +126,11 @@ func update_xi_display(text: String) -> void:
 
 # ═══ Victory overlay ═══
 @onready var victory_overlay: Control = $VictoryOverlay
-@onready var victory_label: Label = $VictoryOverlay/VictoryLabel
-@onready var victory_stats_summary: Label = $VictoryOverlay/StatsSummary
-@onready var victory_menu_button: Button = $VictoryOverlay/MenuButton
+@onready var victory_panel: Panel = $VictoryOverlay/ContentPanel  # KUI2: beige content card
+@onready var victory_label: Label = $VictoryOverlay/ContentPanel/VictoryLabel
+@onready var victory_stats_summary: Label = $VictoryOverlay/ContentPanel/StatsSummary
+@onready var victory_menu_button: Button = $VictoryOverlay/ContentPanel/MenuButton
+@onready var game_over_panel: Panel = $GameOver/ContentPanel  # KUI2: beige content card
 
 # ═══ Delegates ═══
 var hand_display: RefCounted  # HandDisplay
@@ -199,6 +201,17 @@ func _ready() -> void:
 	# ── ColXiLabel autowrap (inside ScoreVBox, VBox handles layout) ──
 	col_xi_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
+	# ── Apply Kenney beige panel styles (centralized in PanelStyles) ──
+	left_panel.get_node("MatchPanel").add_theme_stylebox_override("panel", PanelStyles.beige_panel())
+	left_panel.get_node("AntePanel").add_theme_stylebox_override("panel", PanelStyles.beige_panel())
+	left_panel.get_node("HandTypePanel").add_theme_stylebox_override("panel", PanelStyles.beige_light_panel())
+	left_panel.get_node("ScorePanel").add_theme_stylebox_override("panel", PanelStyles.beige_light_panel())
+	game_layout.get_node("CenterColumn/DunArea").add_theme_stylebox_override("panel", PanelStyles.beige_light_panel())
+
+	# KUI2: Apply Kenney beige panel style to GameOver/Victory content cards
+	game_over_panel.add_theme_stylebox_override("panel", PanelStyles.beige_light_panel())
+	victory_panel.add_theme_stylebox_override("panel", PanelStyles.beige_light_panel())
+
 
 # ══════════════════════════════════════════
 # View switching
@@ -212,6 +225,11 @@ func show_view(view: String) -> void:
 	game_over.visible = (view == "gameover")
 	victory_overlay.visible = (view == "victory")
 	settlement_overlay.visible = (view == "settlement")
+	# KUI2: pop_in animation for GameOver/Victory panels
+	if view == "gameover":
+		_animate_card_pop_in(game_over_panel)
+	elif view == "victory":
+		_animate_card_pop_in(victory_panel)
 	# CardGrid is a sibling of UIManager at z_index=10, so it renders above
 	# all UIManager children. Hide during overlay views so cards don't block
 	# clicks to buttons (e.g. RetryButton on GameOver screen).
@@ -219,6 +237,16 @@ func show_view(view: String) -> void:
 
 
 # ══════════════════════════════════════════
+# KUI2: pop_in animation for content cards (GameOver/Victory panels)
+func _animate_card_pop_in(panel: Panel) -> void:
+	panel.scale = Vector2(0.75, 0.75)
+	panel.modulate = Color(1, 1, 1, 0)
+	var tw: Tween = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.set_parallel(true)
+	tw.tween_property(panel, "scale", Vector2(1, 1), 0.3)
+	tw.tween_property(panel, "modulate", Color(1, 1, 1, 1), 0.2)
+
+
 # Shop overlay (Phase C)
 # ══════════════════════════════════════════
 

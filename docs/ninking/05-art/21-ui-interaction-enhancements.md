@@ -1,6 +1,6 @@
 # NinKing UI 交互增强素材指南
 
-> **建立日期:** 2026-06-22 | **最后更新:** 2026-06-22 (+§3 Kenney 暖纸风面板/按钮改造)
+> **建立日期:** 2026-06-22 | **最后更新:** 2026-06-23 (+§3.7 GameOver/Victory 卡片化 KUI2)
 > **用途:** 汇总所有为提升界面交互体验而集成的 UI 素材，说明架构、使用方法、替换流程和扩展指引。
 > **原则:** 每项增强必须在此文档中有记录，否则视为未正式接入。
 > **关联:**
@@ -26,11 +26,11 @@
 | 项目 | 内容 |
 |------|------|
 | **素材包** | `kenney_ui-pack-rpg-expansion` (CC0) |
-| **默认光标** | `cursorSword_gold.png` — 金色剑形（34×37 px） |
+| **默认光标** | `cursorHand_beige.png` — 暖色手掌（治愈系，匹配整体氛围）（旧: cursorSword_gold） |
 | **悬停光标** | `cursorHand_blue.png` — 蓝色手掌（27×28 px） |
 | **素材路径** | `res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/` |
 | **授权** | CC0，可商用无需署名 |
-| **选取理由** | 详见 `20-kenney-ui-pack-evaluation.md` §2.3 — 少年漫画风下唯一可用项 |
+| **选取理由** | 详见 `20-kenney-ui-pack-evaluation.md` — 治愈漫画风下最匹配（暖手代替金剑） |
 
 ### 1.2 架构
 
@@ -205,10 +205,22 @@ Input.set_custom_mouse_cursor(图片, Input.CURSOR_POINTING_HAND, Vector2(2, 2))
 ### 3.4 实现方式
 
 - **面板:** 场景文件 `.tscn` 中 `StyleBoxFlat` sub_resource → `StyleBoxTexture` sub_resource，保留原有 ShaderMaterial（`panel_edge_fade`）
-- **主菜单按钮:** `main_menu.gd` `_apply_kenney_button_style_to_all()` 程序化创建 `StyleBoxTexture`
-- **游戏内操作按钮:** `barrier_theme.gd` 新增 `apply_kenney_button_style()` / `apply_kenney_square_style()` 静态方法；`game_manager.gd` 在 `_on_seal_started()` 中调用
-- **商店按钮:** `shop_ui.gd` 替换 `_apply_seal_button_style` → `_apply_kenney_beige_style` / `_apply_kenney_brown_style`；`shop_slot.gd` 替换 `_apply_seal_button_style` → `_apply_kenney_round_style`
+- **所有按钮样式统一由 `ButtonStyles` 管理:** `scripts/ninking/ui/button_styles.gd`，提供以下方法：
+  - `ButtonStyles.apply_kenney_long(btn, variant)` — Kenney 长按钮（"brown"/"beige"/"grey"/"blue"）
+  - `ButtonStyles.apply_kenney_square(btn, variant)` — Kenney 方按钮
+  - `ButtonStyles.apply_manga(btn, accent, size_tier)` — 漫画风 StyleBoxFlat（按结界属性动态配色）
+- **调用方：** `main_menu.gd`, `shop_ui.gd`, `game_manager.gd` 均改为一行调用 `ButtonStyles.xxx()`
+- **旧方法已全部迁移:**
+  - `main_menu._apply_kenney_button_style_to_all()` → 移除
+  - `barrier_theme.apply_kenney_button_style()/apply_kenney_square_style()/apply_manga_button_style()` → 移到 ButtonStyles
+  - `shop_ui._apply_button_textures()/_apply_long_button()` → 移除
 - **Debug 场景:** 同步修改 `debug_ninking_main.tscn` 中的 sub_resource 和节点引用（DebugPanel 及其子面板除外）
+- **按钮入口动效统一管理:** ``ButtonStyles.attach_entrance_animation(btn, config)`` 挂载完整交互生命周期:
+  - 完整模式: disabled=true → 弹跳入场 / mild: 直接挂载 → disabled=false → **呼吸脉冲** + hover 放大 + click squash
+  - config keys: ``"mild"`` (跳过弹跳), ``"pulse"`` (default true, false=只保留 hover+click), ``"click_sfx"`` (自定义音效)
+  - **呼吸脉冲**: Scale 1.0↔1.05 循环 (TRANS_SINE, 0.8s 半周期), 不依赖 MODULATE uniform
+  - **Launch 场景**: 仅 StartBtn 保留呼吸, 其余按钮 ``pulse:false`` (简洁)
+- **注意:** ``apply_kenney_*`` / ``apply_manga`` **必须在** ``attach_entrance_animation`` 之前调用, 确保 disabled 样式已覆盖
 
 ### 3.5 9宫格注意事项
 
@@ -226,3 +238,29 @@ Kenney 纹理边角圆边区域约 5px，留 3px 缓冲，**patch_margin = 8px**
 | ScorePanel | `texture_filter = 1` |
 | MatchPanel | `texture_filter = 1` |
 | AntePanel | `texture_filter = 1` |
+| GameOver ContentPanel | 运行时由 `PanelStyles.beige_light_panel()` 设置 |
+| VictoryOverlay ContentPanel | 运行时由 `PanelStyles.beige_light_panel()` 设置 |
+
+### 3.7 KUI2 — GameOver/Victory 面板卡片化 (2026-06-23)
+
+> **状态:** ✅ 已完成 | **影响文件:** `ninking_main.tscn` + `ui_manager.gd`
+
+**改造内容：** GameOver 和 VictoryOverlay 从纯 Label+Button 改为居中 Kenney 暖米卡牌面板。
+
+**面板规格：**
+
+| 面板 | 尺寸 | 纹理 | 入场动效 |
+|------|------|------|---------|
+| GameOver ContentPanel | 520×360 居中 | `panel_beigeLight` | pop_in: scale 0.75→1.0 (TRANS_BACK, 0.3s) + 淡入 (0.2s) |
+| VictoryOverlay ContentPanel | 520×320 居中 | `panel_beigeLight` | 同上 |
+
+**文字配色（暖米底适配）：**
+
+| 场景 | 元素 | 颜色 | 色值 |
+|------|------|------|------|
+| 失败 | 标题 | 深红 (醒目不刺眼) | `#C0392B` |
+| 胜利 | 标题 | 金色 (庆祝感) | `#D4A843` |
+| 两者 | 战报正文 | 深褐 (最高可读性) | `#3D2B1A` |
+| 两者 | 按钮 | 由 `ButtonStyles.apply_manga()` 动态设 (accent 色) | — |
+
+**实现方式：** 场景中新增 ContentPanel (Panel) 节点，运行时通过 `PanelStyles.beige_light_panel()` 应用 Kenney 纹理。`ui_manager.gd` 中新增 `_animate_card_pop_in()` 动画方法，在 `show_view("gameover"/"victory")` 时触发。按钮样式由已有的 `game_manager.gd:_on_seal_started()` 中 `ButtonStyles.apply_manga()` 统一管理。

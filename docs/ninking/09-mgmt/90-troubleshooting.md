@@ -571,3 +571,67 @@ s.set("patch_margin_bottom", 8)
 **注意：** `patch_margin_*` 属性值单位是像素，Kenney UI 纹理边角约 5px，推荐 8px 缓冲。
 
 **实例：** 2026-06-22 Kenney UI 暖纸风改造中，所有 StyleBoxTexture 的 patch_margin 设置均使用 `s.set("patch_margin_*", 8)`。涉及文件：`main_menu.gd`、`barrier_theme.gd`、`shop_ui.gd`、`shop_slot.gd`。
+
+---
+
+## §18 Fake3D shader 忽略 MODULATE — 父级 modulate 无效
+
+**现象：** 对 `NinKingCard` 设 `pc.modulate = Color(0.35, 0.35, 0.35, 0.65)` 后，卡牌渲染仍为全亮度，无任何变暗/灰色效果。同理，任何通过 `modulate` 实现的视觉反馈（悬停变暗、禁用灰色、闪烁提示）在带 fake3d 材质的卡牌上均不生效。
+
+**根因：** `fake3d.gdshader`（及 `fake3d_flash.gdshader`、`fake3d_shadow.gdshader`）的 `fragment()` 直接写 `COLOR = texture(TEXTURE, uv + 0.5)`，覆盖了 Godot 4 内置的 `MODULATE` 运算：
+
+```glsl
+void fragment(){
+    // ...
+    COLOR = texture(TEXTURE, uv + 0.5);    // ← GODOT 的 MODULATE 被覆盖
+    COLOR.a *= step(max(abs(uv.x), abs(uv.y)), 0.5);
+    // ...
+    // 缺少: COLOR *= MODULATE;
+}
+```
+
+Godot 4 的 `canvas_item` shader 中，`MODULATE` 是一个 built-in `vec4` uniform，包含该 CanvasItem 及其所有祖先的 `modulate` 累积值。shader 写入 `COLOR` 后不再自动乘 `MODULATE`。默认（无自定义 shader）时 Godot 自动处理，任何自定义 shader 只要写 `COLOR = ...` 就必须显式乘 `MODULATE`。
+
+**附加：shader vertex 修改导致尺寸膨胀**
+
+fake3d 的 vertex 阶段 `VERTEX += (UV - 0.5) / TEXTURE_PIXEL_SIZE * t * (1.0 - inset)` 会基于纹理像素尺寸叠加顶点偏移。即使无旋转（x_rot=0, y_rot=0），无旋转时的像素偏移使渲染尺寸约等于纹理像素尺寸的 2 倍，而非 TextureRect 的设定尺寸。这对牌库面板的缩略图卡牌（期望 63×88）影响明显。
+
+**修复（两处，2026-06-23 B26）：**
+
+1. **Shaders** — 三个 fake3d shader 的 `fragment()` 末尾加 `COLOR *= MODULATE;`：
+   ```glsl
+   void fragment(){
+       // ... 原有色彩/闪光/阴影处理 ...
+       COLOR *= MODULATE;  // ← 恢复父级 modulate
+   }
+   ```
+   - `fake3d.gdshader:71` — 绿幕清除后加
+   - `fake3d_flash.gdshader:199` — **所有闪光效果处理完后才加**（见下方 ⚠️ 坑点）
+   - `fake3d_shadow.gdshader:77` — 阴影处理完成后加
+
+2. **`ninking_card.gd:_apply_fake3d_material()`** — 非交互卡牌（`can_be_interacted_with == false`）跳过 fake3d 材质，同时消除尺寸膨胀和 modulate 问题：
+   ```gdscript
+   func _apply_fake3d_material() -> void:
+       if not _fake3d_mat:
+           return
+       if not can_be_interacted_with:
+           return  # deck viewer / debug 卡牌不需要 fake3d
+       # ...
+   ```
+
+⚠️ **`COLOR *= MODULATE` 的放置顺序陷阱（专坑 flash shader）：**
+
+给带闪光/特效的 shader 加 `COLOR *= MODULATE` 时，**必须放在所有特效处理之后**，而非之前。错误地放在前面会导致：
+
+1. 闪光 `mix(COLOR.rgb, flash_color, flash)` 在已调暗的基色上混合 → 闪光偏暗
+2. 闪光滤镜 `distance(COLOR.rgb, filter_color)` 比较已调制颜色而非原始纹理 → 滤镜误匹配
+
+**规律：** `COLOR *= MODULATE` 在 fragment 中应始终放在所有 COLOR 写操作**之后**（最后一个赋值），作为最终输出调制。
+
+**实例：** 2026-06-23 code-review 发现 `fake3d_flash.gdshader` 首次修复时把 `COLOR *= MODULATE` 放在了绿幕清除后、闪光效果前，导致稀有度闪光被调暗。经 review 确认后移至末尾修复。
+
+**受影响范围：** 所有应用了 fake3d 材质的卡牌（手牌 `NinKingCard`、商店卡 `NinjaInventoryCard`、牌库面板 `DeckViewerController`）。`modulate` 在所有场景下恢复正常。
+
+**排查方法论：** 当 `modulate` 对某个节点无效时，检查该节点或其子节点是否应用了自定义 `canvas_item` shader，且 shader 中是否有 `COLOR = texture(...)` 或类似赋值。如有，确认是否在赋值后乘了 `MODULATE`。
+
+**实例：** 2026-06-23 B26，牌库面板 `deck_viewer_controller.gd` 对已出牌设 `pc.modulate = Color(0.35, 0.35, 0.35, 0.65)` 无效 — fake3d shader 覆盖 COLOR 导致 modulate 丢失。同时 deck viewer 卡牌不旋转（x_rot=0, y_rot=0）时 vertex 偏移使卡牌虚大。两修复联合生效。

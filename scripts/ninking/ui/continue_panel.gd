@@ -12,6 +12,10 @@ signal dismissed()
 
 
 func _ready() -> void:
+	ButtonStyles.apply_kenney_long(_go_btn, "beige")
+	ButtonStyles.apply_kenney_long(_back_btn, "beige")
+	ButtonStyles.attach_entrance_animation(_go_btn, {"mild": true})
+	ButtonStyles.attach_entrance_animation(_back_btn, {"mild": true})
 	_go_btn.pressed.connect(_on_go_pressed)
 	_back_btn.pressed.connect(_on_back_pressed)
 

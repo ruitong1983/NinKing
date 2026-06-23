@@ -1,7 +1,7 @@
 # NinKing Main Game UI 设计方案
 
 > **建立日期:** 2026-06-10 | **最后同步:** 2026-06-22 | **关联场景:** `ninking_main.tscn` + `ui_manager.gd`
-> **风格权威:** [`../05-art/16-art-direction-principles.md`](../05-art/16-art-direction-principles.md) · 少年漫画风
+> **风格权威:** [`../05-art/16-art-direction-principles.md`](../05-art/16-art-direction-principles.md) · 治愈漫画风（旧少年漫画方向已于 2026-06-23 废弃）
 ## §1 概述
 
 Main 场景是核心游戏界面。玩家在此查看手牌、排列三墩、出牌计分、触发商店。
@@ -112,14 +112,24 @@ NinKingMain (Control) [game_manager.gd]
     │   └── ShopPanel (1000×650 居中)    ← 通过 ui_manager 动态实例化
     │
     ├── LevelComplete (Control)         ← 过关覆盖层
-    ├── GameOver (Control) [%GameOver]       ← 失败覆盖层
-    │   ├── OverlayBg (ColorRect)           ← #000 80%
-    │   ├── GameOverLabel [%GameOverLabel]  ← "失败" 48px 红 居中
-    │   ├── ScoreSummary [%ScoreSummary]    ← "战绩: 结界 X · 忍気 Y" 28px 居中
-    │   ├── RetryButton [%RetryButton]      ← "重新开始" 24px flat
-    │   └── BackToMenuButton [%BackToMenuButton] ← "返回主菜单" 20px flat
-    ├── VictoryOverlay (Control)        ← 通关覆盖层
-    └── DeckViewer (Control)            ← 牌库查看器
+    ├── GameOver (Control) [%GameOver]           ← 失败覆盖层
+    │   ├── OverlayBg (ColorRect)               ← #000 80%, 全屏
+    │   ├── ContentPanel (Panel) 520x360 居中    → Kenney 暖米卡牌面板 (KUI2)
+    │   │   ├── GameOverLabel [%GameOverLabel]  → "失败" 48px 深红 #C0392B, 居中
+    │   │   ├── ScoreSummary [%ScoreSummary]    → "战绩: 结界 X · 忍気 Y" 26px 深褐 #3D2B1A, 居中
+    │   │   ├── RetryButton [%RetryButton]      → "重新开始" 24px (manga 样式)
+    │   │   └── BackToMenuButton [%BackToMenuButton] → "返回主菜单" 20px flat
+    │   │   ⚡ pop_in 入场: scale 0.75→1.0 + 淡入 0.2s
+    │   │
+    │   ├── VictoryOverlay (Control) 全屏        ← 通关覆盖层
+    │   │   ├── OverlayBg (ColorRect)           ← #000 70%, 全屏
+    │   │   ├── ContentPanel (Panel) 520x320 居中 → Kenney 暖米卡牌面板 (KUI2)
+    │   │   │   ├── VictoryLabel                → "忍道制霸!" 48px 金色 #D4A843, 居中
+    │   │   │   ├── StatsSummary                → "通关! 全结界制霸 · 忍気 N" 26px 深褐 #3D2B1A
+    │   │   │   └── MenuButton                 → "返回主菜单" 24px flat (manga 样式)
+    │   │   │   ⚡ pop_in 入场: scale 0.75→1.0 + 淡入 0.2s
+    │   │
+    └── DeckViewer (Control)                    ← 牌库查看器
 ```
 
 ---
@@ -170,7 +180,7 @@ VBoxContainer 含 3 行，每行 HBoxContainer 对应一墩：
 墩名颜色：影 `#588CF2` / 瞬 `#BFBFCB` / 滅 `#F24D4D`
 牌型名：白色 `#F0EDE4`
 分数颜色：同该行墩名
-Lv badge 色阶：Lv.1-2 `#7A7A7A` 灰 | Lv.3-4 `#588CF2` 蓝 | Lv.5-6 `#C4A843` 金。Lv.0 隐藏。
+Lv badge 色阶：Lv.1-2 `#5C5C5C` 深灰 | Lv.3-4 `#3A6FD8` 深蓝 | Lv.5-6 `#9A8230` 暗金（2026-06-23 加深，在米色面板上保证对比度）。Lv.0 隐藏。
 鼠标悬浮 Lv badge 弹出浮层（牌型名+等级+筹码/倍率），计分 Phase 1 跟随分数 GOLD flash。
 
 **数据源：** `NinKingGameState.star_chart_levels`（`{ HandType3: int }`）→ `CardData.get_hand_type3_leveled_chips/mult()`。

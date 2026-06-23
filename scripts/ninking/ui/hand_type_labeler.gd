@@ -38,14 +38,14 @@ var _left_col_lv: Label
 var _mid_col_lv: Label
 var _right_col_lv: Label
 
-# Lv color tiers (matches ScoreCard existing palette)
+# Lv color tiers -- darkened for contrast on panel_beigeLight
 const LV_COLORS: Dictionary = {
-	1: Color("#7A7A7A"),  # Lv.1-2: gray (TargetScoreLabel)
-	2: Color("#7A7A7A"),
-	3: Color("#588CF2"),  # Lv.3-4: blue (ShadowDun)
-	4: Color("#588CF2"),
-	5: Color("#C4A843"),  # Lv.5-6: gold (ColXiLabel / ScoreCard accent)
-	6: Color("#C4A843"),
+	1: Color("#5C5C5C"),  # Lv.1-2: 深灰 (~5.5:1)
+	2: Color("#5C5C5C"),
+	3: Color("#3A6FD8"),  # Lv.3-4: 深蓝 (~5.0:1)
+	4: Color("#3A6FD8"),
+	5: Color("#9A8230"),  # Lv.5-6: 暗金 (~4.5:1)
+	6: Color("#9A8230"),
 }
 
 # Current hand types per row (updated every label refresh)
@@ -138,7 +138,7 @@ func reset_labels() -> void:
 	_head_type_label.text = ""
 	_mid_type_label.text = ""
 	_tail_type_label.text = ""
-	_col_xi_label.text = "喜: -"
+	_col_xi_label.text = "-"
 	_col_xi_label.visible = false
 	_shadow_type_label.text = "-"
 	_flash_type_label.text = "-"
@@ -424,17 +424,17 @@ func _update_column_types(hand: Array[CardData.PlayingCard]) -> void:
 # ColXiLabel — xi preview (v5: Label, names only, no xN)
 # ══════════════════════════════════════════
 
-## Update top preview: "喜: 名1  名2  名3" (Label auto-wraps to multi-row).
+## Update top preview: "名1  名2  名3" (Label auto-wraps to multi-row, no "喜:" prefix).
 func _update_col_xi_preview(hand: Array[CardData.PlayingCard]) -> void:
 	if hand.size() < 9:
 		if _col_xi_label and is_instance_valid(_col_xi_label):
-			_col_xi_label.text = "喜: -"
+			_col_xi_label.text = "-"
 			_col_xi_label.visible = false
 		return
 
 	if NinKingGameState.current_arrangement == null:
 		if _col_xi_label and is_instance_valid(_col_xi_label):
-			_col_xi_label.text = "喜: -"
+			_col_xi_label.text = "-"
 			_col_xi_label.visible = false
 		return
 
@@ -452,8 +452,8 @@ func _update_col_xi_preview(hand: Array[CardData.PlayingCard]) -> void:
 			xi_parts.append(xi_name)
 
 	if xi_parts.size() > 0:
-		_col_xi_label.text = "喜: " + "  ".join(xi_parts)
+		_col_xi_label.text = ScoreXiHandler.build_xi_display_text(xi_parts)
 		_col_xi_label.visible = true
 	elif _col_xi_label and is_instance_valid(_col_xi_label):
-		_col_xi_label.text = "喜: -"
+		_col_xi_label.text = "-"
 		_col_xi_label.visible = false

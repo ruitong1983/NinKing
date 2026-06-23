@@ -36,6 +36,7 @@
 
 | 关键词 | Skill | 流程 |
 |--------|-------|------|
+| 特效设计 / 动效 / Shader / 视觉反馈 / 入场消散 | `effect-design` | ①效果定性 → ②查三库 → ③评估缺口 → ④方案选择 → ⑤入库 |
 | 改UI / 调整界面 / 布局 / 按钮 / 配色/字体/间距 | `ui-modify-plan` | 方案 → Figma同步 → 实现 |
 | 代码审查 / review / codereview | `review-plan` | 对照检查项逐条 |
 | 游戏机制/数值/布局变更 | `update-docs` | 判断是否同步 docs/ |
@@ -109,6 +110,15 @@ API 速查 → `docs/tween-library-reference.md`。
 > **铁律：优先 `GlobalShaders.xxx()`，减少手写 `ShaderMaterial.new()` + `load()`。** 外部只调 `GlobalShaders`，不直接调 `ShaderFX` 或子系统。所有 `.gdshader` 资源统一放在 `shaders/` 目录下。
 
 API 速查 → `docs/shader-library-reference.md`。
+
+## ButtonStyles 按鈕樣式
+
+> **铁律：优先 `ButtonStyles.xxx()`，禁止手写 `add_theme_stylebox_override` 或手创 `StyleBoxTexture.new()` / `StyleBoxFlat.new()` 做按钮样式。** 所有按钮样式统一通过 `ButtonStyles` 设置。
+
+API 速查 → `scripts/ninking/ui/button_styles.gd`。支持三种方法：
+- `ButtonStyles.apply_kenney_long(btn, variant)` — Kenney 暖纸风长按钮（brown/beige/grey/blue）
+- `ButtonStyles.apply_kenney_square(btn, variant)` — Kenney 暖纸风方按钮
+- `ButtonStyles.apply_manga(btn, accent, size_tier)` — 漫画风按钮（结界属性动态配色）
 
 ## 主场景与 Debug 场景同步
 

@@ -1,6 +1,6 @@
 # NinKing 设计文档索引
 
-> **最后更新:** 2026-06-18 (新增人格模型引用, 10-ops/ 运维分类，移动日志指南) | **关联:** [`09-mgmt/TODO.md`](09-mgmt/TODO.md)
+> **最后更新:** 2026-06-23 (+设计决策框架, 人格模型引用, 10-ops/ 运维分类，移动日志指南) | **关联:** [`09-mgmt/TODO.md`](09-mgmt/TODO.md)
 > **目录结构:** 文档按以下 9 分类存放。每个文档只能归到一个分类，README 提供跨分类索引。
 
 ---
@@ -43,7 +43,7 @@
 
 | 文档 | 内容 |
 |------|------|
-| [`05-image-asset-generation-plan.md`](05-art/05-image-asset-generation-plan.md) | 图像素材 AI 生成方案 |
+| ~~`05-image-asset-generation-plan.md`~~（已删除，2026-06-23） | 图像素材 AI 生成方案（旧少年漫画风，已废弃） |
 | [`15-sound-design-plan.md`](05-art/15-sound-design-plan.md) | 音效设计计划 |
 | [`16-art-direction-principles.md`](05-art/16-art-direction-principles.md) | **美术方向设计原则:** UI/音效/图像/卡牌/VFX 全局风格规范 |
 | [`17-font-design-plan.md`](05-art/17-font-design-plan.md) | **字体设计方案:** 漫画ゴシック体选型/获取/命名/导入/配置 |
@@ -118,4 +118,5 @@
 | [`../card-framework-usage-guide.md`](../card-framework-usage-guide.md) | Card-Framework API 速查 |
 | [`../tween-library-reference.md`](../tween-library-reference.md) | Tween 三库 API + 选库决策树 |
 | [`../shader-library-reference.md`](../shader-library-reference.md) | GlobalShaders Shader 库 API + 各 shader 参数说明 |
+| [`../design-decision-framework.md`](../design-decision-framework.md) | **特效设计决策框架 — 五步决策方法论**（效果定性→查三库→评估缺口→方案选择→入库） |
 | [`../vfx-system-design.md`](../vfx-system-design.md) | VFX 底层框架 API |

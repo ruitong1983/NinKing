@@ -254,11 +254,11 @@ static func _load_and_setup_flash(rarity: String) -> ShaderMaterial:
 	if loaded == null:
 		return null
 	var mat: ShaderMaterial = loaded.duplicate()
+	# Apply all rarity-specific flash params from RARITY_FLASH_PARAMS
+	# S2: batch-apply all params (speed, stripe_spacing, stripe_width, move_speed, intensity, angle, one_way_loop, softness)
 	var par: Dictionary = AssetRegistry.RARITY_FLASH_PARAMS.get(rarity, {})
-	if par.has("one_way_loop"):
-		mat.set_shader_parameter("one_way_loop", par["one_way_loop"])
-	if par.has("softness"):
-		mat.set_shader_parameter("softness", par["softness"])
+	for key: String in par:
+		mat.set_shader_parameter(key, par[key])
 	return mat
 
 

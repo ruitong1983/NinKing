@@ -1,7 +1,8 @@
 # NinKing Figma 命名规范
 
 > 最后更新: 2026-06-10 | > **风格权威：**[`../05-art/16-art-direction-principles.md`](../05-art/16-art-direction-principles.md)
-> Figma 设计稿统一采用少年漫画风（亮色英雄向 + 粗黑描边 + 漫画特效层）。
+> Figma 设计稿统一采用治愈漫画风（暖纸质感 + 柔和圆角 + 温暖治愈氛围）。
+> **⚠️ 2026-06-23 风格统一：** 旧「少年漫画」方向已废弃，当前为治愈漫画风。详见 [`16-art-direction-principles.md`](../05-art/16-art-direction-principles.md)。
 
 ## 一、总体原则
 

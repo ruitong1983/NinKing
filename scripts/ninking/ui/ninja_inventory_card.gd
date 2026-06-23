@@ -357,13 +357,12 @@ func _apply_flash_material(rarity: String) -> void:
 	if frame_overlay:
 		frame_overlay.material = _flash_mat
 
-	# Apply rarity-specific flash params (one_way_loop, softness) from AssetRegistry.RARITY_FLASH_PARAMS
+	# Apply rarity-specific flash params from AssetRegistry.RARITY_FLASH_PARAMS
+	# S2: batch-apply all params (speed, stripe_spacing, stripe_width, move_speed, intensity, angle, one_way_loop, softness)
 	if _flash_mat:
 		var par: Dictionary = AssetRegistry.RARITY_FLASH_PARAMS.get(rarity, {})
-		if par.has("one_way_loop"):
-			_flash_mat.set_shader_parameter("one_way_loop", par["one_way_loop"])
-		if par.has("softness"):
-			_flash_mat.set_shader_parameter("softness", par["softness"])
+		for key: String in par:
+			_flash_mat.set_shader_parameter(key, par[key])
 
 	# Start rarity-specific looping animations
 	if _flash_mat:
@@ -441,6 +440,7 @@ func _update_name_label(text: String) -> void:
 func _handle_mouse_pressed() -> void:
 	if _shop_mode:
 		card_clicked.emit(ninja_data)
+		accept_event()
 		return
 	if card_container:
 		card_container.on_card_pressed(self)

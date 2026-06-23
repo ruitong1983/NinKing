@@ -6,6 +6,9 @@ extends Control
 ## C21: Shop logic -> ShopHandler, scoring animation -> AnimationHandler.
 ## Phase E: No LevelComplete overlay — settlement card with 封印解除 button → shop.
 
+## v10: Unified button entrance animation via ButtonStyles.attach_entrance_animation.
+##      Replaced local attract_pulse calls.
+
 const SB = preload("res://scripts/config/sound_bank.gd")
 
 @onready var ui: UIManager = %UIManager
@@ -90,6 +93,9 @@ func _on_state_changed(new_state: NinKingGameState.State) -> void:
 			if ui.game_layout.has_node("CenterColumn/HandArea"):
 				ui.game_layout.get_node("CenterColumn/HandArea").modulate = Color.WHITE
 			GlobalTweens.play_sfx(SB.DEAL)  # C17: deal SFX
+			# 按钮统一入场动效（弹跳 + 粒子 + 脉冲 + hover + 点击）
+			ButtonStyles.attach_entrance_animation(ui.play_btn)
+			ButtonStyles.attach_entrance_animation(ui.ai_rearrange_btn, {"mild": true})
 			# hand refresh is already triggered by auto_arrange() → hand_updated signal
 			ui.refresh_ninjas(NinKingGameState.owned_ninjas, NinKingGameState.max_ninja_slots)
 			ui.ai_rearrange_btn.disabled = false
@@ -111,6 +117,9 @@ func _on_state_changed(new_state: NinKingGameState.State) -> void:
 		NinKingGameState.State.GAME_OVER:
 			ui.show_view("gameover")
 			ui.show_game_over("not enough score", NinKingGameState.barrier_num, int(NinKingGameState.current_score))
+			# GameOver 按钮统一入场动效
+			ButtonStyles.attach_entrance_animation(ui.retry_button, {"mild": true})
+			ButtonStyles.attach_entrance_animation(ui.back_to_menu_button, {"mild": true})
 		NinKingGameState.State.VICTORY:
 			_auto_shop_pending = false  # Safety: clear in case finalize_play reached victory
 			ui.show_view("victory")
@@ -121,6 +130,8 @@ func _on_state_changed(new_state: NinKingGameState.State) -> void:
 			GlobalTweens.do_hit_stop(0.1, 0.05)
 			GlobalTweens.screen_shake(0.15, 0.1)
 			MusicManager.set_game_variation(1)  # Light BGM for victory screen
+			# Victory 按钮入场动效
+			ButtonStyles.attach_entrance_animation(ui.victory_menu_button, {"mild": true})
 
 
 func _on_score_updated(current: float, target: float) -> void:
@@ -160,13 +171,13 @@ func _on_seal_started(barrier: int, seal_idx: int, target: float, seal_lord_name
 	# BGM: auto-switch variation based on barrier difficulty (B11)
 	MusicManager.set_game_variation(barrier)
 
-	# Manga-style impact buttons — apply_manga_button_style handles all font colors
-	BarrierTheme.apply_manga_button_style(ui.play_btn, c.accent, "L")
-	BarrierTheme.apply_manga_button_style(ui.ai_rearrange_btn, c.accent, "M")
-	BarrierTheme.apply_manga_button_style(ui.deck_btn, c.accent, "S")
-	BarrierTheme.apply_manga_button_style(ui.retry_button, c.accent, "S")
-	BarrierTheme.apply_manga_button_style(ui.back_to_menu_button, c.accent, "S")
-	BarrierTheme.apply_manga_button_style(ui.victory_menu_button, c.accent, "S")
+	# Manga-style impact buttons — ButtonStyles.apply_manga handles all font colors
+	ButtonStyles.apply_manga(ui.play_btn, c.accent, "L")
+	ButtonStyles.apply_manga(ui.ai_rearrange_btn, c.accent, "M")
+	ButtonStyles.apply_manga(ui.deck_btn, c.accent, "S")
+	ButtonStyles.apply_manga(ui.retry_button, c.accent, "S")
+	ButtonStyles.apply_manga(ui.back_to_menu_button, c.accent, "S")
+	ButtonStyles.apply_manga(ui.victory_menu_button, c.accent, "S")
 
 	# Phase C: Boss reveal moved to PLAYING state (_trigger_boss_reveal_in_playing).
 	# No more 1s wait here. Theme + intro watermark only.
@@ -185,6 +196,9 @@ func _on_play_pressed() -> void:
 		return
 	if not NinKingGameState.is_constraint_satisfied():
 		return
+
+	# 停止讨伐按钮脉冲，进入计分流程
+	GlobalTweens.kill_domain(ui.play_btn, "modulate")
 
 	# Pre-compute scoring (no state mutation) — A7 animation flow
 	var play_data: Dictionary = SealController.prepare_play(NinKingGameState)

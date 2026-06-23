@@ -2,7 +2,7 @@
 
 > **用途：** 每次代码变更后，对照此表检查受影响文档是否需要同步更新。
 > **原则：** 改代码前先查此表，改完代码后逐项同步。
-> **建立日期：** 2026-06-17 | **最后更新：** 2026-06-22 (新增 §5.16 交互增强指南, §5.15 CursorManager 更新) | 自动生成的 HTML 由 pre-commit hook 触发，不列在此表。
+> **建立日期：** 2026-06-17 | **最后更新：** 2026-06-23 (+牌库面板优化: 切换关闭/toggle + 深褐字色 + ViewerTitle移除 → 同步 06-ui-layout)
 
 ---
 
@@ -240,13 +240,22 @@
 ### 5.16 Kenney 暖纸风 UI 改造 — `kenney-beige-ui-transformation.md` 方案 + 实现
 
 > **方案文件:** `docs/ninking/09-mgmt/specs/kenney-beige-ui-transformation.md`
-> **相关脚本:** `barrier_theme.gd` / `main_menu.gd` / `game_manager.gd` / `shop_ui.gd` / `shop_slot.gd`
+> **相关脚本:** `button_styles.gd` / `barrier_theme.gd` / `main_menu.gd` / `game_manager.gd` / `shop_ui.gd` / `shop_slot.gd`
 
 | 影响文档 | 说明 | 同步要点 |
 |---------|------|---------|
 | `05-art/21-ui-interaction-enhancements.md` §3 | Kenney 面板/按钮纹理映射 | 新增纹理或修改映射表时同步 |
 | `04-ui/06-ui-layout-reference.md` | UI 布局参考 | 面板样式变更不影响布局，无需同步 |
 | `04-ui/10-main-ui-design.md` | Main Game UI | 按钮样式不影响结构，无需同步 |
+
+### 5.17 `scripts/ninking/ui/button_styles.gd` — 按钮样式统一工具类 (v2026-06-23)
+
+> 新增文件。`class_name ButtonStyles`，`extends RefCounted`，静态方法集中管理所有按钮样式。
+
+| 影响文档 | 说明 | 同步要点 |
+|---------|------|---------|
+| `05-art/21-ui-interaction-enhancements.md` §3.4 | 按钮样式实现方式 | 新增/修改 API 时同步更新实现描述 |
+| `CLAUDE.md` | 编码规范 — ButtonStyles 铁律 | 新增/移除方法时同步 |
 
 ---
 
@@ -375,7 +384,7 @@
 
 | 影响文档 | 说明 | 同步要点 |
 |---------|------|---------|
-| `05-art/05-image-asset-generation-plan.md` | 素材生成计划 | 资产路径/加载逻辑变更时同步 |
+| `05-art/~~05-image-asset-generation-plan.md~~`（已删除） | 素材生成计划（已废弃） | 资产路径/加载逻辑变更时同步 |
 | `05-art/19-image-asset-matching-guide.md` | 图像素材匹配 | 资产映射变更时同步 |
 
 ### 10.3 `scripts/config/config_manager.gd`（autoload: `ConfigManager`）
@@ -401,6 +410,7 @@
 
 | 影响文档 | 说明 | 同步要点 |
 |---------|------|---------|
+| `docs/design-decision-framework.md` | 特效设计决策框架 | 新增/修改效果类型或分类时同步 |
 | `docs/shader-library-reference.md` | Shader API 参考 | 新增/修改 Shader 子系统/API 时**必须同步** |
 | `05-art/16-art-direction-principles.md` | 美术方向 — VFX 风格 | 新 Shader 效果引入时同步 |
 | 本表（DOCUMENT_MAP.md） | 文档依赖映射 | 新增 Shader 子系统时加一行
@@ -493,3 +503,6 @@
 | 2026-06-20 | 📉 **封印阈值减半**: `barrier_config.gd` v5.3 整体 ×0.5；同步 `01-gameplay/13-blinds-and-bosses.md` 封印值表 + 难度曲线 + 变更日志 |
 | 2026-06-21 | 🗑️ **删除 B14 替换系统**: 移除 §5.13 `ninja_replace_overlay.gd` 映射条目（文件已删除）。§5.13 → `nin_king_tween.gd`，节号前移（14→13）。 |
 | 2026-06-21 | 🎨 **Toast 视觉强化**: 深色半透明背景面板 (rgba 0,0,0,0.75 + 圆角12px) + 位置从底部移至顶部 20%。`toast_manager.gd` 改为 Panel 容器包裹 Label，动画修正为 toast() 完整淡入→停留→淡出。 |
+| 2026-06-23 | 🎨 **计分行配色调整**: ...略...
+| 2026-06-23 | 🖌️ **风格统一：少年漫画→治愈漫画**: 更新 `16-art-direction-principles.md` 全篇。同步 6 份文档风格引用。TODO.md 新增风格统一条目。|
+| 2026-06-23 | 🏗️ **KUI2 GameOver/Victory 面板卡片化**: ContentPanel 暖米面板 + pop_in 入场 + 文字配色适配。同步 `06-ui-layout-reference.md`/`10-main-ui-design.md`/`11-main-overlay-design.md`/`21-ui-interaction-enhancements.md` 场景树与文字配色描述。|

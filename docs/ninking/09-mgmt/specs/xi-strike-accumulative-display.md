@@ -1,14 +1,14 @@
 # 喜 Strike 动画累积式展示 — 实现方案
 
-> 版本: v1 | 日期: 2026-06-22 | 状态: 待实施
+> 版本: v2 | 日期: 2026-06-23 | 状态: 已实施
 
 ## 1. 改动范围
 
 | 文件 | 改动量 | 说明 |
 |------|--------|------|
-| `scripts/ninking/ui/xi_strike_overlay.gd` | ~+100 行 | 核心改动：累积行逻辑、溢出折叠、水印保留 |
-| `scripts/ninking/ui/animation_handler.gd` | ~+8 行 | Phase 3 循环截断、溢出判断 |
-| `docs/ninking/04-ui/24-scoring-ninja-animation.md` | ~+10 行 | §5 文档同步、时序表更新 |
+| `scripts/ninking/ui/xi_strike_overlay.gd` | ~+20 行 | v12: 金色→红色系配色, 新增半透明暗底, font_shadow |
+| `scripts/ninking/ui/animation_handler.gd` | 无改动 | — |
+| `docs/ninking/04-ui/24-scoring-ninja-animation.md` | ~+10 行 | §5.2 色表同步 |
 
 ## 2. 最终设计
 
@@ -97,13 +97,20 @@ Stage C 后
 | `_create_divider()` | **新增** | 创建分割线 Label |
 | `_create_final_label()` | 不变 | 已有(已修 bug) |
 
-### 3.3 颜色 tier 复用
+### 3.3 颜色 tier 红色系（v12 更新: 金色→喜红）
 
-已有 `_xi_name_color` / `_mult_color` / `_outline_color` 字典不变。单行合拼后，喜名用 `_xi_name_color[tier]`, ×N 用 BBCode 内嵌颜色：
+| ×倍率 | Tier | 主色 | 色值 | 描边色 | 描边厚 |
+|:-----:|:----:|------|------|--------|:------:|
+| ×2 | 1 | **朱砂红** | `#E84040` | `#4A0A0A` 暗红棕 | 3px |
+| ×3 | 2 | **绯红** | `#F02828` | `#5A0808` 暗红褐 | 4px |
+| ×4 | 3 | **赤红** | `#FF1A1A` | `#6A0000` 深血红 | 5px |
+| ×5 | 4 | **血焰红** | `#FF0A0A` | `#7A0000` 黑绛红 | 6px |
+| ×6+ | 5 | **白炽红** | `#FF4444` | `#8A0000` 黑红 | 8px |
 
-```
-[color={xi_color}]{name}[/color]    ×[color={mult_color}]{x_mult}[/color]
-```
+所有行增加 `font_shadow` (黑色 25%, 1px offset) 增强复杂纹理可读性。
+底部新增半透明暗底 `Color(0.04, 0.04, 0.08, 0.45)` 覆盖全 260×400 区域，隔离 table_bg 草地纹理。
+
+已删除金色系旧色值 (`#FFD700` / `#FFBF1A` / `#FF8C1A` / `#FF400D` / `#FF1A1A`)。
 
 ## 4. `animation_handler.gd` 修改明细
 

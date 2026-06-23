@@ -22,7 +22,8 @@ func _init() -> void:
 
 
 ## 为节点应用描边材质（内外描边）。
-## params 支持：line_color, line_thickness
+## params 支持：line_color, line_thickness, high_quality
+## high_quality=false 时仅采 4 对角线方向，性能翻倍（S4 LOD）。
 func apply(node: CanvasItem, params: Dictionary = {}) -> ShaderMaterial:
 	if not is_instance_valid(node):
 		return null
@@ -32,6 +33,8 @@ func apply(node: CanvasItem, params: Dictionary = {}) -> ShaderMaterial:
 
 	mat.set_shader_parameter("line_color", params.get("line_color", Color.WHITE))
 	mat.set_shader_parameter("line_thickness", params.get("line_thickness", 1.0))
+	# S4: Outline LOD — high_quality=false 用 4 对角线采样替代 8 邻居
+	mat.set_shader_parameter("high_quality", params.get("high_quality", true))
 
 	node.material = mat
 	_active[node] = mat

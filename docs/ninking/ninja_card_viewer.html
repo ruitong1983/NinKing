@@ -469,7 +469,7 @@ footer a:hover { color: var(--gold); }
 <!-- ═══ Header ═══ -->
 <header>
   <h1>🏯 NinKing 参考手册 <small id="card-count"></small></h1>
-  <p class="subtitle">基于 <span id="data-date">2026-06-22</span> · 忍者牌 / 喜系统 / 场景树 · 点击卡牌查看详情 · ESC 清空搜索</p>
+  <p class="subtitle">基于 <span id="data-date">2026-06-23</span> · 忍者牌 / 喜系统 / 场景树 · 点击卡牌查看详情 · ESC 清空搜索</p>
 </header>
 
 <!-- ═══ Recent Updates (auto-injected by tools/inject_recent_updates.py) ═══ -->
@@ -477,9 +477,9 @@ footer a:hover { color: var(--gold); }
   <h3>📋 最近更新</h3>
   <!-- RECENT_UPDATES_PLACEHOLDER -->
 <ul>
-  <li><span class="date">2026-06-21</span><span class="tag tag-fix">fix</span><span class="tag tag-ninja">ninja</span><span class="tag tag-xi">xi</span>feat: 忍者栏出售+详情浮层系统, XiDetector喜检测器扩展, ShopOverlay事件穿透修复</li>
+  <li><span class="date">2026-06-22</span><span class="tag tag-docs">docs</span><span class="tag tag-fix">fix</span><span class="tag tag-ninja">ninja</span>@ fix: 商店忍者牌居中布局 + UI脚本/docs同步更新</li>
 </ul>
-<p style="font-size:11px;color:var(--text-dim);margin-top:6px">最新提交 · 部署于 2026-06-22 21:38</p>
+<p style="font-size:11px;color:var(--text-dim);margin-top:6px">最新提交 · 部署于 2026-06-23 18:04</p>
 </div>
 
 <!-- ═══ Tab Bar ═══ -->
@@ -1212,29 +1212,29 @@ const XI_BASIC = [
 const XI_PHASE_E = [
   { id: 10, name: "豹子", cond: "任意一组为三条", mult: 2, chips: 0, tier: "group", tierLabel: "组级" },
   { id: 11, name: "昇龍", cond: "影<瞬<滅 牌型严格递增", mult: 3, chips: 0, tier: "special", tierLabel: "排列递进" },
-  { id: 12, name: "背水", cond: "尾墩为散牌 (HIGH_CARD_3)", mult: 4, chips: 0, tier: "special", tierLabel: "牺牲型" },
+  { id: 12, name: "背水", cond: "尾墩为散牌 (HIGH_CARD_3)", mult: 3, chips: 0, tier: "special", tierLabel: "牺牲型" },
   { id: 13, name: "貧打", cond: "某墩精确含 2-3-5", mult: 4, chips: 0, tier: "special", tierLabel: "特定组合" },
   { id: 14, name: "陣眼", cond: "中心牌全局最小或最大（含并列）", mult: 3, chips: 0, tier: "special", tierLabel: "位置型" },
-  { id: 15, name: "均爵", cond: "每墩至少一张 J/Q/K", mult: 3, chips: 0, tier: "special", tierLabel: "均匀分配" },
-  { id: 16, name: "三等", cond: "三行 chip 总和相等", mult: 5, chips: 0, tier: "special", tierLabel: "平衡型" },
+  { id: 15, name: "均爵", cond: "每墩至少一张 J/Q/K", mult: 2, chips: 0, tier: "special", tierLabel: "均匀分配" },
+  { id: 16, name: "三等", cond: "三行 chip 总和相等", mult: 4, chips: 0, tier: "special", tierLabel: "平衡型" },
   { id: 17, name: "满堂", cond: "3 行 + 3 列全部非散牌 (≥ONE_PAIR_3)", mult: 5, chips: 0, tier: "special", tierLabel: "行列全判" },
   { name: "四角", cond: "四角", mult: 3, chips: 0, tier: "", tierLabel: "" },
   { name: "中十字", cond: "中十字", mult: 4, chips: 0, tier: "", tierLabel: "" },
   { name: "倒影", cond: "倒影", mult: 3, chips: 0, tier: "", tierLabel: "" },
   { name: "双壁", cond: "双壁", mult: 3, chips: 0, tier: "", tierLabel: "" },
   { name: "对影", cond: "对影", mult: 2, chips: 0, tier: "", tierLabel: "" },
-  { name: "连环", cond: "连环", mult: 6, chips: 0, tier: "", tierLabel: "" },
+  { name: "连环", cond: "连环", mult: 4, chips: 0, tier: "", tierLabel: "" },
   { name: "天九", cond: "天九", mult: 5, chips: 0, tier: "", tierLabel: "" },
   { name: "压牌", cond: "压牌", mult: 4, chips: 0, tier: "", tierLabel: "" },
   { name: "至尊", cond: "至尊", mult: 4, chips: 0, tier: "", tierLabel: "" },
-  { name: "独尊", cond: "独尊", mult: 6, chips: 0, tier: "", tierLabel: "" },
+  { name: "独尊", cond: "独尊", mult: 4, chips: 0, tier: "", tierLabel: "" },
   { name: "廿一点", cond: "廿一点", mult: 4, chips: 0, tier: "", tierLabel: "" },
   { name: "文武", cond: "文武", mult: 4, chips: 0, tier: "", tierLabel: "" },
   { name: "一气", cond: "一气", mult: 3, chips: 0, tier: "", tierLabel: "" },
   { name: "无将", cond: "无将", mult: 4, chips: 0, tier: "", tierLabel: "" },
-  { name: "长套", cond: "长套", mult: 5, chips: 0, tier: "", tierLabel: "" },
+  { name: "长套", cond: "长套", mult: 3, chips: 0, tier: "", tierLabel: "" },
   { name: "无忧角", cond: "无忧角", mult: 4, chips: 0, tier: "", tierLabel: "" },
-  { name: "慢打", cond: "慢打", mult: 5, chips: 0, tier: "", tierLabel: "" },
+  { name: "慢打", cond: "慢打", mult: 4, chips: 0, tier: "", tierLabel: "" },
   { name: "四对半", cond: "四对半", mult: 4, chips: 0, tier: "", tierLabel: "" },
 ];  // ── xi-auto-extracted:phase-e ──
 const XI_COMBOS = [
@@ -1870,20 +1870,25 @@ const SCENES = {
               unique: true,
               children: [
 {
-                  type: 'Button', name: 'RetryButton',
-                  unique: true
-                },
+                  type: 'Panel', name: 'ContentPanel',
+                  children: [
 {
-                  type: 'Button', name: 'BackToMenuButton',
-                  unique: true
-                },
+                      type: 'Button', name: 'RetryButton',
+                      unique: true
+                    },
 {
-                  type: 'Label', name: 'ScoreSummary',
-                  unique: true
-                },
+                      type: 'Button', name: 'BackToMenuButton',
+                      unique: true
+                    },
 {
-                  type: 'Label', name: 'GameOverLabel',
-                  unique: true
+                      type: 'Label', name: 'ScoreSummary',
+                      unique: true
+                    },
+{
+                      type: 'Label', name: 'GameOverLabel',
+                      unique: true
+                    },
+                  ],
                 },
 {
                   type: 'ColorRect', name: 'OverlayBg'
@@ -1936,16 +1941,21 @@ const SCENES = {
               type: 'Control', name: 'VictoryOverlay',
               children: [
 {
-                  type: 'Label', name: 'StatsSummary'
-                },
+                  type: 'Panel', name: 'ContentPanel',
+                  children: [
 {
-                  type: 'Label', name: 'VictoryLabel'
+                      type: 'Label', name: 'StatsSummary'
+                    },
+{
+                      type: 'Label', name: 'VictoryLabel'
+                    },
+{
+                      type: 'Button', name: 'MenuButton'
+                    },
+                  ],
                 },
 {
                   type: 'ColorRect', name: 'OverlayBg'
-                },
-{
-                  type: 'Button', name: 'MenuButton'
                 },
               ],
             },
@@ -2008,22 +2018,12 @@ const SCENES = {
       note: '800×716 [shop_ui.gd]',
       children: [
 {
-          type: 'ColorRect', name: 'BottomBar',
-          unique: true,
-          note: '底栏'
-        },
-{
-          type: 'GridContainer', name: 'ItemColumn',
-          unique: true,
-          note: '2列 星图卡槽 ×2'
-        },
-{
           type: 'Button', name: 'RerollBtn',
           unique: true,
           note: '"入替 $3"'
         },
 {
-          type: 'ColorRect', name: 'TitleBar',
+          type: 'NinePatchRect', name: 'TitleBar',
           unique: true,
           note: '标题栏'
         },
@@ -2033,14 +2033,8 @@ const SCENES = {
           note: '"$0" 20px'
         },
 {
-          type: 'Label', name: 'ShopSubtitle',
-          unique: true,
-          note: '"萬屋！" 32px'
-        },
-{
-          type: 'GridContainer', name: 'AbilityGrid',
-          unique: true,
-          note: '2列 忍者卡槽 ×4'
+          type: 'GridContainer', name: 'ItemGrid',
+          unique: true
         },
 {
           type: 'Button', name: 'ContinueBtn',
@@ -2048,13 +2042,18 @@ const SCENES = {
           note: '"討伐へ ▶"'
         },
 {
-          type: 'ColorRect', name: 'Separator',
+          type: 'GridContainer', name: 'AbilityGrid',
           unique: true,
-          note: '分割线'
+          note: '2列 忍者卡槽 ×4'
         },
 {
-          type: 'ColorRect', name: 'StageBg',
+          type: 'NinePatchRect', name: 'StageBg',
           note: '面板底色'
+        },
+{
+          type: 'Label', name: 'ShopSubtitle',
+          unique: true,
+          note: '"萬屋！" 32px'
         },
       ],
     },

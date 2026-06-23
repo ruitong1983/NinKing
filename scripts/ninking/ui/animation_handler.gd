@@ -102,8 +102,8 @@ func _run_scoring_animation() -> void:
 			var dm: int = dun_mult_vals[i]
 			var dr: int = dc * dm
 
-			# -- Score fade-in: show "0 x 0 = 0" at low alpha --
-			sl.text = "0 x 0 = 0"
+			# -- Score fade-in: start empty, count-up from 0 in play_score --
+			sl.text = ""
 			sl.modulate.a = 0.0
 			sl.scale = Vector2(0.1, 0.1)
 			GlobalTweens.fade_in(sl, 0.15)
@@ -457,13 +457,13 @@ func _float_score_gain(anchor: Label, gain: int, color: Color) -> void:
 func _build_xi_summary(xi_result: XiDetector.XiResult) -> String:
 	## Build xi summary for ColXiLabel (persists after scoring).
 	if xi_result == null or not xi_result.has_any():
-		return "喜: -"
+		return "-"
 	var parts: Array[String] = []
 	for xi_name: String in xi_result.triggered:
 		parts.append(xi_name)
 	if parts.size() > 0:
-		return "喜: " + "  ".join(parts)
-	return "喜: -"
+		return ScoreXiHandler.build_xi_display_text(parts)
+	return "-"
 
 
 func _show_breakdown_toast(text: String, _color: Color) -> void:

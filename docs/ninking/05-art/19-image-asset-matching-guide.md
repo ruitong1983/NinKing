@@ -1,7 +1,7 @@
 # NinKing 图像素材匹配指南 v3
 
 > **建立日期:** 2026-06-10 | **状态:** v3 实地资产校准（Game Icons 2 已下架→Board Game Icons 替代，文件名映射实测修正）
-> **关联:** [`05-image-asset-generation-plan.md`](05-image-asset-generation-plan.md) · [`16-art-direction-principles.md`](16-art-direction-principles.md) · [`18-audio-asset-matching-guide.md`](18-audio-asset-matching-guide.md)
+> **关联:** ~~[`05-image-asset-generation-plan.md`](05-image-asset-generation-plan.md)~~（已删除，旧少年漫画风提示词不再需要）· [`16-art-direction-principles.md`](16-art-direction-principles.md) · [`18-audio-asset-matching-guide.md`](18-audio-asset-matching-guide.md)
 >
 > **用途:** 指导图像素材的"现成素材包匹配 + AI 兜底生成"两层混合策略。避免重蹈 V23 音频匹配的覆辙。
 > **⚠️ 先执行 Phase 0（样板验证），再进入全面匹配/生成。六条核心教训见 `18-audio-asset-matching-guide.md` §11。**
@@ -137,7 +137,7 @@ ImageMagick: convert input.png -ordered-dither h4x4a output.png
 
 ## §3 需求分层：两层分类
 
-> 基于 §2 的市场调研结论 + review-plan 审阅 Q1 决策（删除 Layer 2"半匹配+后处理"），将 `05-image-asset-generation-plan.md` 的 47 个 AI 生成项重新分类为两层。
+> 基于 §2 的市场调研结论 + review-plan 审阅 Q1 决策（删除 Layer 2"半匹配+后处理"），将旧 `05-image-asset-generation-plan.md`（已删除）的 47 个 AI 生成项重新分类为两层。
 
 ### 3.1 两层分类结果
 
@@ -354,7 +354,7 @@ magick input.png -ordered-dither h4x4a output.png
 | 4 | `pngquant` 已安装（`pngquant --version`） | ⬜ |
 | 5 | 豆包/即梦 AI 账号可用（备选：Stable Diffusion / ComfyUI），确认当日配额 | ⬜ |
 | 6 | Phase 0 样板计划已定（§12 附录 B + 附录 C） | ⬜ |
-| 7 | 输出目录清单已确认（按 `05-image-asset-generation-plan.md` §7.4 的文件结构） | ⬜ |
+| 7 | 输出目录清单已确认（按旧 `05-image-asset-generation-plan.md` §7.4 的文件结构，文档已删除） | ⬜ |
 | 8 | 人工眼确认流程已安排（生成/匹配后必须人眼过，不过不标完成） | ⬜ |
 | 9 | 目标代码文件已验证存在 — `ninking_card.gd` / `shop_ability_card.gd` / `card_back_generator.gd` — 匹配后需更新 preload 路径 | ⬜ |
 
@@ -456,7 +456,7 @@ score <= 2  → 🔴 不可匹配 → 直接走 Layer 3
 | L1 | `ninking_card.gd` | suit 渲染从 SVG Unicode → PNG 纹理引用 |
 | L2 | `ninking_card.gd`（或匹配执行中新建 `ninja_card_renderer.gd`） | 图标 preload 路径更新为匹配后的实际文件 |
 | L3 | `shop_ability_card.gd` | 消耗品图标路径更新 |
-| L4 | `05-image-asset-generation-plan.md` | 更新实施状态：已匹配项打 ✅，AI 额度从 47→28 |
+| L4 | ~~`05-image-asset-generation-plan.md`~~ | 已删除。更新实施状态：AI 额度从 47→28（旧文档不再维护） |
 | L5 | `TODO.md` | V26/V27/V36 状态更新 |
 
 ---

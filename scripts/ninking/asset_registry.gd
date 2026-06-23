@@ -31,16 +31,38 @@ const FLASH_MATERIAL_PATHS: Dictionary = {
 	"legendary": "res://resources/materials/fake3d_legendary.tres",
 }
 ## Base flash shader parameters per rarity (for hover accelerate / restore).
+##
+## S2: All per-rarity numerical flash params live here, not in the .tres files.
+## The .tres files retain only editor-visual fields (gradient_texture, flash_type,
+## pure_flash_color) plus the shared fake3d infrastructure (fov, cull_back, etc.).
+## Code calls duplicate() then batch-applies these params.
+##
 ## Design intent:
 ##   Common   -> type2 silver gradient scan,   intensity 0.3 (no breathing)
 ##   Uncommon -> type2 ocean wave gradient,     breath 0.18~0.42
 ##   Rare     -> type2 fire gradient flicker,   pulse 0.20~0.55
 ##   Legendary-> type1 rainbow shimmer,         breath 0.10~0.38
 const RARITY_FLASH_PARAMS: Dictionary = {
-	"common": {"intensity": 0.3, "move_speed": 0.4, "one_way_loop": true, "softness": 0.25},
-	"uncommon": {"intensity": 0.35, "move_speed": 0.2, "one_way_loop": true, "softness": 0.4},
-	"rare": {"intensity": 0.55, "move_speed": 0.35, "one_way_loop": true, "softness": 0.35},
-	"legendary": {"intensity": 0.35, "move_speed": 0.8, "one_way_loop": false, "softness": 0.2},
+	"common": {
+		"speed": 1.0, "stripe_spacing": 6.5, "stripe_width": 1.2,
+		"move_speed": 0.4, "intensity": 0.3, "angle": 45.0,
+		"one_way_loop": true, "softness": 0.25,
+	},
+	"uncommon": {
+		"speed": 1.0, "stripe_spacing": 5.0, "stripe_width": 0.5,
+		"move_speed": 0.2, "intensity": 0.35, "angle": 75.0,
+		"one_way_loop": true, "softness": 0.4,
+	},
+	"rare": {
+		"speed": 1.2, "stripe_spacing": 5.0, "stripe_width": 0.8,
+		"move_speed": 0.35, "intensity": 0.55, "angle": 85.0,
+		"one_way_loop": true, "softness": 0.35,
+	},
+	"legendary": {
+		"speed": 1.5, "stripe_spacing": 4.5, "stripe_width": 1.0,
+		"move_speed": 0.8, "intensity": 0.35, "angle": 45.0,
+		"one_way_loop": false, "softness": 0.2,
+	},
 }
 
 

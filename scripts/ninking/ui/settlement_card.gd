@@ -31,11 +31,17 @@ var _barrier_num: int = 1
 # 本局金币获得（count-up 用）
 var _gold_gain: int = 0
 
+# count-up VFX 跟踪
+var _count_played_sfx: bool = false
+var _count_last_milestone: int = 0
+
 # 动画控制
 var _entrance_busy: bool = false
 
 
 func _ready() -> void:
+	ButtonStyles.apply_kenney_long(_unlock_btn, "beige")
+	ButtonStyles.attach_entrance_animation(_unlock_btn, {"mild": true})
 	_unlock_btn.pressed.connect(_on_unlock_pressed)
 	# 初始态：所有内容隐藏
 	_reset_animation_state()
@@ -154,33 +160,60 @@ func _play_entrance() -> void:
 
 func _show_gold_count_up() -> void:
 	## 金币数字 count-up 动画。
+	## 视觉: 每 $5 金色粒子 burst | 听觉: 递增音高 tick | 触觉: 落定微震
 	_gold_label.modulate = Color(1, 1, 1, 0)
 	_gold_label.text = "+0 $"
+	_count_played_sfx = false
+	_count_last_milestone = 0
 
 	# 淡入 + count-up
 	var gold_tw := create_tween()
 	gold_tw.set_parallel(true)
 	gold_tw.tween_property(_gold_label, "modulate", Color.WHITE, 0.2)
 	gold_tw.tween_method(
-		func(v: float): _gold_label.text = "+%d $" % int(v),
+		func(v: float): _on_count_up_tick(int(v)),
 		0.0, float(_gold_gain), 0.5
 	).set_ease(Tween.EASE_OUT)
 	await gold_tw.finished
 
-	GlobalTweens.play_sfx(SB.UI_COIN)
+	if not is_inside_tree():
+		return
+
+	# 小额 ($1-$4) 无声时补播一声默认音效
+	if not _count_played_sfx and _gold_gain > 0:
+		GlobalTweens.play_sfx(SB.UI_COIN)
+
 	# 小 pulse 强调
 	var pulse_tw := create_tween()
 	pulse_tw.tween_property(_gold_label, "scale", Vector2(1.15, 1.15), 0.1)
 	pulse_tw.tween_property(_gold_label, "scale", Vector2.ONE, 0.15)
+	await pulse_tw.finished
+
+	# 落定微震
+	if is_inside_tree():
+		GlobalTweens.shake_node(_gold_label, 2.0, 0.15)
+
+
+func _on_count_up_tick(val: int) -> void:
+	## Count-up 每帧回调：更新文字 + 整 $5 触发 VFX。
+	_gold_label.text = "+%d $" % val
+	if val <= 0 or val % 5 != 0 or val > _gold_gain or val == _count_last_milestone:
+		return
+	_count_last_milestone = val
+
+	# 每 $5: 金色粒子 + 递增音高 tick
+	var gp := _gold_label.global_position
+	var burst_pos := gp + Vector2(_gold_label.size.x * 0.5, _gold_label.size.y)
+	GlobalTweens.burst_particles(burst_pos, "sparkle", Color(1.0, 0.85, 0.2))
+
+	var progress := float(val) / float(max(_gold_gain, 1))
+	GlobalTweens.play_sfx(SB.UI_COIN, 0.0, 0.9 + progress * 0.3)
+	_count_played_sfx = true
 
 
 func _start_button_pulse() -> void:
-	## 按钮脉冲辉光（无限循环）。
-	var pulse_tw := create_tween().set_loops()
-	pulse_tw.tween_property(_unlock_btn, "modulate", Color(1.08, 1.08, 1.08, 1.0), 0.6)\
-		.set_ease(Tween.EASE_IN_OUT)
-	pulse_tw.tween_property(_unlock_btn, "modulate", Color.WHITE, 0.6)\
-		.set_ease(Tween.EASE_IN_OUT)
+	## 按钮脉冲辉光（无限循环）— 通过 GlobalTweens 统一 API。
+	GlobalTweens.attract_pulse(_unlock_btn)
 
 
 func _on_unlock_pressed() -> void:
@@ -188,6 +221,7 @@ func _on_unlock_pressed() -> void:
 	if _unlock_btn.disabled:
 		return
 	_unlock_btn.disabled = true
+	GlobalTweens.kill_domain(_unlock_btn, "modulate")
 
 	# 卡片收缩 + 淡出
 	var exit_tw := create_tween()

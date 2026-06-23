@@ -198,6 +198,7 @@ static func play_score(label: Control, chips: int, mult: int, result: int,
 	label.bbcode_enabled = true
 	const CHIPS_COLOR := "#588CF2"
 	const MULT_COLOR := "#E04040"
+	const OP_COLOR := "#7A5C3A"  # 运算符/得分统一暖褐 — 在米色面板上清晰可见
 
 	var t: Dictionary = _score_tier(result)
 	var chips_ticks: int = t["c_ticks"]
@@ -218,10 +219,10 @@ static func play_score(label: Control, chips: int, mult: int, result: int,
 
 	var tw: Tween = play_multi(label, [
 		{"value": chips,  "duration": chips_dur,  "delay": 0.0,           "ticks": chips_ticks,  "ease": Tween.EASE_OUT, "trans": Tween.TRANS_CUBIC, "color": CHIPS_COLOR},
-		{"text": " × "},
+		{"text": "[color=%s] × [/color]" % OP_COLOR},
 		{"value": mult,   "duration": mult_dur,   "delay": mult_delay,    "ticks": mult_ticks,   "ease": Tween.EASE_OUT, "trans": Tween.TRANS_CUBIC, "color": MULT_COLOR},
-		{"text": " = "},
-		{"value": result, "duration": result_dur, "delay": result_delay,  "ticks": result_ticks, "ease": Tween.EASE_OUT, "trans": Tween.TRANS_CUBIC},
+		{"text": "[color=%s] = [/color]" % OP_COLOR},
+		{"value": result, "duration": result_dur, "delay": result_delay,  "ticks": result_ticks, "ease": Tween.EASE_OUT, "trans": Tween.TRANS_CUBIC, "color": OP_COLOR},
 	], per_tick)
 	if tw != null:
 		tw.tween_callback(func():
@@ -240,13 +241,13 @@ static func _score_tier(result: int) -> Dictionary:
 
 	# {c_ticks, m_ticks, r_ticks, dt (dur_per_tick), gap_bonus}
 	var table: Array[Dictionary] = [
-		{"c_ticks": 3,  "m_ticks": 2,  "r_ticks": 3,  "dt": 0.16, "gap_bonus": 0.00},  # <20   → ~1.4s
-		{"c_ticks": 4,  "m_ticks": 3,  "r_ticks": 4,  "dt": 0.15, "gap_bonus": 0.01},  # 20-99 → ~1.8s
-		{"c_ticks": 6,  "m_ticks": 4,  "r_ticks": 6,  "dt": 0.17, "gap_bonus": 0.03},  # 100-199 → ~2.9s
-		{"c_ticks": 7,  "m_ticks": 5,  "r_ticks": 8,  "dt": 0.16, "gap_bonus": 0.04},  # 200-399 → ~3.4s
-		{"c_ticks": 9,  "m_ticks": 6,  "r_ticks": 10, "dt": 0.17, "gap_bonus": 0.06},  # 400-799 → ~4.5s
-		{"c_ticks": 10, "m_ticks": 7,  "r_ticks": 12, "dt": 0.18, "gap_bonus": 0.08},  # 800-1599 → ~5.5s
-		{"c_ticks": 11, "m_ticks": 8,  "r_ticks": 14, "dt": 0.19, "gap_bonus": 0.10},  # 1600+ → ~6.6s
+		{"c_ticks": 3,  "m_ticks": 2,  "r_ticks": 3,  "dt": 0.16, "gap_bonus": 0.00},  # <20   -> ~1.4s
+		{"c_ticks": 4,  "m_ticks": 3,  "r_ticks": 4,  "dt": 0.15, "gap_bonus": 0.01},  # 20-99 -> ~1.8s
+		{"c_ticks": 6,  "m_ticks": 4,  "r_ticks": 6,  "dt": 0.17, "gap_bonus": 0.03},  # 100-199 -> ~2.9s
+		{"c_ticks": 7,  "m_ticks": 5,  "r_ticks": 8,  "dt": 0.16, "gap_bonus": 0.04},  # 200-399 -> ~3.4s
+		{"c_ticks": 9,  "m_ticks": 6,  "r_ticks": 10, "dt": 0.17, "gap_bonus": 0.06},  # 400-799 -> ~4.5s
+		{"c_ticks": 10, "m_ticks": 7,  "r_ticks": 12, "dt": 0.18, "gap_bonus": 0.08},  # 800-1599 -> ~5.5s
+		{"c_ticks": 11, "m_ticks": 8,  "r_ticks": 14, "dt": 0.19, "gap_bonus": 0.10},  # 1600+ -> ~6.6s
 	]
 	return table[tier]
 

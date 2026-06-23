@@ -1,6 +1,6 @@
 [gd_resource type="Theme" format=3 uid="uid://bqb2i07k0v8jt"]
 
-[ext_resource type="FontFile" uid="uid://cu41ixkts3rlk" path="res://assets/fonts/mianfeiziti.com.ttf" id="default_font"]
+[ext_resource type="FontFile" uid="uid://cq14qgkdwdiec" path="res://assets/fonts/LXGWWenKai-Medium.ttf" id="default_font"]
 
 [sub_resource type="StyleBoxFlat" id="slot_frame"]
 content_margin_left = 6.0

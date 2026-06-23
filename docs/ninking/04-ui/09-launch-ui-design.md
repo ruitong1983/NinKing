@@ -1,7 +1,7 @@
 # NinKing Launch UI 设计方案
 
-> **建立日期:** 2026-06-10 | **最后更新:** 2026-06-16 | **关联场景:** `ninking_launcher.tscn` + `deck_select_panel.tscn` + `continue_panel.tscn` + `main_menu.gd`
-> **风格权威:** [`../05-art/16-art-direction-principles.md`](../05-art/16-art-direction-principles.md) · 少年漫画风
+> **建立日期:** 2026-06-10 | **最后更新:** 2026-06-23 | **关联场景:** `ninking_launcher.tscn` + `deck_select_panel.tscn` + `continue_panel.tscn` + `main_menu.gd`
+> **风格权威:** [`../05-art/16-art-direction-principles.md`](../05-art/16-art-direction-principles.md) · 治愈漫画风（旧少年漫画方向已于 2026-06-23 废弃）
 ## §1 概述
 
 Launch 场景是玩家接触的第一个界面。从闪屏过渡到主菜单，再通过模态面板进入游戏。
@@ -29,8 +29,18 @@ Launcher (Control) [main_menu.gd]
 ├── ContinueBtn (Button)               ← 「繼續」P0
 ├── SettingsBtn (Button)               ← 「設置」P2
 ├── QuitBtn (Button)                   ← 「退出」P2
+├── %DebugBtn (Button)                ← 「DEBUG」(右下角, `apply_kenney_long("grey")`)
 │
 ├── Overlay (ColorRect)               ← 全屏半透明遮罩 (程序化构建)
+
+### §2.1 按钮入场动效
+
+所有 Launch 按钮经 `ButtonStyles.attach_entrance_animation()` 统一挂载交互生命周期：
+- **stagger slide-in 入场** → 随后挂载 hover 放大 + click squash 反馈
+- **呼吸脉冲** (Scale 1.0↔1.05, TRANS_SINE, 无限循环): **仅 StartBtn 保留**
+- ContinueBtn / SettingsBtn / QuitBtn / DebugBtn: `pulse: false`（只保留 hover + click，简洁化）
+- 样式: 全部 `apply_kenney_long()`，beige 底色 / grey(DebugBtn)
+
 │
 ├── %DeckSelectPanel (Control)       ← 子场景: deck_select_panel.tscn [deck_select_panel.gd]
 │   └── PanelBg (PanelContainer, 960×600 居中)
@@ -123,7 +133,7 @@ Launcher (Control) [main_menu.gd]
 
 ### 4.3 选中态
 
-选中卡片高亮：`StyleBoxFlat` 金色边框 (2px) + 紫色底 + 金色阴影 (10px)。
+选中卡片高亮：`StyleBoxFlat` 暖棕边框 (2px, `#8B6F4E`) + 暖米底 (`#F0EBDC`) + 暖棕阴影 (6px)。与 KUI 暖纸风面板协调。
 
 ### 4.4 交互流
 
@@ -147,7 +157,7 @@ Launcher (Control) [main_menu.gd]
 
 ```
 ┌─────────────────────────────────┐
-│          繼續冒險                │  ← 32px 金色
+│          繼續冒險                │  ← 32px 深褐
 │                                 │
 │    结界 3 · 明王封印             │  ← 24px info 行
 │    当前忍気: 450 / 600          │
@@ -189,18 +199,18 @@ Launcher (Control) [main_menu.gd]
 
 ### 6.1 旧 vs 新
 
-| 项目 | 旧 (已废弃) | 新 (C10) |
-|------|-----------|---------|
-| 全局字体 | `vonwaon_bitmap_16px.ttf` | `manga_theme.tres` → SourceHanSansSC-Heavy |
-| 标题色 | — | `(0.91, 0.77, 0.27)` 金色 |
-| info 色 | — | `(0.78, 0.78, 0.82)` 灰白 |
+| 项目 | 旧 (已废弃) | 新 (KUI 暖纸风) |
+|------|-----------|----------------|
+| 全局字体 | `vonwaon_bitmap_16px.ttf` | `manga_theme.tres` → LXGWWenKai-Medium |
+| 标题色 | `(0.91, 0.77, 0.27)` 金色 | `(0.24, 0.17, 0.10)` 深褐 |
+| info 色 | `(0.78, 0.78, 0.82)` 灰白 | `(0.48, 0.42, 0.35)` 暖棕 |
 | 字号·标题 | 32px | 32px (不变) |
 | 字号·按钮 | 24px | 24px (不变) |
 | 字号·info | 20px | 20px (不变) |
 
 ### 6.2 Panel 内边距
 
-PanelContainer 使用 `manga_theme.tres` 的 `panel` StyleBox → 12px content_margin。
+PanelContainer 使用 `panel_beigeLight` `StyleBoxTexture` (9宫格) → patch_margin=8px。
 
 ### 6.3 按钮高度
 ContinuePanel 里面的 继续冒险 按钮高度 48px

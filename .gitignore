@@ -59,3 +59,4 @@ tmp_godot_out.txt
 skills-lock.json
 .agents/
 *.translation
+shaderlist/

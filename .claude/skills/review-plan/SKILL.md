@@ -53,13 +53,26 @@ description: Use when the user says "review方案", "审阅方案", "review plan
     │   │   └─ 手写且可复用 → 标记"建议形成基建文件"
     │   │
     │   ├─ 维度 B：交互设计
-    │   │   ├─ 整体交互风格是否与现有设计语言一致？（拟物/扁平/等）
+    │   │   ├─ 整体交互风格是否与现有设计语言一致？（Kenney 暖纸风治愈漫画）
     │   │   ├─ 操作反馈是否一致？同样的操作（点击/悬停/拖拽/长按）是否产生同样的反馈？
     │   │   ├─ 动画/转场节奏是否一致？时长、缓动曲线是否与项目已有的交互模式匹配？
     │   │   ├─ 是否考虑了操作容错？（误触保护、撤销/确认机制、不可逆操作提示）
     │   │   ├─ 是否考虑了极端状态？（空状态、加载中、错误提示、数据溢出）
-    │   │   ├─ 输入方式是否统一？同样类型的操作是否使用同样的手势/按键组合？
-    │   │   └─ 对照 `docs/ninking/04-ui/` 下的 UI 设计文档检查交互模式是否对齐
+    │   │   ├─ 输入方式是否统一？同样类型的操作使用同样的手势/按键组合？
+    │   │   ├─ 按钮交互合规 — 所有按钮必须通过 `ButtonStyles` 统一管理：
+    │   │   │   ├─ Kenney 风 → `ButtonStyles.apply_kenney_long/square(btn, variant)`
+    │   │   │   ├─ 属性动态色 → `ButtonStyles.apply_manga(btn, accent, size_tier)`
+    │   │   │   ├─ 入口动效 → `ButtonStyles.attach_entrance_animation(btn, config)`
+    │   │   │   └─ 严禁散落手写 `add_theme_stylebox_override` 做按钮样式
+    │   │   ├─ 面板交互合规 — Panel 节点须匹配 Kenney 暖纸风映射：
+    │   │   │   ├─ 纹理 `panel_beige` / `panel_beigeLight`、9宫格 8px、NEAREST 过滤
+    │   │   │   ├─ 参考 `docs/ninking/05-art/21-ui-interaction-enhancements.md §3.2` 面板映射表
+    │   │   │   └─ 程序化创建 TextureRect 必须显式 `expand_mode = EXPAND_IGNORE_SIZE`
+    │   │   ├─ 光标交互合规 — 新控件是否自动获得蓝手悬停？
+    │   │   │   ├─ Button / Card 子类自动继承 `CursorManager`
+    │   │   │   └─ 非标准控件需手动调用 `CursorManager.set_hover()`
+    │   │   ├─ 画风改造边界 — 参考 `kenney-beige-ui-transformation.md §一` 确认哪些已改造/哪些不动
+    │   │   └─ 对照 `docs/ninking/04-ui/` 下的 UI 设计文档 + `21-ui-interaction-enhancements.md` 检查交互对齐
     │   │
     │   ├─ 维度 C：游戏机制
     │   │   ├─ 方案提出的游戏机制是否与现有核心玩法冲突？
@@ -78,6 +91,7 @@ description: Use when the user says "review方案", "审阅方案", "review plan
     │       │   ├─ `docs/ninking/01-gameplay/13-blinds-and-bosses.md` — 关卡/Boss 设计
     │       │   ├─ `docs/ninking/04-ui/06-ui-layout-reference.md` — UI 布局
     │       │   ├─ `docs/ninking/04-ui/07-shop-ui-design.md` — 商店 UI
+    │       │   ├─ `docs/ninking/05-art/21-ui-interaction-enhancements.md` — UI 交互增强（面板/按钮/光标样式基线）
     │       │   ├─ `docs/ninking/06-tech/ui-signal-architecture.md` — UI 信号/数据流
     │       │   ├─ `docs/vfx-system-design.md` — VFX 框架设计原则
     │       │   └─ `docs/tween-library-reference.md` — Tween API 使用合规
@@ -192,13 +206,18 @@ description: Use when the user says "review方案", "审阅方案", "review plan
 - [ ] **Tween/VFX 子项**：检查方案中是否有 Tween 冲突风险（见 §4.3 防冲突模式）
 
 ### B 维度检查项 — 交互设计
-- [ ] 整体交互风格是否与现有设计语言一致？（拟物/扁平/等）
+- [ ] 整体交互风格是否与现有设计语言一致？（Kenney 暖纸风治愈漫画）
 - [ ] 操作反馈是否一致？同样的操作（点击/悬停/拖拽/长按）是否产生同样的反馈？
 - [ ] 动画/转场节奏是否一致？时长、缓动曲线是否匹配项目已有交互模式？
 - [ ] 是否考虑了操作容错？（误触保护、撤销/确认机制、不可逆操作提示）
 - [ ] 是否考虑了极端状态？（空状态、加载中、错误提示、数据溢出）
 - [ ] 输入方式是否统一？同样类型的操作使用同样的手势/按键组合？
-- [ ] 对照 `docs/ninking/04-ui/` 下的 UI 设计文档检查交互模式是否对齐
+- [ ] 按钮样式合规：所有按钮通过 `ButtonStyles.apply_kenney_long/square/manga()` 管理，无散落手写样式
+- [ ] 按钮动效合规：入口动画/呼吸脉冲/hover/click 通过 `ButtonStyles.attach_entrance_animation()` 管理
+- [ ] 面板样式合规：Panel 节点匹配 Kenney 映射（纹理/9宫格 8px/NEAREST），TextureRect 显式设 expand_mode
+- [ ] 光标交互合规：Button/Card 自动蓝手悬停，非标准控件手动调 `CursorManager.set_hover()`
+- [ ] 对照 `docs/ninking/05-art/21-ui-interaction-enhancements.md` 检查交互增强是否对齐
+- [ ] 对照 `docs/ninking/04-ui/` 下的 UI 设计文档检查布局/交互是否对齐
 - [ ] 交互是否符合平台惯例？（Godot 桌面游戏的操作习惯）
 
 ### C 维度检查项 — 游戏机制
@@ -217,6 +236,7 @@ description: Use when the user says "review方案", "审阅方案", "review plan
 - [ ] 关卡/Boss 设计与 `docs/ninking/01-gameplay/13-blinds-and-bosses.md` 是否一致？
 - [ ] UI 布局与 `docs/ninking/04-ui/06-ui-layout-reference.md` 是否一致？
 - [ ] 商店 UI 与 `docs/ninking/04-ui/07-shop-ui-design.md` 是否一致？
+- [ ] UI 交互增强与 `docs/ninking/05-art/21-ui-interaction-enhancements.md` 是否一致？
 - [ ] UI 信号/数据流与 `docs/ninking/06-tech/ui-signal-architecture.md` 是否一致？
 - [ ] VFX 设计原则与 `docs/vfx-system-design.md` 是否一致？
 - [ ] Tween API 使用与 `docs/tween-library-reference.md` 是否合规？

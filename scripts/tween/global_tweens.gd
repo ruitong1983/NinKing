@@ -82,6 +82,26 @@ func wobble(node: Node2D, angle_deg: float = 5.0, duration: float = 0.3, auto_ki
 func pulse(node: Node, scale_to: Vector2 = Vector2(1.1, 1.1), duration: float = 0.6, auto_kill: bool = true) -> Tween:
 	return FX.pulse(node, scale_to, duration, auto_kill)
 
+## 按钮注意力脉冲（无限循环）：modulate 亮度呼吸 + 可选微缩放。
+## 调用方可随时用 kill_domain(node, "modulate") 停止。
+## 注意：scale_pulse 默认 false（避免与 card_hover 争夺 scale）。
+## config: { intensity, duration, scale_pulse, scale_intensity }
+func attract_pulse(node: CanvasItem, config: Dictionary = {}, auto_kill: bool = true) -> Tween:
+	return FX.attract_pulse(node, config, auto_kill)
+
+## 公开结束指定 domain 的补间并复位属性。
+## 用于停止 attract_pulse / pulse 等循环动效。
+func kill_domain(node: Node, domain: String) -> void:
+	FX.kill_domain(node, domain)
+
+## 按钮弹跳入场：scale 0.8→1.0，TRANS_BOUNCE，自动 domain "entrance" 隔离。
+func entrance_bounce(node: Node, duration: float = 0.4, auto_kill: bool = true) -> Tween:
+	return FX.entrance_bounce(node, duration, auto_kill)
+
+## 按钮点击反馈：squash → spring back。自动 domain "click" 隔离。
+func button_click_feedback(btn: Button, down_duration: float = 0.04, up_duration: float = 0.12) -> Tween:
+	return FX.button_click_feedback(btn, down_duration, up_duration)
+
 func float_up(node: CanvasItem, offset_y: float = -40.0, duration: float = 0.8, auto_kill: bool = true) -> Tween:
 	return FX.float_up(node, offset_y, duration, auto_kill)
 

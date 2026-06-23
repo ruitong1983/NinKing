@@ -19,11 +19,11 @@ const XI_DEFINITIONS: Array[Dictionary] = [
 	{ "name": "豹子", "x_mult": 2 },
 	# ── Phase E 新喜 (2026-06-16) ──
 	{ "name": "昇龍", "x_mult": 3 },
-	{ "name": "背水", "x_mult": 4 },
+	{ "name": "背水", "x_mult": 3 },
 	{ "name": "貧打", "x_mult": 4 },
 	{ "name": "陣眼", "x_mult": 3 },
-	{ "name": "均爵", "x_mult": 3 },
-	{ "name": "三等", "x_mult": 5 },
+	{ "name": "均爵", "x_mult": 2 },
+	{ "name": "三等", "x_mult": 4 },
 	# ── 2026-06-16 追加 ──
 	{ "name": "满堂", "x_mult": 5 },
 	# ── 合系列 (行列对角匹配, 互斥) ──
@@ -36,18 +36,18 @@ const XI_DEFINITIONS: Array[Dictionary] = [
 	{ "name": "倒影", "x_mult": 3 },
 	{ "name": "双壁", "x_mult": 3 },
 	{ "name": "对影", "x_mult": 2 },
-	{ "name": "连环", "x_mult": 6 },
+	{ "name": "连环", "x_mult": 4 },
 	{ "name": "天九", "x_mult": 5 },
 	{ "name": "压牌", "x_mult": 4 },
 	{ "name": "至尊", "x_mult": 4 },
-	{ "name": "独尊", "x_mult": 6 },
+	{ "name": "独尊", "x_mult": 4 },
 	{ "name": "廿一点", "x_mult": 4 },
 	{ "name": "文武", "x_mult": 4 },
 	{ "name": "一气", "x_mult": 3 },
 	{ "name": "无将", "x_mult": 4 },
-	{ "name": "长套", "x_mult": 5 },
+	{ "name": "长套", "x_mult": 3 },
 	{ "name": "无忧角", "x_mult": 4 },
-	{ "name": "慢打", "x_mult": 5 },
+	{ "name": "慢打", "x_mult": 4 },
 	{ "name": "四对半", "x_mult": 4 },
 ]
 
@@ -129,7 +129,7 @@ static func detect(head_cards: Array, mid_cards: Array, tail_cards: Array,
 
 	# 12. 背水 — 尾墩散牌 (HIGH_CARD_3)
 	if _check_last_stand(tail_eval):
-		result.add_xi("背水", 4)
+		result.add_xi("背水", 3)
 
 	# 13. 貧打 — 某墩精确含 2-3-5
 	if _check_poor_strike(head_cards, mid_cards, tail_cards):
@@ -141,11 +141,11 @@ static func detect(head_cards: Array, mid_cards: Array, tail_cards: Array,
 
 	# 15. 均爵 — 每墩至少一张 J/Q/K (A不算)
 	if _check_all_face(head_cards, mid_cards, tail_cards):
-		result.add_xi("均爵", 3)
+		result.add_xi("均爵", 2)
 
 	# 16. 三等 — 三行卡牌chip总和相等(类幻方)
 	if _check_equal_chips(head_cards, mid_cards, tail_cards):
-		result.add_xi("三等", 5)
+		result.add_xi("三等", 4)
 
 	# ── 预计算列牌型 (供 _check_full_house / _count_diag_matches / _check_double_wall 共享) ──
 	var col_evals: Array[HandEvaluator3.EvalResult] = []
@@ -182,7 +182,7 @@ static func detect(head_cards: Array, mid_cards: Array, tail_cards: Array,
 
 	# 23. 连环 — 3×3 棋盘交错色 (正交相邻全异色)
 	if _check_chain(head_cards, mid_cards, tail_cards):
-		result.add_xi("连环", 6)
+		result.add_xi("连环", 4)
 
 	# ── 合系列 (互斥: 只取最高档) ──
 
@@ -204,7 +204,7 @@ static func detect(head_cards: Array, mid_cards: Array, tail_cards: Array,
 
 	# 28. 独尊 — 影行 chip 和 > 瞬行 + 滅行 chip 和 (逆约束独行)
 	if _check_du_zun(head_cards, mid_cards, tail_cards):
-		result.add_xi("独尊", 6)
+		result.add_xi("独尊", 4)
 
 	# 29. 文武 — 三行中同时存在豹子(文)和散牌(武) (牌九文武精神)
 	if _check_wen_wu(head_eval, mid_eval, tail_eval):
@@ -220,7 +220,7 @@ static func detect(head_cards: Array, mid_cards: Array, tail_cards: Array,
 
 	# 32. 长套 — 某花色≥6张, 其余三门各1张 (唯一分布 6-1-1-1, 桥牌长套)
 	if _check_long_suit(all_cards):
-		result.add_xi("长套", 5)
+		result.add_xi("长套", 3)
 
 	# 33. 无忧角 — 任一 2×2 子方格内 4 张全同色 (围棋守角定式)
 	if _check_safe_corner(head_cards, mid_cards, tail_cards):
@@ -228,7 +228,7 @@ static func detect(head_cards: Array, mid_cards: Array, tail_cards: Array,
 
 	# 34. 慢打 — 影=散牌(示弱) + 滅=豹子(收网) (德扑慢打战术)
 	if _check_slow_play(head_eval, tail_eval):
-		result.add_xi("慢打", 5)
+		result.add_xi("慢打", 4)
 
 	# 35. 四对半 — 4×2+1×1 rank distribution (十三张报到压缩版, 2-2-2-2-1)
 	if _check_four_pairs_half(all_cards):

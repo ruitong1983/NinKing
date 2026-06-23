@@ -14,44 +14,39 @@
 
 ## 字体 & 主题
 
-### 像素字体
+### 当前字体 (LXGW WenKai 霞鹜文楷)
 
-| 字体 | 用途 | 网格 | 文件 |
-|------|------|------|------|
-| Press Start 2P (OFL) | 英文/数字/扑克牌面 | 8px 倍数 (8,16,24,32,40,48,56,64,72) | `assets/fonts/press_start_2p.ttf` |
-| 凤凰点阵体 12px (CC0) | 中文 UI (CJK 回退) | 12px 倍数 (12,24,36,48,60,72) | `assets/fonts/vonwaon_bitmap_12px.ttf` |
-| 凤凰点阵体 16px (CC0) | 备用较大中文 | 16px 倍数 | `assets/fonts/vonwaon_bitmap_16px.ttf` |
+| 字体 | 用途 | 文件 |
+|------|------|------|
+| LXGW WenKai Medium (OFL) | 默认 UI — 按钮/标题/数字/标签 | `assets/fonts/LXGWWenKai-Medium.ttf` |
+| LXGW WenKai Regular (OFL) | 正文备用 — 卡牌描述/小字 | `assets/fonts/LXGWWenKai-Regular.ttf` |
 
-**导入设置 (像素字体):** 抗锯齿=关, 子像素定位=关, Mipmap=关, 嵌入位图=保留(凤凰)
+> 前代字体（Press Start 2P / 凤凰点阵体 / 思源黑体 / 站酷妙典体）已全部清理。
+> 详见 `05-art/17-font-design-plan.md`。
 
-**回退链:** Press Start 2P → 凤凰点阵体 12px (CJK fallback)
-
-**字号选择规则:**
-- 纯英文/数字标签 → 8 的倍数即可
-- 含中文标签 → **必须用 24 / 48 / 72** (两字体网格交集)
-- 牌面角标 → 24px (CORNER_FONT_SZ), 中央花色 → 56px (CENTER_FONT_SZ)
+**导入设置:** 抗锯齿=开, 子像素定位=开, Mipmap=关, 轻度微调(hinting=1)
 
 ### 全局主题
 
-**`assets/themes/pixel_theme.tres`** — 挂载在 `ninking_main.tscn` 根节点 `NinKingMain`
+**`assets/themes/manga_theme.tres`** — 挂载在 `ninking_main.tscn` / `ninking_launcher.tscn` 根节点
 
-- `default_font` = Press Start 2P (font_size=16)
-- StyleBox 全部 0 圆角、2px 硬边、金色边框（像素忍者风）
-- 按钮三态：normal/hover/pressed（瞬时切换 + 按下时 content_margin 下移）
-- 三墩边框递进：DunHead(1px) → DunMiddle(2px) → DunTail(3px)
-- 原 `button_theme.tres` 已废弃删除
+- `default_font` = LXGWWenKai-Medium (font_size=16)
+- StyleBoxFlat 全部 hard-edge（0 圆角、2px 边框、金色描边）
+- 按钮三态：normal(深色) / hover(亮色) / pressed(按下偏移)
+- 面板深色半透明底 + 金色边框 2px
 
 ### UI 字号速查 (ninking_main.tscn)
 
-| 类别 | 节点 | 字号 | 网格 |
-|------|------|------|------|
-| 标题 | TitleLabel "N I N K I N G" | 72 | 交集 ✓ |
-| 中文标签 | SubtitleLabel, DeckLabel, StatusLabel 等 | 24 | 交集 ✓ |
-| 中文大号 | LevelLabel, CompleteLabel, GameOverLabel, HandNameLabel | 48 | 交集 ✓ |
-| 分数预览 | ColXiLabel | 32 | PS2P ✓ |
-| 分数 | ScoreLabel, ScoreValueLabel | 48 / 72 | 交集 ✓ |
-| 按钮 | StartButton, PlayBtn, RedrawBtn 等 | 24 | 交集 ✓ |
-| 牌面 | CORNER_FONT_SZ / CENTER_FONT_SZ | 24 / 56 | PS2P ✓ |
+| 类别 | 节点 | 字号 |
+|------|------|------|
+| 标题 | TitleLabel | 72 |
+| 分数 | ScoreLabel, ScoreValueLabel | 48 / 72 |
+| 分数预览 | ColXiLabel | 32 |
+| 按钮 | PlayBtn, AiRearrangeBtn, DeckBtn 等 | 18-24 |
+| 中文标签 | SubtitleLabel, DeckLabel, StatusLabel 等 | 24 |
+| 中文大号 | LevelLabel, CompleteLabel, HandNameLabel | 48 |
+| 牌面角标 | CORNER_FONT_SZ | 24 |
+| 牌面中央 | CENTER_FONT_SZ | 56 |
 | 特殊 | VersionLabel, TitleBar | 16 / 24 | PS2P ✓ |
 
 ---

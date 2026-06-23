@@ -1,22 +1,41 @@
 class_name ShopSlot
-extends VBoxContainer
-## Shop card container — Kenney beige (暖纸风) card + button layout.
+extends Control
+## Shop card slot — Kenney beige (暖纸风) card with click-to-reveal buy button.
 ##
-## VBoxContainer: NinjaInventoryCard (125×175) + BuyBtn (125×40), separation=6.
-## Supports dynamic button state: ¥N / 満員 / disabled.
+## Root is a Control (not VBoxContainer), manually positioned:
+##   NinjaCard (125x175) at y=0
+##   BuyBtn    (125x40 ) at y=181 (175 height + 6px separation)
+##
+## Left-click card -> raise 30px + show BuyBtn below card.
+## Click BuyBtn -> purchase_requested. Click card again / blank area -> reset.
+##
+## Interaction flow:
+##   Card click -> card_raised(self) -> ShopPanel tracks _active_slot
+##   BuyBtn press -> purchase_requested(data) (same as before)
 
 # ═══ Signals ═══
 signal purchase_requested(data: Dictionary)
+signal card_raised(slot: ShopSlot)
 
 # ═══ @onready references ═══
 @onready var ninja_card: NinjaInventoryCard = $NinjaCard
 @onready var buy_button: Button = $BuyBtn
 
+# ═══ Constants ═══
+const RAISE_Y: float = -30.0        ## Card lifts 30px when clicked
+const LIFT_DURATION: float = 0.15
+const RESET_DURATION: float = 0.12
+
 # ═══ State ═══
 var _data: Dictionary = {}
 var _is_item: bool = false
-var _is_ninja_bar_full: bool = false
 var _is_purchased: bool = false
+var _is_raised: bool = false
+var _anim_guard: bool = false
+var _lift_tween: Tween = null
+
+# Sound
+const SB = preload("res://scripts/config/sound_bank.gd")
 
 
 # ══════════════════════════════════════════
@@ -26,7 +45,7 @@ var _is_purchased: bool = false
 func setup(data: Dictionary, is_ninja_bar_full: bool = false) -> void:
 	_data = data
 	_is_item = data.has("hand_type") or data.get("type") == "item"
-	_is_ninja_bar_full = is_ninja_bar_full
+
 
 	ninja_card.setup_shop(data)
 	_load_illustration(data)
@@ -35,25 +54,100 @@ func setup(data: Dictionary, is_ninja_bar_full: bool = false) -> void:
 	_apply_purchase_button_style()
 	_update_button_state()
 
+	# ── Signal connections ──
+	# Card left-click -> toggle raise/reset (not direct buy anymore)
+	if ninja_card.card_clicked.is_connected(_on_card_clicked):
+		ninja_card.card_clicked.disconnect(_on_card_clicked)
+	ninja_card.card_clicked.connect(_on_card_clicked)
+
+	# Buy button -> actual purchase
 	if buy_button.pressed.is_connected(_on_buy_pressed):
 		buy_button.pressed.disconnect(_on_buy_pressed)
 	buy_button.pressed.connect(_on_buy_pressed)
 
-	if ninja_card.card_clicked.is_connected(_on_buy_pressed):
-		ninja_card.card_clicked.disconnect(_on_buy_pressed)
-	ninja_card.card_clicked.connect(_on_buy_pressed)
-
+	# Reset state
 	_is_purchased = false
+	_is_raised = false
+	_anim_guard = false
+	_kill_lift_tween()
+
+	ninja_card.position.y = 0.0
+	buy_button.visible = false
 	visible = true
 
 
 func set_purchased() -> void:
 	_is_purchased = true
+	GlobalTweens.kill_domain(buy_button, "modulate")
 	visible = false
 
 
 func get_card_id() -> String:
 	return _data.get("id", "")
+
+
+## Snap-reset without animation (used by ShopPanel on reroll/continue).
+func reset_immediate() -> void:
+	_kill_lift_tween()
+	if _is_raised:
+		_is_raised = false
+		ninja_card.position.y = 0.0
+		GlobalTweens.kill_domain(buy_button, "modulate")
+		buy_button.visible = false
+	_anim_guard = false
+
+
+# ══════════════════════════════════════════
+# Card click -> raise / reset toggle
+# ══════════════════════════════════════════
+
+func _on_card_clicked(_card_data: Dictionary) -> void:
+	if _is_purchased or _anim_guard:
+		return
+	_anim_guard = true
+
+	if not _is_raised:
+		_do_raise()
+	else:
+		_do_reset()
+
+
+func _do_raise() -> void:
+	_is_raised = true
+	buy_button.visible = true
+	# 购买按钮统一入场动效（弹跳 + 粒子 + 脉冲 + hover + 点击）
+	ButtonStyles.attach_entrance_animation(buy_button)
+
+	_kill_lift_tween()
+	_lift_tween = create_tween()
+	_lift_tween.tween_property(ninja_card, "position:y", RAISE_Y, LIFT_DURATION) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SINE)
+	_lift_tween.tween_callback(func():
+		_anim_guard = false
+	)
+
+	card_raised.emit(self)
+	GlobalTweens.play_sfx(SB.SELECT)
+
+
+func _do_reset() -> void:
+	_is_raised = false
+
+	_kill_lift_tween()
+	_lift_tween = create_tween()
+	_lift_tween.tween_property(ninja_card, "position:y", 0.0, RESET_DURATION) \
+		.set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_SINE)
+	_lift_tween.tween_callback(func():
+		GlobalTweens.kill_domain(buy_button, "modulate")
+		buy_button.visible = false
+		_anim_guard = false
+	)
+
+
+func _kill_lift_tween() -> void:
+	if _lift_tween and _lift_tween.is_valid():
+		_lift_tween.kill()
+	_lift_tween = null
 
 
 # ══════════════════════════════════════════
@@ -70,49 +164,26 @@ func _apply_card_style() -> void:
 
 
 # ══════════════════════════════════════════
-# Purchase button — buttonSquare_brown / grey disabled
+# Purchase button — ButtonStyles Kenney square, brown
 # ══════════════════════════════════════════
 
 func _apply_purchase_button_style() -> void:
-	var tex_n: Texture2D = preload("res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/buttonSquare_brown.png")
-	var tex_p: Texture2D = preload("res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/buttonSquare_brown_pressed.png")
+	ButtonStyles.apply_kenney_square(buy_button, "brown")
+
+	# Disabled state: grey texture (ButtonStyles doesn't set disabled)
 	var tex_grey: Texture2D = preload("res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/buttonSquare_grey.png")
-
-	var s_n := StyleBoxTexture.new()
-	s_n.texture = tex_n
-	const PM: int = 8
-	s_n.set("patch_margin_left", PM); s_n.set("patch_margin_top", PM); s_n.set("patch_margin_right", PM); s_n.set("patch_margin_bottom", PM)
-	buy_button.add_theme_stylebox_override("normal", s_n)
-
-	var s_h := StyleBoxTexture.new()
-	s_h.texture = tex_n; s_h.modulate_color = Color(1.05, 1.03, 1.0)
-	s_h.set("patch_margin_left", PM); s_h.set("patch_margin_top", PM); s_h.set("patch_margin_right", PM); s_h.set("patch_margin_bottom", PM)
-	buy_button.add_theme_stylebox_override("hover", s_h)
-
-	var s_p := StyleBoxTexture.new()
-	s_p.texture = tex_p
-	s_p.set("patch_margin_left", PM); s_p.set("patch_margin_top", PM); s_p.set("patch_margin_right", PM); s_p.set("patch_margin_bottom", PM)
-	buy_button.add_theme_stylebox_override("pressed", s_p)
-
 	var s_d := StyleBoxTexture.new()
 	s_d.texture = tex_grey
+	var PM: int = 8
 	s_d.set("patch_margin_left", PM); s_d.set("patch_margin_top", PM); s_d.set("patch_margin_right", PM); s_d.set("patch_margin_bottom", PM)
 	buy_button.add_theme_stylebox_override("disabled", s_d)
-
-	buy_button.add_theme_color_override("font_color", Color.WHITE)
-	buy_button.add_theme_color_override("font_pressed_color", Color(0.95, 0.95, 0.98))
 	buy_button.add_theme_color_override("font_disabled_color", Color(0.5, 0.5, 0.5))
-	buy_button.add_theme_font_size_override("font_size", 14)
 
 
 func _update_button_state() -> void:
 	var cost: int = _data.get("cost", 0)
-	if not _is_item and _is_ninja_bar_full:
-		buy_button.text = "満員"
-		buy_button.disabled = true
-	else:
-		buy_button.text = "¥%d" % cost
-		buy_button.disabled = false
+	buy_button.text = "¥%d" % cost
+	buy_button.disabled = false
 
 
 # ══════════════════════════════════════════

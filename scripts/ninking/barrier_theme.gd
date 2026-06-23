@@ -11,6 +11,11 @@ extends RefCounted
 ##   left_panel.color = c.panel
 ##   play_btn.add_theme_color_override("font_color", c.accent)
 ##   GlobalTweens.burst_particles(pos, "manga_burst", c.particle_color)
+##
+## 按钮样式 → 已迁移至 ButtonStyles (scripts/ninking/ui/button_styles.gd):
+##   apply_kenney_button_style   → ButtonStyles.apply_kenney_long()
+##   apply_kenney_square_style    → ButtonStyles.apply_kenney_square()
+##   apply_manga_button_style     → ButtonStyles.apply_manga()
 
 const BARRIER_COLORS: Dictionary = {
 	1: {
@@ -96,122 +101,5 @@ static func get_barrier_name(barrier_num: int) -> String:
 	return get_colors(barrier_num)["name"]
 
 
-## Apply Kenney buttonLong_brown texture to a Button (primary action buttons).
-## Font: white normal, accent color on pressed.
-static func apply_kenney_button_style(btn: Button, accent: Color) -> void:
-	var tex: Texture2D = preload("res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/buttonLong_brown.png")
-	var tex_pressed: Texture2D = preload("res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/buttonLong_brown_pressed.png")
-	const PM: int = 8
-
-	var s_n := StyleBoxTexture.new()
-	s_n.texture = tex
-	s_n.set("patch_margin_left", PM); s_n.set("patch_margin_top", PM); s_n.set("patch_margin_right", PM); s_n.set("patch_margin_bottom", PM)
-	btn.add_theme_stylebox_override("normal", s_n)
-
-	var s_h := StyleBoxTexture.new()
-	s_h.texture = tex
-	s_h.modulate_color = Color(1.05, 1.03, 1.0)
-	s_h.set("patch_margin_left", PM); s_h.set("patch_margin_top", PM); s_h.set("patch_margin_right", PM); s_h.set("patch_margin_bottom", PM)
-	btn.add_theme_stylebox_override("hover", s_h)
-
-	var s_p := StyleBoxTexture.new()
-	s_p.texture = tex_pressed
-	s_p.set("patch_margin_left", PM); s_p.set("patch_margin_top", PM); s_p.set("patch_margin_right", PM); s_p.set("patch_margin_bottom", PM)
-	btn.add_theme_stylebox_override("pressed", s_p)
-
-	btn.add_theme_color_override("font_color", Color.WHITE)
-	btn.add_theme_color_override("font_pressed_color", accent)
-	btn.add_theme_color_override("font_hover_color", Color(0.95, 0.95, 0.98))
-
-
-## Apply Kenney buttonSquare_brown texture (small/secondary action buttons).
-static func apply_kenney_square_style(btn: Button, accent: Color) -> void:
-	var tex: Texture2D = preload("res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/buttonSquare_brown.png")
-	var tex_pressed: Texture2D = preload("res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/buttonSquare_brown_pressed.png")
-	const PM: int = 8
-
-	var s_n := StyleBoxTexture.new()
-	s_n.texture = tex
-	s_n.set("patch_margin_left", PM); s_n.set("patch_margin_top", PM); s_n.set("patch_margin_right", PM); s_n.set("patch_margin_bottom", PM)
-	btn.add_theme_stylebox_override("normal", s_n)
-
-	var s_h := StyleBoxTexture.new()
-	s_h.texture = tex
-	s_h.modulate_color = Color(1.05, 1.03, 1.0)
-	s_h.set("patch_margin_left", PM); s_h.set("patch_margin_top", PM); s_h.set("patch_margin_right", PM); s_h.set("patch_margin_bottom", PM)
-	btn.add_theme_stylebox_override("hover", s_h)
-
-	var s_p := StyleBoxTexture.new()
-	s_p.texture = tex_pressed
-	s_p.set("patch_margin_left", PM); s_p.set("patch_margin_top", PM); s_p.set("patch_margin_right", PM); s_p.set("patch_margin_bottom", PM)
-	btn.add_theme_stylebox_override("pressed", s_p)
-
-	btn.add_theme_color_override("font_color", Color.WHITE)
-	btn.add_theme_color_override("font_pressed_color", accent)
-	btn.add_theme_color_override("font_hover_color", Color(0.95, 0.95, 0.98))
-
-
 static func get_particle_color(barrier_num: int) -> Color:
 	return get_colors(barrier_num)["particle_color"]
-
-
-## Apply manga-style impact button styles (normal/hover/pressed/disabled) to a Button.
-## Size tiers: "L" (primary, 4px border), "M" (secondary, 3px), "S" (utility, 2px).
-## Creates 4 StyleBoxFlat states with the given accent color and ink #1A1A1A border.
-static func apply_manga_button_style(btn: Button, accent: Color, size_tier: String = "M", ink_color: Color = Color(0.102, 0.102, 0.102)) -> void:
-	var border_w: int
-	var margin_h: int
-	var margin_v: int
-	match size_tier:
-		"L":
-			border_w = 4; margin_h = 20; margin_v = 10
-		"M":
-			border_w = 3; margin_h = 16; margin_v = 8
-		"S":
-			border_w = 2; margin_h = 12; margin_v = 6
-		_:
-			border_w = 3; margin_h = 16; margin_v = 8
-
-	var s_normal := StyleBoxFlat.new()
-	s_normal.bg_color = accent
-	s_normal.border_color = ink_color
-	s_normal.border_width_left = border_w
-	s_normal.border_width_top = border_w
-	s_normal.border_width_right = border_w
-	s_normal.border_width_bottom = border_w
-	s_normal.corner_radius_top_left = 8
-	s_normal.corner_radius_top_right = 8
-	s_normal.corner_radius_bottom_left = 8
-	s_normal.corner_radius_bottom_right = 8
-	s_normal.content_margin_left = margin_h
-	s_normal.content_margin_top = margin_v
-	s_normal.content_margin_right = margin_h
-	s_normal.content_margin_bottom = margin_v
-	btn.add_theme_stylebox_override("normal", s_normal)
-	btn.add_theme_color_override("font_color", Color.WHITE)
-	btn.add_theme_color_override("font_hover_color", Color.WHITE)
-	btn.add_theme_color_override("font_pressed_color", Color(accent).darkened(0.3))
-	btn.add_theme_color_override("font_disabled_color", Color(0.7, 0.7, 0.7, 0.6))
-
-	var s_hover := s_normal.duplicate() as StyleBoxFlat
-	s_hover.bg_color = Color(accent).lightened(0.1)
-	s_hover.border_width_left = border_w + 1
-	s_hover.border_width_right = border_w + 1
-	s_hover.border_width_top = border_w + 1
-	s_hover.border_width_bottom = border_w + 1
-	btn.add_theme_stylebox_override("hover", s_hover)
-
-	var s_pressed := s_normal.duplicate() as StyleBoxFlat
-	s_pressed.bg_color = Color(accent).darkened(0.15)
-	s_pressed.content_margin_top = margin_v + 2
-	s_pressed.content_margin_bottom = margin_v - 2
-	btn.add_theme_stylebox_override("pressed", s_pressed)
-
-	var s_disabled := s_normal.duplicate() as StyleBoxFlat
-	s_disabled.bg_color = Color(0.8, 0.8, 0.8, 1)
-	s_disabled.border_color = Color(0.6, 0.6, 0.6, 1)
-	s_disabled.border_width_left = maxi(border_w - 1, 1)
-	s_disabled.border_width_right = maxi(border_w - 1, 1)
-	s_disabled.border_width_top = maxi(border_w - 1, 1)
-	s_disabled.border_width_bottom = maxi(border_w - 1, 1)
-	btn.add_theme_stylebox_override("disabled", s_disabled)

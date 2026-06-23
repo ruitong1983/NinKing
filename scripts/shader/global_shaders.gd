@@ -2,6 +2,7 @@
 # ============================================================
 # GlobalShaders — 全局 Shader 调度（Autoload: GlobalShaders）
 # 依赖: ShaderFX（纯函数库）+ DissolveFX / GlowFX / OutlineFX / EdgeFadeFX
+#       + ChromaticAberrationFX / SplitGlitchFX / PixelExplosionFX / HaloFX
 # ============================================================
 # 调用规范：外部代码只调 GlobalShaders，不直接调 ShaderFX 或子系统。
 # ShaderFX 是纯函数库，GlobalShaders 是唯一对外入口。
@@ -13,12 +14,20 @@ const _EdgeFadeFX = preload("res://scripts/shader/edge_fade_fx.gd")
 const _DissolveFX = preload("res://scripts/shader/dissolve_fx.gd")
 const _GlowFX = preload("res://scripts/shader/glow_fx.gd")
 const _OutlineFX = preload("res://scripts/shader/outline_fx.gd")
+const _ChromaticAberrationFX = preload("res://scripts/shader/chromatic_aberration_fx.gd")
+const _SplitGlitchFX = preload("res://scripts/shader/split_glitch_fx.gd")
+const _PixelExplosionFX = preload("res://scripts/shader/pixel_explosion_fx.gd")
+const _HaloFX = preload("res://scripts/shader/halo_fx.gd")
 
 # ─── 子系统实例 ───
 var edge_fade
 var dissolve
 var glow
 var outline
+var chromatic_aberration
+var split_glitch
+var pixel_explosion
+var halo
 
 
 func _ready() -> void:
@@ -41,6 +50,22 @@ func _init_subsystems() -> void:
 	outline = _OutlineFX.new()
 	outline.name = "OutlineFX"
 	add_child(outline)
+
+	chromatic_aberration = _ChromaticAberrationFX.new()
+	chromatic_aberration.name = "ChromaticAberrationFX"
+	add_child(chromatic_aberration)
+
+	split_glitch = _SplitGlitchFX.new()
+	split_glitch.name = "SplitGlitchFX"
+	add_child(split_glitch)
+
+	pixel_explosion = _PixelExplosionFX.new()
+	pixel_explosion.name = "PixelExplosionFX"
+	add_child(pixel_explosion)
+
+	halo = _HaloFX.new()
+	halo.name = "HaloFX"
+	add_child(halo)
 
 
 # ══════════════════════════════════════════
@@ -106,6 +131,68 @@ func has_outline(node: CanvasItem) -> bool:
 
 
 # ══════════════════════════════════════════
+# 色差（Chromatic Aberration — 故障/受击反馈）
+# ══════════════════════════════════════════
+
+func apply_chromatic_aberration(node: CanvasItem, params: Dictionary = {}) -> ShaderMaterial:
+	return chromatic_aberration.apply(node, params)
+
+func clear_chromatic_aberration(node: CanvasItem) -> void:
+	chromatic_aberration.cleanup(node)
+
+func has_chromatic_aberration(node: CanvasItem) -> bool:
+	return chromatic_aberration.is_applied(node)
+
+
+# ══════════════════════════════════════════
+# 分裂故障（Split Glitch — Boss 战过渡/受击扰动）
+# ══════════════════════════════════════════
+
+func apply_split_glitch(node: CanvasItem, params: Dictionary = {}) -> ShaderMaterial:
+	return split_glitch.apply(node, params)
+
+func split_glitch_burst(node: CanvasItem, params: Dictionary = {}) -> Tween:
+	return split_glitch.burst(node, params)
+
+func clear_split_glitch(node: CanvasItem) -> void:
+	split_glitch.cleanup(node)
+
+func has_split_glitch(node: CanvasItem) -> bool:
+	return split_glitch.is_applied(node)
+
+
+# ══════════════════════════════════════════
+# 像素爆炸（Pixel Explosion — 忍者消散/结算爆炸）
+# ══════════════════════════════════════════
+
+func apply_pixel_explosion(node: CanvasItem, params: Dictionary = {}) -> ShaderMaterial:
+	return pixel_explosion.apply(node, params)
+
+func pixel_explode(node: CanvasItem, params: Dictionary = {}) -> Tween:
+	return pixel_explosion.explode(node, params)
+
+func clear_pixel_explosion(node: CanvasItem) -> void:
+	pixel_explosion.cleanup(node)
+
+func has_pixel_explosion(node: CanvasItem) -> bool:
+	return pixel_explosion.is_applied(node)
+
+
+# ══════════════════════════════════════════
+# 边框光晕（Halo — 稀有度动态边框）
+# ══════════════════════════════════════════
+
+func apply_halo(node: CanvasItem, params: Dictionary = {}) -> ShaderMaterial:
+	return halo.apply(node, params)
+
+func clear_halo(node: CanvasItem) -> void:
+	halo.cleanup(node)
+
+func has_halo(node: CanvasItem) -> bool:
+	return halo.has_halo(node)
+
+
+# ══════════════════════════════════════════
 # 通用 Shader 参数动效（委托 ShaderFX → GlobalTweens）
 # ══════════════════════════════════════════
 
@@ -127,6 +214,10 @@ func remove_all_shaders(node: CanvasItem) -> void:
 	dissolve.cleanup(node)
 	glow.cleanup(node)
 	outline.cleanup(node)
+	chromatic_aberration.cleanup(node)
+	split_glitch.cleanup(node)
+	pixel_explosion.cleanup(node)
+	halo.cleanup(node)
 
 
 # ══════════════════════════════════════════

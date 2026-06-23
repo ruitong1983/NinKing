@@ -1,8 +1,10 @@
-# NinKing 商店 UI 设计方案 v8
+# NinKing 商店 UI 设计方案 v9
 
 > 参考：Balatro 小丑牌商店界面 | 适配：NinKing 扑克牌型计分闯关
 > **风格权威：**[`../05-art/16-art-direction-principles.md`](../05-art/16-art-direction-principles.md) · [`../09-mgmt/specs/kenney-beige-ui-transformation.md`](../09-mgmt/specs/kenney-beige-ui-transformation.md)
 > **审定：** 2026-06-22 Kenney 米色改造 — panel_beige 面板 + buttonLong/buttonSquare 按钮
+> **v9 交互变更：** 2026-06-23 点击抬起 + 购买按钮浮现取代常显按钮
+> **v9a 样式统一：** 2026-06-23 BuyBtn 改由 `ButtonStyles.apply_kenney_square()` 集中管理
 > **关联 Figma：** —
 
 ---
@@ -16,6 +18,7 @@
 - **Kenney 纹理按钮** — buttonLong_brown 重感操作 + buttonLong_beige 轻感操作 + buttonSquare_brown 购买
 - **无分隔线** — 忍者/道具区通过间距分隔，简洁布局
 - **卡片 4+2 布局** — 4 张忍者牌在上 (GridContainer 4列), 2 张星图卡在下 (GridContainer 2列居中)
+- **点击抬起交互** — 左键点击卡牌 → 卡牌上浮 30px → 卡牌下方浮现购买按钮
 - **入场动画保留** — 沿用 NinKingTween.play_shop_entrance_manga()，StageBg 从 NinePatchRect 向上刷出
 
 ---
@@ -28,17 +31,21 @@
         ├─────────────────────────────────────────────────┤
         │  ┌──────┐  ┌──────┐  ┌──────┐  ┌──────┐      │
         │  │ 忍者1 │  │ 忍者2 │  │ 忍者3 │  │ 忍者4 │    │
-        │  │ ¥N   │  │ ¥N   │  │ ¥N   │  │ ¥N   │    │
+        │  │ 点击  │  │ 点击  │  │ 点击  │  │ 点击  │    │
+        │  │ ↑¥N  │  │ ↑¥N  │  │ ↑¥N  │  │ ↑¥N  │    │
         │  └──────┘  └──────┘  └──────┘  └──────┘      │
         │                                                 │
         │       ┌──────┐            ┌──────┐            │
         │       │ 星図1 │            │ 星図2 │            │
-        │       │ ¥N   │            │ ¥N   │            │
+        │       │ 点击  │            │ 点击  │            │
+        │       │ ↑¥N  │            │ ↑¥N  │            │
         │       └──────┘            └──────┘            │
         │                                                 │
         │         [ 入替 ¥3 ]      [ 討伐へ ▶ ]          │
         └─────────────────────────────────────────────────┘
 ```
+
+> **↑ 图示：** `点击` = 点击卡牌抬起 30px，`↑¥N` = 抬起后下方浮现购买按钮
 
 ### 尺寸规格
 
@@ -46,15 +53,15 @@
 |------|------|----------|------|
 | 画布 | — | 1920×1080 | — |
 | ShopPanel | Control | 1000×650, x:460 y:215 | 居中 |
-| StageBg | NinePatchRect | 全面板 1000×650 | panel_beige, patch_margin=8 |
-| TitleBar | NinePatchRect | 1000×44, y:0 | panel_brown, patch_margin=8/4/8/4 |
+| StageBg | NinePatchRect | 全面板 1000×650 | panel_beige, patch_margin=8, mouse_filter=IGNORE |
+| TitleBar | NinePatchRect | 1000×44, y:0 | panel_brown, patch_margin=8/4/8/4, mouse_filter=IGNORE |
 | GoldLabel | Label | x:16 y:8, w:134 h:30 | 金色 #FFD700, 22px |
 | ShopSubtitle | Label | x:880 y:6, w:104 h:34 | 白色 "商店", 22px, 右对齐 |
-| AbilityGrid | GridContainer | x:60 y:76, w:880, 4cols, h_sep:26 | 578px 内容宽, 151px 两侧留白 |
-| ItemGrid | GridContainer | x:362 y:317, w:276, 2cols, h_sep:26 | 276px 内容宽, 居中 |
+| AbilityGrid | GridContainer | x:60 y:76, w:880, 4cols, h_sep:26, mouse_filter=IGNORE | 578px 内容宽, 151px 两侧留白 |
+| ItemGrid | GridContainer | x:362 y:317, w:276, 2cols, h_sep:26, mouse_filter=IGNORE | 276px 内容宽, 居中 |
 | RerollBtn | Button | x:300 y:558, 190×49 | buttonLong_brown, "入替 ¥3" |
 | ContinueBtn | Button | x:510 y:558, 190×49 | buttonLong_beige, "討伐へ ▶" |
-| ShopSlot | VBoxContainer | min 125×221 | 卡 (125×175) + separation (6) + 按钮 (125×40) |
+| ShopSlot | Control | min 125×221 | 内部手动布位：卡 (125×175) + 按钮 (125×40) |
 
 ---
 
@@ -71,8 +78,8 @@
 
 | 按钮 | 纹理 | 字色 |
 |------|------|------|
-| 购买按钮 (BuyBtn) | `buttonSquare_brown.png` | 白 |
-| 购买按钮 disabled | `buttonSquare_grey.png` | 灰 #808080 |
+| 购买按钮 (BuyBtn) | `ButtonStyles.apply_kenney_square("brown")` 集中管理 | 白 |
+| 购买按钮 disabled | `buttonSquare_grey.png` (禁用态保留手动覆盖) | 灰 #808080 |
 | 入替按钮 (RerollBtn) | `buttonLong_brown.png` | 白 |
 | 继续按钮 (ContinueBtn) | `buttonLong_beige.png` | 深褐 #3D2B1A |
 
@@ -88,17 +95,21 @@
 
 ## 四、卡片组件结构
 
-ShopSlot (VBoxContainer, min 125×221, separation=6, alignment=CENTER):
+ShopSlot (Control, min 125×221) — 手动布位，非 VBoxContainer 自动排布：
 
 ```
-ShopSlot (VBoxContainer)
-├── NinjaCard (125×175, ninja_card.tscn 实例)
-└── BuyBtn (Button, 125×40)
+ShopSlot (Control, 125×221)
+├── NinjaCard (125×175, ninja_card.tscn 实例, position: 0,0)
+└── BuyBtn  (Button, 125×40, position: 0,181, 初始 visible=false)
 ```
 
-- 左键点击卡牌或按钮 → `purchase_requested` 信号
-- 右键卡牌 → 详情浮层（NinjaInventoryCard 内置）
-- 忍者栏满员时：按钮显示 "満員" + disabled (灰色)
+- 左侧点击卡牌 → 卡牌 `position.y` 0→-30 (抬起 30px) + BuyBtn visible=true
+- 再点同一卡牌 → 卡牌复位 + BuyBtn hidden
+- 点另一卡牌 → 旧卡牌 snap 复位 → 新卡牌抬起
+- 点空白区域 → 复位当前抬起卡牌
+- 右键卡牌 → 详情浮层（NinjaInventoryCard 内置，抬起态下正常弹出）
+- BuyBtn 点击 → `purchase_requested` 信号（满员时由购买流程处理提示）
+- 购买成功后 `set_purchased()` → `visible=false` 隐藏整个槽位
 
 ---
 
@@ -113,18 +124,27 @@ ShopSlot (VBoxContainer)
 - 0.45s Cards stagger_pop_in (0.06s 间隔, 0.25s dur)
 - ~0.90s impact_sfx
 
-### 5.2 购买
+### 5.2 购买交互 (v9 新增)
 
-- 点击购买按钮 / 卡牌本体 → purchase_requested 信号
-- 忍者栏满员时：按钮 disabled + 灰色 + 文字 "満員"
+1. **常态：** 卡牌在 y=0，BuyBtn 隐藏
+2. **点击抬起：** 左键点击卡牌 → `card_clicked` 信号 → ShopSlot 执行抬起动画:
+   - `tween_property(ninja_card, "position:y", -30, 0.15s, EASE_OUT SINE)`
+   - `BuyBtn.visible = true`
+   - 发射 `card_raised(slot)` 信号 → ShopPanel 追踪 `_active_slot`
+   - 播放 `SB.SELECT` 音效
+3. **点击购买：** 点击 BuyBtn → `_on_buy_pressed` → `purchase_requested` 信号
+4. **复位：** 再次点击卡牌 / 点击另一卡牌 / 点击空白区域 / Reroll/Continue → 复位动画:
+   - `tween_property(ninja_card, "position:y", 0, 0.12s, EASE_IN SINE)`
+   - `BuyBtn.visible = false`
+5. **购买成功：** `set_purchased()` → `visible = false`（直接隐藏）
 
 ### 5.3 Reroll
 
-点击 "入替 ¥3" → reroll_requested 信号 → 旧卡吹飞 → 新卡 stagger_pop_in (NinKingTween.play_reroll_vfx)。使用 `stagger_pop_in`（scale 0→1 弹入）而非 `stagger_slide_in`，避免修改 GridContainer 子节点的 `position` 导致布局冲突。
+点击 "入替 ¥3" → `_reset_active_slot()` → `reroll_requested` 信号 → 旧卡吹飞 → 新卡 stagger_pop_in (NinKingTween.play_reroll_vfx)。使用 `stagger_pop_in`（scale 0→1 弹入）而非 `stagger_slide_in`，避免修改 GridContainer 子节点的 `position` 导致布局冲突。
 
 ### 5.4 继续闯关
 
-点击 "討伐へ ▶" → continue_requested 信号 → 退场动画 (NinKingTween.play_shop_exit)
+点击 "討伐へ ▶" → `_reset_active_slot()` → `continue_requested` 信号 → 退场动画 (NinKingTween.play_shop_exit)
 
 ---
 
@@ -133,9 +153,10 @@ ShopSlot (VBoxContainer)
 | 文件 | 说明 |
 |------|------|
 | `scenes/ninking/shop_panel.tscn` | Kenney 米色 1000×650 NinePatchRect 面板 |
-| `scenes/ninking/shop_slot.tscn` | VBoxContainer 卡+按钮布局 |
-| `scripts/ninking/ui/shop_ui.gd` | 按钮纹理 + 忍者栏满检测 + 渲染逻辑 |
-| `scripts/ninking/ui/shop_slot.gd` | 动态按钮状态 (¥N/満員/disabled) + 卡底样式 |
+| `scenes/ninking/shop_slot.tscn` | Control 手动布位卡+按钮，点击抬起交互 |
+| `scripts/ninking/ui/shop_ui.gd` | 按钮纹理 + _active_slot 追踪 + 空白点击复位 |
+| `scripts/ninking/ui/shop_slot.gd` | 抬起/复位补间 + card_raised 信号 + `ButtonStyles.apply_kenney_square()` 购买按钮样式 |
+| `scripts/ninking/ui/ninja_inventory_card.gd` | shop_mode 加 accept_event() 防事件冒泡 |
 | `scripts/ninking/ui/nin_king_tween.gd` | stage_bg 类型放宽 ColorRect→Control |
 | `scripts/ninking/ui/ui_manager.gd` | init() 移除 colors 参数 |
 
@@ -148,4 +169,5 @@ ShopSlot (VBoxContainer)
 | v5 | 2026-06-11 | 底部舞台式 1500×700, 横排卡+文字 |
 | v6 | 2026-06-12 | 漫画格入场动画 |
 | v7 | 2026-06-13 | 水墨和纸风 (站酷妙典体 + 印章按钮) |
-| **v8** | **2026-06-22** | **Kenney 暖纸风 (panel_beige + buttonLong/buttonSquare 纹理)** |
+| v8 | 2026-06-22 | Kenney 暖纸风 (panel_beige + buttonLong/buttonSquare 纹理) |
+| **v9** | **2026-06-23** | **点击抬起交互: Control 布位取代 VBoxContainer, 购买按钮点击浮现, 空白复位** |

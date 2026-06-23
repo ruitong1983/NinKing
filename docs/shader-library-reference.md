@@ -1,6 +1,6 @@
 # GlobalShaders Shader 库参考
 
-> 最后更新：2026-06-17 | 源码：`scripts/shader/` + `shaders/`
+> 最后更新：2026-06-23（+ ChromaticAberrationFX / SplitGlitchFX / PixelExplosionFX / MultiFilter） | 源码：`scripts/shader/` + `shaders/`
 >
 > **铁律：实现任何 Shader/VFX 前，必须先查本文档。确认已有 API 是否覆盖需求，避免手写 `ShaderMaterial.new()` + `load()`。**
 >
@@ -17,6 +17,9 @@ GlobalShaders (autoload, /root/GlobalShaders)
 ├── dissolve:  DissolveFX             ← 噪声溶解消散 + 燃烧边框
 ├── glow:      GlowFX                 ← Sprite 内发光（baked_sprite_glow）
 ├── outline:   OutlineFX              ← 内外描边（outline2D_inner_outer）
+├── chromatic_aberration: ChromaticAberrationFX  ← 色差（故障/受击反馈）
+├── split_glitch: SplitGlitchFX       ← 分裂故障（Boss 战过渡）
+├── pixel_explosion: PixelExplosionFX ← 像素爆炸消散
 │
 └── 外部代码 → GlobalShaders.xxx()
      └── 委托 → SFX / subsystem
@@ -30,6 +33,9 @@ GlobalShaders (autoload, /root/GlobalShaders)
 | **DissolveFX** | `scripts/shader/dissolve_fx.gd` | class_name Node | 溶解消散（`dissolve2d.gdshader`） |
 | **GlowFX** | `scripts/shader/glow_fx.gd` | class_name Node | Sprite 内发光（`baked_sprite_glow.gdshader`） |
 | **OutlineFX** | `scripts/shader/outline_fx.gd` | class_name Node | 内外描边（`outline2D_inner_outer.gdshader`） |
+| **ChromaticAberrationFX** | `scripts/shader/chromatic_aberration_fx.gd` | class_name Node | 色差（`chromatic_aberration.gdshader`） |
+| **SplitGlitchFX** | `scripts/shader/split_glitch_fx.gd` | class_name Node | 分裂故障（`split_glitch.gdshader`） |
+| **PixelExplosionFX** | `scripts/shader/pixel_explosion_fx.gd` | class_name Node | 像素爆炸消散（`pixel_explosion.gdshader`） |
 
 ### 对应 .gdshader 文件
 
@@ -42,6 +48,10 @@ GlobalShaders (autoload, /root/GlobalShaders)
 | `shaders/fake3d/fake3d_shadow.gdshader` | 项目自建 | 卡牌阴影（不通过此库管理） |
 | `shaders/baked_sprite_glow.gdshader` | gdquest | Sprite 内发光 |
 | `shaders/outline2D_inner_outer.gdshader` | gdquest | 内外描边 |
+| `shaders/filters/multi_filter.gdshader` | 项目合并 | 复合滤镜（灰度/暗角/颜色叠加/混合） |
+| `shaders/effects/chromatic_aberration.gdshader` | shaderlist | 色差（故障/受击反馈） |
+| `shaders/effects/split_glitch.gdshader` | shaderlist | 分裂故障扰动 |
+| `shaders/effects/pixel_explosion.gdshader` | shaderlist | 像素爆炸消散 |
 
 ---
 
@@ -57,6 +67,14 @@ GlobalShaders (autoload, /root/GlobalShaders)
 | 辉光呼吸脉冲 | `pulse_glow(sprite, {min_intensity: 0.3})` |
 | 卡牌选中/悬停描边 | `apply_outline(card, {line_color: Color.RED})` |
 | 移除描边 | `clear_outline(node)` |
+| **色差故障效果** | `apply_chromatic_aberration(node, {intensity: 0.8})` |
+| **移除色差** | `clear_chromatic_aberration(node)` |
+| **分裂故障扰动** | `apply_split_glitch(node, {distort_strength: 0.3})` |
+| **故障爆发动画** | `split_glitch_burst(node, {duration: 1.0, peak: 0.8})` |
+| **移除故障** | `clear_split_glitch(node)` |
+| **像素爆炸消散** | `apply_pixel_explosion(node, {strength: 1.5})` |
+| **播放消散动画** | `pixel_explode(node, {duration: 0.8})` |
+| **移除像素爆炸** | `clear_pixel_explosion(node)` |
 | Shader 参数单次补间 | `tween_param(material, "param", to_val, 0.15)` |
 | Shader 参数呼吸脉冲 | `pulse_param(material, "param", 0.3, 1.0, 0.8)` |
 | 加载 .gdshader 文件 | `load_shader("res://shaders/xxx.gdshader")` |
@@ -152,7 +170,99 @@ func has_outline(node: CanvasItem) -> bool
 GlobalShaders.apply_outline(card, {line_color: Color.RED, line_thickness: 2.0})
 ```
 
-### 1.5 Shader 参数动效
+### 1.5 色差
+
+```gdscript
+func apply_chromatic_aberration(node: CanvasItem, params: Dictionary = {}) -> ShaderMaterial
+func clear_chromatic_aberration(node: CanvasItem) -> void
+func has_chromatic_aberration(node: CanvasItem) -> bool
+```
+
+`params` 支持：`intensity`（0.0-1.0，默认 0.6），`red_amount` / `green_amount` / `blue_amount`（RGB 偏移量），`radial`（径向模式），`angle`，`jitter_speed` / `jitter_strength`（抖动），`samples`（采样质量 1-8）。
+
+```gdscript
+# 受击色差闪烁
+var mat := GlobalShaders.apply_chromatic_aberration(node, {intensity: 0.8})
+GlobalShaders.tween_param(mat, "intensity", 0.0, 0.3)
+
+# 持续故障效果
+GlobalShaders.apply_chromatic_aberration(node, {
+	intensity: 0.4, jitter_speed: 3.0, jitter_strength: 0.005
+})
+```
+
+### 1.6 分裂故障
+
+```gdscript
+func apply_split_glitch(node: CanvasItem, params: Dictionary = {}) -> ShaderMaterial
+func split_glitch_burst(node: CanvasItem, params: Dictionary = {}) -> Tween
+func clear_split_glitch(node: CanvasItem) -> void
+func has_split_glitch(node: CanvasItem) -> bool
+```
+
+`params` 支持：`distort_strength`（扰动强度），`grid_size_base` / `grid_size_max_add`（网格粒度），`time_cycle`（波动周期），`wave_frequency`（波纹频率），`clamp_uv`（是否限制 UV 范围）。
+
+`split_glitch_burst` 播放一次"从 0 → peak → 0"的故障爆发动画。额外支持 `duration`（默认 1.0）和 `peak`（默认 0.8）。
+
+```gdscript
+# 持续扰动
+GlobalShaders.apply_split_glitch(node, {distort_strength: 0.15, time_cycle: 3.0})
+
+# 爆发动画
+await GlobalShaders.split_glitch_burst(node, {duration: 0.8, peak: 0.9})
+GlobalShaders.clear_split_glitch(node)
+```
+
+### 1.7 像素爆炸
+
+```gdscript
+func apply_pixel_explosion(node: CanvasItem, params: Dictionary = {}) -> ShaderMaterial
+func pixel_explode(node: CanvasItem, params: Dictionary = {}) -> Tween
+func clear_pixel_explosion(node: CanvasItem) -> void
+func has_pixel_explosion(node: CanvasItem) -> bool
+```
+
+`params` 支持：`progress`（-1.0~1.0），`strength`（爆炸力度），`noise_tex_normal` / `noise_tex`（自定义噪声纹理）。
+
+`pixel_explode` 播放完整消散动画（progress -1 → 1），完成后自动清理材质。额外支持 `duration`（默认 0.8），`peak_strength`（默认 1.0）。
+
+```gdscript
+# 消散动画
+await GlobalShaders.pixel_explode(node, {duration: 1.0, peak_strength: 1.5})
+
+# 只挂材质手控参数
+GlobalShaders.apply_pixel_explosion(node, {strength: 0.5})
+```
+
+### 1.8 滤镜（MultiFilter — 灰度/暗角/颜色叠加）
+
+multi_filter 不通过 GlobalShaders 子系统管理，直接通过 `ShaderFX` 工具方法使用：
+
+```gdscript
+var shader := GlobalShaders.load_shader("res://shaders/filters/multi_filter.gdshader")
+var mat := GlobalShaders.create_material(shader, {mode: 1, vignette_intensity: 0.6})
+GlobalShaders.apply_material(node, mat)
+```
+
+`mode` 值：0=灰度, 1=暗角, 2=颜色叠加, 3=混合（灰度+暗角）。
+
+```gdscript
+# 灰度模式
+var gs := GlobalShaders.create_material_from_path(
+	"res://shaders/filters/multi_filter.gdshader",
+	{mode: 0}
+)
+GlobalShaders.apply_material(node, gs)
+
+# 叠加色调
+var tint := GlobalShaders.create_material_from_path(
+	"res://shaders/filters/multi_filter.gdshader",
+	{mode: 2, overlay_color: Color(1.0, 0.5, 0.5, 1.0)}
+)
+GlobalShaders.apply_material(node, tint)
+```
+
+### 1.9 Shader 参数动效
 
 ```gdscript
 func tween_param(material: ShaderMaterial, param_name: String, to_value: Variant,
@@ -165,7 +275,7 @@ func pulse_param(material: ShaderMaterial, param_name: String, min_val: float, m
 - `tween_param`：将 `material.shader_parameter/<param_name>` 从当前值补间到 `to_value`。EASE_OUT SINE。通过 GlobalShaders 节点创建 Tween（始终在场景树中）。
 - `pulse_param`：无限循环在 `min_val ↔ max_val` 之间，EASE_IN_OUT SINE，半周期 = `cycle_duration / 2`。适用于呼吸发光等持续性动效。
 
-### 1.6 Shader 资源管理快捷方法
+### 1.10 Shader 资源管理快捷方法
 
 ```gdscript
 func load_shader(path: String) -> Shader

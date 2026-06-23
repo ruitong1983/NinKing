@@ -2,20 +2,19 @@ extends Control
 ## NinKing 主菜单 — 闪屏 → 按钮 → 牌组选择 / 继续确认面板
 ## Buttons defined in scene file; panels built programmatically.
 ## Deck panel delegated to DeckSelectPanel, ambient effects to LaunchAmbience.
+##
+## v10: Button entrance/hover/click unified via ButtonStyles.attach_entrance_animation.
+##      Removed local _PULSE_CFG, _start_pulse, _stop_pulse, custom hover logic.
+##      ButtonStyles manages modulate pulse, hover scale, click feedback.
+##
+## Godot 4.6.2 gl_compatibility MODULATE uniform bug:
+##   modulate RGB 不生效，按钮呼吸用 StyleBoxTexture.modulate_color 回退。
+##   hover 时先 scale=ONE → card_hover 保存正确基线 → unhover 后重启呼吸。
 
 const SPLASH_DURATION: float = 0.8
 const BUTTON_STAGGER: float = 0.08
 const BUTTON_SLIDE_DUR: float = 0.4
 const BUTTON_SLIDE_OFFSET: float = 80.0
-
-# Kenney 暖纸风纹理路径
-const _BTN_PATH := "res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/"
-const _BTN_BEIGE := _BTN_PATH + "buttonLong_beige.png"
-const _BTN_BEIGE_PRESSED := _BTN_PATH + "buttonLong_beige_pressed.png"
-const _BTN_GREY := _BTN_PATH + "buttonSquare_grey.png"
-const _BTN_GREY_PRESSED := _BTN_PATH + "buttonSquare_grey_pressed.png"
-const _PATCH_MARGIN: int = 8  # 9宫格边距保护四角圆边
-const _FONT_COLOR_DARK := Color(0.24, 0.17, 0.10)  # 深褐
 
 @onready var _btn_start: Button = %StartBtn
 @onready var _btn_continue: Button = %ContinueBtn
@@ -34,7 +33,6 @@ var _deck_select: DeckSelectPanel
 
 # Assets
 var _theme: Theme
-var _sfx_click: AudioStream
 var _sfx_hover: AudioStream
 
 
@@ -46,6 +44,16 @@ func _ready() -> void:
 		btn.modulate.a = 0.0
 	await get_tree().create_timer(SPLASH_DURATION).timeout
 	_show_menu_buttons()
+	var stagger_end: float = BUTTON_STAGGER * (_buttons.size() - 1) + BUTTON_SLIDE_DUR
+	await get_tree().create_timer(stagger_end).timeout
+	# entrance done -> ButtonStyles hover + click
+	# StartBtn keeps pulse, others skip (cleaner)
+	for btn in _buttons:
+		var cfg: Dictionary = {"mild": true}
+		if btn != _btn_start:
+			cfg["pulse"] = false
+		ButtonStyles.attach_entrance_animation(btn, cfg)
+	ButtonStyles.attach_entrance_animation(_btn_debug, {"mild": true, "pulse": false})
 	_ambience = LaunchAmbience.new()
 	_ambience.setup(self, $LaunchBg)
 	_ambience.start()
@@ -53,9 +61,10 @@ func _ready() -> void:
 
 func _load_assets() -> void:
 	_theme = load("res://assets/themes/manga_theme.tres")
-	_sfx_click = load("res://assets/audio/sound/ui/ui_click.ogg")
 	_sfx_hover = load("res://assets/audio/sound/game/hover.ogg")
 
+
+# ─── UI 构建 ───
 
 func _build_ui() -> void:
 	_buttons = [_btn_start, _btn_continue, _btn_settings, _btn_quit]
@@ -69,7 +78,6 @@ func _build_ui() -> void:
 	for btn in _buttons:
 		btn.mouse_entered.connect(_on_button_hovered.bind(btn))
 		btn.mouse_exited.connect(_on_button_unhovered.bind(btn))
-		btn.pressed.connect(_play_click_sfx)
 
 	_update_continue_button()
 
@@ -85,7 +93,7 @@ func _build_ui() -> void:
 
 	_deck_select = preload("res://scenes/ninking/deck_select_panel.tscn").instantiate()
 	add_child(_deck_select)
-	_deck_select.setup(_theme, _on_deck_confirmed, _on_deck_cancelled, _play_click_sfx)
+	_deck_select.setup(_theme, _on_deck_confirmed, _on_deck_cancelled)
 
 	_continue_panel_scene = preload("res://scenes/ninking/continue_panel.tscn").instantiate()
 	add_child(_continue_panel_scene)
@@ -93,55 +101,9 @@ func _build_ui() -> void:
 	_continue_panel_scene.dismissed.connect(_hide_continue_panel)
 
 	# Kenney 暖纸风按钮样式
-	_apply_kenney_button_style_to_all()
-
-
-func _apply_kenney_button_style_to_all() -> void:
-	## 为 4 个主菜单按钮应用 buttonLong_beige，DebugBtn 应用 buttonSquare_grey
-	var tex_beige := load(_BTN_BEIGE) as Texture2D
-	var tex_beige_p := load(_BTN_BEIGE_PRESSED) as Texture2D
-	var tex_grey := load(_BTN_GREY) as Texture2D
-	var tex_grey_p := load(_BTN_GREY_PRESSED) as Texture2D
-
 	for btn in _buttons:
-		var s_normal := StyleBoxTexture.new()
-		s_normal.texture = tex_beige
-		s_normal.set("patch_margin_left", _PATCH_MARGIN)
-		s_normal.set("patch_margin_top", _PATCH_MARGIN)
-		s_normal.set("patch_margin_right", _PATCH_MARGIN)
-		s_normal.set("patch_margin_bottom", _PATCH_MARGIN)
-		btn.add_theme_stylebox_override("normal", s_normal)
-
-		var s_pressed := StyleBoxTexture.new()
-		s_pressed.texture = tex_beige_p
-		s_pressed.set("patch_margin_left", _PATCH_MARGIN)
-		s_pressed.set("patch_margin_top", _PATCH_MARGIN)
-		s_pressed.set("patch_margin_right", _PATCH_MARGIN)
-		s_pressed.set("patch_margin_bottom", _PATCH_MARGIN)
-		btn.add_theme_stylebox_override("pressed", s_pressed)
-
-		btn.add_theme_color_override("font_color", _FONT_COLOR_DARK)
-		btn.add_theme_color_override("font_pressed_color", _FONT_COLOR_DARK)
-
-	# DebugBtn 用 buttonSquare_grey
-	var s_dbg_n := StyleBoxTexture.new()
-	s_dbg_n.texture = tex_grey
-	s_dbg_n.set("patch_margin_left", _PATCH_MARGIN)
-	s_dbg_n.set("patch_margin_top", _PATCH_MARGIN)
-	s_dbg_n.set("patch_margin_right", _PATCH_MARGIN)
-	s_dbg_n.set("patch_margin_bottom", _PATCH_MARGIN)
-	_btn_debug.add_theme_stylebox_override("normal", s_dbg_n)
-
-	var s_dbg_p := StyleBoxTexture.new()
-	s_dbg_p.texture = tex_grey_p
-	s_dbg_p.set("patch_margin_left", _PATCH_MARGIN)
-	s_dbg_p.set("patch_margin_top", _PATCH_MARGIN)
-	s_dbg_p.set("patch_margin_right", _PATCH_MARGIN)
-	s_dbg_p.set("patch_margin_bottom", _PATCH_MARGIN)
-	_btn_debug.add_theme_stylebox_override("pressed", s_dbg_p)
-
-	_btn_debug.add_theme_color_override("font_color", Color(0.35, 0.35, 0.35))  # 深灰
-	_btn_debug.add_theme_color_override("font_pressed_color", Color(0.35, 0.35, 0.35))
+		ButtonStyles.apply_kenney_long(btn, "beige")
+	ButtonStyles.apply_kenney_long(_btn_debug, "grey")
 
 
 func _update_continue_button() -> void:
@@ -200,25 +162,17 @@ func _on_deck_cancelled() -> void:
 	_update_continue_button()
 
 
-# Button hover effects
+# Button hover effects — SFX only (scale handled by ButtonStyles)
 
 func _on_button_hovered(btn: Button) -> void:
 	if btn.disabled:
 		return
-	GlobalTweens.card_hover(btn, Vector2(1.05, 1.05), -2.0)
 	if _sfx_hover:
 		GlobalTweens.play_sfx(_sfx_hover)
 
 
-func _on_button_unhovered(btn: Button) -> void:
-	if btn.disabled:
-		return
-	GlobalTweens.card_unhover(btn, Vector2.ONE, 0.0)
-
-
-func _play_click_sfx() -> void:
-	if _sfx_click:
-		GlobalTweens.play_sfx(_sfx_click)
+func _on_button_unhovered(_btn: Button) -> void:
+	pass  # handled by ButtonStyles
 
 
 # Continue Panel

@@ -2,7 +2,7 @@ class_name ShopPanel
 extends Control
 ## Shop UI panel — Kenney beige (暖纸风) layout.
 ##
-## 1000×650 panel, panel_beige background, panel_brown title bar,
+## 1000x650 panel, panel_beige background, panel_brown title bar,
 ## 4 ninja cards (grid) + 2 item cards (grid),
 ## buttonLong_brown reroll + buttonLong_beige continue.
 ##
@@ -37,6 +37,9 @@ var _initialized: bool = false
 var _current_gold: int = 0
 var _reroll_cost: int = 3
 
+## Currently raised card slot (null if none).
+var _active_slot: ShopSlot = null
+
 var shop_manager: ShopManager = null
 
 
@@ -52,12 +55,24 @@ func init(shop_mgr: ShopManager, gold: int) -> void:
 	slot_scene = load(SLOT_SCENE)
 	shop_manager = shop_mgr
 
-	_apply_button_textures()
+	ButtonStyles.apply_kenney_long(reroll_button, "brown")
+	ButtonStyles.apply_kenney_long(continue_button, "beige")
+	# 商店按钮统一入场动效（轻度：脉冲 + hover + 点击）
+	ButtonStyles.attach_entrance_animation(reroll_button, {"mild": true})
+	ButtonStyles.attach_entrance_animation(continue_button, {"mild": true})
 	_refresh_shop()
 	_update_gold_display(gold)
 
 	continue_button.pressed.connect(_on_continue_pressed)
 	reroll_button.pressed.connect(_on_reroll_pressed)
+
+	# Blank-area click detection: background elements must be IGNORE
+	# so unhandled clicks reach ShopPanel.gui_input
+	stage_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	$TitleBar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ability_grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	item_grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	gui_input.connect(_on_shop_panel_gui_input)
 
 
 func update_gold(gold: int) -> void:
@@ -102,44 +117,6 @@ func play_entrance_animation() -> void:
 	_entrance_active = false
 
 
-# ══════════════════════════════════════════
-# Button textures (Kenney 9-slice)
-# ══════════════════════════════════════════
-
-func _apply_button_textures() -> void:
-	_apply_long_button(reroll_button, "brown")
-	_apply_long_button(continue_button, "beige")
-
-
-func _apply_long_button(btn: Button, color: String) -> void:
-	var tex_n: Texture2D = load("res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/buttonLong_" + color + ".png")
-	var tex_p: Texture2D = load("res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/buttonLong_" + color + "_pressed.png")
-
-	var s_n := StyleBoxTexture.new()
-	s_n.texture = tex_n
-	const PM: int = 8
-	s_n.set("patch_margin_left", PM); s_n.set("patch_margin_top", PM); s_n.set("patch_margin_right", PM); s_n.set("patch_margin_bottom", PM)
-	btn.add_theme_stylebox_override("normal", s_n)
-
-	var s_h := StyleBoxTexture.new()
-	s_h.texture = tex_n; s_h.modulate_color = Color(1.05, 1.03, 1.0)
-	s_h.set("patch_margin_left", PM); s_h.set("patch_margin_top", PM); s_h.set("patch_margin_right", PM); s_h.set("patch_margin_bottom", PM)
-	btn.add_theme_stylebox_override("hover", s_h)
-
-	var s_p := StyleBoxTexture.new()
-	s_p.texture = tex_p
-	s_p.set("patch_margin_left", PM); s_p.set("patch_margin_top", PM); s_p.set("patch_margin_right", PM); s_p.set("patch_margin_bottom", PM)
-	btn.add_theme_stylebox_override("pressed", s_p)
-
-	if color == "brown":
-		btn.add_theme_color_override("font_color", Color.WHITE)
-		btn.add_theme_color_override("font_pressed_color", Color(0.95, 0.95, 0.98))
-		btn.add_theme_color_override("font_hover_color", Color(0.95, 0.95, 0.98))
-	else:
-		btn.add_theme_color_override("font_color", Color(0.24, 0.17, 0.10))
-		btn.add_theme_color_override("font_pressed_color", Color(0.24, 0.17, 0.10))
-		btn.add_theme_color_override("font_hover_color", Color(0.30, 0.22, 0.14))
-
 
 # ══════════════════════════════════════════
 # Shop rendering
@@ -162,6 +139,7 @@ func _render_abilities() -> void:
 		ability_grid.add_child(slot)
 		slot.setup(data, bar_full)
 		slot.purchase_requested.connect(_on_ability_purchase)
+		slot.card_raised.connect(_on_card_raised)
 		ability_cards.append(slot)
 
 
@@ -172,10 +150,12 @@ func _render_items() -> void:
 		item_grid.add_child(slot)
 		slot.setup(data, false)
 		slot.purchase_requested.connect(_on_item_purchase)
+		slot.card_raised.connect(_on_card_raised)
 		item_cards.append(slot)
 
 
 func _clear_ability_grid() -> void:
+	_reset_active_slot()
 	for card in ability_cards:
 		if is_instance_valid(card):
 			if card.get_parent() == ability_grid:
@@ -185,6 +165,7 @@ func _clear_ability_grid() -> void:
 
 
 func _clear_item_grid() -> void:
+	_reset_active_slot()
 	for card in item_cards:
 		if is_instance_valid(card):
 			if card.get_parent() == item_grid:
@@ -218,18 +199,48 @@ func update_reroll_cost(cost: int) -> void:
 # ══════════════════════════════════════════
 
 func _on_ability_purchase(ability: Dictionary) -> void:
+	# Reset active slot after purchase
+	_reset_active_slot()
 	purchase_requested.emit(ability)
 
 
 func _on_item_purchase(item: Dictionary) -> void:
+	_reset_active_slot()
 	item_purchase_requested.emit(item)
 
 
+# ══════════════════════════════════════════
+# Card raise / reset (shop click-to-reveal)
+# ══════════════════════════════════════════
+
+func _on_card_raised(slot: ShopSlot) -> void:
+	## A card slot has been raised. If another slot was active, snap-reset it first.
+	if _active_slot != null and is_instance_valid(_active_slot) and _active_slot != slot:
+		_active_slot.reset_immediate()
+	_active_slot = slot
+
+
+func _on_shop_panel_gui_input(event: InputEvent) -> void:
+	## Blank-area click -> reset raised card.
+	if event is InputEventMouseButton \
+			and event.button_index == MOUSE_BUTTON_LEFT \
+			and event.pressed:
+		_reset_active_slot()
+
+
+func _reset_active_slot() -> void:
+	if _active_slot != null and is_instance_valid(_active_slot):
+		_active_slot.reset_immediate()
+	_active_slot = null
+
+
 func _on_reroll_pressed() -> void:
+	_reset_active_slot()
 	reroll_requested.emit()
 
 
 func _on_continue_pressed() -> void:
+	_reset_active_slot()
 	continue_button.disabled = true
 	continue_requested.emit()
 

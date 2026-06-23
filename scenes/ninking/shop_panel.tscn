@@ -2,15 +2,15 @@
 
 [ext_resource type="Texture2D" uid="uid://du3jy44eij6xa" path="res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/panel_beige.png" id="1_panel_beige"]
 [ext_resource type="Texture2D" uid="uid://dw2wowafuulen" path="res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/panel_brown.png" id="2_panel_brown"]
-[ext_resource type="Script" uid="uid://dlrutxdiac0k8" path="res://scripts/ninking/ui/shop_ui.gd" id="3_script"]
+[ext_resource type="Script" uid="uid://py2jsudkqhq" path="res://scripts/ninking/ui/shop_ui.gd" id="3_script"]
 
 [node name="ShopPanel" type="Control" unique_id=184316858]
 layout_mode = 3
 anchors_preset = 0
 offset_left = 460.0
-offset_top = 215.0
+offset_top = 352.0
 offset_right = 1460.0
-offset_bottom = 865.0
+offset_bottom = 1002.0
 script = ExtResource("3_script")
 
 [node name="StageBg" type="NinePatchRect" parent="." unique_id=1303302503]
@@ -40,9 +40,9 @@ patch_margin_bottom = 4
 [node name="GoldLabel" type="Label" parent="." unique_id=689599902]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 16.0
+offset_left = 860.0
 offset_top = 8.0
-offset_right = 150.0
+offset_right = 994.0
 offset_bottom = 38.0
 theme_override_colors/font_color = Color(1, 0.843137, 0, 1)
 theme_override_font_sizes/font_size = 22
@@ -52,10 +52,10 @@ vertical_alignment = 1
 [node name="ShopSubtitle" type="Label" parent="." unique_id=1358196267]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 880.0
-offset_top = 6.0
-offset_right = 984.0
-offset_bottom = 40.0
+offset_left = 420.0
+offset_top = 8.0
+offset_right = 524.0
+offset_bottom = 42.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 22
 text = "商店"

@@ -2,6 +2,7 @@
 # ============================================================
 # GlowFX — Sprite 发光特效子系统
 # 封装 baked_sprite_glow.gdshader，管理节点的发光材质。
+# S5: 新增 emissive 模式（加法发光，覆盖 blink.gdshader）。
 # ============================================================
 # 调用方式: GlobalShaders.apply_glow(node, params)
 #           GlobalShaders.pulse_glow(node, params) → Tween
@@ -22,8 +23,10 @@ func _init() -> void:
 
 
 ## 为节点应用发光材质。
-## params 支持：tint_front, tint_back, alpha_falloff_front, alpha_falloff_back,
-##           blend_amount, falloff_max_alpha
+## params 支持：
+##   tint_front, tint_back, alpha_falloff_front, alpha_falloff_back,
+##   blend_amount, falloff_max_alpha (传统混合发光)
+##   emissive_mode, emissive_color, emissive_frequency, emissive_intensity (S5 加法发光)
 func apply(node: CanvasItem, params: Dictionary = {}) -> ShaderMaterial:
 	if not is_instance_valid(node):
 		return null
@@ -31,13 +34,19 @@ func apply(node: CanvasItem, params: Dictionary = {}) -> ShaderMaterial:
 	var mat := ShaderMaterial.new()
 	mat.shader = _shader
 
-	# 设置参数
+	# 传统混合发光参数
 	mat.set_shader_parameter("tint_front", params.get("tint_front", Color.WHITE))
 	mat.set_shader_parameter("tint_back", params.get("tint_back", Color.WHITE))
 	mat.set_shader_parameter("alpha_falloff_front", params.get("alpha_falloff_front", 1.0))
 	mat.set_shader_parameter("alpha_falloff_back", params.get("alpha_falloff_back", 1.0))
 	mat.set_shader_parameter("blend_amount", params.get("blend_amount", 1.0))
 	mat.set_shader_parameter("falloff_max_alpha", params.get("falloff_max_alpha", 1.0))
+
+	# S5: emissive 模式参数
+	mat.set_shader_parameter("emissive_mode", params.get("emissive_mode", false))
+	mat.set_shader_parameter("emissive_color", params.get("emissive_color", Color(1.0, 0.8, 0.2, 1.0)))
+	mat.set_shader_parameter("emissive_frequency", params.get("emissive_frequency", 2.0))
+	mat.set_shader_parameter("emissive_intensity", params.get("emissive_intensity", 0.5))
 
 	node.material = mat
 	_active[node] = mat
@@ -59,12 +68,14 @@ func pulse(node: CanvasItem, params: Dictionary = {}) -> Tween:
 	var max_val: float = params.get("max_intensity", 1.0)
 	var cycle_duration: float = params.get("duration", 0.8)
 
-	# 脉冲 blend_amount
+	# 脉冲 blend_amount (传统模式) 或 emissive_intensity (emissive 模式)
+	var prop_name: String = "emissive_intensity" if params.get("emissive_mode", false) else "blend_amount"
+
 	var tw := node.create_tween()
 	tw.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
 	tw.set_loops()
-	tw.tween_property(mat, "shader_parameter/blend_amount", max_val, cycle_duration * 0.5)
-	tw.tween_property(mat, "shader_parameter/blend_amount", min_val, cycle_duration * 0.5)
+	tw.tween_property(mat, "shader_parameter/" + prop_name, max_val, cycle_duration * 0.5)
+	tw.tween_property(mat, "shader_parameter/" + prop_name, min_val, cycle_duration * 0.5)
 	return tw
 
 

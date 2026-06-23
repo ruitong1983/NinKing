@@ -52,6 +52,10 @@ GlobalTweens (autoload, 胶水层)
 | 一次性缩放弹跳 | `GlobalTweens.scale_pop(node, 1.2, 0.2)` | scale 过冲→1.0，BACK 缓出 |
 | 弹性冲入（大 overshoot） | `GlobalTweens.punch_in(node, 0.4, 1.5)` | ELASTIC scale 过冲回弹 |
 | Toast 通知 | `GlobalTweens.toast(label, 1.5)` | 淡入→停留→淡出→释放 |
+| 按钮注意力脉冲 | `GlobalTweens.attract_pulse(btn, config)` | scale 1.0↔1.05 呼吸 + modulate 亮度，支持 StyleBoxTexture/StyleBoxFlat fallback。`kill_domain(btn,"modulate")` 停止。参见 §函数详情 |
+| 停止指定域补间 | `GlobalTweens.kill_domain(node, "modulate")` | 停止脉冲/动效并复位属性 |
+| 按钮弹跳入场 | `GlobalTweens.entrance_bounce(btn, 0.4)` | scale 0.8→1.0, TRANS_BOUNCE, auto_kill domain "entrance" |
+| 按钮点击反馈 | `GlobalTweens.button_click_feedback(btn)` | squash 0.92→spring 回弹，自动 domain "click" |
 | 列表逐项错峰入场 | `GlobalTweens.stagger_slide_in(nodes, 0.12, 0.3)` | 淡入+左滑，每项间隔 stagger |
 | 弧线弹性补间 | `GlobalTweens.move_arc(node, target_pos, 0.5, 0.5)` | 贝塞尔弧线+弹性归位 |
 | 溶解消散 | `GlobalTweens.dissolve_out(node, 1.0, 0.2, Color.ORANGE)` | 需预先挂载 dissolve2d shader |
@@ -298,8 +302,12 @@ TweenFX.float_up(node: Node2D, offset_y: float = -40.0, duration: float = 0.8) -
 ```
 
 - `pulse`：无限循环 scale 脉冲（`set_loops()` 无参数 = 无限）
+- `attract_pulse`：**按钮注意力脉冲**（无限循环），scale 1.0↔`scale_intensity` + StyleBoxTexture/StyleBoxFlat 颜色回退。config: `{intensity: 0.72, duration: 0.8, scale_pulse: true, scale_intensity: 1.05}`。自动 auto_kill domain "modulate"。Godot 4 gl_compatibility MODULATE uniform bug 回退：StyleBoxTexture 调 `modulate_color`，StyleBoxFlat 调 `bg_color`
+- `kill_domain`：公开结束指定 domain 的补间并复位 modulate/scale 属性。支持 `"modulate"` / `"scale"` 两域。复位到 `Color.WHITE` / `Vector2.ONE`
 - `scale_pop`：一次性 scale 弹跳（factor → 1.0），BACK EASE_OUT，两段式（60% up + 40% settle）
 - `float_up`：Y 轴上浮 + alpha 淡出 + `queue_free`（飘字/粒子消散）
+- `entrance_bounce`：**按钮弹跳入场**。scale 设为 `original * 0.8` → `TRANS_BOUNCE` 弹至 1.0。自动 auto_kill domain `"entrance"`，不与其他动效冲突
+- `button_click_feedback`：**按钮点击 squash+spring 反馈**。squash 至 `scale * 0.92`（0.04s, EASE_IN）→ spring 回弹至 `Vector2.ONE`（0.12s, TRANS_BACK EASE_OUT）。ignore_time_scale = true，不受 HitStop 影响
 
 ### 2.5 滑入/滑出
 

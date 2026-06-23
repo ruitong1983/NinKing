@@ -3,18 +3,22 @@
 [ext_resource type="Script" uid="uid://m5jqnpwp2kmi" path="res://scripts/ninking/ui/shop_slot.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://scenes/ninking/ninja_card.tscn" id="2_card"]
 
-[node name="ShopSlot" type="VBoxContainer"]
+[node name="ShopSlot" type="Control"]
 custom_minimum_size = Vector2(125, 221)
 layout_mode = 2
 offset_right = 125.0
 offset_bottom = 221.0
-theme_override_constants/separation = 6
-alignment = 1
 script = ExtResource("1_script")
 
 [node name="NinjaCard" parent="." instance=ExtResource("2_card")]
-layout_mode = 2
+layout_mode = 0
+offset_right = 125.0
+offset_bottom = 175.0
 
 [node name="BuyBtn" type="Button" parent="."]
-layout_mode = 2
+layout_mode = 0
+offset_left = 0
+offset_top = 181
+offset_right = 125
+offset_bottom = 221
 text = "0"

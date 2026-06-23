@@ -1,0 +1,10 @@
+[gd_resource type="StyleBoxTexture" format=3 uid="uid://c6kgjmgqi7r8k"]
+
+[ext_resource type="Texture2D" uid="uid://du3jy44eij6xa" path="res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/panel_beige.png" id="1_beige"]
+
+[resource]
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+texture = ExtResource("1_beige")

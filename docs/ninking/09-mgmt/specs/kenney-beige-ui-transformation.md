@@ -4,6 +4,7 @@
 > **来源:** `05-art/20-kenney-ui-pack-evaluation.md` §3
 > **前置依赖:** `cursor_manager.gd` (KN1/KN2，已完成)
 > **风格定位:** 治愈漫画风（暖米纸背景 + 和风圆润按钮），保留卡牌插画高饱和 + BarrierTheme 8属性 accent色
+> **⚠️ 代码迁移注記 (2026-06-23):** 本方案中描述的 `barrier_theme.apply_kenney_button_style()` / `main_menu._apply_kenney_button_style_to_all()` 等方法已統一到 `ButtonStyles` (`scripts/ninking/ui/button_styles.gd`)。按鈕視覺效果一致，僅實現方式變更。詳見 `05-art/21-ui-interaction-enhancements.md` §3.4。
 
 ---
 

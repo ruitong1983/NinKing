@@ -77,6 +77,4 @@ offset_top = 968.0
 offset_right = 1840.0
 offset_bottom = 1040.0
 theme = ExtResource("3_theme")
-theme_override_colors/font_color = Color(0.6, 0.3, 0.3, 1)
-theme_override_font_sizes/font_size = 24
 text = "DEBUG"

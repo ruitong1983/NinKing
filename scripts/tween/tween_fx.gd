@@ -27,10 +27,18 @@ static func _kill_tracked(node: Node, domain: String) -> void:
 
 
 ## 追踪补间以便后续 kill。finished 时自动清理。
+## 注意：set_loops() 的无限循环补永不发射 finished，应使用 _track_loop 替代。
 static func _track(node: Node, tw: Tween, domain: String) -> void:
 	var key := _make_key(node, domain)
 	_active_tweens[key] = tw
 	tw.finished.connect(_on_tracked_finished.bind(key), CONNECT_ONE_SHOT)
+
+
+## 追踪无限循环补间（不连接 finished，因为永不触发）。
+## 仍可通过 kill_domain / _kill_tracked 找到并 kill。
+static func _track_loop(node: Node, tw: Tween, domain: String) -> void:
+	var key := _make_key(node, domain)
+	_active_tweens[key] = tw
 
 
 static func _on_tracked_finished(key: String) -> void:
@@ -202,6 +210,115 @@ static func pulse(node: Node, scale_to: Vector2 = Vector2(1.1, 1.1), duration: f
 	if auto_kill:
 		_track(node, tw, "scale")
 	return tw
+
+
+## 按钮注意力脉冲（无限循环）：默认 modulate 亮度呼吸 + 微缩放。
+## 调用方可随时用 kill_domain(node, "modulate") 停止，或传 auto_kill=false 自行管理。
+##
+## Godot 4.6.2 gl_compatibility 渲染器兼容性：
+##   modulate 的 RGB 通道在 gl_compatibility 下可能不生效（MODULATE uniform bug），
+##   自动回退到 tween StyleBoxTexture.modulate_color（StyleBox 纹理级调色）。
+##
+## config:
+##   intensity:      modulate 谷值 (default 0.85)，值越低呼吸越明显
+##   duration:       半周期时长秒 (default 0.6)
+##   scale_pulse:    是否加微缩放 (default true)
+##   scale_intensity: 缩放峰值 (default 1.04)
+## ⚠️ scale_pulse=true 时会与 card_hover/card_unhover 的 scale 动画冲突，
+##    但 modulate 呼吸可能不可见（因 MODULATE bug），建议保留 scale 脉冲确保可见性。
+##    可通过外部调用 card_hover 时用 kill_domain(node, "modulate") 停掉 pulse。
+static func attract_pulse(
+	node: CanvasItem,
+	config: Dictionary = {},
+	auto_kill: bool = true
+) -> Tween:
+	if not is_instance_valid(node):
+		return null
+	var raw_intensity: float = config.get("intensity", 0.85)
+	var duration: float = config.get("duration", 0.6)
+	var do_scale: bool = config.get("scale_pulse", true)
+	var scale_intensity: float = config.get("scale_intensity", 1.04)
+
+	# 夹紧到 ≤1.0，保证 Compatibility 渲染器下可见
+	var inten: float = min(raw_intensity, 1.0)
+
+	# ── 检测 StyleBox 回退 ──
+	# Godot 4.6.2 gl_compatibility MODULATE uniform bug（RGB 通道不生效），
+	# 自动检测 Button 的 StyleBoxTexture override 并改调 stylebox.modulate_color。
+	# StyleBoxTexture.modulate_color 走纹理级调色，不依赖 CanvasItem MODULATE uniform。
+	var use_sb_fallback: bool = false
+	var sb_fallback: StyleBoxTexture
+	var sb_low_color: Color
+	var sb_high_color: Color = Color.WHITE
+	if node is Control and node is not ColorRect:
+		var ctrl := node as Control
+		for sb_key in ["normal", "hover", "pressed", "disabled"]:
+			var sb = ctrl.get_theme_stylebox(sb_key)
+			if sb is StyleBoxTexture:
+				use_sb_fallback = true
+				sb_fallback = sb as StyleBoxTexture
+				# modulate_color 走纹理调色独立路径，不受 MODULATE uniform bug 影响
+				var orig := sb_fallback.modulate_color
+				sb_low_color = Color(
+					orig.r * inten,
+					orig.g * inten,
+					orig.b * inten,
+					maxf(orig.a, 0.01)
+				)
+				break
+
+	if auto_kill:
+		_kill_tracked(node, "modulate")
+
+	var tw := node.create_tween()
+	tw.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	tw.set_loops()
+
+	# === 半周期 1：暗 + 缩放放大（并行，不同属性不冲突）===
+	tw.set_parallel(true)
+	if use_sb_fallback and sb_fallback != null:
+		# 回退路径：调 stylebox 颜色（规避 MODULATE uniform bug）
+		tw.tween_property(sb_fallback, "modulate_color", sb_low_color, duration)
+	else:
+		# 标准路径：调 CanvasItem.modulate
+		tw.tween_property(node, "modulate", Color(inten, inten, inten, 1.0), duration)
+	if do_scale:
+		tw.tween_property(node, "scale", Vector2(scale_intensity, scale_intensity), duration * 0.8)
+
+	# === 半周期 2：亮 + 缩放复原（串行等待半周期 1 完成后）===
+	tw.set_parallel(false)
+	tw.set_parallel(true)
+	if use_sb_fallback and sb_fallback != null:
+		tw.tween_property(sb_fallback, "modulate_color", sb_high_color, duration)
+	else:
+		tw.tween_property(node, "modulate", Color.WHITE, duration)
+	if do_scale:
+		tw.tween_property(node, "scale", Vector2.ONE, duration * 0.8)
+
+	if auto_kill:
+		_track_loop(node, tw, "modulate")
+	return tw
+
+
+## 公开结束指定 domain 的补间并复位属性。
+## 用于外部代码停止 attract_pulse / pulse 等循环动效。
+## 复位到 WHITE modulate + ONE scale。
+static func kill_domain(node: Node, domain: String) -> void:
+	_kill_tracked(node, domain)
+	match domain:
+		"modulate":
+			if node is CanvasItem and is_instance_valid(node):
+				node.modulate = Color.WHITE
+			# 同时也复位 StyleBoxTexture fallback（如果有）
+			if node is Control:
+				var ctrl := node as Control
+				for sb_key in ["normal", "hover", "pressed", "disabled"]:
+					var sb = ctrl.get_theme_stylebox(sb_key)
+					if sb is StyleBoxTexture:
+						(sb as StyleBoxTexture).modulate_color = Color.WHITE
+		"scale":
+			if is_instance_valid(node):
+				node.scale = Vector2.ONE
 
 
 # ─── 一次性缩放弹跳 ───
@@ -698,4 +815,51 @@ static func shader_pulse(
 	tw.tween_property(material, "shader_parameter/%s" % param_name, min_val, cycle_duration * 0.5)
 	if auto_kill:
 		_track(context_node, tw, domain)
+	return tw
+
+
+# ─── 按钮入场弹跳 & 点击反馈 ───
+
+## 按钮弹跳入场：scale 0.8→1.0，TRANS_BOUNCE EASE_OUT，总时长 0.4s。
+## 使用 "entrance" domain，与 hover ("hover") / 脉冲 ("modulate") / 点击 ("click") 隔离。
+## 注意：调用前应先禁用按钮防误触，补间完成后再启用。
+static func entrance_bounce(node: Node, duration: float = 0.4, auto_kill: bool = true) -> Tween:
+	if not is_instance_valid(node):
+		return null
+	if auto_kill:
+		_kill_tracked(node, "entrance")
+	var original_scale: Vector2 = node.scale
+	node.scale = original_scale * 0.8
+	var tw := node.create_tween()
+	tw.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BOUNCE)
+	tw.tween_property(node, "scale", original_scale, duration)
+	if auto_kill:
+		_track(node, tw, "entrance")
+	return tw
+
+
+## 按钮点击反馈：squash → spring back。
+## Phase 1: 快速压扁 (scale × 0.92)
+## Phase 2: 弹簧归位 (TRANS_BACK EASE_OUT)
+## 使用 "click" domain，与 hover ("hover") / 脉冲 ("modulate") / 入场 ("entrance") 隔离。
+static func button_click_feedback(
+	btn: Button,
+	down_duration: float = 0.04,
+	up_duration: float = 0.12
+) -> Tween:
+	if not is_instance_valid(btn):
+		return null
+	_kill_tracked(btn, "click")
+	var tw := btn.create_tween()
+	tw.set_ignore_time_scale(true)
+
+	# Phase 1: quick squash
+	var squish_scale := btn.scale * 0.92
+	tw.tween_property(btn, "scale", squish_scale, down_duration).set_ease(Tween.EASE_IN)
+
+	# Phase 2: spring back
+	tw.tween_property(btn, "scale", Vector2.ONE, up_duration) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+	_track(btn, tw, "click")
 	return tw

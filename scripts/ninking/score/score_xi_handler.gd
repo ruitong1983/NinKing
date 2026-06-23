@@ -9,6 +9,20 @@ extends RefCounted
 ##   - _apply_group_xi: apply group-level xi (三清/三顺清/顺清打头/豹子)
 ##   - _apply_duplicate_hand_x2: double groups where hand type appears ≥2
 
+## Build display text for ColXiLabel, inserting Unicode Word Joiner (U+2060)
+## between each CJK character so Godot's autowrap keeps each xi name intact.
+static func build_xi_display_text(names: Array[String]) -> String:
+	if names.is_empty():
+		return "-"
+	var safe_names: Array[String] = []
+	var wj: String = char(0x2060)
+	for name in names:
+		var chars: Array[String] = []
+		for c in name:
+			chars.append(c)
+		safe_names.append(wj.join(chars))
+	return "  ".join(safe_names)
+
 ## Global xi names — shared with animation_handler.gd for Stage B interim formula.
 const GLOBAL_XI_NAMES: Array[String] = [
 	"全黑", "全红", "全顺", "全同花", "四张", "全三条",
@@ -22,11 +36,11 @@ const GLOBAL_XI_NAMES: Array[String] = [
 
 ## Extract global xi ×mult values from xi_result triggered list.
 ## Global xis: 全黑(×2), 全红(×2), 全顺(×2), 全同花(×3), 四张(×5), 全三条(×4),
-##             昇龍(×3), 背水(×4), 貧打(×4), 陣眼(×3), 均爵(×3), 三等(×5), 满堂(×5),
+##             昇龍(×3), 背水(×3), 貧打(×4), 陣眼(×3), 均爵(×2), 三等(×4), 满堂(×5),
 ##             三合(×6), 双合(×4), 一合(×2),
-##             四角(×3), 中十字(×4), 倒影(×3), 双壁(×3), 对影(×2), 连环(×6),
-##             天九(×5), 压牌(×4), 至尊(×4), 独尊(×6), 文武(×4), 廿一点(×4),
-##             一气(×3), 无将(×4), 长套(×5), 无忧角(×4), 慢打(×5), 四对半(×4)
+##             四角(×3), 中十字(×4), 倒影(×3), 双壁(×3), 对影(×2), 连环(×4),
+##             天九(×5), 压牌(×4), 至尊(×4), 独尊(×4), 文武(×4), 廿一点(×4),
+##             一气(×3), 无将(×4), 长套(×3), 无忧角(×4), 慢打(×4), 四对半(×4)
 ## xi_bonus is added to each multiplier (e.g. 喜鹊 +1).
 ## xi_max_mult: 龙之眼 — 多个喜时全部按最高倍率统一（仅影响全局喜栈，不影响组级喜）。
 static func get_global_xi_x_stack(xi_result: XiDetector.XiResult, xi_bonus: int = 0, xi_override: Dictionary = {}, xi_max_mult: bool = false) -> Array[int]:

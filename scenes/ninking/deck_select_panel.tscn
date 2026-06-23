@@ -1,6 +1,14 @@
 [gd_scene format=3 uid="uid://d154ejftx4al1"]
 
 [ext_resource type="Script" path="res://scripts/ninking/ui/deck_select_panel.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/panel_beigeLight.png" id="2_panel"]
+
+[sub_resource type="StyleBoxTexture" id="1"]
+texture = ExtResource("2_panel")
+patch_margin_left = 8
+patch_margin_top = 8
+patch_margin_right = 8
+patch_margin_bottom = 8
 
 [node name="DeckSelectPanel" type="Control" unique_id=1954896477]
 visible = false
@@ -15,6 +23,7 @@ script = ExtResource("1_script")
 
 [node name="PanelBg" type="PanelContainer" parent="." unique_id=1937777187]
 layout_mode = 1
+theme_override_styles/panel = SubResource("1")
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -34,7 +43,7 @@ alignment = 1
 
 [node name="Title" type="Label" parent="PanelBg/VBox" unique_id=1745278178]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.91, 0.77, 0.27, 1)
+theme_override_colors/font_color = Color(0.24, 0.17, 0.10, 1)
 theme_override_font_sizes/font_size = 32
 text = "选择牌组"
 horizontal_alignment = 1

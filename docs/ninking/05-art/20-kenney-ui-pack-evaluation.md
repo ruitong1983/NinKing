@@ -1,7 +1,9 @@
 # Kenney UI 素材包评估报告
 
 > **建立日期:** 2026-06-17 | **评估人:** Claude Code
-> **关联文档:** [`16-art-direction-principles.md`](16-art-direction-principles.md) · [`07-shop-ui-design.md`](../04-ui/07-shop-ui-design.md) · [`09-mgmt/specs/shop-ink-wash-redesign.md`](../09-mgmt/specs/shop-ink-wash-redesign.md) · [`19-image-asset-matching-guide.md`](19-image-asset-matching-guide.md)
+> **方向状态（2026-06-23）：** 本项目已正式确认为**治愈漫画风（Iyashikei Manga）**。本报告保留双方向评估作为历史参考，§2 少年漫画风内容仅作对照。
+> **当前方向文档：** [`16-art-direction-principles.md`](16-art-direction-principles.md)
+> **关联文档:** [`07-shop-ui-design.md`](../04-ui/07-shop-ui-design.md) · [`09-mgmt/specs/shop-ink-wash-redesign.md`](../09-mgmt/specs/shop-ink-wash-redesign.md) · [`19-image-asset-matching-guide.md`](19-image-asset-matching-guide.md)
 > **素材位置:** `assets/images/ui/kenney_ui-pack/` + `assets/images/ui/kenney_ui-pack-rpg-expansion/`
 
 ---
@@ -9,8 +11,8 @@
 ## 目录
 
 1. [素材包总览](#一素材包总览)
-2. [少年漫画风评估（当前方向）](#二少年漫画风评估当前方向)
-3. [治愈漫画风评估（备选方向）](#三治愈漫画风评估备选方向)
+2. [少年漫画风评估（历史对照）](#二少年漫画风评估历史对照)
+3. [治愈漫画风评估（当前方向）](#三治愈漫画风评估当前方向)
 4. [两方向对比总结](#四两方向对比总结)
 5. [附录：素材清单](#五附录素材清单)
 
@@ -50,7 +52,7 @@
 
 ---
 
-## 二、少年漫画风评估（当前方向）
+## 二、少年漫画风评估（历史对照）
 
 ### 2.1 项目当前美术方向
 
@@ -94,7 +96,7 @@
 
 ---
 
-## 三、治愈漫画风评估（备选方向）
+## 三、治愈漫画风评估（当前方向）
 
 ### 3.1 假设风格定义
 

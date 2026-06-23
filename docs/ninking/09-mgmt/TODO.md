@@ -1,6 +1,6 @@
 # NinKing 工作清单
 
-> **最后更新:** 2026-06-22 | **当前 Phase:** Kenney 暖纸风 UI 改造 Phase KUI 启动 | 本次: 方案审阅通过，KUI1-KUI7 入 TODO
+> **最后更新:** 2026-06-23 | **当前 Phase:** Kenney 暖纸风 UI 改造 Phase KUI  + Shader 内部优化 S1-S7 + shaderlist 优化 S8-S14 | 本次: S8 清理完成 ✅ S10 HaloFX 实施完成 ✅ S11-S14 暂缓
 > **使用方式:** AI 每次会话开始时读取此文件。完成任务后更新状态。
 > **状态图例:** ⬜ 待做 | 🔵 进行中 | ✅ 已完成 | 🔒 暂缓 | ⛔ 已废弃
 
@@ -45,6 +45,7 @@
 | B22 | **删除 B14 忍者替换购买系统** — 删 `ninja_replace_overlay.gd`(含.uid) + `_start_replace_flow()` + `_replace_guard` + `show/hide_replace_overlay()` + `ShopManager.replace_ninja()` | `shop_handler.gd` + `ninja_replace_overlay.gd` + `shop_manager.gd` + `ui_manager.gd` | **P0** | ✅ |
 | B23 | **满员购买 → Toast + 忍栏脉冲 + UI_ERROR 音效** — `on_purchase_requested()` 满员分支改为 `ToastManager.show("忍者栏已满，请先出售", 2.0)` + `_ui.pulse_ninja_bar()` + `GlobalTweens.play_sfx(SB.UI_ERROR)` | `shop_handler.gd` | **P0** | ✅ |
 | B24 | **新增 `pulse_cards()` 集体脉冲动画** — 忍者栏卡片集体 pulse: scale 1.0→1.08→1.0, 0.15s×2轮, 用 `GlobalTweens.scale_pop()` 链式调用。ui_manager 委托到 ninja_bar_node | `ui_manager.gd` + `ninja_bar_node.gd` | **P0** | ✅ |
+| B26 | **牌库面板已出牌无灰色 + 尺寸异常** — `fake3d.gdshader` fragment 直接 `COLOR = texture(...)` 覆盖了 Godot 内置的 `MODULATE`，导致 `pc.modulate = Color(0.35, 0.35, 0.35, 0.65)` 无效。修复：三个 fake3d shader 末尾加 `COLOR *= MODULATE;`；`ninking_card.gd` `_apply_fake3d_material()` 中 `can_be_interacted_with == false` 时跳过（deck viewer 卡牌不需要 3D 倾斜+消除 vertex 膨胀导致的尺寸问题） | `shaders/fake3d/fake3d.gdshader` + `fake3d_flash.gdshader` + `fake3d_shadow.gdshader` + `scripts/ninking/ui/ninking_card.gd` | **P0** | ✅ |
 
 ---
 
@@ -230,12 +231,30 @@
 | U1 | **设置面板** — 设置按钮 `_on_settings_pressed` 当前为 `pass`，补全为弹出面板：BGM音量 + SFX音量 → ConfigManager 持久化。半透明遮罩 + 面板 pop_in 动画 | `main_menu.gd` + 新建 settings_panel.tscn/·gd | ? | ⬜ |
 | U2 | **卡牌拖拽手感增强** — 拖起时卡牌升起+阴影，合法落点发光高亮，非法落点淡红提示，松手弹回动画 | card-framework 相关文件 + `ninking_card.gd` | ? | ⬜ |
 | U3 | **GameOver/Victory 画面卡片化** — 当前为纯 Label + Button，改为带背景卡牌样式的面板 + pop_in 入场动效 | `ui_manager.gd` + `ninking_main.tscn` + 相关 gd | ? | ⬜ |
-| U4 | **结算金币 count-up 视觉加强** — 当前纯数字跳动，加金币粒子 + 音效 + 震动 | `settlement_card.gd` + `game_manager.gd` | ? | ⬜ |
+| U4 | **结算金币 count-up 视觉加强** — 每 $5 金色粒子 burst + 递增音高 tick + 落定微震 + 小额回退音效 | `settlement_card.gd` only | ? | ✅ |
 
-## 📐 代码质量
+## ⚡ Shader 优化 — 内部重构（Phase J/K 已完成外部集成，此为内部清理）
 
-| # | 问题 | 位置 | 优先级 | 状态 |
+> **方案审阅: 2026-06-23** | 基于现实 shader 体系分析
+> **核心:** P0 Fake3D 抽 `.gdshaderinc` 去重 + .tres 精简 + 内存/性能优化 + 清理残留文件
+> **已取消:** P6全息shader（与fake3d冲突）⛔ | P5 FoilFX（暂缓，性价比低）🔒
+
+| # | 任务 | 说明 | 优先级 | 状态 |
 |---|------|------|--------|------|
+| S1 | **P0: Fake3D 系列抽 `.gdshaderinc`** — `fake3d.gdshader`/`fake3d_flash.gdshader`/`fake3d_shadow.gdshader` 三者的 `vertex()` 完全一致(旋转矩阵+透视变换+绿幕去除各70+行)。新建 `shaders/fake3d/fake3d_core.gdshaderinc` 抽提公共 vertex()，三文件 `#include` 继承。修改任一改全部 | `shaders/fake3d/` 4 文件 | **P1** | ✅ |
+| S2 | **P1(路径A): 精简稀有度 .tres — 参数合并到 RARITY_FLASH_PARAMS** — 当前 4× .tres(fake3d_common/uncommon/rare/legendary) 与 `RARITY_FLASH_PARAMS` 参数重复且不一致。保留 .tres 中 gradient_texture/flash_type/pure_flash_color 等编辑器可视化字段，其余数值参数(angle/stripe_spacing/speed 等)移入扩展后的 `RARITY_FLASH_PARAMS`。代码在 `duplicate()` 后批量设参。`delete_tolerance` 统一为 0.0 | `asset_registry.gd` + 4× .tres + `ninja_inventory_card.gd` + `card_visual_composer.gd` | **P2** | ✅ |
+| S3 | **P2: 全局共享背面 ShaderMaterial** — NinKingCard 的 `_apply_fake3d_material()` 每张牌正面独享材质、反面 `y_rot=0` 可全局共享。加 `static var _back_fake3d_mat: ShaderMaterial` + `static _get_back_fake3d_mat()`，所有卡牌复用同一实例 | `scripts/ninking/ui/ninking_card.gd` | **P2** | ✅ |
+| S4 | **P4: Outline LOD 性能** — `outline2D_inner_outer.gdshader` 每像素采 8 邻居。加 `uniform bool high_quality`，低质量模式采 4 对角线方向(4次 texture())。牌组预览 52 张卡从 416→208 次 texture()/帧 | `shaders/outline2D_inner_outer.gdshader` + `outline_fx.gd` | **P3** | ✅ |
+| S5 | **P3: GlowFX 扩展 emissive 模式** — `baked_sprite_glow.gdshader` 追加 `uniform bool emissive_mode`，加法发光替代混合发光。覆盖 `sources/blink.gdshader` 功能，不单独引入 | `shaders/baked_sprite_glow.gdshader` + `glow_fx.gd` | **P3** | ✅ |
+| S6 | **P8: NinKingCard 材质状态缓存** — `set_visual_state()` 每次 duplicate 材质。加 `_material_cache: Dictionary` 按 VisualState 缓存正反面材质，O(n) → O(1)。`_apply_flash_material()` 也走缓存 | `scripts/ninking/ui/ninking_card.gd` | **P2** | ✅ |
+| S7 | **P7: SOURCES 清理 + 残留清理** — ① `card_glow.gdshader.uid` ✅ 删除 ② `shaders/shaderlib/2d_holographic_card_shader.gdshader` + `.uid` ✅ 删除 ③ `sources/SOURCES.md` ✅ 更新状态列，增加已删除清单 | 4+ 文件 | **P2** | ✅ |
+| S8 | **shaderlist 优化 Phase 0: 清理 `shaders/shaderlib/` 3 个未用 shader** — 删除 balatro_card_hover / balatro_foil / card_shadow_pseudo_3d（均被项目现有系统覆盖）。同时删除 `sources/` 中已标记✅的 robust_shine + blink（对应 shader）。 | `shaders/shaderlib/*.gdshader` ×3 + `shaders/sources/*.gdshader` ×2 | **P1** | ✅ |
+| S9 | **shaderlist 优化 Phase 0: 清理后建 `shaders/reference/INDEX.md`** — 从 shaderlist 项目精选子集索引，按 card_border/card_entry/card_shine/attack_vfx/atmosphere 分类。文档参考，不引入实际 shader。 | `shaders/reference/INDEX.md`(新) | **P4** | ⬜ |
+| **S10** | **🔥 shaderlist 优化 Phase 1: HaloFX 子系统 — 边框光晕环** — `halo_01.gdshader`(94行) 移植到 `shaders/effects/halo.gdshader`。**改造要点：** ① 关掉 shader 内 TIME 驱动旋转/脉冲，改为 uniform 暴露，由外部 `GlobalTweens.shader_pulse/tween_shader_param` 控制节奏 ② 颜色取项目稀有度色板（银/青/红橙/蓝紫），不直接使用 shaderlist 默认粉/紫配色 ③ `color_mix_range` 取值 0.2-0.3 保持主色调稳定。新建 `halo_fx.gd`(class_name HaloFX) 遵循 EdgeFadeFX 模式(apply/cleanup/has_halo)。`GlobalShaders` 注册 `apply_halo/clear_halo/has_halo`。用于传说/罕见卡动态边框、选中悬停高亮、结界属性边框。 | `shaders/effects/halo.gdshader` ✅ + `scripts/shader/halo_fx.gd` ✅ + `scripts/shader/global_shaders.gd` ✅ | **P1** | ✅ |
+| S11 | **shaderlist 优化 Phase 2: LightningFX 子系统** — `thunder_box.gdshader` 移植。**约束：** ① 雷电范围限制在忍者牌自身 UV（不扩散全屏）② 颜色用结界属性 accent 色而非纯黄 ③ 闪烁频率降为原版 1/3。新建 `lightning_fx.gd`。 | `shaders/effects/lightning.gdshader`(新) + `scripts/shader/lightning_fx.gd`(新) | **P3** | ⬜ |
+| S12 | **shaderlist 优化 Phase 2: rainbow foil flash_type=3** — `rainbow.gdshader` 分段调色板算法移植到 `fake3d_flash.gdshader` 新增 `flash_type=3`，保留现有 type=1(sin 彩虹)。作为第 5 隐藏稀有度"彩虹箔"。 | `shaders/fake3d/fake3d_flash.gdshader` | **P3** | ⬜ |
+| S13 | **shaderlist 优化 Phase 2: ExplodeFX 子系统** — `pixel_explosion.gdshader` 移植，新建独立 `explode_fx.gd`（不扩展 DissolveFX，两者原理不同）。 | `shaders/effects/pixel_explosion.gdshader`(新) + `scripts/shader/explode_fx.gd`(新) | **P3** | ⬜ |
+| S14 | **shaderlist 优化 Phase 2: 内阴影/边缘光（降质版）** — `inner_shadow_rimlight.gdshader` 缩减到 4 方向×3 质量=12 采样(原 72 采样 1/6)后引入，用于卡牌深度增强。 | `shaders/effects/inner_shadow_rimlight.gdshader`(新) | **P3** | ⬜ |
 | C1 | `ui_manager.gd` 444 行 → 已拆分至 `hand_display.gd` + `hand_interaction.gd`，现 284 行 | `scripts/ninking/ui/ui_manager.gd` | P2 | ✅ |
 | C2 | `game_state.gd` 345 行 → 库存移至 ShopManager，BlindController 转发删除，现 268 行 | `scripts/ninking/game_state.gd` | P2 | ✅ |
 | C3 | `game_state.gd` BlindController 静态方法类型检查冲突 | `scripts/ninking/game_state.gd` | P2 | ✅ |
@@ -295,6 +314,8 @@
 | C52 | **清理死代码 `shop_handler.on_sell_requested` + `ShopManager.sell_ninja`** — 两处均为 B14 替换系统遗留，全项目零调用方 | `shop_handler.gd` + `shop_manager.gd` | P1 | ✅ |
 | C53 | **文档同步: `07-shop-ui-design.md` 删除 §5.3 替换流程** — 更新 §5.2 购买描述为满员→Toast+脉冲 | `docs/ninking/04-ui/07-shop-ui-design.md` | **P0** | ✅ |
 | C54 | **文档同步: `DOCUMENT_MAP.md` 删除 §5.13** — 移除 `ninja_replace_overlay.gd` 映射条目 | `docs/ninking/DOCUMENT_MAP.md` | **P0** | ✅ |
+| C55 | **按钮注意力脉冲抽象 `attract_pulse()` + `kill_domain()`** — TweenFX 新增 modulate 呼吸脉冲基建 + GlobalTweens 委托。替换 settlement_card 手写 `_start_button_pulse()`；接入 game_manager 讨伐按钮 + shop_slot 购买按钮。文档同步 | `tween_fx.gd` + `global_tweens.gd` + `settlement_card.gd` + `game_manager.gd` + `shop_slot.gd` + `tween-library-reference.md` | P1 | ✅ |
+| C56 | **attract_pulse 修复 + 扩展** — (1) 修复 Compatibility 渲染器下不可见问题：默认 `scale_pulse=true`、modulate 夹紧 ≤1.0； (2) 接入 Launcher StartBtn + DeckSelect ConfirmBtn 两按钮，含入场延时启动 + 点击/返回时 kill_domain | `tween_fx.gd` + `main_menu.gd` + `deck_select_panel.gd` | P1 | ✅ |
 
 ---
 
@@ -679,3 +700,29 @@ Phase F1 ──→ Phase F2 ──→ Phase F3 ──→ Phase H ──→ Phase
 | 2026-06-21 | 🖱️ **忍者栏交互重设计**: Grill + review-plan 审阅通过后实施。① NinjaBarNode 新增 hover 工具提示（0.3s SceneTreeTimer 延迟）→ `ninja_detail_tooltip.tscn/.gd`（面板位置/尺寸/颜色完全在编辑器中调整，不锁死在代码里）② 右键弹出红色售卖按钮 → `ninja_sell_button.tscn/.gd`（价格=ceil(cost/2)，pop_in 动效）③ VFX: 右键售卖调用卡面 `GlobalTweens.scale_pop(card, 1.15, 0.15)` + `SB.UI_CLICK` SFX ④ ShopManager.sell_ninja() 金币退款已验证（半价 refund + 刷新）⑤ 文档同步: `06-ui-layout-reference.md` §3.3.3.a（6 行交互行为表 + tooltip/sell 场景信息表 + 编辑器可调整约束） + §7 文件索引 + `DOCUMENT_MAP.md` §5.6 更新 |
 | 2026-06-21 | 📋 **方案审阅: 删除忍者替换购买 → Toast+脉冲**: B22(删替换系统) + B23(满员→Toast+脉冲) + B24(pulse_cards) + C52(清死代码) + C53/C54(文档同步) 共 6 项加入 TODO。替换系统 UI 太复杂，改为引导玩家自行出售。 |
 | 2026-06-21 | ✅ **删除忍者替换购买系统 — 全部完成**: B22/B23/B24/C52/C53/C54 共 6 项 ✅。删 `ninja_replace_overlay.gd/.uid` + `_start_replace_flow()`(78行) + `_replace_guard` + `show/hide_replace_overlay()` + `ShopManager.replace_ninja()`/`sell_ninja()` + `shop_handler.on_sell_requested()`。满员购买 → Toast "忍者栏已满，请先出售" + 脉冲动画 + UI_ERROR。文档同步: `07-shop-ui-design.md` §5.3 删除 + `DOCUMENT_MAP.md` §5.13 移除 + `ui-signal-architecture.md` 更新 + `specs/ninja-replace-flow.md` 标记废弃。 |
+| 2026-06-23 | 🔴 **attract_pulse 修复 — Compatibility 渲染器下不可见**。根因：`gl_compatibility` 不支持 Color >1.0，modulate 脉冲被夹紧为无色。修复：`scale_pulse` 默认 `true`，modulate 范围改为 ≤1.0 (`0.90↔1.0`)。扩展至 Launcher StartBtn + DeckSelect ConfirmBtn。C56 入 TODO。|
+| 2026-06-23 | 🎨 **按钮统一展示动效 KUI8-KUI17**: 10 场景全部实施
+| 2026-06-23 | 🐛 **B26 牌库面板已出牌灰色 + 尺寸修复**: `fake3d.gdshader` fragment 写 `COLOR = texture(...)` 覆盖 Godot 内置 `MODULATE`，导致 `modulate` 灰度无效。修复：三个 fake3d shader 末尾加 `COLOR *= MODULATE`; `ninking_card.gd` `_apply_fake3d_material()` 在 `can_be_interacted_with == false` 时跳过（deck viewer 卡牌无需 fake3d，同时消除 vertex 膨胀导致的尺寸异常）。涉及 4 文件。|
+| 2026-06-23 | ⚡ **Shader 优化 S2/S4/S5 完成** — S2: 4× .tres 精简(删除 12 个冗余闪参数→RARITY_FLASH_PARAMS 批量循环)；S4: Outline LOD (`high_quality`低质量4对角线采样)；S5: GlowFX emissive 加法发光模式(覆盖 blink.gdshader)。|
+| 2026-06-23 | ⚡ **Shader 优化方案审阅完成 — S1-S7 入 TODO**: 分析 18 个 shader 文件发现 Fake3D 3× 重复代码(核心问题) + 5× 冗余 .tres + 材质复制爆炸 + 4 闲置 shader。review-plan 四维度审阅通过，P1 因 .tres 参数实际复杂度高于预想修正为路径 A。P6(Holographic)删除，P5(Foil)暂缓。S1(P0)+S2(P1)+S3(P2)+S4(P4)+S5(P3)+S6(P8)+S7(清理) 共 7 项加入 TODO。Q1(路径A)/Q2(删除全息)/Q3(清理card_glow残留)全部确认。|
+| 2026-06-23 | 📋 **shaderlist 优化方案审阅 + 修正**: 分析 shaderlist 85+ shader 对 NinKing 的优化价值。review-plan 发现 🔴A1(架构边界/GlobalTweens控制) + A2(pixel_explosion独子系统) 必须修正。用户确认后写入 S8-S14 共 7 项。**仅 S8(清理) + S10(HaloFX) 为 P1 优先实施，其余 P3/P4暂缓。**|
+| 2026-06-23 | ⚡ **S8 清理完成** — 删除 `shaderlib/` 3 个未用 shader(含 .uid) + `sources/` 中已覆盖的 robust_shine/blink。`SOURCES.md` 同步更新。shaderlib/ 目录已清空。|
+| 2026-06-23 | 🔥 **S10 HaloFX 实施完成** — `shaders/effects/halo.gdshader` 移植(halo_01 改造版: animate 开关+uniform 外部控制+稀有度色板适配) + `scripts/shader/halo_fx.gd`新建(遵循 EdgeFadeFX 模式) + `GlobalShaders` 注册 `apply_halo/clear_halo/has_halo`。脚本编译验证通过。|
+
+## 🎨 按钮统一展示动效 — 弹跳入场 + 金色粒子 + 呼吸脉冲 + hover + 点击反馈
+
+| # | 任务 | 说明 | 优先级 | 状态 |
+|---|------|------|--------|------|
+| KUI8 | **TweenFX 基础设施**: entrance_bounce + button_click_feedback | tween_fx.gd + global_tweens.gd | P0 | ✅ |
+| KUI9 | **ButtonStyles.attach_entrance_animation**: 统一入口动效全生命周期 | button_styles.gd | P0 | ✅ |
+| KUI10 | **Launcher StartBtn mild** (pulse: true) + 其他按钮 pulse: false | main_menu.gd | P0 | ✅ |
+| KUI11 | **DeckSelect ConfirmBtn** 完整入场 | deck_select_panel.gd | P0 | ✅ |
+| KUI12 | **Main PlayBtn/AiRearrangeBtn** 完整+mild | game_manager.gd | P0 | ✅ |
+| KUI13 | **GameOver/Victory 按钮** mild 模式 | game_manager.gd | P0 | ✅ |
+| KUI14 | **Shop RerollBtn/ContinueBtn** mild | shop_ui.gd | P0 | ✅ |
+| KUI15 | **ShopSlot BuyBtn** 完整入场 | shop_slot.gd | P0 | ✅ |
+| KUI16 | **ContinuePanel GoBtn/BackBtn** mild | continue_panel.gd | P0 | ✅ |
+| KUI17 | **SettlementCard UnlockBtn** mild | settlement_card.gd | P0 | ✅ |
+| KUI18 | **Debug 场景同步** (待接入 manga 样式后) | debug_controller.gd | P2 | ⬜ |
+| KUI19 | **呼吸脉冲重写**: direct scale pulse, StyleBoxFlat fallback, pulse config | tween_fx.gd + button_styles.gd | P0 | ✅ |
+

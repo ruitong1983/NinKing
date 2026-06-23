@@ -1,7 +1,7 @@
 # NinKing Main Overlay 设计方案
 
 > **建立日期:** 2026-06-10 | **关联场景:** `ninking_main.tscn` 子节点
-> **风格权威:** [`../05-art/16-art-direction-principles.md`](../05-art/16-art-direction-principles.md) · 少年漫画风
+> **风格权威:** [`../05-art/16-art-direction-principles.md`](../05-art/16-art-direction-principles.md) · 治愈漫画风（旧少年漫画方向已于 2026-06-23 废弃）
 
 ## §1 概述
 
@@ -186,12 +186,15 @@ LevelComplete (Control 1920×1080)
 ┌──────────────────────────────────────────┐
 │                  全屏黑底 (80% opacity)    │
 │                                          │
-│                忍気不足                   │  ← GameOverLabel 48px 红 居中
-│                                          │
-│          战绩: 结界 3 · 忍気 380          │  ← ScoreSummary 28px 居中
-│                                          │
-│              [重新开始]                    │  ← RetryButton 24px flat
-│              [返回主菜单]                  │  ← BackToMenuButton 20px flat
+│  ┌─ ContentPanel (Kenney 暖米 520×360) ─┐│
+│  │           忍気不足                    ││  ← GameOverLabel 48px 深红 居中
+│  │                                      ││
+│  │     战绩: 结界 3 · 忍気 380          ││  ← ScoreSummary 26px 深褐 居中
+│  │                                      ││
+│  │         [重新开始]                    ││  ← RetryButton 24px flat
+│  │         [返回主菜单]                  ││  ← BackToMenuButton 20px flat
+│  │   ⚡ pop_in 入场 (0.3s TRANS_BACK)   ││
+│  └──────────────────────────────────────┘│
 │                                          │
 └──────────────────────────────────────────┘
 ```
@@ -200,11 +203,13 @@ LevelComplete (Control 1920×1080)
 
 ```
 GameOver (Control 1920×1080)
-├── OverlayBg (ColorRect)
-├── GameOverLabel (Label)              ← "失败" 48px 红 居中 / 代码覆盖
-├── ScoreSummary (Label)               ← "战绩: 结界 X · 忍気 Y" 28px 居中
-├── RetryButton (Button)              ← "重新开始" 24px flat
-└── BackToMenuButton (Button)         ← "返回主菜单" 20px flat
+├── OverlayBg (ColorRect)                   ← 全屏遮罩
+├── ContentPanel (Panel) 520×360 居中        ← Kenney 暖米卡牌面板 (KUI2)
+│   ├── GameOverLabel (Label) [%GameOverLabel]  ← "失败" 48px 深红 #C0392B, 居中
+│   ├── ScoreSummary (Label) [%ScoreSummary]     ← "战绩: 结界 X · 忍気 Y" 26px 深褐 #3D2B1A, 居中
+│   ├── RetryButton (Button) [%RetryButton]      ← "重新开始" 24px flat (manga 样式)
+│   └── BackToMenuButton (Button) [%BackToMenuButton] ← "返回主菜单" 20px flat
+│   ⚡ pop_in 入场: scale 0.75→1.0 (TRANS_BACK) + 淡入 0.2s
 ```
 
 ### 6.3 永久死亡 (A8)
@@ -227,11 +232,14 @@ GameOver (Control 1920×1080)
 ┌──────────────────────────────────────────┐
 │                  全屏黑底 (70% opacity)    │
 │                                          │
-│              忍道制霸!                    │  ← VictoryLabel 48px 金
-│                                          │
-│    通关! 全8 结界制霸 · 忍気 2400         │  ← StatsSummary
-│                                          │
-│            [返回主菜单]                    │  ← MenuButton
+│  ┌─ ContentPanel (Kenney 暖米 520×320) ─┐│
+│  │          忍道制霸!                    ││  ← VictoryLabel 48px 金 居中
+│  │                                      ││
+│  │   通关! 全8 结界制霸 · 忍気 2400      ││  ← StatsSummary 26px 深褐 居中
+│  │                                      ││
+│  │         [返回主菜单]                  ││  ← MenuButton 24px flat
+│  │   ⚡ pop_in 入场 (0.3s TRANS_BACK)   ││
+│  └──────────────────────────────────────┘│
 │                                          │
 └──────────────────────────────────────────┘
 ```
@@ -240,10 +248,12 @@ GameOver (Control 1920×1080)
 
 ```
 VictoryOverlay (Control 1920×1080)
-├── OverlayBg (ColorRect)
-├── VictoryLabel (Label)               ← "忍道制霸!"
-├── StatsSummary (Label)               ← "通关! 全N 结界制霸 · 忍気 M"
-└── MenuButton (Button)                ← "返回主菜单"
+├── OverlayBg (ColorRect)                   ← 全屏遮罩
+├── ContentPanel (Panel) 520×320 居中        ← Kenney 暖米卡牌面板 (KUI2)
+│   ├── VictoryLabel (Label)                 ← "忍道制霸!" 48px 金色 #D4A843, 居中
+│   ├── StatsSummary (Label)                 ← "通关! 全N 结界制霸 · 忍気 M" 26px 深褐 #3D2B1A, 居中
+│   └── MenuButton (Button)                  ← "返回主菜单" 24px flat (manga 样式)
+│   ⚡ pop_in 入场: scale 0.75→1.0 + 淡入 0.2s
 ```
 
 ### 7.3 交互
