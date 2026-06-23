@@ -1,0 +1,286 @@
+[gd_scene load_steps=44 format=3 uid="uid://cx1kal6r8uejx"]
+
+[ext_resource type="Shader" uid="uid://bdpuuvioxyc0t" path="res://grayscale.gdshader" id="1_hu2rj"]
+[ext_resource type="Shader" uid="uid://r70ve8rt1ffl" path="res://inversion.gdshader" id="1_rpmbb"]
+[ext_resource type="Texture2D" uid="uid://sutjglc65448" path="res://w700d1q75cms.jpg" id="2_umhg4"]
+[ext_resource type="Shader" uid="uid://cs0c8s3wj50e2" path="res://boxblur.gdshader" id="4_83bew"]
+[ext_resource type="Shader" uid="uid://bk068pkdhevwh" path="res://color_overlay.gdshader" id="5_5hvva"]
+[ext_resource type="Shader" uid="uid://b1usfyf7lut0l" path="res://highlight_boost.gdshader" id="5_83bew"]
+[ext_resource type="Shader" uid="uid://bb4u268pvw7uf" path="res://wave.gdshader" id="6_tvk1p"]
+[ext_resource type="Shader" uid="uid://fvwc8f3f06jx" path="res://posterization.gdshader" id="7_f5b8l"]
+[ext_resource type="Shader" uid="uid://l4midjb72nck" path="res://liquefy_bloat.gdshader" id="8_6eaad"]
+[ext_resource type="Shader" uid="uid://by8wti2al58ks" path="res://CRT.gdshader" id="9_tc5di"]
+[ext_resource type="Shader" uid="uid://c0lfpg8bdi05f" path="res://blink.gdshader" id="10_ec6yr"]
+[ext_resource type="Shader" uid="uid://r7cint6sjp2r" path="res://dithering.gdshader" id="11_t8lft"]
+[ext_resource type="Shader" uid="uid://f83wbp6gwphd" path="res://liquid_distortion.gdshader" id="12_ki5ws"]
+[ext_resource type="Shader" uid="uid://bx4f5ebcgbchv" path="res://cel_shading.gdshader" id="13_imyl8"]
+[ext_resource type="Shader" uid="uid://qn38gtswypak" path="res://glitch_art.gdshader" id="14_j1kth"]
+[ext_resource type="Shader" uid="uid://defxxkdatemco" path="res://AO.gdshader" id="15_202wq"]
+[ext_resource type="Shader" uid="uid://bfogxoxfw0chp" path="res://mosaic_blink.gdshader" id="16_e8ygj"]
+[ext_resource type="Shader" uid="uid://bymqtykih1i3g" path="res://vignette.gdshader" id="17_d01i6"]
+[ext_resource type="Shader" uid="uid://cqf2lhju2s5om" path="res://advanced_mono.gdshader" id="18_iw4mn"]
+[ext_resource type="Shader" uid="uid://bycmbb3m8dh8d" path="res://radial_blur.gdshader" id="19_oymnv"]
+[ext_resource type="Shader" uid="uid://cfh7tmur02ldp" path="res://blue_tone.gdshader" id="20_ppely"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_rpmbb"]
+shader = ExtResource("1_rpmbb")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tvk1p"]
+shader = ExtResource("1_hu2rj")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_f5b8l"]
+shader = ExtResource("4_83bew")
+shader_parameter/blur_size = 0.0150000007125
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_6eaad"]
+shader = ExtResource("5_5hvva")
+shader_parameter/red = 0.67999998480064
+shader_parameter/green = 0.36999999172976
+shader_parameter/blue = 0.78999998234192
+shader_parameter/alpha = 0.999999977648
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tc5di"]
+shader = ExtResource("5_83bew")
+shader_parameter/intensity = 3.5000000521542
+shader_parameter/brightness_power = 1.60000002384192
+shader_parameter/threshold = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ec6yr"]
+shader = ExtResource("6_tvk1p")
+shader_parameter/time = 5.0
+shader_parameter/frequency = 33.0
+shader_parameter/amplitude = 0.03999999910592
+shader_parameter/speed = 1.30000001937156
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_t8lft"]
+shader = ExtResource("7_f5b8l")
+shader_parameter/levels = 12.30000018328476
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ki5ws"]
+shader = ExtResource("8_6eaad")
+shader_parameter/center = Vector2(0.5, 0.5)
+shader_parameter/radius = 0.36800001748
+shader_parameter/strength = -0.5
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_imyl8"]
+shader = ExtResource("9_tc5di")
+shader_parameter/scanline_strength = 0.4610000218975
+shader_parameter/scanline_density = 945.5170401620576
+shader_parameter/barrel_distortion_strength = 0.05200000247
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_j1kth"]
+shader = ExtResource("10_ec6yr")
+shader_parameter/glow_color = Vector4(0.2, 0.8, 0.6, 0.6)
+shader_parameter/blink_frequency = 2.0
+shader_parameter/max_intensity = 0.5
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_202wq"]
+shader = ExtResource("11_t8lft")
+shader_parameter/temperature_min = 0.5
+shader_parameter/temperature_max = 1.0
+shader_parameter/use_custom_colors = true
+shader_parameter/cold_color = Vector4(0, 0, 0.3, 1)
+shader_parameter/cool_color = Vector4(0, 0.5, 1, 1)
+shader_parameter/warm_color = Vector4(1, 1, 0, 1)
+shader_parameter/hot_color = Vector4(1, 0.5, 0, 1)
+shader_parameter/very_hot_color = Vector4(1, 0, 0, 1)
+shader_parameter/noise_intensity = 0.05
+shader_parameter/noise_scale = 5.0
+shader_parameter/edge_threshold = 0.1
+shader_parameter/edge_intensity = 1.5
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_e8ygj"]
+shader = ExtResource("12_ki5ws")
+shader_parameter/distortion_strength = 0.03
+shader_parameter/distortion_speed = 1.0
+shader_parameter/wave_frequency = 15.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_d01i6"]
+shader = ExtResource("13_imyl8")
+shader_parameter/shadow_threshold = 0.7210000342475
+shader_parameter/shadow_multiplier = 0.63900002709262
+shader_parameter/light_direction_2d = Vector2(0.6, 0.3)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_iw4mn"]
+shader = ExtResource("14_j1kth")
+shader_parameter/global_glitch_chance = 0.4350000206625
+shader_parameter/max_horizontal_shift = 4.1950001992625
+shader_parameter/max_color_fringe = 0.90800004313
+shader_parameter/max_vertical_block_jitter = 5.8620002784450005
+shader_parameter/noise_line_intensity = 0.42400002014
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_5hvva"]
+noise_type = 5
+seed = 5
+frequency = 0.0084
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_iw4mn"]
+noise = SubResource("FastNoiseLite_5hvva")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_oymnv"]
+shader = ExtResource("15_202wq")
+shader_parameter/sdf_map = SubResource("NoiseTexture2D_iw4mn")
+shader_parameter/light_position = Vector2(0.5, 0.5)
+shader_parameter/shadow_sharpness = 26.466001019635
+shader_parameter/ambient_color = Vector4(0.1, 0.1, 0.1, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ppely"]
+shader = ExtResource("16_e8ygj")
+shader_parameter/grain_strength = 0.1590000075525
+shader_parameter/grain_size = 50.0
+shader_parameter/grain_speed = 3.35600015941
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5hvva"]
+shader = ExtResource("17_d01i6")
+shader_parameter/vignette_intensity = 5.77600027436
+shader_parameter/vignette_opacity = 0.0750000035625
+shader_parameter/vignette_rgb = Vector4(0.47, 0.265, 0, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_b6jgy"]
+shader = ExtResource("18_iw4mn")
+shader_parameter/channel_weights = Vector3(0.3, 0.3, 0.5)
+shader_parameter/contrast = 1.014000024415
+shader_parameter/gamma = 2.2330001028076203
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_i47ng"]
+shader = ExtResource("19_oymnv")
+shader_parameter/blur_center = Vector2(0.5, 0.5)
+shader_parameter/blur_strength = 2.0
+shader_parameter/sample_count = 8
+shader_parameter/outward_blur = true
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gjspy"]
+shader = ExtResource("20_ppely")
+shader_parameter/blue_tone_strength = 3.9370001870075
+shader_parameter/shadow_tint_color_r = 1.0
+shader_parameter/shadow_tint_color_g = 0.8730000414675
+shader_parameter/shadow_tint_color_b = 0.9710000461225
+shader_parameter/shadow_lift = 1.0
+
+[node name="Node2D" type="Node2D"]
+scale = Vector2(1.7591231, 1.7591231)
+
+[node name="init" type="Sprite2D" parent="."]
+position = Vector2(84.375, 102.06251)
+scale = Vector2(0.1732143, 0.1732143)
+texture = ExtResource("2_umhg4")
+
+[node name="1" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_rpmbb")
+position = Vector2(237.87498, 103.5)
+scale = Vector2(0.17392853, 0.17392853)
+texture = ExtResource("2_umhg4")
+
+[node name="2" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_tvk1p")
+position = Vector2(383.74994, 103.812515)
+scale = Vector2(0.17107145, 0.17107145)
+texture = ExtResource("2_umhg4")
+
+[node name="3" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_f5b8l")
+position = Vector2(529.75, 102.812515)
+scale = Vector2(0.17107145, 0.17107145)
+texture = ExtResource("2_umhg4")
+
+[node name="4" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_6eaad")
+position = Vector2(671.75, 102.812515)
+scale = Vector2(0.17107145, 0.17107145)
+texture = ExtResource("2_umhg4")
+
+[node name="5" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_tc5di")
+position = Vector2(819.75, 101.812515)
+scale = Vector2(0.17107145, 0.17107145)
+texture = ExtResource("2_umhg4")
+
+[node name="6" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_ec6yr")
+position = Vector2(969, 102)
+scale = Vector2(0.17107145, 0.17107145)
+texture = ExtResource("2_umhg4")
+
+[node name="7" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_t8lft")
+position = Vector2(84, 299)
+scale = Vector2(0.17107145, 0.17107145)
+texture = ExtResource("2_umhg4")
+
+[node name="8" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_ki5ws")
+position = Vector2(240, 298)
+scale = Vector2(0.17107145, 0.17107145)
+texture = ExtResource("2_umhg4")
+
+[node name="9" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_imyl8")
+position = Vector2(385, 298)
+scale = Vector2(0.17107145, 0.17107145)
+texture = ExtResource("2_umhg4")
+
+[node name="10" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_j1kth")
+position = Vector2(530, 298)
+scale = Vector2(0.17107145, 0.17107145)
+texture = ExtResource("2_umhg4")
+
+[node name="11" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_202wq")
+position = Vector2(673.0625, 296)
+scale = Vector2(0.17125005, 0.17107145)
+texture = ExtResource("2_umhg4")
+
+[node name="12" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_e8ygj")
+position = Vector2(821, 299)
+scale = Vector2(0.17107145, 0.17107145)
+texture = ExtResource("2_umhg4")
+
+[node name="13" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_d01i6")
+position = Vector2(970, 301)
+scale = Vector2(0.17107145, 0.17107145)
+texture = ExtResource("2_umhg4")
+
+[node name="14" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_iw4mn")
+position = Vector2(83.99994, 504)
+scale = Vector2(0.17107145, 0.17107145)
+texture = ExtResource("2_umhg4")
+
+[node name="15" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_oymnv")
+position = Vector2(239, 501.99997)
+scale = Vector2(0.17107145, 0.17107145)
+texture = ExtResource("2_umhg4")
+
+[node name="16" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_ppely")
+position = Vector2(386, 502)
+scale = Vector2(0.17107145, 0.17107145)
+texture = ExtResource("2_umhg4")
+
+[node name="17" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_5hvva")
+position = Vector2(528, 502)
+scale = Vector2(0.17107145, 0.17107145)
+texture = ExtResource("2_umhg4")
+
+[node name="18" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_b6jgy")
+position = Vector2(675, 500)
+scale = Vector2(0.17107145, 0.17107145)
+texture = ExtResource("2_umhg4")
+
+[node name="19" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_i47ng")
+position = Vector2(818, 499.99997)
+scale = Vector2(0.17107145, 0.17107145)
+texture = ExtResource("2_umhg4")
+
+[node name="20" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_gjspy")
+position = Vector2(970.99994, 502.99997)
+scale = Vector2(0.17107145, 0.17107145)
+texture = ExtResource("2_umhg4")

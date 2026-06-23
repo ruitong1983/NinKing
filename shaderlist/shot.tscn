@@ -1,0 +1,35 @@
+[gd_scene load_steps=5 format=3 uid="uid://crpkpj3mijddm"]
+
+[ext_resource type="Texture2D" uid="uid://sutjglc65448" path="res://w700d1q75cms.jpg" id="1_awion"]
+[ext_resource type="Shader" uid="uid://dkpbfc4jb1y70" path="res://extract_line.gdshader" id="1_f4qg3"]
+[ext_resource type="Script" uid="uid://cyxolxdv24ufe" path="res://sprite_2d.gd" id="3_f4qg3"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_3ldfn"]
+shader = ExtResource("1_f4qg3")
+shader_parameter/line_color = Color(0, 0, 0, 1)
+shader_parameter/bg_color = Color(1, 1, 1, 0)
+shader_parameter/sensitivity = 0.40000000596048
+shader_parameter/line_width = 0.5000000074506
+shader_parameter/threshold = 0.07999999821184
+shader_parameter/smoothness = 0.05
+shader_parameter/edge_power = 0.90000001341108
+shader_parameter/use_antialiasing = false
+shader_parameter/use_center_detection = false
+shader_parameter/center_weight = 1.5000000223518
+
+[node name="Node2D" type="Node2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_3ldfn")
+position = Vector2(525, 518)
+texture = ExtResource("1_awion")
+script = ExtResource("3_f4qg3")
+
+[node name="Button" type="Button" parent="."]
+offset_left = 914.0
+offset_top = 80.0
+offset_right = 1132.0
+offset_bottom = 199.0
+text = "截图保存"
+
+[connection signal="pressed" from="Button" to="Sprite2D" method="_on_CaptureButton_pressed"]

@@ -1,0 +1,128 @@
+[gd_scene load_steps=16 format=3 uid="uid://dviewm5pivb1f"]
+
+[ext_resource type="Shader" uid="uid://bxmhrl0wkdp1v" path="res://miffy.gdshader" id="1_k1aq6"]
+[ext_resource type="Texture2D" uid="uid://biov4rbdk7lip" path="res://art/3ffa00805504153249527c8360f986b2.png" id="2_2rvgm"]
+[ext_resource type="Texture2D" uid="uid://bgqvymoifi8ya" path="res://art/女主低头1.png" id="3_05d0c"]
+[ext_resource type="Shader" uid="uid://bxici8uq7kddm" path="res://veiled_palette.gdshader" id="4_djtf0"]
+[ext_resource type="Texture2D" uid="uid://bqpyy8hvh6unb" path="res://art/更新公告英文封面.jpg" id="4_qhy6t"]
+[ext_resource type="Shader" uid="uid://bvku6y12eowag" path="res://kuwahara02.gdshader" id="4_ythwj"]
+[ext_resource type="Texture2D" uid="uid://dw1gkoo5hf8uf" path="res://art/麻辣烫2.png" id="6_mwfoc"]
+[ext_resource type="Shader" uid="uid://csksyii7jnhye" path="res://flat_paint.gdshader" id="6_tv86p"]
+[ext_resource type="Texture2D" uid="uid://cbo6ku5y42qsa" path="res://art/cheap2.png" id="7_tv86p"]
+[ext_resource type="Texture2D" uid="uid://simhffl1ffmm" path="res://art/1.png" id="8_kibeh"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_05d0c"]
+shader = ExtResource("1_k1aq6")
+shader_parameter/color_seed = 5.0
+shader_parameter/color_variety = 5.0
+shader_parameter/style_strength = 1.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_djtf0"]
+shader = ExtResource("4_djtf0")
+shader_parameter/blur_intensity = 1.5950000757625
+shader_parameter/posterize_levels = 5
+shader_parameter/color_intensity = 1.02800002508
+shader_parameter/color_temperature = -0.02299997734249997
+shader_parameter/saturation = 2.0
+shader_parameter/grain_amount = 0.194000009215
+shader_parameter/grain_size = 10.0
+shader_parameter/fade = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ythwj"]
+shader = ExtResource("4_ythwj")
+shader_parameter/kuwahara_radius = 1
+shader_parameter/kuwahara_hardness = 0.10000000149012
+shader_parameter/blur_intensity = 0.0
+shader_parameter/posterize_levels = 5
+shader_parameter/color_intensity = 1.0
+shader_parameter/color_temperature = -0.15199998347
+shader_parameter/saturation = 2.0
+shader_parameter/grain_amount = 0.146000006935
+shader_parameter/grain_size = 10.0
+shader_parameter/fade = 0.0
+shader_parameter/edge_emphasis = 0.0
+shader_parameter/edge_threshold = 0.5
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tv86p"]
+shader = ExtResource("6_tv86p")
+shader_parameter/paint_blur = 0.63200003002
+shader_parameter/color_levels = 6
+shader_parameter/color_vividness = 1.05200002622
+shader_parameter/color_saturation = 1.56000005035
+shader_parameter/paint_style = 2
+shader_parameter/style_intensity = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_mwfoc"]
+shader = ExtResource("4_djtf0")
+shader_parameter/blur_intensity = 0.0
+shader_parameter/posterize_levels = 5
+shader_parameter/color_intensity = 1.1890000327275
+shader_parameter/color_temperature = -0.06099997914749999
+shader_parameter/saturation = 2.0
+shader_parameter/grain_amount = 0.0
+shader_parameter/grain_size = 3.586000122835
+shader_parameter/fade = 0.1030000048925
+
+[node name="Node2D" type="Node2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+visible = false
+material = SubResource("ShaderMaterial_05d0c")
+position = Vector2(964, 525)
+scale = Vector2(0.740108, 0.7401079)
+texture = ExtResource("2_2rvgm")
+
+[node name="Sprite2D2" type="Sprite2D" parent="."]
+visible = false
+material = SubResource("ShaderMaterial_05d0c")
+position = Vector2(964, 525)
+scale = Vector2(0.740108, 0.7401079)
+texture = ExtResource("3_05d0c")
+
+[node name="更新公告英文封面" type="Sprite2D" parent="."]
+visible = false
+material = SubResource("ShaderMaterial_djtf0")
+position = Vector2(958, 541.5)
+scale = Vector2(2.3933337, 2.3933332)
+texture = ExtResource("4_qhy6t")
+
+[node name="更新公告英文封面5" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_ythwj")
+position = Vector2(958, 541.5)
+scale = Vector2(2.3933337, 2.3933332)
+texture = ExtResource("4_qhy6t")
+
+[node name="更新公告英文封面6" type="Sprite2D" parent="."]
+visible = false
+material = SubResource("ShaderMaterial_ythwj")
+position = Vector2(925.6665, 525.75)
+scale = Vector2(0.6309029, 0.63090265)
+texture = ExtResource("7_tv86p")
+
+[node name="更新公告英文封面7" type="Sprite2D" parent="."]
+visible = false
+material = SubResource("ShaderMaterial_ythwj")
+position = Vector2(925.6665, 525.75)
+scale = Vector2(0.6309029, 0.63090265)
+texture = ExtResource("8_kibeh")
+
+[node name="更新公告英文封面4" type="Sprite2D" parent="."]
+visible = false
+material = SubResource("ShaderMaterial_djtf0")
+position = Vector2(909.00006, 530)
+scale = Vector2(0.632778, 0.6327778)
+texture = ExtResource("6_mwfoc")
+
+[node name="更新公告英文封面2" type="Sprite2D" parent="."]
+visible = false
+material = SubResource("ShaderMaterial_tv86p")
+position = Vector2(940.00006, 547)
+scale = Vector2(0.6844569, 0.684457)
+texture = ExtResource("7_tv86p")
+
+[node name="更新公告英文封面3" type="Sprite2D" parent="."]
+visible = false
+material = SubResource("ShaderMaterial_mwfoc")
+position = Vector2(940.00006, 547)
+scale = Vector2(0.6844569, 0.684457)
+texture = ExtResource("7_tv86p")
