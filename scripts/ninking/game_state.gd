@@ -367,6 +367,7 @@ func _begin_seal_phase() -> void:
 	if game_mode == "clean":
 		# Clean mode: generate 3x3 grid with no pre-existing matches
 		hand = CleanLayoutGenerator.generate(deck_manager)
+		hand_updated.emit(hand)  # 🐛 critical: update card grid for level transitions (level 2+ was showing stale cards)
 	else:
 		# Bi-ji mode: draw 9 and auto-arrange into 3 groups
 		hand = deck_manager.draw(9)

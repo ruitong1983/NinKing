@@ -1,6 +1,6 @@
 # NinKing 技术设计文档
 
-> **最后更新: 2026-06-20** — 配置外部化：ConfigManager 加载 `game_config.json`，游戏启动参数（金币/次数/槽位/利息/商店）统一配置。
+> **最后更新: 2026-06-24** — 消除模式 _begin_seal_phase 同场景过渡数据流 + hand_updated emit 修复
 
 ## 技术栈
 
@@ -292,7 +292,7 @@ NinKingGameState.swap_cards(src_idx, tgt_idx)
     │ 检查 _cascading 锁 + 相邻约束
     │
     ├── CleanController.do_swap(gs, src, tgt) → 交换两张牌位置
-    │   └── emit hand_swapped + hand_updated 信号
+    │   └── emit hand_swapped（注：hand_updated 在 finalize_swap / 链消除波次中 emit）
     │
     ▼
 GameManager._resolve_clean_chain()
@@ -311,6 +311,34 @@ GameManager._resolve_clean_chain()
         │       按波次计分 → {swap_score, gold_on_swap, extra_swaps}
         ├── 应用 gold_on_swap / extra_swaps
         └── CleanController.finalize_swap → emit swaps_changed → 判定: 过关/失败/继续
+```
+
+---
+
+### 数据流（消除模式 — 新封印启动 / 关卡通）
+
+同场景关卡过渡（过关 → 商店 → 继续 → 下一关）不经过 `change_scene_to_file`，`_ready()` 不会重跑。
+
+```
+ShopHandler.on_continue_requested() → SealController.continue_from_shop(gs)
+    │
+    ▼
+NinKingGameState._start_seal()
+    │ 重置 target_score / swaps_remaining / _cascading
+    │
+    ▼
+_begin_seal_phase()
+    ├── DeckManager.new() + reset()
+    │
+    ├── [Clean] hand = CleanLayoutGenerator.generate(deck_manager)
+    │   └── hand_updated.emit(hand)  ← 关键：同场景下 must emit
+    │       （缺失此 emit → 卡牌网格显示上一关残影，见 90-troubleshooting.md §20）
+    │
+    ├── [Bi-ji] hand = deck_manager.draw(9) + auto_arrange()
+    │   └── auto_arrange() 内部已有 hand_updated.emit
+    │
+    ├── _transition_to(SEAL_INTRO) → _intro_timer() → 0.5s → PLAYING
+    └── seal_started.emit() → UI 更新（结界名 / BOSS / 主题色）
 ```
 
 ---

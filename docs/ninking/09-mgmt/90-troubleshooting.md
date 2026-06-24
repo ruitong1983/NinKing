@@ -1,6 +1,6 @@
 # 疑难问题解决手册
 
-> **建立日期:** 2026-06-14 | **最后更新:** 2026-06-24 (§19)
+> **建立日期:** 2026-06-14 | **最后更新:** 2026-06-24 (§20)
 > **用途:** 记录开发中遇到的非显而易见的坑及其解决方案，避免重复踩坑。
 
 ## §1 素材替换后"缺少依赖项"
@@ -703,3 +703,32 @@ fake3d 的 vertex 阶段 `VERTEX += (UV - 0.5) / TEXTURE_PIXEL_SIZE * t * (1.0 -
 **排查方法论：** 当 `modulate` 对某个节点无效时，检查该节点或其子节点是否应用了自定义 `canvas_item` shader，且 shader 中是否有 `COLOR = texture(...)` 或类似赋值。如有，确认是否在赋值后乘了 `MODULATE`。
 
 **实例：** 2026-06-23 B26，牌库面板 `deck_viewer_controller.gd` 对已出牌设 `pc.modulate = Color(0.35, 0.35, 0.35, 0.65)` 无效 — fake3d shader 覆盖 COLOR 导致 modulate 丢失。同时 deck viewer 卡牌不旋转（x_rot=0, y_rot=0）时 vertex 偏移使卡牌虚大。两修复联合生效。
+
+---
+
+## §20 消除模式同场景关卡过渡 — 卡牌视觉层不同步
+
+**现象：** 消除模式第一关正常，进入第二关后交换卡牌不触发消除，或玩家看到的卡牌与数据层不一致。
+
+**根因：** `game_state.gd:_begin_seal_phase()` 生成新关卡的卡牌数据（`hand = CleanLayoutGenerator.generate()`）后，**没有 emit `hand_updated` 信号**。卡牌网格仍显示上一关的旧牌面数据。
+
+| 步骤 | 第一关（`change_scene_to_file`） | 第二关+（同场景过渡） |
+|------|--------------------------------|---------------------|
+| 场景加载 | `_ready()` → `restore_ui_state()` → `refresh_hand(gs.hand)` ✅ | 场景不重载，`_ready()` 不重复执行 ❌ |
+| 新牌生成 | `_begin_seal_phase()` 设 `gs.hand` 但不 emit | 同上，**仍无 `hand_updated.emit()`** |
+| 结果 | 卡牌显示正确 | 卡牌网格显示上一关旧牌，数据层 (`gs.hand`) 已是新牌 |
+
+比鸡模式不受影响是因为 `auto_arrange()` 内部 emit 了 `hand_updated`。
+
+**修复：** `game_state.gd:370` — 消除模式生成手牌后立即 emit：
+```gdscript
+if game_mode == "clean":
+    hand = CleanLayoutGenerator.generate(deck_manager)
+    hand_updated.emit(hand)  # 关键：通知 UI 层更新卡牌网格
+```
+
+**次生问题（已一并修复）：** 结算面板金币显示虚高 — `game_manager.gd:_show_settlement_card()` 引用 `animation_handler.current_play_data`（仅比鸡模式有值），消除模式取到空字典导致 `gold_gain = 现有金币 + 1`。修复：新增 `_gold_before_seal_complete` 追踪变量，消除模式走独立计算通道。
+
+**受影响文件：** `game_state.gd`（+1行）、`game_manager.gd`（+4行 +2行修改）
+
+**2026-06-24**

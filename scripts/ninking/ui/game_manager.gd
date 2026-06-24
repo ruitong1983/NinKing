@@ -23,6 +23,8 @@ var _boss_revealed: bool = false
 
 # Auto-shop: SCORING -> shop transition without click (Balatro-style)
 var _auto_shop_pending: bool = false
+# Clean mode: gold before _complete_seal applies reward + interest (for settlement card)
+var _gold_before_seal_complete: int = -1
 
 var _game_mode: String = "bi_ji"
 
@@ -34,7 +36,9 @@ func _ready() -> void:
 	shop_handler = ShopHandler.new()
 	shop_handler.setup(ui)
 	animation_handler = AnimationHandler.new()
-	var _mark_cb := func(): _auto_shop_pending = true
+	var _mark_cb := func():
+			_auto_shop_pending = true
+			_gold_before_seal_complete = NinKingGameState.gold
 	animation_handler.setup(ui, _mark_cb)
 	clean_chain_handler = CleanChainHandler.new()
 	clean_chain_handler.setup(ui, _mark_cb)
@@ -321,7 +325,11 @@ func _trigger_boss_reveal_in_playing() -> void:
 
 func _show_settlement_card() -> void:
 	## Show settlement card with score/gold info, then wait for button press.
-	var old_gold: int = animation_handler.current_play_data.get("gold_before_settlement", -1)
+	var old_gold: int
+	if _game_mode == "clean":
+		old_gold = _gold_before_seal_complete
+	else:
+		old_gold = animation_handler.current_play_data.get("gold_before_settlement", -1)
 	var gain: int = max(0, NinKingGameState.gold - old_gold) if old_gold >= 0 else 0
 	ui.settlement_overlay.show_card({
 		barrier_num = NinKingGameState.barrier_num,
