@@ -19,9 +19,13 @@ var ui: UIManager
 var _scoring_vfx: CleanScoringVFX = null
 var _match_display: CleanMatchDisplay = null
 
+## Callable to set game_manager's _auto_shop_pending flag before seal completion.
+var _mark_auto_shop: Callable = func(): pass
 
-func setup(ui_ref: UIManager) -> void:
+
+func setup(ui_ref: UIManager, mark_auto_shop_cb: Callable = func(): pass) -> void:
 	ui = ui_ref
+	_mark_auto_shop = mark_auto_shop_cb
 	# Create clean mode scoring VFX orchestrator (add to tree for Tween support)
 	_scoring_vfx = CleanScoringVFX.new()
 	_scoring_vfx.setup(ui)
@@ -35,11 +39,14 @@ func setup(ui_ref: UIManager) -> void:
 
 ## Resolve elimination chains after a clean mode swap.
 func resolve_clean_chain() -> void:
+	print("[MASK_DEBUG] resolve_clean_chain: START")
 	var gs = NinKingGameState
 	if gs.current_state != NinKingGameState.State.PLAYING:
 		return
+
 	if gs.game_mode != "clean":
 		return
+
 
 	# Check if swap formed any match
 	var first_wave: Dictionary = CleanController.prepare_chain_wave(gs, 0)
@@ -86,6 +93,8 @@ func resolve_clean_chain() -> void:
 	# B.5 — Explicitly hide card nodes (primary hide mechanism)
 	_hide_matched_cards(first_wave)
 	gs.hand_updated.emit(gs.hand)
+	# Mask debug
+	print("[MASK_DEBUG] Wave 1 Phase B done: visible=", _count_visible_cards(), " nulls=", _count_hand_nulls(gs))
 
 	# Phase C — GAP (0.4s): player sees empty slots
 	await get_tree().create_timer(0.4).timeout
@@ -136,6 +145,8 @@ func resolve_clean_chain() -> void:
 		# B.5 — Explicitly hide card nodes
 		_hide_matched_cards(wave)
 		gs.hand_updated.emit(gs.hand)
+		# Mask debug
+		print("[MASK_DEBUG] Wave ", chain_level, " Phase B done: visible=", _count_visible_cards(), " nulls=", _count_hand_nulls(gs))
 
 		# Phase C — GAP
 		await get_tree().create_timer(0.4).timeout
@@ -179,6 +190,9 @@ func resolve_clean_chain() -> void:
 		gs.swaps_remaining += extra
 	if clean_result.get("only_one_swap", false):
 		gs.swaps_remaining = 1
+
+	# Mark auto-shop before transition (Phase E settlement card)
+	_mark_auto_shop.call()
 
 	# Finalize
 	CleanController.finalize_swap(gs, chains, swap_score)
@@ -234,6 +248,8 @@ func _animate_replenishment(gs) -> void:
 
 	CleanController.gravity_and_draw(gs)
 	gs.hand_updated.emit(gs.hand)
+	# Mask debug
+	print("[MASK_DEBUG] _animate_replenishment: after update_card_faces visible=", _count_visible_cards(), " nulls=", _count_hand_nulls(gs))
 
 	var grid: HandCardContainer = ui.card_grid
 	var COLS: int = 3
@@ -269,9 +285,14 @@ func _animate_replenishment(gs) -> void:
 				incoming.append(idx)
 
 	# Phase D1 — Old cards fall
+	var skipped_falling: int = 0
 	for idx in falling:
 		var nk := grid.get_card_at(idx)
-		if nk == null or not nk.visible:
+		if nk == null:
+			skipped_falling += 1
+			continue
+		if not nk.visible:
+			skipped_falling += 1
 			continue
 		var target_y: float = nk.position.y
 		var col: int = idx % COLS
@@ -294,6 +315,9 @@ func _animate_replenishment(gs) -> void:
 			.set_delay(delay + 0.26)
 		glow.tween_property(nk, "modulate", Color.WHITE, 0.18)\
 			.set_ease(Tween.EASE_OUT)
+
+	if skipped_falling > 0:
+		print("[MASK_DEBUG] D1 skipped ", skipped_falling, "/", falling.size(), " falling cards (not visible)")
 
 	await get_tree().create_timer(0.55).timeout
 
@@ -350,3 +374,29 @@ func _animate_replenishment(gs) -> void:
 			var nk := grid.get_card_at(idx)
 			if is_instance_valid(nk):
 				nk.set_visual_state(NinKingCard.VisualState.NORMAL)
+
+
+# ═══ Mask debug helpers ═══
+
+## Count how many card nodes in the grid have visible=true.
+func _count_visible_cards() -> int:
+	var grid: HandCardContainer = ui.card_grid
+	if not is_instance_valid(grid):
+		return -1
+	var count: int = 0
+	for i in 9:
+		var nk := grid.get_card_at(i)
+		if nk != null and nk.visible:
+			count += 1
+	return count
+
+
+## Count how many null entries exist in gs.hand (unfilled grid slots).
+func _count_hand_nulls(gs) -> int:
+	if gs == null or gs.hand.is_empty():
+		return -1
+	var count: int = 0
+	for i in 9:
+		if gs.hand[i] == null:
+			count += 1
+	return count

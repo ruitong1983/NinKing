@@ -135,7 +135,7 @@
 
 ### 4.8 `scripts/ninking/clean_chain_handler.gd` — 消除链处理器（new 2026-06-24）
 
-> `class_name CleanChainHandler`，`extends Node`，消除模式链式消除 UI 流程控制器。从 `game_manager.gd` 提取（A1 行数优化）。`setup(ui)` → `resolve_clean_chain()`。持有 `_match_display: CleanMatchDisplay` 实例。
+> `class_name CleanChainHandler`，`extends Node`，消除模式链式消除 UI 流程控制器。从 `game_manager.gd` 提取（A1 行数优化）。`setup(ui, mark_auto_shop_cb?)` → `resolve_clean_chain()`。持有 `_match_display: CleanMatchDisplay` 实例 + `_mark_auto_shop` 回调（过关自动商店标志位）。
 
 | 影响文档 | 说明 | 同步要点 |
 |---------|------|---------|
@@ -547,3 +547,4 @@
 | 2026-06-23 | 🖌️ **风格统一：少年漫画→治愈漫画**: 更新 `16-art-direction-principles.md` 全篇。同步 6 份文档风格引用。TODO.md 新增风格统一条目。|
 | 2026-06-23 | 🏗️ **KUI2 GameOver/Victory 面板卡片化**: ContentPanel 暖米面板 + pop_in 入场 + 文字配色适配。同步 `06-ui-layout-reference.md`/`10-main-ui-design.md`/`11-main-overlay-design.md`/`21-ui-interaction-enhancements.md` 场景树与文字配色描述。|
 | 2026-06-23 | 🆕 **消除模式通道**: §4.1 `game_state.gd` 新增 `game_mode` 字段映射；§5.12 `main_menu.gd` 新增 CleanBtn/_pending_mode 路由说明；§6.1 新增 `ninking_clean_main.tscn` 场景映射。同步 `03-technical-design.md` / `09-launch-ui-design.md`。|
+| 2026-06-24 | 🃏 **扑克牌面替换为 Standard Deck Outlined PNG**: `card_data.gd` SUIT_FILE_CHARS/RANK_FILE_CHARS 映射更新；`ninking_card.gd` SVG→PNG 路径重构 + 卡背换为 Outlined Card_back_01 (128×175 vs 旧 1728×2304)。同步 `03-technical-design.md` / `16-art-direction-principles.md` / `19-image-asset-matching-guide.md` / `90-troubleshooting.md`。|

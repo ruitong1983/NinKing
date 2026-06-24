@@ -499,13 +499,13 @@ res://
 ## 核心类图
 
 ```
-NinKingCard (extends Card) — SVG 牌面渲染
+NinKingCard (extends Card) — PNG 牌面渲染 (128×175 Outlined Deck, resized to 125×175)
 ├── _ensure_face_nodes() — 创建 FrontFace/BackFace/TextureRect 节点（new() 兜底）
-├── _load_card_texture() — 加载 SVG 纹理 (res://assets/images/poker/{suit_dir}/{rank_num}.svg)  <!-- 2026-06-24: 素材从 4color_deck_by_heratexx 切至 poker -->
+├── _load_card_texture() — 加载 PNG 纹理 (res://assets/images/poker/Standard Deck Game Assets/Outlined/Outlined Cards/{RANK}_{SUIT}.png)  <!-- 2026-06-24: 素材从 poker/SVG 切至 Standard Deck Outlined PNG -->
 │   └── expand_mode=IGNORE_SIZE + stretch_mode=KEEP_ASPECT_COVERED + size=125×175 (5:7)
-│       (IGNORE_SIZE 防止 Godot 4 每帧覆盖 size 为 SVG viewBox 240×334)
-├── _get_card_svg_path() — suit/rank → SVG 文件路径
-├── update_display() — 重载 SVG 纹理（换牌/数据变更时）
+│       (IGNORE_SIZE 防止 Godot 4 每帧覆盖 size 为 PNG 原生 128×175)
+├── _get_card_texture_path() — suit/rank → PNG 文件路径
+├── update_display() — 重载 PNG 纹理（换牌/数据变更时）
 ├── set_visual_state(VisualState) — SWAP_SOURCE(蓝) / REDRAW_TARGET(红) / NORMAL
 ├── _handle_mouse_released/pressed() — 点击 vs 拖拽判定（CLICK_THRESHOLD=10px）
 │   Click: emit ninking_card_clicked → HandInteraction 点选交换

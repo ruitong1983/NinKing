@@ -2,8 +2,9 @@ class_name NinKingCard
 extends Card
 
 ## NinKing-specific Card extending card-framework's Card.
-## Card face is a full SVG texture (rank + suit + background + border all in
-## one image). No procedural drawing, no text labels — the SVG IS the card.
+## Card face is a full PNG texture (rank + suit + illustration all in
+## one image) from the "Standard Deck Game Assets — Outlined" set.
+## No procedural drawing, no text labels — the PNG IS the card.
 ##
 ## FrontFace / BackFace / TextureRect nodes are defined in ninking_card.tscn.
 ## For cards created via NinKingCard.new() (hand_display, deck_viewer), the
@@ -29,8 +30,8 @@ var _material_cache: Dictionary = {}
 # Card back texture (shared across all cards, loaded once at init)
 static var _card_back_tex: Texture2D
 
-# SVG texture cache — avoid re-processing the same face repeatedly.
-# Key format: "svg_path_WIDTHxHEIGHT" so 63x88 deck thumbnails and
+# PNG texture cache — avoid re-processing the same face repeatedly.
+# Key format: "png_path_WIDTHxHEIGHT" so 63x88 deck thumbnails and
 # 125x175 hand cards use separate entries, preventing wrong-sized
 # texture reuse across display contexts.
 static var _face_cache: Dictionary = {}
@@ -38,19 +39,19 @@ static var _face_cache: Dictionary = {}
 static func _face_cache_key(path: String, p_size: Vector2) -> String:
 	return "%s_%dx%d" % [path, int(p_size.x), int(p_size.y)]
 
-## Pre-load deck SVG textures into the shared face cache using threaded
-## loading. SVG rasterization happens in background threads; the cache is
+## Pre-load deck PNG textures into the shared face cache using threaded
+## loading. PNG textures load faster than rasterized SVGs; the cache is
 ## populated with textures already resized to `target_size`. Subsequent
 ## _load_card_texture() calls on individual cards hit the cache instantly.
 ##
 ## Call this before instantiating cards for the deck viewer grid so the
-## 52-card loop doesn't block on sequential SVG parsing + resize.
+## 52-card loop doesn't block on sequential texture loading.
 static func prewarm_face_cache(card_datas: Array[CardData.PlayingCard], target_size: Vector2) -> void:
 	var paths: Array[String] = []
 	for cd: CardData.PlayingCard in card_datas:
 		var rank_char: String = CardData.RANK_FILE_CHARS.get(cd.rank, "?")
 		var suit_char: String = CardData.SUIT_FILE_CHARS.get(cd.suit, "?")
-		var path: String = "%s/%s/%s.svg" % [SVG_BASE_PATH, suit_char, rank_char]
+		var path: String = "%s/%s_%s.png" % [PNG_BASE_PATH, rank_char, suit_char]
 		var key: String = _face_cache_key(path, target_size)
 		if not _face_cache.has(key):
 			paths.append(path)
@@ -70,11 +71,11 @@ static func prewarm_face_cache(card_datas: Array[CardData.PlayingCard], target_s
 
 func _get_card_back_tex() -> Texture2D:
 	if _card_back_tex == null:
-		_card_back_tex = load("res://assets/images/cards/card_back.png")
+		_card_back_tex = load("res://assets/images/poker/Standard Deck Game Assets/Outlined/Outlined Cards/Card_back_01.png")
 	return _card_back_tex
 
-# ── SVG asset path ──
-const SVG_BASE_PATH: String = "res://assets/images/poker"
+# ── PNG asset path ──
+const PNG_BASE_PATH: String = "res://assets/images/poker/Standard Deck Game Assets/Outlined/Outlined Cards"
 
 # ── Instance vars ──
 var playing_card_data: CardData.PlayingCard
@@ -152,20 +153,20 @@ func _ensure_face_nodes() -> void:
 		back_face_texture = tex_rect
 
 
-# ═══ SVG texture loading ═══
+# ═══ PNG texture loading ═══
 
-func _get_card_svg_path() -> String:
+func _get_card_texture_path() -> String:
 	if playing_card_data == null:
 		return ""
 	var rank_char: String = CardData.RANK_FILE_CHARS.get(playing_card_data.rank, "?")
 	var suit_char: String = CardData.SUIT_FILE_CHARS.get(playing_card_data.suit, "?")
-	return "%s/%s/%s.svg" % [SVG_BASE_PATH, suit_char, rank_char]
+	return "%s/%s_%s.png" % [PNG_BASE_PATH, rank_char, suit_char]
 
 
 func _load_card_texture() -> void:
 	if _texture_loaded:
 		return
-	var path: String = _get_card_svg_path()
+	var path: String = _get_card_texture_path()
 	if path.is_empty():
 		return
 
@@ -174,18 +175,18 @@ func _load_card_texture() -> void:
 	if _face_cache.has(cache_key):
 		front_tex = _face_cache[cache_key]
 	else:
-		var svg_tex: Texture2D = load(path)
-		if svg_tex == null:
+		var png_tex: Texture2D = load(path)
+		if png_tex == null:
 			return
-		front_tex = svg_tex
-		var img: Image = svg_tex.get_image()
+		front_tex = png_tex
+		var img: Image = png_tex.get_image()
 		if img and (img.get_width() != int(card_size.x) or img.get_height() != int(card_size.y)):
 			img.resize(int(card_size.x), int(card_size.y), Image.INTERPOLATE_LANCZOS)
 			front_tex = ImageTexture.create_from_image(img)
 		_face_cache[cache_key] = front_tex
 
 	# Deck viewer (non-interactive) cards never flip — skip back texture
-	# processing entirely to avoid 52x decompress+resize of a 1728x2304 PNG.
+	# processing entirely to avoid 52x decompress+resize overhead.
 	var back_tex: Texture2D
 	if can_be_interacted_with:
 		back_tex = _get_card_back_tex()

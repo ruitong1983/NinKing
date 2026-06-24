@@ -1,0 +1,931 @@
+diff --git a/scripts/config/config_manager.gd b/scripts/config/config_manager.gd
+index a71422e..c5611fb 100644
+--- a/scripts/config/config_manager.gd
++++ b/scripts/config/config_manager.gd
+@@ -13,13 +13,14 @@ const DEFAULT: Dictionary = {
+ 	"shop_item_count": 2,
+ 	"reroll_base_cost": 3,
+ 	"starter_ninja_ids": ["n_001", "n_052", "n_059", "n_105", "n_151"],
++		"clean_swaps_per_seal": 5,
+ }
+ 
+ 
+ const REQUIRED_KEYS: Array[String] = [
+ 	"starting_gold", "plays_per_seal", "max_ninja_slots",
+ 	"interest_divisor", "interest_cap", "shop_ninja_count",
+-	"shop_item_count", "reroll_base_cost", "starter_ninja_ids",
++	"shop_item_count", "reroll_base_cost", "starter_ninja_ids", "clean_swaps_per_seal",
+ ]
+ 
+ var starting_gold: int
+@@ -31,6 +32,7 @@ var shop_ninja_count: int
+ var shop_item_count: int
+ var reroll_base_cost: int
+ var starter_ninja_ids: Array[String]
++var clean_swaps_per_seal: int
+ var _config_loaded: bool = false
+ 
+ 
+@@ -92,6 +94,7 @@ func _load_config() -> void:
+ 	_validate_gte(errors, data, "shop_ninja_count", 1)
+ 	_validate_gte(errors, data, "shop_item_count", 1)
+ 	_validate_gte(errors, data, "reroll_base_cost", 0)
++	_validate_gte(errors, data, "clean_swaps_per_seal", 1)
+ 	if not data["starter_ninja_ids"] is Array or data["starter_ninja_ids"].is_empty():
+ 		errors.append("starter_ninja_ids 非数组或为空")
+ 	else:
+@@ -124,6 +127,7 @@ func _apply_config(data: Dictionary) -> void:
+ 	shop_item_count = int(data["shop_item_count"])
+ 	reroll_base_cost = int(data["reroll_base_cost"])
+ 	starter_ninja_ids = []
++	clean_swaps_per_seal = int(data.get("clean_swaps_per_seal", 5))
+ 	var ids: Array = data["starter_ninja_ids"]
+ 	for id: String in ids:
+ 		starter_ninja_ids.append(id)
+diff --git a/scripts/ninking/game_state.gd b/scripts/ninking/game_state.gd
+index fd34865..fea2210 100644
+--- a/scripts/ninking/game_state.gd
++++ b/scripts/ninking/game_state.gd
+@@ -4,6 +4,7 @@ const GameRunLogger = preload("res://scripts/ninking/logging/game_logger.gd")
+ 
+ ## Core game state autoload — NinKing (忍者牌 × 比鸡).
+ ## Barrier/Seal progression, 9-card hand → 3-group arrangement, scoring pipeline.
++## Also handles Clean (elimination) mode branching.
+ 
+ enum State {
+ 	MAIN_MENU,
+@@ -37,11 +38,16 @@ signal xi_triggered(xis: Array[String])
+ func emit_xi_triggered(xis: Array[String]) -> void:
+ 	xi_triggered.emit(xis)
+ 
++signal swaps_changed(remaining: int)  # Clean mode only
++
++func emit_swaps_changed() -> void:
++	swaps_changed.emit(swaps_remaining)
++
+ var current_state: State = State.MAIN_MENU
+ 
+ # Barrier/Seal tracking
+ var barrier_num: int = 1
+-var seal_idx: int = 0          # 0=修羅, 1=明王, 2=夜叉
++var seal_idx: int = 0          # 0=修羅(序), 1=明王(破), 2=夜叉(急)
+ var target_score: int = 0
+ var current_score: int = 0
+ var current_seal_lord_name: String = ""
+@@ -49,6 +55,7 @@ var current_seal_lord_effects: Dictionary = {}
+ 
+ # Resources
+ var plays_remaining: int = 3
++var swaps_remaining: int = 5  # Clean mode only
+ var gold: int = 8
+ 
+ # Hand & deck
+@@ -57,7 +64,10 @@ var current_arrangement: Arrangement = null
+ var current_col_evals: Array = []  # Array[HandEvaluator3.EvalResult], 3 elements or empty
+ var deck_manager: DeckManager = null
+ var current_deck_name: String = "standard"
+-var game_mode: String = "bi_ji"  # "bi_ji"=笔记模式, "clean"=消除模式
++var game_mode: String = "bi_ji"  # "bi_ji"=比鸡模式, "clean"=消除模式
++
++# Clean mode
++var _cascading: bool = false  # Chain wave in progress — lock input
+ 
+ # Player inventory
+ var owned_ninjas: Array[Dictionary] = []
+@@ -112,20 +122,27 @@ func _start_seal() -> void:
+ 	target_score = seal_cfg["target"]
+ 	current_score = 0
+ 	plays_remaining = ConfigManager.plays_per_seal
+-
+-	# Tool effects from owned ninjas: extra_plays (火遁已改同花顺倍率 / 赌命-1)
+-	for ninja: Dictionary in owned_ninjas:
+-		var ep: int = ninja.get("effect", {}).get("extra_plays", 0)
+-		plays_remaining += ep
+-	# Clamp to minimum 1
+-	if plays_remaining < 1:
+-		plays_remaining = 1
+-
+-	# 幻术大师: only_one_play → 强制仅1次出牌
+-	for ninja: Dictionary in owned_ninjas:
+-		if ninja.get("effect", {}).get("only_one_play", false):
+-			plays_remaining = 1
+-			break
++	swaps_remaining = ConfigManager.clean_swaps_per_seal if game_mode == "clean" else 0
++	_cascading = false
++
++	if game_mode == "clean":
++		# Clean mode: extra_plays → extra_swaps, only_one_play → only_one_swap
++		for ninja: Dictionary in owned_ninjas:
++			swaps_remaining += ninja.get("effect", {}).get("extra_plays", 0)
++		swaps_remaining = maxi(swaps_remaining, 1)
++		for ninja: Dictionary in owned_ninjas:
++			if ninja.get("effect", {}).get("only_one_play", false):
++				swaps_remaining = 1
++				break
++	else:
++		# Bi-ji mode: standard play handling
++		for ninja: Dictionary in owned_ninjas:
++			plays_remaining += ninja.get("effect", {}).get("extra_plays", 0)
++		plays_remaining = maxi(plays_remaining, 1)
++		for ninja: Dictionary in owned_ninjas:
++			if ninja.get("effect", {}).get("only_one_play", false):
++				plays_remaining = 1
++				break
+ 
+ 	# Seal Lord effects
+ 	current_seal_lord_name = ""
+@@ -135,6 +152,13 @@ func _start_seal() -> void:
+ 		current_seal_lord_name = lord["name"]
+ 		current_seal_lord_effects = lord.get("effect", {}).duplicate()
+ 
++	# Apply Seal Lord clean-mode specific effects
++	if game_mode == "clean":
++		if current_seal_lord_effects.has("column_blocked") or current_seal_lord_effects.has("row_blocked"):
++			pass  # consumed by CleanController/game_manager at scoring time
++		if current_seal_lord_effects.has("max_chain"):
++			pass  # consumed by CleanController during chain resolution
++
+ 	# Check if Seal Lord changes constraint — used by is_constraint_satisfied()
+ 	if current_seal_lord_effects.has("constraint"):
+ 		pass  # stored in current_seal_lord_effects, read by is_constraint_satisfied()
+@@ -147,12 +171,14 @@ func _start_seal() -> void:
+ 
+ 
+ # ══════════════════════════════════════════
+-# Auto-arrange (thin wrapper — logic in ArrangeController)
++# Auto-arrange (bi_ji only — thin wrapper)
+ # ══════════════════════════════════════════
+ 
+ ## Compute the best arrangement and emit signals.
+ ## Called externally by SealController and ShopManager.
+ func auto_arrange() -> void:
++	if game_mode == "clean":
++		return
+ 	var old_hand: Array = hand.duplicate()
+ 	ArrangeController.auto_arrange(self)
+ 	_recompute_col_evals()
+@@ -163,7 +189,7 @@ func auto_arrange() -> void:
+ ## Re-evaluate the current manual arrangement without AI re-sorting.
+ ## Preserves player's card positions, re-computes hand types and constraint.
+ func re_evaluate_arrangement() -> void:
+-	if hand.size() < 9:
++	if game_mode == "clean" or hand.size() < 9:
+ 		return
+ 	var head_cards: Array[CardData.PlayingCard] = []
+ 	var mid_cards: Array[CardData.PlayingCard] = []
+@@ -197,15 +223,28 @@ func get_scoring_rules() -> Dictionary:
+ 
+ 
+ # ══════════════════════════════════════════
+-# Play / Seal — delegated to SealController
++# Play / Seal — delegated to controllers
+ # ══════════════════════════════════════════
+ 
+ func execute_play() -> void:
++	if game_mode == "clean":
++		# Clean mode: no "play" action — swaps handle scoring
++		return
+ 	SealController.execute_play(self)
+ 
+ 
+ func swap_cards(idx1: int, idx2: int) -> void:
+-	SealController.swap_cards(self, idx1, idx2)
++	if game_mode == "clean":
++		if _cascading:
++			return  # Locked during chain wave
++		if current_state != State.PLAYING:
++			return
++		if CleanController.do_swap(self, idx1, idx2):
++			# Signal handler (_on_hand_swapped in game_manager) will trigger
++			# chain resolution if matches found.
++			pass
++	else:
++		SealController.swap_cards(self, idx1, idx2)
+ 
+ 
+ func go_to_shop() -> void:
+@@ -261,6 +300,9 @@ func get_tail_cards() -> Array[CardData.PlayingCard]:
+ 
+ 
+ func is_constraint_satisfied() -> bool:
++	if game_mode == "clean":
++		# Clean mode has no ascending constraint — always satisfied
++		return true
+ 	if not current_arrangement:
+ 		return false
+ 	var c: String = current_seal_lord_effects.get("constraint", "ascending")
+@@ -288,6 +330,7 @@ func continue_run() -> void:
+ 	current_score = int(data.get("current_score", 0))
+ 	target_score = int(data.get("target_score", 0))
+ 	plays_remaining = int(data.get("plays_remaining", 3))
++	swaps_remaining = int(data.get("swaps_remaining", 0))
+ 	gold = int(data.get("gold", 4))
+ 	current_deck_name = data.get("current_deck_name", "standard")
+ 
+@@ -308,17 +351,23 @@ func continue_run() -> void:
+ # Internal
+ # ══════════════════════════════════════════
+ 
+-## Shared seal startup: reset deck → deal 9 → auto-arrange → checkpoint → emit signals → await intro.
++## Shared seal startup: reset deck → deal 9 → arrange/generate → checkpoint → emit → await intro.
+ ## Called by _start_seal (fresh seal) and continue_run (resumed seal).
+ func _begin_seal_phase() -> void:
+ 	GameRunLogger.on_seal_started(barrier_num, seal_idx, target_score, current_seal_lord_name)
+ 
+ 	deck_manager = DeckManager.new()
+ 	deck_manager.reset()
+-	hand = deck_manager.draw(9)
+-	GameRunLogger.on_cards_dealt(hand)
+ 
+-	auto_arrange()
++	if game_mode == "clean":
++		# Clean mode: generate 3x3 grid with no pre-existing matches
++		hand = CleanLayoutGenerator.generate(deck_manager)
++	else:
++		# Bi-ji mode: draw 9 and auto-arrange into 3 groups
++		hand = deck_manager.draw(9)
++		auto_arrange()
++
++	GameRunLogger.on_cards_dealt(hand)
+ 
+ 	# Checkpoint save after seal is fully set up
+ 	SaveManager.save_run(SaveManager.build_run_data(self))
+diff --git a/scripts/ninking/save_manager.gd b/scripts/ninking/save_manager.gd
+index a55d17a..ef72737 100644
+--- a/scripts/ninking/save_manager.gd
++++ b/scripts/ninking/save_manager.gd
+@@ -44,6 +44,7 @@ static func build_run_data(gs: Node) -> Dictionary:
+ 		"current_score": gs.current_score,
+ 		"target_score": gs.target_score,
+ 		"plays_remaining": gs.plays_remaining,
++		"swaps_remaining": gs.swaps_remaining,
+ 		"gold": gs.gold,
+ 		"current_deck_name": gs.current_deck_name,
+ 		"owned_ninjas": gs.owned_ninjas.duplicate(true),
+@@ -51,6 +52,7 @@ static func build_run_data(gs: Node) -> Dictionary:
+ 		"star_chart_levels": gs.star_chart_levels.duplicate(),
+ 		"current_seal_lord_name": gs.current_seal_lord_name,
+ 		"current_seal_lord_effects": gs.current_seal_lord_effects.duplicate(),
++		"game_mode": gs.game_mode,
+ 	}
+ 
+ 
+diff --git a/scripts/ninking/score/score_calculator.gd b/scripts/ninking/score/score_calculator.gd
+index 137d641..3b81556 100644
+--- a/scripts/ninking/score/score_calculator.gd
++++ b/scripts/ninking/score/score_calculator.gd
+@@ -582,6 +582,135 @@ static func _finalize(
+ 	}
+ 
+ 
++# ══════════════════════════════════════════
++# Clean Mode Scoring
++# ══════════════════════════════════════════
++
++## Filter: returns true if a ninja effect should apply in clean mode.
++##
++## Clean mode skips conditions that reference concepts that don't exist
++## (hand_type/group/col_hand_type/xi). Only unconditional effects and
++## economy effects (mult_per_gold, x_per_gold) are valid.
++static func _is_ninja_valid_for_clean(effect: Dictionary) -> bool:
++	## CL21: Conservative condition filter for clean mode.
++	## Known-valid: rank_odd, mult_per_hand_rank. Known-invalid: hand_type, group, col_hand_type, xi.
++	## Unknown condition keys reject (false) — safe default against future condition types.
++	var cond: Dictionary = effect.get("condition", {})
++	if cond.is_empty():
++		return true  # No condition → unconditional
++	const SAFE_KEYS: Array[String] = ["rank_odd", "mult_per_hand_rank"]
++	const INVALID_KEYS: Array[String] = ["hand_type", "group", "col_hand_type", "xi"]
++	for key: String in cond:
++		if key in INVALID_KEYS:
++			return false
++		if key not in SAFE_KEYS:
++			return false  # Unknown condition key — reject conservatively
++	return true
++
++
++## Clean mode per-swap scoring with chain waves and ninja integration.
++##
++## Called once per swap AFTER all chain waves are resolved.
++##
++## Formula (from clean-mode-design.md §5.2):
++##   base_multiplier = 1
++##   swap_score = 0
++##   for each wave:
++##     raw_wave = Σ(match.rank × 10) × chain_multiplier
++##     wave_with_ninja = raw_wave + Σ(ninja_add_chips)
++##     swap_score += wave_with_ninja
++##   swap_score = ceil(swap_score × base_multiplier)
++##   for each x_mult: swap_score = ceil(swap_score × x_mult)
++##
++## @param hand: Array[CardData.PlayingCard] — current 9-card grid (unused currently, for future condition checks)
++## @param chain_waves: Array[Dictionary] — each wave from CleanController chain loop
++## @param ninjas: Array[Dictionary] — owned ninjas with effects
++## @param gold: int — current gold for economy effects
++##
++## Returns Dictionary:
++##   swap_score: int — total score for this swap
++##   wave_scores: Array[int] — per-wave scores (for animation)
++##   gold_on_swap: int — gold earned from this swap
++##   extra_swaps: int — extra swaps to add
++##   only_one_swap: bool — override swaps_remaining to 1
++##   applied_ninja_ids: Array[String] — ninjas that contributed
++static func calculate_clean(
++	hand: Array,
++	chain_waves: Array,
++	ninjas: Array,
++	gold: int = 0
++) -> Dictionary:
++	var base_multiplier: int = 1
++	var add_chips_total: int = 0
++	var x_stack: Array[int] = []
++	var gold_on_swap: int = 0
++	var extra_swaps: int = 0
++	var only_one_swap: bool = false
++	var applied_ids: Array[String] = []
++
++	# ── Process ninja effects ──
++	for ninja: Dictionary in ninjas:
++		var eff: Dictionary = ninja.get("effect", {})
++		if not _is_ninja_valid_for_clean(eff):
++			continue
++
++		applied_ids.append(ninja.get("id", ""))
++
++		# Direct stat effects
++		add_chips_total += eff.get("add_chips", 0)
++		base_multiplier += eff.get("add_mult", 0)
++
++		var xv: int = eff.get("x_mult", 1)
++		if xv > 1:
++			x_stack.append(xv)
++
++		# CL20: economy effects via shared helper
++		var eco: Dictionary = ScoreHelpers.apply_economy_effects(eff, gold)
++		base_multiplier += eco.earned_mult
++		for xv: int in eco.earned_x:
++			x_stack.append(xv)
++		# Gold on swap (gold_on_play → gold_on_swap)
++		gold_on_swap += eff.get("gold_on_play", 0)
++
++		# Extra swaps / only one swap
++		extra_swaps += eff.get("extra_plays", 0)
++		if eff.get("only_one_play", false):
++			only_one_swap = true
++
++	# ── Score each chain wave ──
++	var swap_score: int = 0
++	var wave_scores: Array[int] = []
++
++	for wave: Dictionary in chain_waves:
++		var matches: Array[Dictionary] = wave.get("matches", [])
++		var chain_level: int = wave.get("chain_level", 1)
++
++		# Raw wave score: Σ(rank × 10) × chain_multiplier
++		var raw: int = 0
++		for m: Dictionary in matches:
++			raw += m.get("rank", 2) * 10
++		raw *= chain_level
++
++		# Add ninja chips (same value per wave)
++		var ws: int = raw + add_chips_total
++		wave_scores.append(ws)
++		swap_score += ws
++
++	# ── Apply multipliers ──
++	swap_score = ceili(float(swap_score) * float(base_multiplier))
++	for x: int in x_stack:
++		swap_score = ceili(float(swap_score) * float(x))
++
++	return {
++		"swap_score": max(swap_score, 0),
++		"wave_scores": wave_scores,
++		"gold_on_swap": gold_on_swap,
++		"extra_swaps": extra_swaps,
++		"only_one_swap": only_one_swap,
++		"applied_ninja_ids": applied_ids,
++	}
++
++
+ # ──────────────────────────── Cross-group bonuses (shared) ────────────────────────────
+ 
+ ## Detect cross-group effect flags from raw ninjas array.
+diff --git a/scripts/ninking/score/score_effect_collector.gd b/scripts/ninking/score/score_effect_collector.gd
+index 60362fc..67480af 100644
+--- a/scripts/ninking/score/score_effect_collector.gd
++++ b/scripts/ninking/score/score_effect_collector.gd
+@@ -335,29 +335,16 @@ static func _col_matches_hand_type_cond(cond: Dictionary, col_type: CardData.Han
+ 
+ ## Apply gold-scaling effects (金剛力, 黄金律) to a group.
+ ## These are unconditional — they apply to ANY group (row or column).
++## CL20: Delegates to ScoreHelpers.apply_economy_effects() to eliminate
++## code duplication with ScoreCalculator.calculate_clean().
+ static func _apply_economy_effects(effect: Dictionary, gold: int, target: Dictionary) -> bool:
++	var eco: Dictionary = ScoreHelpers.apply_economy_effects(effect, gold)
+ 	var applied: bool = false
+-	var mult_step: int = effect.get("mult_per_gold", 0)
+-	if mult_step > 0:
+-		var step: int = effect.get("mult_gold_step", 5)
+-		var cap: int = effect.get("mult_gold_cap", 0)
+-		var earned: int = floori(float(gold) / float(step)) * mult_step
+-		if cap > 0:
+-			earned = mini(earned, cap)
+-		if earned > 0:
+-			target.mult += earned
+-			applied = true
+-
+-	var x_step: int = effect.get("x_per_gold", 0)
+-	if x_step > 1:
+-		var step_g: int = effect.get("x_gold_step", 15)
+-		var cap_x: int = effect.get("x_gold_cap", 0)
+-		var count: int = floori(float(gold) / float(step_g))
+-		if cap_x > 0:
+-			count = mini(count, cap_x)
+-		for _i: int in range(count):
+-			target.x_stack.append(x_step)
+-		if count > 0:
+-			applied = true
+-
++	if eco.earned_mult > 0:
++		target.mult += eco.earned_mult
++		applied = true
++	if not eco.earned_x.is_empty():
++		for xv: int in eco.earned_x:
++			target.x_stack.append(xv)
++		applied = true
+ 	return applied
+diff --git a/scripts/ninking/score/score_helpers.gd b/scripts/ninking/score/score_helpers.gd
+index b6a5e56..e30107b 100644
+--- a/scripts/ninking/score/score_helpers.gd
++++ b/scripts/ninking/score/score_helpers.gd
+@@ -43,3 +43,39 @@ static func group_ench_mult(cards: Array) -> int:
+ 		total += c.get_enhancement_mult()
+ 		total += c.get_edition_mult()
+ 	return total
++
++
++## Apply economy effects (金剛力: mult_per_gold, 黄金律: x_per_gold).
++## CL20: Shared between ScoreEffectCollector._apply_economy_effects() and
++## ScoreCalculator.calculate_clean() to eliminate code duplication.
++##
++## Returns {earned_mult: int, earned_x: Array[int]} — caller applies to
++## their own accumulator structure.
++static func apply_economy_effects(effect: Dictionary, gold: int) -> Dictionary:
++	var result: Dictionary = {
++		earned_mult = 0,
++		earned_x = [],
++	}
++
++	# mult_per_gold (金剛力)
++	var mult_step: int = effect.get("mult_per_gold", 0)
++	if mult_step > 0:
++		var step: int = effect.get("mult_gold_step", 5)
++		var cap: int = effect.get("mult_gold_cap", 0)
++		var earned: int = floori(float(gold) / float(step)) * mult_step
++		if cap > 0:
++			earned = mini(earned, cap)
++		result.earned_mult = earned
++
++	# x_per_gold (黄金律)
++	var x_step: int = effect.get("x_per_gold", 0)
++	if x_step > 1:
++		var step_g: int = effect.get("x_gold_step", 15)
++		var cap_x: int = effect.get("x_gold_cap", 0)
++		var count: int = floori(float(gold) / float(step_g))
++		if cap_x > 0:
++			count = mini(count, cap_x)
++		for _i: int in range(count):
++			result.earned_x.append(x_step)
++
++	return result
+diff --git a/scripts/ninking/ui/dun_highlighter.gd b/scripts/ninking/ui/dun_highlighter.gd
+index d61e30a..efc4ac1 100644
+--- a/scripts/ninking/ui/dun_highlighter.gd
++++ b/scripts/ninking/ui/dun_highlighter.gd
+@@ -46,6 +46,9 @@ func setup(
+ # ══════════════════════════════════════════
+ 
+ func update(arrangement: Arrangement, constraint: String = "ascending") -> void:
++	if NinKingGameState.game_mode == "clean":
++		reset()
++		return
+ 
+ 	if arrangement == null:
+ 		reset()
+diff --git a/scripts/ninking/ui/game_manager.gd b/scripts/ninking/ui/game_manager.gd
+index 0cdae17..6b0b7e6 100644
+--- a/scripts/ninking/ui/game_manager.gd
++++ b/scripts/ninking/ui/game_manager.gd
+@@ -55,6 +55,7 @@ func _ready() -> void:
+ 	NinKingGameState.state_changed.connect(_on_state_changed)
+ 	NinKingGameState.score_updated.connect(_on_score_updated)
+ 	NinKingGameState.plays_changed.connect(_on_plays_changed)
++	NinKingGameState.swaps_changed.connect(_on_swaps_changed)
+ 	NinKingGameState.gold_changed.connect(_on_gold_changed)
+ 	NinKingGameState.hand_updated.connect(_on_hand_updated)
+ 	NinKingGameState.hand_swapped.connect(_on_hand_swapped)
+@@ -98,8 +99,13 @@ func _on_state_changed(new_state: NinKingGameState.State) -> void:
+ 				ui.game_layout.get_node("CenterColumn/HandArea").modulate = Color.WHITE
+ 			GlobalTweens.play_sfx(SB.DEAL)  # C17: deal SFX
+ 			# 按钮统一入场动效（弹跳 + 粒子 + 脉冲 + hover + 点击）
+-			ButtonStyles.attach_entrance_animation(ui.play_btn)
+-			ButtonStyles.attach_entrance_animation(ui.ai_rearrange_btn, {"mild": true})
++			if _game_mode != "clean":
++				ButtonStyles.attach_entrance_animation(ui.play_btn)
++				ButtonStyles.attach_entrance_animation(ui.ai_rearrange_btn, {"mild": true})
++			else:
++				# Clean mode: hide buttons that don't apply
++				ui.play_btn.visible = false
++				ui.ai_rearrange_btn.visible = false
+ 			# hand refresh is already triggered by auto_arrange() → hand_updated signal
+ 			ui.refresh_ninjas(NinKingGameState.owned_ninjas, NinKingGameState.max_ninja_slots)
+ 			ui.ai_rearrange_btn.disabled = false
+@@ -110,7 +116,8 @@ func _on_state_changed(new_state: NinKingGameState.State) -> void:
+ 				_trigger_boss_reveal_in_playing()
+ 		NinKingGameState.State.SCORING:
+ 			ui.show_view("scoring")
+-			animation_handler.run_scoring()
++			if _game_mode != "clean":
++				animation_handler.run_scoring()
+ 		NinKingGameState.State.SEAL_COMPLETE:
+ 			ui.show_view("settlement")
+ 			if _auto_shop_pending:
+@@ -145,6 +152,9 @@ func _on_score_updated(current: float, target: float) -> void:
+ func _on_plays_changed(remaining: int) -> void:
+ 	ui.update_match_info(remaining)
+ 
++func _on_swaps_changed(remaining: int) -> void:
++	ui.update_match_info(remaining)
++
+ 
+ func _on_gold_changed(amount: int) -> void:
+ 	ui.update_gold(amount)
+@@ -160,6 +170,8 @@ func _on_hand_updated(_hand: Array) -> void:
+ func _on_hand_swapped(src: int, tgt: int) -> void:
+ 	ui.on_cards_swapped(src, tgt)
+ 	_update_deck_display()
++	if _game_mode == "clean" and NinKingGameState.current_state == NinKingGameState.State.PLAYING:
++		_resolve_clean_chain()
+ 
+ 
+ func _on_seal_started(barrier: int, seal_idx: int, target: float, seal_lord_name: String) -> void:
+@@ -192,12 +204,148 @@ func _on_xi_triggered(xis: Array[String]) -> void:
+ 		return  # Already handled in animation Phase 3
+ 	ui.show_xi_popup(xis)
+ 
++# ══════════════════════════════════════════
++# Clean mode — chain resolution
++# ══════════════════════════════════════════
+ 
+-# ═══ Button handlers ═══
++## Resolve elimination chains after a clean mode swap.
++##
++## Called by _on_hand_swapped signal. Checks for matches first.
++## If no match found, still consumes a swap (wasted move) with shake animation.
++## When matches found, runs cascade loop with VFX between waves.
++func _resolve_clean_chain() -> void:
++	var gs = NinKingGameState
++	if gs.current_state != NinKingGameState.State.PLAYING:
++		return
++	if gs.game_mode != "clean":
++		return
++
++	# Check if swap formed any match — if not, wasted swap with shake
++	var first_wave: Dictionary = CleanController.prepare_chain_wave(gs, 0)
++	if first_wave.is_empty():
++		# CL18: no-match anim — shake card grid + UI_ERROR sfx
++		GlobalTweens.shake_node(ui.card_grid, 0.5, 0.1)
++		GlobalTweens.play_sfx(SB.UI_ERROR)
++		gs.swaps_remaining -= 1
++		gs.emit_swaps_changed()
++		gs.hand_updated.emit(gs.hand)
++		if gs.swaps_remaining <= 0 and gs.current_score < gs.target_score:
++			gs._transition_to(NinKingGameState.State.GAME_OVER)
++		return
++
++	# Enter SCORING state to lock player input
++	gs._transition_to(NinKingGameState.State.SCORING)
++
++	var chains: Array[Dictionary] = []
++	var chain_level: int = 0
++	# CL18: viewport center for particle bursts
++	var vp_center := get_viewport_rect().size * 0.5
++
++	# ══ Process first wave with animation ══
++	chain_level += 1
++	first_wave["chain_level"] = chain_level
++	chains.append(first_wave)
++
++	# CL18: burst manga_burst particles at grid center
++	GlobalTweens.burst_particles(vp_center, "manga_burst")
++	GlobalTweens.play_sfx(SB.SWAP)
++	# CL18: screen shake for chain feel
++	GlobalTweens.screen_shake(0.1, 0.06)
++	# Apply wave data mutation
++	CleanController.apply_chain_wave(gs, first_wave)
++
++	# Refresh visual hand after data mutation
++	gs.hand_updated.emit(gs.hand)
++
++	# Brief wait for VFX to settle
++	await get_tree().create_timer(0.25).timeout
++	if not is_instance_valid(gs) or not is_instance_valid(self):
++		return
++
++	# ══ Chain loop for subsequent waves ══
++	while true:
++		var wave: Dictionary = CleanController.prepare_chain_wave(gs, chain_level)
++		if wave.is_empty():
++			break
++
++		chain_level += 1
++		wave["chain_level"] = chain_level
++		chains.append(wave)
++
++		# CL18: stronger burst + shake for chain waves
++		GlobalTweens.burst_particles(vp_center, "manga_burst")
++		GlobalTweens.play_sfx(SB.SWAP)
++		if chain_level >= 3:
++			GlobalTweens.screen_shake(0.2, 0.12)
++			GlobalTweens.do_hit_stop(0.08, 0.04)
++		else:
++			GlobalTweens.screen_shake(0.15, 0.08)
++
++		CleanController.apply_chain_wave(gs, wave)
++		gs.hand_updated.emit(gs.hand)
++
++		# VFX delay
++		await get_tree().create_timer(0.25).timeout
++		if not is_instance_valid(gs) or not is_instance_valid(self):
++			return
++
++		# Hard cap
++		if chain_level >= 10:
++			push_warning("GameManager: clean chain reached hard cap of 10 waves")
++			break
++
++	# ── CL13: Compute clean score with ninja integration ──
++	var clean_result: Dictionary = ScoreCalculator.calculate_clean(
++		gs.hand, chains, gs.owned_ninjas, gs.gold
++	)
++	var swap_score: int = clean_result.get("swap_score", 0)
++
++	# CL18: score popup at end of chain
++	if chain_level > 0 and swap_score > 0:
++		_show_clean_score_popup(swap_score, chain_level)
++
++	# Apply gold_on_swap (if any ninja gives gold per swap)
++	var gold_earned: int = clean_result.get("gold_on_swap", 0)
++	if gold_earned > 0:
++		gs.gold += gold_earned
++		gs.gold_changed.emit(gs.gold)
++
++	# Apply extra_swaps / only_one_swap
++	var extra: int = clean_result.get("extra_swaps", 0)
++	if extra > 0:
++		gs.swaps_remaining += extra
++	if clean_result.get("only_one_swap", false):
++		gs.swaps_remaining = 1
++
++	# Finalize: apply score, decrement swaps, check win/lose
++	CleanController.finalize_swap(gs, chains, swap_score)
++
++## CL18: Create a temporary score popup "+N" that floats up and fades.
++func _show_clean_score_popup(score: int, chain_level: int) -> void:
++	var label := Label.new()
++	label.text = "+%d" % score
++	label.add_theme_font_size_override("font_size", 36)
++	label.add_theme_color_override("font_color", Color(1.0, 0.84, 0.0, 1.0))  # Gold
++	label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
++	label.add_theme_constant_override("font_outline_size", 4)
++	if chain_level >= 3:
++		label.text += "\nCOMBO x%d" % chain_level
++	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
++	label.size = Vector2(200, 60)
++	label.position = get_viewport_rect().size * Vector2(0.5, 0.35) - label.size * 0.5
++	add_child(label)
++	var tw: Tween = create_tween().set_parallel(true)
++	tw.tween_property(label, "position:y", label.position.y - 60, 0.8).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
++	tw.tween_property(label, "modulate:a", 0.0, 0.8).set_delay(0.3)
++	await tw.finished
++	if is_instance_valid(label):
++		label.queue_free()
+ 
+ func _on_play_pressed() -> void:
+ 	if NinKingGameState.current_state != NinKingGameState.State.PLAYING:
+ 		return
++	if _game_mode == "clean":
++		return  # Clean mode: no play button — swaps handle scoring
+ 	if not NinKingGameState.is_constraint_satisfied():
+ 		return
+ 
+@@ -228,6 +376,8 @@ func _on_play_pressed() -> void:
+ func _on_ai_rearrange_pressed() -> void:
+ 	if NinKingGameState.current_state != NinKingGameState.State.PLAYING:
+ 		return
++	if _game_mode == "clean":
++		return
+ 	NinKingGameState.auto_arrange()
+ 	# auto_arrange() emits hand_updated — UI refresh bound via signal
+ 
+diff --git a/scripts/ninking/ui/hand_card_container.gd b/scripts/ninking/ui/hand_card_container.gd
+index 10fd44c..738894d 100644
+--- a/scripts/ninking/ui/hand_card_container.gd
++++ b/scripts/ninking/ui/hand_card_container.gd
+@@ -141,7 +141,7 @@ func move_cards(cards: Array, index: int = -1, with_history: bool = true) -> boo
+ 			var target := global_position + _card_local_pos(index)
+ 			cards[0].move(target, 0.0)
+ 			return true
+-		SealController.swap_cards(NinKingGameState, src_idx, index)
++		NinKingGameState.swap_cards(src_idx, index)
+ 		# If not in PLAYING state (e.g. debug menu), swap_cards won't
+ 		# emit hand_swapped → swap_two_cards won't fire via signal.
+ 		# Call it directly to ensure visual swap.
+diff --git a/scripts/ninking/ui/hand_display.gd b/scripts/ninking/ui/hand_display.gd
+index 8597811..d427374 100644
+--- a/scripts/ninking/ui/hand_display.gd
++++ b/scripts/ninking/ui/hand_display.gd
+@@ -77,7 +77,7 @@ func refresh(hand: Array[CardData.PlayingCard]) -> void:
+ 
+ 
+ func update_labels(hand: Array[CardData.PlayingCard]) -> void:
+-	if _labeler:
++	if _labeler and NinKingGameState.game_mode != "clean":
+ 		_labeler.update_all(hand)
+ 
+ 
+diff --git a/scripts/ninking/ui/ui_manager.gd b/scripts/ninking/ui/ui_manager.gd
+index f2cab62..c82dda6 100644
+--- a/scripts/ninking/ui/ui_manager.gd
++++ b/scripts/ninking/ui/ui_manager.gd
+@@ -134,6 +134,7 @@ func update_xi_display(text: String) -> void:
+ 
+ # ═══ Delegates ═══
+ var hand_display: RefCounted  # HandDisplay
++var _game_mode: String = "bi_ji"
+ 
+ var deck_viewer_ctrl: DeckViewerController
+ var dun_highlighter: DunHighlighter
+@@ -142,6 +143,8 @@ var ninja_bar: NinjaBarNode
+ 
+ 
+ func _ready() -> void:
++	_game_mode = NinKingGameState.game_mode
++
+ 	# Hand display (rendering)
+ 	hand_display = HandDisplay.new()
+ 	hand_display.setup(
+@@ -235,6 +238,10 @@ func show_view(view: String) -> void:
+ 	# clicks to buttons (e.g. RetryButton on GameOver screen).
+ 	card_grid.visible = (view in ["game", "scoring"])
+ 
++	# Apply clean mode specific UI visibility
++	if view in ["game", "scoring"]:
++		_apply_clean_mode_visibility()
++
+ 
+ # ══════════════════════════════════════════
+ # KUI2: pop_in animation for content cards (GameOver/Victory panels)
+@@ -247,6 +254,60 @@ func _animate_card_pop_in(panel: Panel) -> void:
+ 	tw.tween_property(panel, "modulate", Color(1, 1, 1, 1), 0.2)
+ 
+ 
++# Clean mode UI visibility
++# ══════════════════════════════════════════
++## Apply clean-mode-specific UI visibility rules.
++## Hides elements that don't apply to elimination mode.
++func _apply_clean_mode_visibility() -> void:
++	if _game_mode != "clean":
++		return
++
++	# Hide HandTypePanel
++	var htp: Control = left_panel.get_node("HandTypePanel")
++	if is_instance_valid(htp):
++		htp.visible = false
++
++	# Hide ScorePanel column/xi labels
++	col_xi_label.visible = false
++	# Hide column labels
++	if is_instance_valid(col0_label): col0_label.visible = false
++	if is_instance_valid(col1_label): col1_label.visible = false
++	if is_instance_valid(col2_label): col2_label.visible = false
++	# Hide column row labels
++	if is_instance_valid(left_col_label): left_col_label.visible = false
++	if is_instance_valid(left_col_type): left_col_type.visible = false
++	if is_instance_valid(left_col_score): left_col_score.visible = false
++	if is_instance_valid(left_col_lv): left_col_lv.visible = false
++	if is_instance_valid(mid_col_label): mid_col_label.visible = false
++	if is_instance_valid(mid_col_type): mid_col_type.visible = false
++	if is_instance_valid(mid_col_score): mid_col_score.visible = false
++	if is_instance_valid(mid_col_lv): mid_col_lv.visible = false
++	if is_instance_valid(right_col_label): right_col_label.visible = false
++	if is_instance_valid(right_col_type): right_col_type.visible = false
++	if is_instance_valid(right_col_score): right_col_score.visible = false
++	if is_instance_valid(right_col_lv): right_col_lv.visible = false
++	# Hide three-dun labels
++	if is_instance_valid(head_label): head_label.visible = false
++	if is_instance_valid(middle_label): middle_label.visible = false
++	if is_instance_valid(tail_label): tail_label.visible = false
++	if is_instance_valid(head_type_label): head_type_label.visible = false
++	if is_instance_valid(middle_type_label): middle_type_label.visible = false
++	if is_instance_valid(tail_type_label): tail_type_label.visible = false
++	# Hide shadow/flash/destroy rows
++	if is_instance_valid(shadow_type_label): shadow_type_label.visible = false
++	if is_instance_valid(flash_type_label): flash_type_label.visible = false
++	if is_instance_valid(destroy_type_label): destroy_type_label.visible = false
++	if is_instance_valid(shadow_score_label): shadow_score_label.visible = false
++	if is_instance_valid(flash_score_label): flash_score_label.visible = false
++	if is_instance_valid(destroy_score_label): destroy_score_label.visible = false
++	if is_instance_valid(shadow_lv_label): shadow_lv_label.visible = false
++	if is_instance_valid(flash_lv_label): flash_lv_label.visible = false
++	if is_instance_valid(destroy_lv_label): destroy_lv_label.visible = false
++	# Hide buttons
++	if is_instance_valid(play_btn): play_btn.visible = false
++	if is_instance_valid(ai_rearrange_btn): ai_rearrange_btn.visible = false
++
++
+ # Shop overlay (Phase C)
+ # ══════════════════════════════════════════
+ 
+@@ -314,8 +375,9 @@ func hide_shop() -> void:
+ 	hand_area.visible = true
+ 	if game_layout.has_node("CenterColumn/DunArea"):
+ 		game_layout.get_node("CenterColumn/DunArea").visible = true
+-	play_btn.visible = true
+-	ai_rearrange_btn.visible = true
++	if _game_mode != "clean":
++		play_btn.visible = true
++		ai_rearrange_btn.visible = true
+ 
+ 
+ func is_shop_open() -> bool:
+@@ -371,7 +433,7 @@ func _on_shop_continue_requested() -> void:
+ 
+ func on_seal_start(barrier: int, seal_idx: int, target: int, seal_lord_name: String) -> void:
+ 	clear_score_formula()
+-	var seal_names: Array = ["修羅ノ封印", "明王ノ封印", "夜叉ノ封印"]
++	var seal_names: Array = ["修羅ノ封印", "明王ノ封印", "夜叉ノ封印"] if _game_mode != "clean" else ["序ノ封印", "破ノ封印", "急ノ封印"]
+ 	var seal_str: String = seal_names[seal_idx] if seal_idx < 3 else "?"
+ 	intro_level_label.text = "結界%d · %s" % [barrier, seal_str]
+ 	if seal_lord_name != "":
+@@ -386,7 +448,10 @@ func on_seal_start(barrier: int, seal_idx: int, target: int, seal_lord_name: Str
+ 
+ 	update_score(0, target)
+ 	update_target(target)
+-	update_match_info(3)
++	if _game_mode == "clean":
++		update_match_info(NinKingGameState.swaps_remaining)
++	else:
++		update_match_info(3)
+ 	update_gold(NinKingGameState.gold)
+ 
+ 
+@@ -432,7 +497,10 @@ func update_gold(amount: int) -> void:
+ 
+ 
+ func update_match_info(plays_left: int) -> void:
+-	hands_label.text = "討伐 %d" % plays_left
++	if _game_mode == "clean":
++		hands_label.text = "交換 %d" % plays_left
++	else:
++		hands_label.text = "討伐 %d" % plays_left
+ 
+ 
+ func update_target(target: int) -> void:
+@@ -445,9 +513,10 @@ func update_target(target: int) -> void:
+ 
+ func _refresh_internal(hand: Array[CardData.PlayingCard]) -> void:
+ 	hand_display.refresh(hand)
+-	hand_display.update_labels(hand)
+-	dun_highlighter.update(NinKingGameState.current_arrangement, NinKingGameState.current_seal_lord_effects.get("constraint", "ascending"))
+-	play_btn.disabled = not NinKingGameState.is_constraint_satisfied()
++	if _game_mode != "clean":
++		hand_display.update_labels(hand)
++		dun_highlighter.update(NinKingGameState.current_arrangement, NinKingGameState.current_seal_lord_effects.get("constraint", "ascending"))
++		play_btn.disabled = not NinKingGameState.is_constraint_satisfied()
+ 
+ 
+ func refresh_hand(hand: Array[CardData.PlayingCard]) -> void:
+@@ -457,9 +526,10 @@ func refresh_hand(hand: Array[CardData.PlayingCard]) -> void:
+ ## Called after two cards swap  animate in-place, no full rebuild.
+ func on_cards_swapped(src: int, tgt: int) -> void:
+ 	card_grid.swap_two_cards(src, tgt)
+-	hand_display.update_labels(NinKingGameState.hand)
+-	dun_highlighter.update(NinKingGameState.current_arrangement, NinKingGameState.current_seal_lord_effects.get("constraint", "ascending"))
+-	play_btn.disabled = not NinKingGameState.is_constraint_satisfied()
++	if _game_mode != "clean":
++		hand_display.update_labels(NinKingGameState.hand)
++		dun_highlighter.update(NinKingGameState.current_arrangement, NinKingGameState.current_seal_lord_effects.get("constraint", "ascending"))
++		play_btn.disabled = not NinKingGameState.is_constraint_satisfied()
+ 
+ 
+ # ══════════════════════════════════════════
+@@ -514,7 +584,7 @@ func restore_ui_state() -> void:
+ 	var gs: NinKingGameState = NinKingGameState
+ 	on_seal_start(gs.barrier_num, gs.seal_idx, int(gs.target_score), gs.current_seal_lord_name)
+ 	update_score(int(gs.current_score), int(gs.target_score))
+-	update_match_info(gs.plays_remaining)
++	update_match_info(gs.swaps_remaining if gs.game_mode == "clean" else gs.plays_remaining)
+ 	update_gold(gs.gold)
+ 	refresh_hand(gs.hand)
+ 	refresh_ninjas(gs.owned_ninjas, gs.max_ninja_slots)

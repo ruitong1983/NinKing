@@ -37,7 +37,7 @@ func _ready() -> void:
 	var _mark_cb := func(): _auto_shop_pending = true
 	animation_handler.setup(ui, _mark_cb)
 	clean_chain_handler = CleanChainHandler.new()
-	clean_chain_handler.setup(ui)
+	clean_chain_handler.setup(ui, _mark_cb)
 	add_child(clean_chain_handler)
 
 	# Wire UI buttons

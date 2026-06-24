@@ -1,0 +1,18 @@
+LICENSE
+
+You are allowed to use, copy, modify, and include these assets in any type of project,
+both commercial and non-commercial (such as video games, applications, templates,
+educational projects, videos, or printed materials).
+
+YOU MAY:
+* Use and modify the assets freely within your final projects.
+* Include them, even unmodified, inside a finished product.
+* Include the assets in templates or project files, as long as the template is not
+  distributed mainly as a standalone resource pack.
+
+YOU MAY NOT:
+* Resell, redistribute, or share these assets as a resource pack,
+  whether original or modified, if the main purpose is to offer them
+  as standalone reusable files.
+* Publish or share the original files, or easily extractable versions of them,
+  outside of a finished product or an allowed template.

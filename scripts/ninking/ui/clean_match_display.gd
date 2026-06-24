@@ -122,7 +122,7 @@ func _build_match_row(match_data: Dictionary) -> RichTextLabel:
 
 	var type_name: String = CardData.get_hand_type3_name(hand_type as CardData.HandType3)
 	var mult: int = MATCH_MULTS.get(hand_type, 1)
-	var chips: int = score / mult  # Inverse: score = chips x mult
+	var chips: int = int(float(score) * 1.0 / mult)  # Inverse: score = chips x mult
 
 	var type_color: String = HAND_TYPE_COLORS.get(hand_type, "#7A7A7A")
 

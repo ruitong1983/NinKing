@@ -163,7 +163,8 @@ ImageMagick: convert input.png -ordered-dither h4x4a output.png
 | 9 | 面板角装饰 9-patch | 和风+漫画コマ边框 → 现成包无匹配 | 中 |
 | 10 | 顶栏背景 | 漫画粗描边 UI 横条 | 低 |
 | 11-14 | 4 忍者牌底板（按稀有度） | Ninja × Manga × Rarity 色 → 不存在现成包 | 中（批次化模板保证一致） |
-| 25 | 卡牌背面 `card_back.png` | 漫画网点+粗黑描边+"忍"字 | 中 |
+| 25 | 卡牌背面 `Card_back_01.png` | 漫画网点+粗黑描边+"忍"字 → Outlined Deck 标准卡背 | 中 |
+| 26 | 52 张扑克牌面 | Outlined Deck 标准插画 PNG (128×175) `{RANK}_{SUIT}.png` | ✅ 已完成替换 |
 | 26-28 | 3 漫画粒子纹理 | 集中线 + 墨迹 + 速度线 | 低 |
 | 30-40 | Boss 卷轴 + 10 符号 | 完全定制 | 中 |
 | 42-44 | 3 消耗品底板 | 符術/星图/禁術类别底板 | 低 |
@@ -278,11 +279,11 @@ Phase 3: 全局风格统一 + 验证
 5. pngquant --colors 16 output.png
 ```
 
-### 5.3 扑克牌面（已有 SVG，不需匹配）
+### 5.3 扑克牌面（已替换为 Standard Deck Outlined PNG）
 
-> **已确认：** 项目已使用 `poker/` 的 52 张 SVG 卡牌面（按花色分目录，数字命名）。牌面程序绘制保持不变（`16-art-direction-principles.md` §7.1）。<br>（2026-06-24: 素材从 `4color_deck_by_heratexx/` 切至 `poker/`）
+> **已确认：** 项目已从 52 张 SVG 牌面替换为 **Standard Deck Game Assets — Outlined** 版 PNG 纹理（128×175，`{RANK}_{SUIT}.png`）。<br>（2026-06-24: 素材从 `poker/svg` 切至 `Standard Deck Game Assets/Outlined/Outlined Cards/`）
 >
-> 花色符号替换只需改 `ninking_card.gd` 的 suit 渲染从 SVG 引用改为 PNG 纹理，牌面其余部分不动。
+> 路径配置：`ninking_card.gd` 中 `PNG_BASE_PATH` 指向 Outlined Cards 目录，`card_data.gd` 的 `SUIT_FILE_CHARS`/`RANK_FILE_CHARS` 映射更新为 Outlined 命名（复数花色 + A/J/Q/K 字母）。
 
 ---
 
@@ -596,9 +597,10 @@ magick identify -format "%f: %wx%h\n" *.png
 ```
 assets/images/
 ├── cards/
-│   ├── 4color_deck_by_heratexx/   ← 旧 52 SVG 牌面（2026-06-24 后不再使用，保留备查）
-│   ├── poker/                     ← 52 SVG 牌面（当前使用，按花色分目录/数字命名）
-│   ├── card_back.png              ← ✅ Phase 2 AI 漫画风重绘（网点+忍字）
+│   ├── Standard Deck Game Assets/       ← ✅ 52+ Outlined PNG 牌面（当前使用）
+│   │   ├── Cards/                       ← 旧 52 PNG 标准版（126×173，不再使用）
+│   │   └── Outlined/Outlined Cards/     ← ✅ 52 张 PNG（128×175）+ 6 款卡背
+│   ├── card_back.png                    ← ❌ 停用 → Card_back_01.png (128×175)
 │   ├── card_base_{n,r,sr,ur}.png  ← ✅ Phase 2 AI 4 稀有度底板
 │   ├── slot_bg.png                ← 程序绘制槽位背景（保留）
 │   └── suits/

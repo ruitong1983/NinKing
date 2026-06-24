@@ -70,19 +70,19 @@ const RANK_NAMES: Dictionary = {
 	Rank.TEN: "10", Rank.JACK: "J", Rank.QUEEN: "Q", Rank.KING: "K", Rank.ACE: "A",
 }
 
-## Directory names for poker card SVGs (e.g., "club" → clubs)
+## Suit name strings for poker card PNGs ("clubs" for Outlined version)
 const SUIT_FILE_CHARS: Dictionary = {
-	Suit.CLUBS: "club",
-	Suit.DIAMONDS: "diamond",
-	Suit.HEARTS: "heart",
-	Suit.SPADES: "spade",
+	Suit.CLUBS: "clubs",
+	Suit.DIAMONDS: "diamonds",
+	Suit.HEARTS: "hearts",
+	Suit.SPADES: "spades",
 }
 
-## Numeric rank strings for poker card SVGs (e.g., "1" → ace, "10" → ten)
+## Rank strings for poker card PNGs ("A" for ace, "J"/"Q"/"K" for face cards)
 const RANK_FILE_CHARS: Dictionary = {
 	Rank.TWO: "2", Rank.THREE: "3", Rank.FOUR: "4", Rank.FIVE: "5",
 	Rank.SIX: "6", Rank.SEVEN: "7", Rank.EIGHT: "8", Rank.NINE: "9",
-	Rank.TEN: "10", Rank.JACK: "11", Rank.QUEEN: "12", Rank.KING: "13", Rank.ACE: "1",
+	Rank.TEN: "10", Rank.JACK: "J", Rank.QUEEN: "Q", Rank.KING: "K", Rank.ACE: "A",
 }
 
 ## Chip value for each face card rank

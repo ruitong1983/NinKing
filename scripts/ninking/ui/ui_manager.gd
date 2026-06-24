@@ -234,6 +234,9 @@ func show_view(view: String) -> void:
 	settlement_overlay.visible = (view == "settlement")
 	# Scoring overlay: show only in bi-ji scoring (clean mode uses its own VFX)
 	scoring_overlay.visible = (view == "scoring" and _game_mode != "clean")
+	# Mask debug — detect if scoring_overlay ever becomes visible in clean mode
+	if _game_mode == "clean" and scoring_overlay.visible:
+		push_error("[MASK_DEBUG] BUG: ScoringOverlay visible in clean mode! view=" + view)
 	# KUI2: pop_in animation for GameOver/Victory panels
 	if view == "gameover":
 		_animate_card_pop_in(game_over_panel)
@@ -243,6 +246,10 @@ func show_view(view: String) -> void:
 	# all UIManager children. Hide during overlay views so cards don't block
 	# clicks to buttons (e.g. RetryButton on GameOver screen).
 	card_grid.visible = (view in ["game", "scoring"])
+	# Mask debug — trace view changes in clean mode
+	if _game_mode == "clean":
+		print("[MASK_DEBUG] show_view(" + view + ") scoring_overlay=" + str(scoring_overlay.visible) \
+			+ " card_grid=" + str(card_grid.visible) + " game_layout=" + str(game_layout.visible))
 
 	# Apply clean mode specific UI visibility
 	if view in ["game", "scoring"]:
