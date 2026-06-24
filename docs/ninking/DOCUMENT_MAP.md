@@ -2,7 +2,7 @@
 
 > **用途：** 每次代码变更后，对照此表检查受影响文档是否需要同步更新。
 > **原则：** 改代码前先查此表，改完代码后逐项同步。
-> **建立日期：** 2026-06-17 | **最后更新：** 2026-06-23 (+牌库面板优化: 切换关闭/toggle + 深褐字色 + ViewerTitle移除 → 同步 06-ui-layout)
+> **建立日期：** 2026-06-17 | **最后更新：** 2026-06-24 (CL33 Phase D 落位动效增强 v2 — 重力加速/squash/spring/粒子) | **更新：** 2026-06-24
 
 ---
 
@@ -122,7 +122,45 @@
 | `02-cards/11-ninja-cards.md` | 成长修炼卡 | 成长机制/触发条件变更时同步 |
 | `01-gameplay/06-complete-redesign.md` | 核心玩法 | 出牌后处理流程变更时同步 |
 
-### 4.6 `scripts/ninking/ninja_pool.gd`
+### 4.6 `scripts/ninking/clean_controller.gd` + `clean_layout_generator.gd`
+
+> 消除模式核心引擎。`class_name CleanController / CleanLayoutGenerator`，`extends RefCounted`，静态方法。匹配 4 种类型：豹子/同花顺/同花/顺子。计分公式：Σ(card_chip)×hand_type_mult。
+
+| 影响文档 | 说明 | 同步要点 |
+|---------|------|---------|
+| **`01-gameplay/06-complete-redesign.md`** §5 | 消除模式玩法/计分公式 | 算法/计分公式变更时同步 |
+| **`06-tech/03-technical-design.md`** | 状态机-消除模式/数据流 | 连锁流程/交换逻辑变更时同步 |
+| **`09-mgmt/specs/clean-mode-design.md`** | 消除模式方案规格书 | 代码实现与方案描述不一致时同步 |
+| 本表（DOCUMENT_MAP.md） | 文档依赖映射 | 新增/删除消除模式文件时同步 |
+
+### 4.8 `scripts/ninking/clean_chain_handler.gd` — 消除链处理器（new 2026-06-24）
+
+> `class_name CleanChainHandler`，`extends Node`，消除模式链式消除 UI 流程控制器。从 `game_manager.gd` 提取（A1 行数优化）。`setup(ui)` → `resolve_clean_chain()`。持有 `_match_display: CleanMatchDisplay` 实例。
+
+| 影响文档 | 说明 | 同步要点 |
+|---------|------|---------|
+| `09-mgmt/specs/clean-mode-design.md` §4.1a + §9.3 | 消除链视觉分步流程 + match 明细面板 | 链解析 UI 时序/动画变更、match 显示逻辑变更时同步 |
+| `06-tech/03-technical-design.md` | 技术架构 | 消除流程/游戏管理器拆分变更时同步 |
+| `04-ui/06-ui-layout-reference.md` | UI 布局参考 — HandTypePanel | CleanMatchDisplay 集成/可见性变更时同步 |
+
+### 4.8a `scripts/ninking/ui/clean_match_display.gd` — 消除模式计分明细展示（new 2026-06-24）
+
+> `class_name CleanMatchDisplay`，`extends RefCounted`，消除模式 HandTypePanel 中逐波追加 match 组行的展示控制器。
+> 格式：`手役名  chip×mult=score`。行间距分隔波次，ScrollContainer 自动滚底。
+
+| 影响文档 | 说明 | 同步要点 |
+|---------|------|---------|
+| **`04-ui/06-ui-layout-reference.md`** §3.3.2a | UI 布局参考 — HandTypePanel 场景树 | 消除模式 HandTypePanel 子节点结构变更时同步 |
+| **`09-mgmt/specs/clean-mode-design.md`** §9.3 | 消除模式方案 — 左面板精简 | 显示格式/配色/流程变更时同步 |
+
+### 4.9 `scripts/ninking/score/score_calculator.gd` — 消除模式扩展
+
+> `calculate_clean()` + `_is_ninja_valid_for_clean()` 新增方法。计分引擎扩展。
+
+| 影响文档 | 说明 | 同步要点 |
+|---------|------|---------|
+| **`01-gameplay/06-complete-redesign.md`** §5.3 | 消除模式计分公式 | 计分公式/忍者效果映射变更时同步 |
+| `06-tech/03-technical-design.md` | 消除模式数据流 | ScoreCalculator 消除API变更时同步 |
 
 | 影响文档 | 说明 | 同步要点 |
 |---------|------|---------|

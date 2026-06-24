@@ -280,7 +280,7 @@ Phase 3: 全局风格统一 + 验证
 
 ### 5.3 扑克牌面（已有 SVG，不需匹配）
 
-> **已确认：** 项目已使用 `4color_deck_by_heratexx/` 的 52 张 SVG 卡牌面。牌面程序绘制保持不变（`16-art-direction-principles.md` §7.1）。
+> **已确认：** 项目已使用 `poker/` 的 52 张 SVG 卡牌面（按花色分目录，数字命名）。牌面程序绘制保持不变（`16-art-direction-principles.md` §7.1）。<br>（2026-06-24: 素材从 `4color_deck_by_heratexx/` 切至 `poker/`）
 >
 > 花色符号替换只需改 `ninking_card.gd` 的 suit 渲染从 SVG 引用改为 PNG 纹理，牌面其余部分不动。
 
@@ -596,7 +596,8 @@ magick identify -format "%f: %wx%h\n" *.png
 ```
 assets/images/
 ├── cards/
-│   ├── 4color_deck_by_heratexx/   ← 52 SVG 牌面（保持不变）
+│   ├── 4color_deck_by_heratexx/   ← 旧 52 SVG 牌面（2026-06-24 后不再使用，保留备查）
+│   ├── poker/                     ← 52 SVG 牌面（当前使用，按花色分目录/数字命名）
 │   ├── card_back.png              ← ✅ Phase 2 AI 漫画风重绘（网点+忍字）
 │   ├── card_base_{n,r,sr,ur}.png  ← ✅ Phase 2 AI 4 稀有度底板
 │   ├── slot_bg.png                ← 程序绘制槽位背景（保留）

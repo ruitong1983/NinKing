@@ -46,6 +46,9 @@ func setup(
 # ══════════════════════════════════════════
 
 func update(arrangement: Arrangement, constraint: String = "ascending") -> void:
+	if NinKingGameState.game_mode == "clean":
+		reset()
+		return
 
 	if arrangement == null:
 		reset()

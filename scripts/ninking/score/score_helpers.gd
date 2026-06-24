@@ -43,3 +43,39 @@ static func group_ench_mult(cards: Array) -> int:
 		total += c.get_enhancement_mult()
 		total += c.get_edition_mult()
 	return total
+
+
+## Apply economy effects (金剛力: mult_per_gold, 黄金律: x_per_gold).
+## CL20: Shared between ScoreEffectCollector._apply_economy_effects() and
+## ScoreCalculator.calculate_clean() to eliminate code duplication.
+##
+## Returns {earned_mult: int, earned_x: Array[int]} — caller applies to
+## their own accumulator structure.
+static func apply_economy_effects(effect: Dictionary, gold: int) -> Dictionary:
+	var result: Dictionary = {
+		earned_mult = 0,
+		earned_x = [],
+	}
+
+	# mult_per_gold (金剛力)
+	var mult_step: int = effect.get("mult_per_gold", 0)
+	if mult_step > 0:
+		var step: int = maxi(effect.get("mult_gold_step", 5), 1)  # CL21: guard div-by-zero
+		var cap: int = effect.get("mult_gold_cap", 0)
+		var earned: int = floori(float(gold) / float(step)) * mult_step
+		if cap > 0:
+			earned = mini(earned, cap)
+		result.earned_mult = earned
+
+	# x_per_gold (黄金律)
+	var x_step: int = effect.get("x_per_gold", 0)
+	if x_step > 1:
+		var step_g: int = maxi(effect.get("x_gold_step", 15), 1)  # CL21: guard div-by-zero
+		var cap_x: int = effect.get("x_gold_cap", 0)
+		var count: int = floori(float(gold) / float(step_g))
+		if cap_x > 0:
+			count = mini(count, cap_x)
+		for _i: int in range(count):
+			result.earned_x.append(x_step)
+
+	return result

@@ -141,11 +141,13 @@ func move_cards(cards: Array, index: int = -1, with_history: bool = true) -> boo
 			var target := global_position + _card_local_pos(index)
 			cards[0].move(target, 0.0)
 			return true
-		SealController.swap_cards(NinKingGameState, src_idx, index)
-		# If not in PLAYING state (e.g. debug menu), swap_cards won't
-		# emit hand_swapped → swap_two_cards won't fire via signal.
-		# Call it directly to ensure visual swap.
-		if NinKingGameState.current_state != NinKingGameState.State.PLAYING:
+		# Capture state BEFORE swap_cards (which may trigger signals that
+		# change state, e.g. clean mode PLAYING to SCORING during chain resolution).
+		var was_playing: bool = NinKingGameState.current_state == NinKingGameState.State.PLAYING
+		NinKingGameState.swap_cards(src_idx, index)
+		# If not in PLAYING state before swap, the hand_swapped signal won't
+		# fire -> swap_two_cards won't be called. Call it directly for visual swap.
+		if not was_playing:
 			swap_two_cards(src_idx, index)
 		return true
 	return super.move_cards(cards, index, with_history)
@@ -163,6 +165,31 @@ func set_cards_interactable(interactable: bool) -> void:
 	for card: Card in _held_cards:
 		if card is NinKingCard:
 			card.can_be_interacted_with = interactable
+
+
+## Returns the NinKingCard at grid index 0-8, or null if out of range.
+func get_card_at(idx: int) -> NinKingCard:
+	if idx < 0 or idx >= _held_cards.size():
+		return null
+	return _held_cards[idx] as NinKingCard
+
+
+## Update existing card visuals in-place from hand data array.
+## Avoids clear/recreate (which triggers full grid rebuild / re-deal visual).
+## When hand[i] is null, hides the card node (matched card removed).
+func update_card_faces(hand: Array[CardData.PlayingCard]) -> void:
+	var count := mini(hand.size(), _held_cards.size())
+	for i: int in range(count):
+		var nk_card := _held_cards[i] as NinKingCard
+		if nk_card == null:
+			continue
+		if hand[i] == null:
+			nk_card.visible = false
+			continue
+		nk_card.visible = true
+		if nk_card.playing_card_data != hand[i]:
+			nk_card.playing_card_data = hand[i]
+			nk_card.update_display()
 
 
 func get_row_cards(row: int) -> Array[Card]:

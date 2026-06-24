@@ -232,32 +232,50 @@ NinKingMain (Control) 1920×1080                      [game_manager.gd]
 
 ```
 HandTypePanel (Panel) [%HandTypePanel]
-└── HandTypeVBox (Control)
-    ├── Row影 (Control)
-    │   ├── ShadowDun (Label)          "影" 20px #588CF2
-    │   ├── ShadowType [%ShadowType]   "对子" 20px 白 (弹性)
-    │   ├── ShadowLv [%ShadowLv]       Lv badge 色阶
-    │   └── ShadowScore [%ShadowScore] "37×2" RichText
-    ├── Row瞬 (Control)
-    │   ├── FlashDun (Label)           "瞬" 20px #BFBFCB
-    │   ├── FlashType [%FlashType]     "顺子" 20px 白
-    │   ├── FlashLv [%FlashLv]
-    │   └── FlashScore [%FlashScore]   "50×3" RichText
-    ├── Row滅 (Control)
-    │   ├── DestroyDun (Label)         "滅" 20px #F24D4D
-    │   ├── DestroyType [%DestroyType] "同花" 20px 白
-    │   ├── DestroyLv [%DestroyLv]
-    │   └── DestroyScore [%DestroyScore] "53×4" RichText
-    ├── ColDivider (ColorRect)          — 分割线
-    └── ColumnBar (Control)             — 三列牌型/分数
-        ├── LeftColType [%LeftColType]
-        ├── MidColType [%MidColType]
-        ├── RightColType [%RightColType]
-        └── (Left/Mid/Right ColLabel + ColLv + ColScore)
+├── HandTypeVBox (Control)             ← 比鸡: 三墩+列牌型
+│   ├── Row影 (Control)
+│   │   ├── ShadowDun (Label)          "影" 20px #588CF2
+│   │   ├── ShadowType [%ShadowType]   "对子" 20px 白 (弹性)
+│   │   ├── ShadowLv [%ShadowLv]       Lv badge 色阶
+│   │   └── ShadowScore [%ShadowScore] "37×2" RichText
+│   ├── Row瞬 (Control)
+│   │   ├── FlashDun (Label)           "瞬" 20px #BFBFCB
+│   │   ├── FlashType [%FlashType]     "顺子" 20px 白
+│   │   ├── FlashLv [%FlashLv]
+│   │   └── FlashScore [%FlashScore]   "50×3" RichText
+│   ├── Row滅 (Control)
+│   │   ├── DestroyDun (Label)         "滅" 20px #F24D4D
+│   │   ├── DestroyType [%DestroyType] "同花" 20px 白
+│   │   ├── DestroyLv [%DestroyLv]
+│   │   └── DestroyScore [%DestroyScore] "53×4" RichText
+│   ├── ColDivider (ColorRect)          — 分割线
+│   └── ColumnBar (Control)             — 三列牌型/分数
+│       ├── LeftColType [%LeftColType]
+│       ├── MidColType [%MidColType]
+│       ├── RightColType [%RightColType]
+│       └── (Left/Mid/Right ColLabel + ColLv + ColScore)
+└── CleanMatchScroll (ScrollContainer)  ← 消除: 逐波 match 组明细
+    └── MatchVBox (VBoxContainer)
+        └── (运行时动态追加 RichTextLabel 行)
 ```
 
 分数 = (卡牌筹码 + 牌型筹码) × 牌型倍率，由 `HandTypeLabeler._update_dun_types()` 实时预览。
 Lv badge 色阶：Lv.1-2 `#5C5C5C` 深灰 | Lv.3-4 `#3A6FD8` 深蓝 | Lv.5-6 `#9A8230` 暗金（2026-06-23 加深，在米色面板上保证对比度）。Lv.0 不显示。
+
+**消除模式 HandTypePanel (v2026-06-24)：** 比鸡模式下 `HandTypeVBox` 显示三墩+列牌型。消除模式下 `HandTypeVBox` 隐藏，`CleanMatchScroll`（ScrollContainer）显示动态逐波 match 组明细。由 `CleanMatchDisplay` (`scripts/ninking/ui/clean_match_display.gd`) 管理，流程：
+
+- 一次 swap 触发连锁消除，面板清空上次结果
+- 每波消除检测到 match 组后，立即追加一行 `[手役名]  [chip×mult=score]`
+- 波次之间 8px 行间距分隔
+- 超出面板高度时 ScrollContainer 自动滚底
+- 连锁结束后保留上次结果，到下一次 swap 才清空
+
+| 手役 | 行颜色 |
+|------|--------|
+| 豹子 | `#F24D4D` 烈红 |
+| 同花顺 | `#D4A843` 暗金 |
+| 同花 | `#3A6FD8` 深蓝 |
+| 顺子 | `#7A7A7A` 中灰 |
 
 ##### b. ScorePanel (中部 30%~70%) — 喜 / 分数 / 进度
 
@@ -521,7 +539,7 @@ Overlay  (封印达成)    (忍気不足)  (全结界制霸)
 |------|------|
 | `scenes/ninking/ninking_launcher.tscn` | 启动场景（自动跳转） |
 | `scenes/ninking/ninking_main.tscn` | 主UI场景（比鸡模式, 本文档所述） |
-| `scenes/ninking/ninking_clean_main.tscn` | 消除模式场景（1:1 复刻 ninking_main.tscn） |
+| `scenes/ninking/ninking_clean_main.tscn` | 消除模式场景（1:1 复刻 ninking_main.tscn, HUD 差异见 §7 附注） |
 | `scripts/ninking/ui/game_manager.gd` | 游戏流程控制 |
 | `scripts/ninking/ui/ui_manager.gd` | UI显示管理（本文档 §5 所述） |
 | `scripts/ninking/ui/hand_display.gd` | 手牌渲染（HandDisplay delegate） |
@@ -535,6 +553,7 @@ Overlay  (封印达成)    (忍気不足)  (全结界制霸)
 | `scripts/ninking/ui/result_screen_display.gd` | 结果屏幕渲染（计分/过关/失败/喜） |
 | `scripts/ninking/ui/nin_king_tween.gd` | 项目级动画序列（商店入场/出场/reroll） |
 | `scripts/ninking/ui/deck_viewer_controller.gd` | 牌库查看器 |
+| `scripts/ninking/ui/clean_match_display.gd` | 🆕 消除模式 HandTypePanel 逐波 match 明细展示 |
 | `scripts/ninking/ui/ninking_card.gd` | 忍者卡牌显示 (Card Framework 扩展) |
 | `scripts/ninking/ui/shop_ui.gd` | 商店 UI 控制 (ShopPanel) |
 | `scripts/ninking/ui/ninja_inventory_card.gd` | 统一忍者卡 (忍者栏+商店, 替代旧 DisplayCardBase) |
@@ -572,3 +591,22 @@ Overlay  (封印达成)    (忍気不足)  (全结界制霸)
 | [`docs/ninking/04-ui/07-shop-ui-design.md`](07-shop-ui-design.md) | 商店 UI 设计文档 |
 | [`docs/ninking/04-ui/10-main-ui-design.md`](10-main-ui-design.md) | 主 UI 设计文档 |
 | ~~[`docs/ninking/05-art/05-image-asset-generation-plan.md`](../05-art/05-image-asset-generation-plan.md)~~（已删除） | 素材生成方案（已废弃） |
+| `scripts/ninking/clean_controller.gd` | 消除模式核心引擎 |
+| `scripts/ninking/clean_layout_generator.gd` | 消除模式初始布局生成器 |
+| `scripts/ninking/clean_chain_handler.gd` | 消除链处理器（VFX + match 显示集成） |
+| `scripts/ninking/ui/clean_match_display.gd` | 🆕 消除模式 HandTypePanel 逐波 match 明细展示 |
+| `scripts/ninking/game_state.gd`（消除模式） | `game_mode` 字段 + `_cascading` 连锁锁 + `swaps_remaining` 管理 |
+
+### 7.1 📌 消除模式 HUD 差异（CL17 已实施 ✅ 2026-06-24）
+
+| UI 元素 | 比鸡模式 | 消除模式 |
+|---------|---------|---------|
+| HandTypePanel | 三墩手役+列牌型 | **改造为动态 match 明细面板**（`CleanMatchDisplay` 管理，逐波追加 `手役名  chip×mult=score` 行） |
+| ColXiLabel | 喜列表 | **隐藏**（无喜） |
+| ColumnLabelRow | 列手役 | **隐藏**（无列概念） |
+| PlayCounter | "出牌 3" | 改为 **SwapCounter** "交换 5" |
+| PlayBtn | 讨伐 | **隐藏** |
+| AiRearrangeBtn | AI 重排 | **隐藏** |
+| HandTypeLabeler | 手役+约束预览 | **隐藏**（由 CleanMatchDisplay 替代） |
+| RedrawBtn | 手替え | **隐藏** |
+| ScoreCard | 行/列/喜 breakdown | 纯总分进度显示（match 明细在 HandTypePanel） |

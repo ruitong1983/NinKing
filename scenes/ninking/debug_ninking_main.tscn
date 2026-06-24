@@ -514,7 +514,24 @@ theme_override_font_sizes/normal_font_size = 13
 bbcode_enabled = true
 scroll_active = false
 
+[node name="CleanMatchScroll" type="ScrollContainer" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel" unique_id=1399827472]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 10.0
+offset_right = -24.0
+offset_bottom = -10.0
+mouse_filter = 2
+horizontal_scroll_mode = 0
+
+[node name="MatchVBox" type="VBoxContainer" parent="MainVBox/ContentRow/LeftPanel/HandTypePanel/CleanMatchScroll" unique_id=2013171625]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
 [node name="ScorePanel" type="Panel" parent="MainVBox/ContentRow/LeftPanel" unique_id=1050895993]
+unique_name_in_owner = true
 texture_filter = 1
 material = SubResource("ShaderMaterial_score_fade")
 layout_mode = 1

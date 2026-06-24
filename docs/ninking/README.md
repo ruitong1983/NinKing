@@ -1,6 +1,6 @@
 # NinKing 设计文档索引
 
-> **最后更新:** 2026-06-23 (+设计决策框架, 人格模型引用, 10-ops/ 运维分类，移动日志指南) | **关联:** [`09-mgmt/TODO.md`](09-mgmt/TODO.md)
+> **最后更新:** 2026-06-24 (+消除模式核心玩法/计分专章) | **关联:** [`09-mgmt/TODO.md`](09-mgmt/TODO.md)
 > **目录结构:** 文档按以下 9 分类存放。每个文档只能归到一个分类，README 提供跨分类索引。
 
 ---
@@ -9,7 +9,7 @@
 
 | 文档 | 内容 |
 |------|------|
-| [`06-complete-redesign.md`](01-gameplay/06-complete-redesign.md) | **核心玩法主文档 (v5.0):** 核心循环、AI排列、计分公式(行+列双维度加总)、喜系统 |
+| [`06-complete-redesign.md`](01-gameplay/06-complete-redesign.md) | **核心玩法主文档 (v7.0):** 核心循环、AI排列、计分公式(行+列双维度加总)、喜系统、**消除模式**（§5 含忍者计分公式） |
 | [`13-blinds-and-bosses.md`](01-gameplay/13-blinds-and-bosses.md) | **关卡与Boss:** 分数目标、10 Boss 设计、AI 适配 |
 
 ## 🃏 卡牌系统 (02-cards/)

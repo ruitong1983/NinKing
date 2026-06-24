@@ -469,7 +469,7 @@ footer a:hover { color: var(--gold); }
 <!-- ═══ Header ═══ -->
 <header>
   <h1>🏯 NinKing 参考手册 <small id="card-count"></small></h1>
-  <p class="subtitle">基于 <span id="data-date">2026-06-23</span> · 忍者牌 / 喜系统 / 场景树 · 点击卡牌查看详情 · ESC 清空搜索</p>
+  <p class="subtitle">基于 <span id="data-date">2026-06-24</span> · 忍者牌 / 喜系统 / 场景树 · 点击卡牌查看详情 · ESC 清空搜索</p>
 </header>
 
 <!-- ═══ Recent Updates (auto-injected by tools/inject_recent_updates.py) ═══ -->
@@ -477,9 +477,9 @@ footer a:hover { color: var(--gold); }
   <h3>📋 最近更新</h3>
   <!-- RECENT_UPDATES_PLACEHOLDER -->
 <ul>
-  <li><span class="date">2026-06-23</span><span class="tag tag-docs">docs</span>feat: 特效设计决策框架 + Tier 2 Shader 接入(色差/故障/像素爆炸/滤镜)</li>
+  <li><span class="date">2026-06-23</span><span class="tag tag-docs">docs</span><span class="tag tag-scene">scene</span>@ docs: 消除模式方案审阅入库 CL8-CL19 + 文档/场景/脚本同步更新</li>
 </ul>
-<p style="font-size:11px;color:var(--text-dim);margin-top:6px">最新提交 · 部署于 2026-06-23 18:05</p>
+<p style="font-size:11px;color:var(--text-dim);margin-top:6px">最新提交 · 部署于 2026-06-24 15:48</p>
 </div>
 
 <!-- ═══ Tab Bar ═══ -->
@@ -1643,6 +1643,14 @@ const SCENES = {
                       type: 'Panel', name: 'HandTypePanel',
                       children: [
 {
+                          type: 'ScrollContainer', name: 'CleanMatchScroll',
+                          children: [
+{
+                              type: 'VBoxContainer', name: 'MatchVBox'
+                            },
+                          ],
+                        },
+{
                           type: 'Control', name: 'HandTypeVBox',
                           children: [
 {
@@ -1767,6 +1775,7 @@ const SCENES = {
                     },
 {
                       type: 'Panel', name: 'ScorePanel',
+                      unique: true,
                       children: [
 {
                           type: 'VBoxContainer', name: 'ScoreVBox',
@@ -1981,6 +1990,10 @@ const SCENES = {
           type: 'Button', name: 'StartBtn',
           unique: true,
           note: '"开始游戏"'
+        },
+{
+          type: 'Button', name: 'CleanBtn',
+          unique: true
         },
 {
           type: 'Button', name: 'DebugBtn',
@@ -2215,6 +2228,7 @@ const SCENES = {
                     },
 {
                       type: 'Panel', name: 'ScorePanel',
+                      unique: true,
                       children: [
 {
                           type: 'VBoxContainer', name: 'ScoreVBox',
@@ -2387,6 +2401,14 @@ const SCENES = {
                                   unique: true
                                 },
                               ],
+                            },
+                          ],
+                        },
+{
+                          type: 'ScrollContainer', name: 'CleanMatchScroll',
+                          children: [
+{
+                              type: 'VBoxContainer', name: 'MatchVBox'
                             },
                           ],
                         },

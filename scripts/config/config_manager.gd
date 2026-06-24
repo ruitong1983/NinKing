@@ -13,13 +13,14 @@ const DEFAULT: Dictionary = {
 	"shop_item_count": 2,
 	"reroll_base_cost": 3,
 	"starter_ninja_ids": ["n_001", "n_052", "n_059", "n_105", "n_151"],
+		"clean_swaps_per_seal": 5,
 }
 
 
 const REQUIRED_KEYS: Array[String] = [
 	"starting_gold", "plays_per_seal", "max_ninja_slots",
 	"interest_divisor", "interest_cap", "shop_ninja_count",
-	"shop_item_count", "reroll_base_cost", "starter_ninja_ids",
+	"shop_item_count", "reroll_base_cost", "starter_ninja_ids", "clean_swaps_per_seal",
 ]
 
 var starting_gold: int
@@ -31,6 +32,7 @@ var shop_ninja_count: int
 var shop_item_count: int
 var reroll_base_cost: int
 var starter_ninja_ids: Array[String]
+var clean_swaps_per_seal: int
 var _config_loaded: bool = false
 
 
@@ -92,6 +94,7 @@ func _load_config() -> void:
 	_validate_gte(errors, data, "shop_ninja_count", 1)
 	_validate_gte(errors, data, "shop_item_count", 1)
 	_validate_gte(errors, data, "reroll_base_cost", 0)
+	_validate_gte(errors, data, "clean_swaps_per_seal", 1)
 	if not data["starter_ninja_ids"] is Array or data["starter_ninja_ids"].is_empty():
 		errors.append("starter_ninja_ids 非数组或为空")
 	else:
@@ -124,6 +127,7 @@ func _apply_config(data: Dictionary) -> void:
 	shop_item_count = int(data["shop_item_count"])
 	reroll_base_cost = int(data["reroll_base_cost"])
 	starter_ninja_ids = []
+	clean_swaps_per_seal = int(data.get("clean_swaps_per_seal", 5))
 	var ids: Array = data["starter_ninja_ids"]
 	for id: String in ids:
 		starter_ninja_ids.append(id)

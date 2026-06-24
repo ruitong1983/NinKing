@@ -381,5 +381,140 @@ suit_tiebreak: ♠=4, ♥=3, ♦=2, ♣=1
 
 ---
 
-*文档版本: v6.8 (新增 Phase F 脑暴提案库: 26 条跨棋牌设计提案) | 日期: 2026-06-20*
-*原 v3.1: 经 16 轮 grill 确认 | v3.0: 2026-06-08 | 经 29 轮 grill 确认*
+# Part 5: 消除模式 (Clean Mode) — Balatro 风消除
+
+> **设计来源:** Grill 10 轮决策, 2026-06-23 | **规格书:** [`specs/clean-mode-design.md`](../09-mgmt/specs/clean-mode-design.md)
+> **实施状态:** Phase 1 核心玩法 ✅ | Phase 2 计分配置 ✅ | Phase 3 UI+VFX ⬜
+
+## 5.1 核心概念
+
+消除模式是 NinKing 的第二种游戏模式。与比鸡模式共享结界/封印/金币/商店/忍者主体框架，但核心玩法完全不同：
+
+| 维度 | 比鸡模式 (bi_ji) | 消除模式 (clean) |
+|------|------------------|-----------------|
+| 核心操作 | 排列 9 张牌为 3 组（头/中/尾） | 相邻交换，三连消除 |
+| 操作限制 | `plays_per_seal=3`（出牌次数） | `clean_swaps_per_seal=5`（交换次数） |
+| 计分单位 | 组（头/中/尾）+ 列 + 喜 | 消除波次（chain wave） |
+| 约束 | 升序约束（头≤中≤尾） | 相邻约束（只能交换相邻卡） |
+| 补充机制 | 无（9 张固定排列） | 重力补牌 + 连锁消除 |
+| 喜系统 | ✅ 全局喜 / 组喜 / 列喜 | ❌ 无喜系统 |
+| 牌型手役 | ✅ 同花/顺子/豹子等 | ✅ **豹子/同花顺/同花/顺子**（行/列消除检测） |
+
+## 5.2 核心循环
+
+```
+封印开始
+  ↓
+初始发牌: peek 9 张 → 验证无四类三连（豹子/同花顺/同花/顺子）→ 有效则落牌
+  ↓
+PLAYING 状态
+  ↓
+玩家操作: 点击相邻两张牌 → 交换
+  ↓
+检测: 是否有三连 (豹子/同花顺/同花/顺子)?
+  ├── 无三连 → 交换生效 → swaps_remaining -1 → 等待下一次交换
+  └── 有三连 → 进入连锁消除流程
+         ↓
+      连锁消除（多波次）: 匹配→移除→重力补牌→再检测
+         ↓
+      swaps_remaining -1
+         ↓
+      判定:
+        ├── current_score ≥ target_score → 封印突破
+        ├── swaps_remaining ≤ 0 → GAME_OVER
+        └── 继续 → PLAYING 等待下一次交换
+```
+
+## 5.3 消除计分公式
+
+### 5.3.1 基础波次计分
+
+```
+每波原始分 = Σ(匹配组 rank_value × 10) × chain_multiplier
+chain_multiplier = 1 + (chain_level - 1) × 0.5   ← chain_level 从 1 开始
+```
+
+- rank_value: 2=2, 3=3, ..., 10=10, J=11, Q=12, K=13, A=14
+- 十字消除（行列交叉）奖励: +50 额外分（算入当波原始分）
+- 硬编码连锁上限: **10 波**（防御死循环）
+
+### 5.3.2 含忍者计分（完整公式）
+
+由 `ScoreCalculator.calculate_clean()` 实现：
+
+```
+输入: hand(9张牌), chain_waves(各波次数据), ninjas(持有忍者), gold(当前金币)
+
+Step 1 — 忍者效果过滤 (_is_ninja_valid_for_clean):
+  - 无条件忍者   → ✅ 生效
+  - hand_type/group/col_hand_type/xi 条件 → ⛔ 跳过（消除模式无对应概念）
+  - 经济效果 (mult_per_gold, x_per_gold) → ✅ 生效
+
+Step 2 — 忍者效果累加:
+  累加 each valid ninja:
+    add_chips_total += eff.add_chips
+    base_multiplier += eff.add_mult
+    x_stack.append(eff.x_mult)          // beyond ×1
+    base_multiplier += floor(gold/5) * mult_per_gold  // 金剛力
+    x_stack += 每 $15 增 ×2, 最多 3 次  // 黄金律
+    gold_on_swap += eff.gold_on_play    // 每次 swap 产金
+    extra_swaps += eff.extra_plays      // 额外交换次数
+    if only_one_play: only_one_swap = true
+
+Step 3 — 各波次计分:
+  for each wave:
+    raw = Σ(match.rank × 10) × chain_multiplier
+    wave_score = raw + add_chips_total    // 忍 chips 加到此波
+    swap_score += wave_score
+
+Step 4 — 乘算:
+  swap_score = ceil(swap_score × base_multiplier)
+  for each x in x_stack:
+    swap_score = ceil(swap_score × x)
+
+输出: {swap_score, wave_scores, gold_on_swap, extra_swaps, only_one_swap}
+```
+
+### 5.3.3 忍者效果映射
+
+| 效果字段 | 比鸡语义 | 消除语义 |
+|---------|---------|---------|
+| `add_chips` | 加到组 chips 上 | 直接加到每波波次分数上（每波都加） |
+| `add_mult` | 加到组 mult 上 | 加法到 base_multiplier（该次 swap 末尾乘算） |
+| `x_mult` | 乘到组 x_stack | 乘法乘到该次 swap 总分上 |
+| `extra_plays` | +1 出牌次数 | +1 swaps_remaining |
+| `gold_on_play` | 出牌产金 | 每次 swap 首波产金 |
+| `only_one_play` | 强制仅 1 次出牌 | 强制仅 1 次交换 |
+| `mult_per_gold` | 每 $5 +1 mult | ✅ 同左（金剛力） |
+| `x_per_gold` | 每 $15 ×2 | ✅ 同左（黄金律） |
+
+### 5.3.4 条件型忍者处理
+
+**消除模式中，仅无条件忍者 + 经济型忍者生效。** 约 60% 带 `hand_type`/`group`/`xi` 条件的忍者被静默跳过。商店中仍然可见，但不会触发。未来考虑引入消除模式专属忍者池。
+
+## 5.4 技术架构
+
+### 5.4.1 关键文件
+
+| 文件 | 职责 |
+|------|------|
+| `scripts/ninking/clean_controller.gd` | 核心引擎: 网格操作、匹配检测、连锁执行、交换验证、计分（基础分） |
+| `scripts/ninking/clean_layout_generator.gd` | 初始布局: peek 9 张 → 验证四类三连 → 无效则 shuffle 重试（无上限，不消耗牌） |
+| `scripts/ninking/score/score_calculator.gd` | `calculate_clean()` — 含忍者效果的消除计分管线 |
+| `scripts/ninking/game_state.gd` | 模式分支: `game_mode` 字段、`_cascading` 连锁锁、`swaps_remaining` 管理 |
+| `scripts/ninking/ui/game_manager.gd` | 连锁动画循环 `_resolve_clean_chain()` |
+
+### 5.4.2 Cascading 锁
+
+连锁消除期间（`gs._cascading = true`），所有输入被锁定：
+- `swap_cards()` 检查 `_cascading`，true 时直接 return
+- 连锁结束后 `_cascading` 置回 false
+- 通过 `prepare_chain_wave()` → `apply_chain_wave()` 循环实现波次间状态更新
+
+### 5.4.3 `CleanController` vs `SealController`
+
+**独立不继承。** 消除模式的 prepare/finalize 流程完全不同（无分组、有连锁）。共用部分（`_complete_seal`、利息计算）在 `clean_controller.gd` 中独立实现。
+
+---
+
+*文档版本: v7.1 (消除模式三连/计分/发牌更新) | 日期: 2026-06-24*

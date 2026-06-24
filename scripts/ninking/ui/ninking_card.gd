@@ -35,8 +35,8 @@ static var _card_back_tex: Texture2D
 # texture reuse across display contexts.
 static var _face_cache: Dictionary = {}
 
-static func _face_cache_key(path: String, size: Vector2) -> String:
-	return "%s_%dx%d" % [path, int(size.x), int(size.y)]
+static func _face_cache_key(path: String, p_size: Vector2) -> String:
+	return "%s_%dx%d" % [path, int(p_size.x), int(p_size.y)]
 
 ## Pre-load deck SVG textures into the shared face cache using threaded
 ## loading. SVG rasterization happens in background threads; the cache is
@@ -50,7 +50,7 @@ static func prewarm_face_cache(card_datas: Array[CardData.PlayingCard], target_s
 	for cd: CardData.PlayingCard in card_datas:
 		var rank_char: String = CardData.RANK_FILE_CHARS.get(cd.rank, "?")
 		var suit_char: String = CardData.SUIT_FILE_CHARS.get(cd.suit, "?")
-		var path: String = "%s/%s%s.svg" % [SVG_BASE_PATH, rank_char, suit_char]
+		var path: String = "%s/%s/%s.svg" % [SVG_BASE_PATH, suit_char, rank_char]
 		var key: String = _face_cache_key(path, target_size)
 		if not _face_cache.has(key):
 			paths.append(path)
@@ -74,7 +74,7 @@ func _get_card_back_tex() -> Texture2D:
 	return _card_back_tex
 
 # ── SVG asset path ──
-const SVG_BASE_PATH: String = "res://assets/images/cards/4color_deck_by_heratexx"
+const SVG_BASE_PATH: String = "res://assets/images/poker"
 
 # ── Instance vars ──
 var playing_card_data: CardData.PlayingCard
@@ -159,7 +159,7 @@ func _get_card_svg_path() -> String:
 		return ""
 	var rank_char: String = CardData.RANK_FILE_CHARS.get(playing_card_data.rank, "?")
 	var suit_char: String = CardData.SUIT_FILE_CHARS.get(playing_card_data.suit, "?")
-	return "%s/%s%s.svg" % [SVG_BASE_PATH, rank_char, suit_char]
+	return "%s/%s/%s.svg" % [SVG_BASE_PATH, suit_char, rank_char]
 
 
 func _load_card_texture() -> void:
@@ -212,6 +212,9 @@ func _load_card_texture() -> void:
 # ═══ Display update ═══
 
 func update_display() -> void:
+	# Reset the one-shot guard so _load_card_texture actually re-runs
+	# when playing_card_data has changed (e.g. clean-mode replenishment).
+	_texture_loaded = false
 	_load_card_texture()
 
 
@@ -292,3 +295,9 @@ func _apply_flash_material(flash_color: Color) -> void:
 
 func _handle_mouse_released() -> void:
 	super._handle_mouse_released()
+
+
+## Play ninja trigger flash — scale pop + modulate flash.
+## Used by CleanScoringVFX to show which ninja contributed to a swap.
+func play_ninja_flash() -> void:
+	GlobalTweens.ninja_trigger(self)

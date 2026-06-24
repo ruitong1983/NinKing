@@ -42,7 +42,7 @@ const SB = preload("res://scripts/config/sound_bank.gd")
 # Public API
 # ══════════════════════════════════════════
 
-func setup(data: Dictionary, is_ninja_bar_full: bool = false) -> void:
+func setup(data: Dictionary, _is_ninja_bar_full: bool = false) -> void:
 	_data = data
 	_is_item = data.has("hand_type") or data.get("type") == "item"
 

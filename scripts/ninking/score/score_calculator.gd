@@ -582,6 +582,213 @@ static func _finalize(
 	}
 
 
+# ══════════════════════════════════════════
+# Clean Mode Scoring
+# ══════════════════════════════════════════
+
+## Filter: returns true if a ninja effect should apply in clean mode.
+##
+## Clean mode skips conditions that reference concepts that don't exist
+## (hand_type/group/col_hand_type/xi). Only unconditional effects and
+## economy effects (mult_per_gold, x_per_gold) are valid.
+##
+## NOTE: This is a FILTER only — it decides WHETHER the ninja is valid for
+## clean mode. The actual condition VALUE evaluation (e.g. rank_odd check
+## against the current grid) is done in _evaluate_clean_condition().
+static func _is_ninja_valid_for_clean(effect: Dictionary) -> bool:
+	## CL21: Conservative condition filter for clean mode.
+	## Known-valid condition keys: rank_odd.
+	## mult_per_hand_rank is an effect key, NOT a condition key for clean mode.
+	## Known-invalid condition keys: hand_type, group, col_hand_type, xi.
+	## Unknown condition keys reject (false) — safe default against future condition types.
+	var cond: Dictionary = effect.get("condition", {})
+	if cond.is_empty():
+		return true  # No condition → unconditional
+	const SAFE_KEYS: Array[String] = ["rank_odd"]
+	const INVALID_KEYS: Array[String] = ["hand_type", "group", "col_hand_type", "xi"]
+	for key: String in cond:
+		if key in INVALID_KEYS:
+			return false
+		if key not in SAFE_KEYS:
+			return false  # Unknown condition key — reject conservatively
+	return true
+
+
+## Evaluate condition values against the current grid state.
+## Called AFTER _is_ninja_valid_for_clean() passes the whitelist filter.
+## Returns true if the condition is met (or no condition exists).
+static func _evaluate_clean_condition(cond: Dictionary, hand: Array) -> bool:
+	if cond.is_empty():
+		return true
+
+	# rank_odd: require at least one odd-rank card in the 9-card grid
+	if cond.get("rank_odd", false):
+		return _has_odd_rank_in_hand(hand)
+
+	# Fallback: unknown condition passed the filter but no runtime evaluation
+	return true
+
+
+## Check if the 9-card grid contains any odd-rank card.
+## Odd ranks: THREE(3), FIVE(5), SEVEN(7), NINE(9), JACK(11), KING(13)
+static func _has_odd_rank_in_hand(hand: Array) -> bool:
+	const ODD_RANKS: Array = [
+		CardData.Rank.THREE,
+		CardData.Rank.FIVE,
+		CardData.Rank.SEVEN,
+		CardData.Rank.NINE,
+		CardData.Rank.JACK,
+		CardData.Rank.KING,
+	]
+	for card: CardData.PlayingCard in hand:
+		if card != null and card.rank in ODD_RANKS:
+			return true
+	return false
+
+
+## Clean mode per-swap scoring with chain waves and ninja integration.
+##
+## Called once per swap AFTER all chain waves are resolved.
+##
+## Formula (from clean-mode-design.md §5.2):
+##   base_multiplier = 1
+##   swap_score = 0
+##   for each wave:
+##     raw_wave = Σ(match.rank × 10) × chain_multiplier
+##     wave_with_ninja = raw_wave + Σ(ninja_add_chips)
+##     swap_score += wave_with_ninja
+##   swap_score = ceil(swap_score × base_multiplier)
+##   for each x_mult: swap_score = ceil(swap_score × x_mult)
+##
+## @param hand: Array[CardData.PlayingCard] — current 9-card grid (unused currently, for future condition checks)
+## @param chain_waves: Array[Dictionary] — each wave from CleanController chain loop
+## @param ninjas: Array[Dictionary] — owned ninjas with effects
+## @param gold: int — current gold for economy effects
+##
+## Returns Dictionary:
+##   swap_score: int — total score for this swap
+##   wave_scores: Array[int] — per-wave scores (for animation)
+##   gold_on_swap: int — gold earned from this swap
+##   extra_swaps: int — extra swaps to add
+##   only_one_swap: bool — override swaps_remaining to 1
+##   applied_ninja_ids: Array[String] — ninjas that contributed
+##   per_match_scores: Array[Dict] — per-match-group detail ({hand_type, chips, mult, score, pos})
+##   ninja_contribs: Array[Dict] — per-ninja detail ({id, chips, mult, x_mult})
+static func calculate_clean(
+	hand: Array,
+	chain_waves: Array,
+	ninjas: Array,
+	gold: int = 0
+) -> Dictionary:
+	var base_multiplier: int = 1
+	var add_chips_total: int = 0
+	var x_stack: Array[int] = []
+	var gold_on_swap: int = 0
+	var extra_swaps: int = 0
+	var only_one_swap: bool = false
+	var applied_ids: Array[String] = []
+	var ninja_contribs: Array[Dictionary] = []
+
+	# ── Process ninja effects ──
+	for ninja: Dictionary in ninjas:
+		var eff: Dictionary = ninja.get("effect", {})
+		if not _is_ninja_valid_for_clean(eff):
+			continue
+
+		# F1: Evaluate condition VALUES against the current grid state.
+		if not _evaluate_clean_condition(eff.get("condition", {}), hand):
+			continue
+
+		var nid: String = ninja.get("id", "")
+		applied_ids.append(nid)
+
+		var n_chips: int = eff.get("add_chips", 0)
+		var n_mult: int = eff.get("add_mult", 0)
+		var n_x: int = eff.get("x_mult", 1)
+
+		# Direct stat effects
+		add_chips_total += n_chips
+		base_multiplier += n_mult
+
+		if n_x > 1:
+			x_stack.append(n_x)
+
+		# CL20: economy effects via shared helper
+		var eco: Dictionary = ScoreHelpers.apply_economy_effects(eff, gold)
+		base_multiplier += eco.earned_mult
+		for eco_xv: int in eco.earned_x:
+			x_stack.append(eco_xv)
+		gold_on_swap += eff.get("gold_on_play", 0)
+
+		extra_swaps += eff.get("extra_plays", 0)
+		if eff.get("only_one_play", false):
+			only_one_swap = true
+
+		# Track per-ninja contribution for VFX
+		var has_effect: bool = n_chips > 0 or n_mult > 0 or (n_x > 1) \
+			or eco.earned_mult > 0 or not eco.earned_x.is_empty()
+		if has_effect:
+			ninja_contribs.append({
+				"id": nid,
+				"chips": n_chips,
+				"mult": n_mult + eco.earned_mult,
+				"x_mult": n_x if n_x > 1 else (eco.earned_x[0] if not eco.earned_x.is_empty() else 1),
+			})
+
+	# ── Score each chain wave + collect per-match details ──
+	var swap_score: int = 0
+	var wave_scores: Array[int] = []
+	var per_match_scores: Array[Dictionary] = []
+
+	for wave: Dictionary in chain_waves:
+		var matches: Array[Dictionary] = wave.get("matches", [])
+		var chain_level: int = wave.get("chain_level", 1)
+
+		# Raw wave score: Σ(match_score) × chain_multiplier
+		var raw: int = 0
+		for m: Dictionary in matches:
+			raw += m.get("score", 0)
+
+			# Per-match detail (before chain multiplier)
+			var hand_type: int = m.get("hand_type", 0)
+			var m_score: int = m.get("score", 0)
+			var mults: Dictionary = {2: 3, 3: 4, 4: 5, 5: 8}
+			var mult_val: int = mults.get(hand_type, 1)
+			var chips_val: int = ceili(float(m_score) / mult_val) if mult_val > 0 else 0
+
+			per_match_scores.append({
+				"hand_type": hand_type,
+				"type_name": CardData.get_hand_type3_name(hand_type as CardData.HandType3),
+				"chips": chips_val,
+				"mult": mult_val,
+				"score_raw": m_score,
+				"score": m_score * chain_level,
+				"chain_level": chain_level,
+				"pos": m.get("positions", []),
+			})
+
+		raw *= chain_level
+		var ws: int = raw + add_chips_total
+		wave_scores.append(ws)
+		swap_score += ws
+
+	# ── Apply multipliers ──
+	swap_score = ceili(float(swap_score) * float(base_multiplier))
+	for x: int in x_stack:
+		swap_score = ceili(float(swap_score) * float(x))
+
+	return {
+		"swap_score": max(swap_score, 0),
+		"wave_scores": wave_scores,
+		"per_match_scores": per_match_scores,
+		"ninja_contribs": ninja_contribs,
+		"gold_on_swap": gold_on_swap,
+		"extra_swaps": extra_swaps,
+		"only_one_swap": only_one_swap,
+		"applied_ninja_ids": applied_ids,
+	}
+
+
 # ──────────────────────────── Cross-group bonuses (shared) ────────────────────────────
 
 ## Detect cross-group effect flags from raw ninjas array.

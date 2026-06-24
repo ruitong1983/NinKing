@@ -1,16 +1,16 @@
 [gd_scene format=3 uid="uid://dy4wrqhn3q1xv"]
 
 [ext_resource type="Theme" uid="uid://bqb2i07k0v8jt" path="res://assets/themes/manga_theme.tres" id="1_w4h35"]
-[ext_resource type="Script" uid="uid://bs0iqxh63utdk" path="res://scripts/ninking/ui/game_manager.gd" id="2_o1nja"]
+[ext_resource type="Script" uid="uid://ba3r5kv3bxlmg" path="res://scripts/ninking/ui/game_manager.gd" id="2_o1nja"]
 [ext_resource type="PackedScene" uid="uid://c7u8hryloq7hy" path="res://addons/card-framework/card_manager.tscn" id="3_rtcxr"]
 [ext_resource type="PackedScene" uid="uid://4jkp5mgq3d6t" path="res://scenes/ninking/ninking_card_factory.tscn" id="4_7lviv"]
-[ext_resource type="Texture2D" uid="uid://deelue8r4tqif" path="res://assets/images/background/table_bg.png" id="5_fh5uw"]
-[ext_resource type="Script" uid="uid://csla30fhhqlyj" path="res://scripts/ninking/ui/ui_manager.gd" id="6_ctjfp"]
-[ext_resource type="Shader" uid="uid://demp43un45wvo" path="res://shaders/panel_edge_fade.gdshader" id="7_lgb8o"]
+[ext_resource type="Texture2D" uid="uid://cmh6fgxip28j3" path="res://assets/images/background/table_bg.png" id="5_fh5uw"]
+[ext_resource type="Script" uid="uid://dgk1vdi44nj6m" path="res://scripts/ninking/ui/ui_manager.gd" id="6_ctjfp"]
+[ext_resource type="Shader" uid="uid://v8sl5wp6qlqi" path="res://shaders/panel_edge_fade.gdshader" id="7_lgb8o"]
 [ext_resource type="Texture2D" uid="uid://du3jy44eij6xa" path="res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/panel_beige.png" id="8_qhhhb"]
 [ext_resource type="Texture2D" uid="uid://oeae8mjgld5k" path="res://assets/images/ui/kenney_ui-pack-rpg-expansion/PNG/panel_beigeLight.png" id="9_yrwgf"]
 [ext_resource type="PackedScene" uid="uid://d1d3qx3a8b1bw" path="res://scenes/ninking/settlement_card.tscn" id="10_2s81g"]
-[ext_resource type="Script" uid="uid://btor5q756bk78" path="res://scripts/ninking/ui/hand_card_container.gd" id="11_r0dha"]
+[ext_resource type="Script" uid="uid://dkduntlls22m2" path="res://scripts/ninking/ui/hand_card_container.gd" id="11_r0dha"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_match_fade"]
 shader = ExtResource("7_lgb8o")
@@ -718,7 +718,24 @@ theme_override_font_sizes/normal_font_size = 13
 bbcode_enabled = true
 scroll_active = false
 
+[node name="CleanMatchScroll" type="ScrollContainer" parent="UIManager/GameLayout/LeftPanel/HandTypePanel" unique_id=706272367]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 10.0
+offset_right = -24.0
+offset_bottom = -10.0
+mouse_filter = 2
+horizontal_scroll_mode = 0
+
+[node name="MatchVBox" type="VBoxContainer" parent="UIManager/GameLayout/LeftPanel/HandTypePanel/CleanMatchScroll" unique_id=166217452]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
 [node name="ScorePanel" type="Panel" parent="UIManager/GameLayout/LeftPanel" unique_id=2100000091]
+unique_name_in_owner = true
 texture_filter = 1
 material = SubResource("ShaderMaterial_score_fade")
 layout_mode = 1
@@ -1313,8 +1330,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 880.0
 offset_top = 368.0
-offset_right = -660.0
-offset_bottom = -182.0
+offset_right = -630.0
+offset_bottom = -152.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1

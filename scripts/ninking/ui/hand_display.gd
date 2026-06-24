@@ -76,8 +76,23 @@ func refresh(hand: Array[CardData.PlayingCard]) -> void:
 		timer.timeout.connect(_try_fixup_layout, CONNECT_ONE_SHOT)
 
 
+## Clean mode: update card faces in-place without clear/recreate.
+## Avoids the full grid rebuild (re-deal effect) on every hand_updated.
+## Falls back to refresh() for initial deal (grid empty).
+func refresh_clean(hand: Array[CardData.PlayingCard]) -> void:
+	_current_hand = hand
+	if hand.size() < 9:
+		_labeler.reset_labels()
+		return
+	if _card_grid.get_card_count() == 0:
+		# First-time deal: need to create card nodes
+		refresh(hand)
+		return
+	_card_grid.update_card_faces(hand)
+
+
 func update_labels(hand: Array[CardData.PlayingCard]) -> void:
-	if _labeler:
+	if _labeler and NinKingGameState.game_mode != "clean":
 		_labeler.update_all(hand)
 
 

@@ -305,11 +305,11 @@ func _on_reorder_requested(from_index: int, to_index: int) -> void:
 
 func pulse_cards() -> void:
 	var cards: Array = get_held_cards()
-	for round: int in range(2):
+	for _round: int in range(2):
 		for card: NinjaInventoryCard in cards:
 			if is_instance_valid(card):
 				GlobalTweens.scale_pop(card, 1.08, 0.15)
-		if round == 0:
+		if _round == 0:
 			await get_tree().create_timer(0.15).timeout
 
 

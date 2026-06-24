@@ -1,6 +1,6 @@
 # 疑难问题解决手册
 
-> **建立日期:** 2026-06-14 | **最后更新:** 2026-06-22 (§17)
+> **建立日期:** 2026-06-14 | **最后更新:** 2026-06-24 (§19)
 > **用途:** 记录开发中遇到的非显而易见的坑及其解决方案，避免重复踩坑。
 
 ## §1 素材替换后"缺少依赖项"
@@ -316,6 +316,73 @@ rtl.size = Vector2(300, 32)
 **设计要点：** Debug 场景的数据模型（`_slot_data`）与主场景（`NinKingGameState.hand`）不同。主场景通过 `hand_swapped` → `HandTypeLabeler.update_all(hand)` 读取 `gs.hand` 刷新标签；Debug 场景没有 `gs.hand`，必须从 CardGrid 的实际卡片数据反推。`layout_changed` 信号适合做这种"不管数据源是什么，UI 层需要知道布局变了"的通知。
 
 **排查方法论：** 当怀疑信号链路断裂时，沿链路逐节点加 `print()` → 运行 → 看 Output 面板。哪个 `print` 没出现，断点就在上一环。避免纯静态分析耗光回合。
+
+---
+
+## §18 `_texture_loaded` 导致 `update_display()` 后卡牌纹理不变
+
+**现象：** 消除模式补牌时，新卡数据显示正确（`playing_card_data` 已更新），但卡面纹
+理仍然是旧卡。
+
+**根因：** `ninking_card.gd:_load_card_texture()` 开头有一道 `_texture_loaded` 一票否决
+守卫：
+
+```gdscript
+func _load_card_texture() -> void:
+    if _texture_loaded:   # ← 第一次加载后永久为 true
+        return
+    ...
+    _texture_loaded = true
+```
+
+`update_display()` → `_load_card_texture()` 在首次加载后直接 return，即使
+`playing_card_data` 已变更也**不重新设置纹理**。
+
+**影响范围：** 所有在初始发牌后通过 `update_display()` 改变卡面的场景。当前已知：
+消除模式补牌（`CleanChainHandler._animate_replenishment`）。
+
+**修复：** `update_display()` 中先清空守卫：
+
+```gdscript
+func update_display() -> void:
+    _texture_loaded = false   # 允许纹理重新加载
+    _load_card_texture()
+```
+
+**性能说明：** `_load_card_texture` 内部有 `_face_cache`（静态 Dictionary，按路径+尺寸
+缓存），重新加载只会 cache hit，不会重复解析 SVG。
+
+---
+
+## §19 消除模式链式消除 — 卡牌显式隐藏
+
+**现象：** 消除模式匹配的卡牌在高亮闪烁（0.35s）后未消失。
+
+**根因：** 隐藏依赖 `hand_updated` → `_on_hand_updated` → `refresh_clean` →
+`update_card_faces` → `nk_card.visible = false` 的信号链路。任何中间环节异常（信号未连
+接、`_held_cards` 状态不正确等）都会导致卡牌保持可见。
+
+**修复：** 在 `clean_chain_handler.gd` 中添加 `_hide_matched_cards()`，在 `remove_matches`
+数据删除后**直接**设置 `nk_card.visible = false`，不经过信号链路：
+
+```gdscript
+func _hide_matched_cards(wave_data: Dictionary) -> void:
+    var positions: Array[int] = wave_data.get("remove_positions", [])
+    var grid: HandCardContainer = ui.card_grid
+    for pos in positions:
+        var nk := grid.get_card_at(pos)
+        if nk == null:
+            continue
+        if is_instance_valid(nk):
+            nk.visible = false
+```
+
+**调用时机：** `remove_matches(gs, wave)` → `_hide_matched_cards(wave)` →
+`gs.hand_updated.emit(gs.hand)`
+
+原有的 `update_card_faces` 信号路径保留作为第二道防线。
+
+**2026-06-24**
 
 **受影响的文件：** `hand_card_container.gd`、`debug_controller.gd`
 

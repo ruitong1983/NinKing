@@ -22,6 +22,18 @@ func shuffle() -> void:
 	# deck_shuffled signal removed — orphaned (no listeners)
 
 
+## Peek at `count` cards from the top of draw_pile without removing them.
+## Triggers reshuffle from discard if draw pile is low.
+## Returns available cards (may be fewer than `count` if deck truly exhausted).
+func peek(count: int) -> Array[CardData.PlayingCard]:
+	if draw_pile.size() < count:
+		_reshuffle_discard()
+	var available: int = mini(count, draw_pile.size())
+	if available <= 0:
+		return []
+	return draw_pile.slice(-available)
+
+
 func draw(count: int) -> Array[CardData.PlayingCard]:
 	var drawn: Array[CardData.PlayingCard] = []
 	for _i: int in range(count):

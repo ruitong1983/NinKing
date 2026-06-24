@@ -44,6 +44,7 @@ static func build_run_data(gs: Node) -> Dictionary:
 		"current_score": gs.current_score,
 		"target_score": gs.target_score,
 		"plays_remaining": gs.plays_remaining,
+		"swaps_remaining": gs.swaps_remaining,
 		"gold": gs.gold,
 		"current_deck_name": gs.current_deck_name,
 		"owned_ninjas": gs.owned_ninjas.duplicate(true),
@@ -51,6 +52,7 @@ static func build_run_data(gs: Node) -> Dictionary:
 		"star_chart_levels": gs.star_chart_levels.duplicate(),
 		"current_seal_lord_name": gs.current_seal_lord_name,
 		"current_seal_lord_effects": gs.current_seal_lord_effects.duplicate(),
+		"game_mode": gs.game_mode,
 	}
 
 

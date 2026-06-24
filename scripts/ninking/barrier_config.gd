@@ -3,6 +3,7 @@ extends RefCounted
 
 ## Barrier + Seal structure for NinKing (v5.3 — v5.2 thresholds reduced 50%).
 ## 8 Barriers × 3 Seals (Shura / Myouou / Yasha) = 24 total seals.
+## clean_target: separate score targets for clean mode (Yasha difficulty tier).
 
 enum SealType { SHURA, MYOUOU, YASHA }
 
@@ -11,72 +12,72 @@ const BARRIERS: Array[Dictionary] = [
 	{
 		"barrier": 1,
 		"seals": [
-			{ "type": SealType.SHURA,   "target": 5250,   "gold": 3, "seal_lord": "" },
-			{ "type": SealType.MYOUOU,  "target": 8750,   "gold": 5, "seal_lord": "" },
-			{ "type": SealType.YASHA,   "target": 14000,  "gold": 8, "seal_lord": "" },
+			{ "type": SealType.SHURA,   "target": 5250,   "clean_target": 400,   "gold": 3, "seal_lord": "" },
+			{ "type": SealType.MYOUOU,  "target": 8750,   "clean_target": 500,   "gold": 5, "seal_lord": "" },
+			{ "type": SealType.YASHA,   "target": 14000,  "clean_target": 600,   "gold": 8, "seal_lord": "" },
 		]
 	},
 	# 弐ノ結界
 	{
 		"barrier": 2,
 		"seals": [
-			{ "type": SealType.SHURA,   "target": 14000,  "gold": 3, "seal_lord": "" },
-			{ "type": SealType.MYOUOU,  "target": 21000,  "gold": 5, "seal_lord": "" },
-			{ "type": SealType.YASHA,   "target": 28000,  "gold": 8, "seal_lord": "random" },
+			{ "type": SealType.SHURA,   "target": 14000,  "clean_target": 950,   "gold": 3, "seal_lord": "" },
+			{ "type": SealType.MYOUOU,  "target": 21000,  "clean_target": 1150,  "gold": 5, "seal_lord": "" },
+			{ "type": SealType.YASHA,   "target": 28000,  "clean_target": 1400,  "gold": 8, "seal_lord": "random" },
 		]
 	},
 	# 参ノ結界
 	{
 		"barrier": 3,
 		"seals": [
-			{ "type": SealType.SHURA,   "target": 21000,  "gold": 3, "seal_lord": "" },
-			{ "type": SealType.MYOUOU,  "target": 35000,  "gold": 5, "seal_lord": "" },
-			{ "type": SealType.YASHA,   "target": 52500,  "gold": 8, "seal_lord": "random" },
+			{ "type": SealType.SHURA,   "target": 21000,  "clean_target": 1500,  "gold": 3, "seal_lord": "" },
+			{ "type": SealType.MYOUOU,  "target": 35000,  "clean_target": 1800,  "gold": 5, "seal_lord": "" },
+			{ "type": SealType.YASHA,   "target": 52500,  "clean_target": 2200,  "gold": 8, "seal_lord": "random" },
 		]
 	},
 	# 肆ノ結界
 	{
 		"barrier": 4,
 		"seals": [
-			{ "type": SealType.SHURA,   "target": 35000,  "gold": 3, "seal_lord": "" },
-			{ "type": SealType.MYOUOU,  "target": 52500,  "gold": 5, "seal_lord": "" },
-			{ "type": SealType.YASHA,   "target": 70000,  "gold": 8, "seal_lord": "random" },
+			{ "type": SealType.SHURA,   "target": 35000,  "clean_target": 2200,  "gold": 3, "seal_lord": "" },
+			{ "type": SealType.MYOUOU,  "target": 52500,  "clean_target": 2700,  "gold": 5, "seal_lord": "" },
+			{ "type": SealType.YASHA,   "target": 70000,  "clean_target": 3200,  "gold": 8, "seal_lord": "random" },
 		]
 	},
 	# 伍ノ結界
 	{
 		"barrier": 5,
 		"seals": [
-			{ "type": SealType.SHURA,   "target": 52500,  "gold": 3, "seal_lord": "" },
-			{ "type": SealType.MYOUOU,  "target": 70000,  "gold": 5, "seal_lord": "" },
-			{ "type": SealType.YASHA,   "target": 105000, "gold": 8, "seal_lord": "random" },
+			{ "type": SealType.SHURA,   "target": 52500,  "clean_target": 3000,  "gold": 3, "seal_lord": "" },
+			{ "type": SealType.MYOUOU,  "target": 70000,  "clean_target": 3700,  "gold": 5, "seal_lord": "" },
+			{ "type": SealType.YASHA,   "target": 105000, "clean_target": 4500,  "gold": 8, "seal_lord": "random" },
 		]
 	},
 	# 陸ノ結界
 	{
 		"barrier": 6,
 		"seals": [
-			{ "type": SealType.SHURA,   "target": 70000,  "gold": 3, "seal_lord": "" },
-			{ "type": SealType.MYOUOU,  "target": 105000, "gold": 5, "seal_lord": "" },
-			{ "type": SealType.YASHA,   "target": 140000, "gold": 8, "seal_lord": "random" },
+			{ "type": SealType.SHURA,   "target": 70000,  "clean_target": 4000,  "gold": 3, "seal_lord": "" },
+			{ "type": SealType.MYOUOU,  "target": 105000, "clean_target": 5000,  "gold": 5, "seal_lord": "" },
+			{ "type": SealType.YASHA,   "target": 140000, "clean_target": 6000,  "gold": 8, "seal_lord": "random" },
 		]
 	},
 	# 漆ノ結界
 	{
 		"barrier": 7,
 		"seals": [
-			{ "type": SealType.SHURA,   "target": 105000, "gold": 3, "seal_lord": "" },
-			{ "type": SealType.MYOUOU,  "target": 140000, "gold": 5, "seal_lord": "" },
-			{ "type": SealType.YASHA,   "target": 175000, "gold": 8, "seal_lord": "random" },
+			{ "type": SealType.SHURA,   "target": 105000, "clean_target": 5500,  "gold": 3, "seal_lord": "" },
+			{ "type": SealType.MYOUOU,  "target": 140000, "clean_target": 7000,  "gold": 5, "seal_lord": "" },
+			{ "type": SealType.YASHA,   "target": 175000, "clean_target": 8500,  "gold": 8, "seal_lord": "random" },
 		]
 	},
 	# 捌ノ結界
 	{
 		"barrier": 8,
 		"seals": [
-			{ "type": SealType.SHURA,   "target": 140000, "gold": 3, "seal_lord": "" },
-			{ "type": SealType.MYOUOU,  "target": 175000, "gold": 5, "seal_lord": "" },
-			{ "type": SealType.YASHA,   "target": 227500, "gold": 8, "seal_lord": "random" },
+			{ "type": SealType.SHURA,   "target": 140000, "clean_target": 8000,  "gold": 3, "seal_lord": "" },
+			{ "type": SealType.MYOUOU,  "target": 175000, "clean_target": 10000, "gold": 5, "seal_lord": "" },
+			{ "type": SealType.YASHA,   "target": 227500, "clean_target": 12000, "gold": 8, "seal_lord": "random" },
 		]
 	},
 ]
@@ -123,6 +124,15 @@ static func get_seal(barrier_num: int, seal_idx: int) -> Dictionary:
 	if seal_idx < 0 or seal_idx >= seals.size():
 		return {}
 	return seals[seal_idx]
+
+
+## Get clean mode target score for a specific seal.
+## Falls back to bi_ji target if clean_target is not defined.
+static func get_clean_target(barrier_num: int, seal_idx: int) -> int:
+	var cfg: Dictionary = get_seal(barrier_num, seal_idx)
+	if cfg.is_empty():
+		return 0
+	return cfg.get("clean_target", cfg.get("target", 0))
 
 
 static func get_total_barriers() -> int:

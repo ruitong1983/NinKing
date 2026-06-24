@@ -4,6 +4,7 @@ const GameRunLogger = preload("res://scripts/ninking/logging/game_logger.gd")
 
 ## Core game state autoload — NinKing (忍者牌 × 比鸡).
 ## Barrier/Seal progression, 9-card hand → 3-group arrangement, scoring pipeline.
+## Also handles Clean (elimination) mode branching.
 
 enum State {
 	MAIN_MENU,
@@ -37,11 +38,16 @@ signal xi_triggered(xis: Array[String])
 func emit_xi_triggered(xis: Array[String]) -> void:
 	xi_triggered.emit(xis)
 
+signal swaps_changed(remaining: int)  # Clean mode only
+
+func emit_swaps_changed() -> void:
+	swaps_changed.emit(swaps_remaining)
+
 var current_state: State = State.MAIN_MENU
 
 # Barrier/Seal tracking
 var barrier_num: int = 1
-var seal_idx: int = 0          # 0=修羅, 1=明王, 2=夜叉
+var seal_idx: int = 0          # 0=修羅(序), 1=明王(破), 2=夜叉(急)
 var target_score: int = 0
 var current_score: int = 0
 var current_seal_lord_name: String = ""
@@ -49,6 +55,7 @@ var current_seal_lord_effects: Dictionary = {}
 
 # Resources
 var plays_remaining: int = 3
+var swaps_remaining: int = 5  # Clean mode only
 var gold: int = 8
 
 # Hand & deck
@@ -57,7 +64,14 @@ var current_arrangement: Arrangement = null
 var current_col_evals: Array = []  # Array[HandEvaluator3.EvalResult], 3 elements or empty
 var deck_manager: DeckManager = null
 var current_deck_name: String = "standard"
-var game_mode: String = "bi_ji"  # "bi_ji"=笔记模式, "clean"=消除模式
+var game_mode: String = "bi_ji"  # "bi_ji"=比鸡模式, "clean"=消除模式
+
+# Clean mode
+var _cascading: bool = false  # Chain wave in progress — lock input
+
+## Public setter for chain resolution lock (accessed from CleanChainHandler).
+func set_cascading(value: bool) -> void:
+	_cascading = value
 
 # Player inventory
 var owned_ninjas: Array[Dictionary] = []
@@ -91,12 +105,13 @@ func start_new_run(deck_name: String = "standard", mode: String = "bi_ji") -> vo
 	owned_ninjas.clear()
 	owned_items.clear()
 	_reset_star_chart_levels()
-	for id: String in ConfigManager.starter_ninja_ids:
-		var ninja: Dictionary = NinjaData.get_by_id(id)
-		if not ninja.is_empty():
-			owned_ninjas.append(ninja.duplicate())
-		else:
-			push_warning("GameState: starter ninja '%s' not found in NinjaData" % id)
+	if game_mode != "clean":
+		for id: String in ConfigManager.starter_ninja_ids:
+			var ninja: Dictionary = NinjaData.get_by_id(id)
+			if not ninja.is_empty():
+				owned_ninjas.append(ninja.duplicate())
+			else:
+				push_warning("GameState: starter ninja '%s' not found in NinjaData" % id)
 	deck_manager = DeckManager.new()
 	GameRunLogger.start_run(deck_name)
 	GameRunLogger.on_run_started(deck_name, gold)
@@ -109,23 +124,30 @@ func _start_seal() -> void:
 		_transition_to(State.VICTORY)
 		return
 
-	target_score = seal_cfg["target"]
+	target_score = BarrierConfig.get_clean_target(barrier_num, seal_idx) if game_mode == "clean" else seal_cfg["target"]
 	current_score = 0
 	plays_remaining = ConfigManager.plays_per_seal
+	swaps_remaining = ConfigManager.clean_swaps_per_seal if game_mode == "clean" else 0
+	_cascading = false
 
-	# Tool effects from owned ninjas: extra_plays (火遁已改同花顺倍率 / 赌命-1)
-	for ninja: Dictionary in owned_ninjas:
-		var ep: int = ninja.get("effect", {}).get("extra_plays", 0)
-		plays_remaining += ep
-	# Clamp to minimum 1
-	if plays_remaining < 1:
-		plays_remaining = 1
-
-	# 幻术大师: only_one_play → 强制仅1次出牌
-	for ninja: Dictionary in owned_ninjas:
-		if ninja.get("effect", {}).get("only_one_play", false):
-			plays_remaining = 1
-			break
+	if game_mode == "clean":
+		# Clean mode: extra_plays → extra_swaps, only_one_play → only_one_swap
+		for ninja: Dictionary in owned_ninjas:
+			swaps_remaining += ninja.get("effect", {}).get("extra_plays", 0)
+		swaps_remaining = maxi(swaps_remaining, 1)
+		for ninja: Dictionary in owned_ninjas:
+			if ninja.get("effect", {}).get("only_one_play", false):
+				swaps_remaining = 1
+				break
+	else:
+		# Bi-ji mode: standard play handling
+		for ninja: Dictionary in owned_ninjas:
+			plays_remaining += ninja.get("effect", {}).get("extra_plays", 0)
+		plays_remaining = maxi(plays_remaining, 1)
+		for ninja: Dictionary in owned_ninjas:
+			if ninja.get("effect", {}).get("only_one_play", false):
+				plays_remaining = 1
+				break
 
 	# Seal Lord effects
 	current_seal_lord_name = ""
@@ -134,6 +156,13 @@ func _start_seal() -> void:
 		var lord: Dictionary = BarrierConfig.assign_seal_lord(barrier_num)
 		current_seal_lord_name = lord["name"]
 		current_seal_lord_effects = lord.get("effect", {}).duplicate()
+
+	# Apply Seal Lord clean-mode specific effects
+	if game_mode == "clean":
+		if current_seal_lord_effects.has("column_blocked") or current_seal_lord_effects.has("row_blocked"):
+			pass  # consumed by CleanController/game_manager at scoring time
+		if current_seal_lord_effects.has("max_chain"):
+			pass  # consumed by CleanController during chain resolution
 
 	# Check if Seal Lord changes constraint — used by is_constraint_satisfied()
 	if current_seal_lord_effects.has("constraint"):
@@ -147,12 +176,14 @@ func _start_seal() -> void:
 
 
 # ══════════════════════════════════════════
-# Auto-arrange (thin wrapper — logic in ArrangeController)
+# Auto-arrange (bi_ji only — thin wrapper)
 # ══════════════════════════════════════════
 
 ## Compute the best arrangement and emit signals.
 ## Called externally by SealController and ShopManager.
 func auto_arrange() -> void:
+	if game_mode == "clean":
+		return
 	var old_hand: Array = hand.duplicate()
 	ArrangeController.auto_arrange(self)
 	_recompute_col_evals()
@@ -163,7 +194,7 @@ func auto_arrange() -> void:
 ## Re-evaluate the current manual arrangement without AI re-sorting.
 ## Preserves player's card positions, re-computes hand types and constraint.
 func re_evaluate_arrangement() -> void:
-	if hand.size() < 9:
+	if game_mode == "clean" or hand.size() < 9:
 		return
 	var head_cards: Array[CardData.PlayingCard] = []
 	var mid_cards: Array[CardData.PlayingCard] = []
@@ -197,15 +228,28 @@ func get_scoring_rules() -> Dictionary:
 
 
 # ══════════════════════════════════════════
-# Play / Seal — delegated to SealController
+# Play / Seal — delegated to controllers
 # ══════════════════════════════════════════
 
 func execute_play() -> void:
+	if game_mode == "clean":
+		# Clean mode: no "play" action — swaps handle scoring
+		return
 	SealController.execute_play(self)
 
 
 func swap_cards(idx1: int, idx2: int) -> void:
-	SealController.swap_cards(self, idx1, idx2)
+	if game_mode == "clean":
+		if _cascading:
+			return  # Locked during chain wave
+		if current_state != State.PLAYING:
+			return
+		if CleanController.do_swap(self, idx1, idx2):
+			# Signal handler (_on_hand_swapped in game_manager) will trigger
+			# chain resolution if matches found.
+			pass
+	else:
+		SealController.swap_cards(self, idx1, idx2)
 
 
 func go_to_shop() -> void:
@@ -261,6 +305,9 @@ func get_tail_cards() -> Array[CardData.PlayingCard]:
 
 
 func is_constraint_satisfied() -> bool:
+	if game_mode == "clean":
+		# Clean mode has no ascending constraint — always satisfied
+		return true
 	if not current_arrangement:
 		return false
 	var c: String = current_seal_lord_effects.get("constraint", "ascending")
@@ -288,6 +335,7 @@ func continue_run() -> void:
 	current_score = int(data.get("current_score", 0))
 	target_score = int(data.get("target_score", 0))
 	plays_remaining = int(data.get("plays_remaining", 3))
+	swaps_remaining = int(data.get("swaps_remaining", 0))
 	gold = int(data.get("gold", 4))
 	current_deck_name = data.get("current_deck_name", "standard")
 
@@ -308,17 +356,23 @@ func continue_run() -> void:
 # Internal
 # ══════════════════════════════════════════
 
-## Shared seal startup: reset deck → deal 9 → auto-arrange → checkpoint → emit signals → await intro.
+## Shared seal startup: reset deck → deal 9 → arrange/generate → checkpoint → emit → await intro.
 ## Called by _start_seal (fresh seal) and continue_run (resumed seal).
 func _begin_seal_phase() -> void:
 	GameRunLogger.on_seal_started(barrier_num, seal_idx, target_score, current_seal_lord_name)
 
 	deck_manager = DeckManager.new()
 	deck_manager.reset()
-	hand = deck_manager.draw(9)
-	GameRunLogger.on_cards_dealt(hand)
 
-	auto_arrange()
+	if game_mode == "clean":
+		# Clean mode: generate 3x3 grid with no pre-existing matches
+		hand = CleanLayoutGenerator.generate(deck_manager)
+	else:
+		# Bi-ji mode: draw 9 and auto-arrange into 3 groups
+		hand = deck_manager.draw(9)
+		auto_arrange()
+
+	GameRunLogger.on_cards_dealt(hand)
 
 	# Checkpoint save after seal is fully set up
 	SaveManager.save_run(SaveManager.build_run_data(self))
@@ -332,6 +386,9 @@ func _begin_seal_phase() -> void:
 
 func _transition_to(new_state: State) -> void:
 	current_state = new_state
+	# Reset cascading lock when returning to PLAYING in clean mode
+	if new_state == State.PLAYING and game_mode == "clean":
+		_cascading = false
 	state_changed.emit(new_state)
 
 	# Permanent death: record run result and delete checkpoint on terminal states

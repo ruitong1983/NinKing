@@ -16,6 +16,7 @@ const SB = preload("res://scripts/config/sound_bank.gd")
 # Delegates (C21)
 var shop_handler: ShopHandler
 var animation_handler: AnimationHandler
+var clean_chain_handler: CleanChainHandler
 
 # Boss reveal guard — Phase C
 var _boss_revealed: bool = false
@@ -35,6 +36,9 @@ func _ready() -> void:
 	animation_handler = AnimationHandler.new()
 	var _mark_cb := func(): _auto_shop_pending = true
 	animation_handler.setup(ui, _mark_cb)
+	clean_chain_handler = CleanChainHandler.new()
+	clean_chain_handler.setup(ui)
+	add_child(clean_chain_handler)
 
 	# Wire UI buttons
 	ui.play_btn.pressed.connect(_on_play_pressed)
@@ -55,6 +59,7 @@ func _ready() -> void:
 	NinKingGameState.state_changed.connect(_on_state_changed)
 	NinKingGameState.score_updated.connect(_on_score_updated)
 	NinKingGameState.plays_changed.connect(_on_plays_changed)
+	NinKingGameState.swaps_changed.connect(_on_swaps_changed)
 	NinKingGameState.gold_changed.connect(_on_gold_changed)
 	NinKingGameState.hand_updated.connect(_on_hand_updated)
 	NinKingGameState.hand_swapped.connect(_on_hand_swapped)
@@ -98,8 +103,13 @@ func _on_state_changed(new_state: NinKingGameState.State) -> void:
 				ui.game_layout.get_node("CenterColumn/HandArea").modulate = Color.WHITE
 			GlobalTweens.play_sfx(SB.DEAL)  # C17: deal SFX
 			# 按钮统一入场动效（弹跳 + 粒子 + 脉冲 + hover + 点击）
-			ButtonStyles.attach_entrance_animation(ui.play_btn)
-			ButtonStyles.attach_entrance_animation(ui.ai_rearrange_btn, {"mild": true})
+			if _game_mode != "clean":
+				ButtonStyles.attach_entrance_animation(ui.play_btn)
+				ButtonStyles.attach_entrance_animation(ui.ai_rearrange_btn, {"mild": true})
+			else:
+				# Clean mode: hide buttons that don't apply
+				ui.play_btn.visible = false
+				ui.ai_rearrange_btn.visible = false
 			# hand refresh is already triggered by auto_arrange() → hand_updated signal
 			ui.refresh_ninjas(NinKingGameState.owned_ninjas, NinKingGameState.max_ninja_slots)
 			ui.ai_rearrange_btn.disabled = false
@@ -110,7 +120,8 @@ func _on_state_changed(new_state: NinKingGameState.State) -> void:
 				_trigger_boss_reveal_in_playing()
 		NinKingGameState.State.SCORING:
 			ui.show_view("scoring")
-			animation_handler.run_scoring()
+			if _game_mode != "clean":
+				animation_handler.run_scoring()
 		NinKingGameState.State.SEAL_COMPLETE:
 			ui.show_view("settlement")
 			if _auto_shop_pending:
@@ -145,6 +156,9 @@ func _on_score_updated(current: float, target: float) -> void:
 func _on_plays_changed(remaining: int) -> void:
 	ui.update_match_info(remaining)
 
+func _on_swaps_changed(remaining: int) -> void:
+	ui.update_match_info(remaining)
+
 
 func _on_gold_changed(amount: int) -> void:
 	ui.update_gold(amount)
@@ -160,6 +174,8 @@ func _on_hand_updated(_hand: Array) -> void:
 func _on_hand_swapped(src: int, tgt: int) -> void:
 	ui.on_cards_swapped(src, tgt)
 	_update_deck_display()
+	if _game_mode == "clean" and NinKingGameState.current_state == NinKingGameState.State.PLAYING:
+		clean_chain_handler.resolve_clean_chain()
 
 
 func _on_seal_started(barrier: int, seal_idx: int, target: float, seal_lord_name: String) -> void:
@@ -192,12 +208,15 @@ func _on_xi_triggered(xis: Array[String]) -> void:
 		return  # Already handled in animation Phase 3
 	ui.show_xi_popup(xis)
 
-
-# ═══ Button handlers ═══
+# ══════════════════════════════════════════
+# Clean mode — chain resolution
+# ══════════════════════════════════════════
 
 func _on_play_pressed() -> void:
 	if NinKingGameState.current_state != NinKingGameState.State.PLAYING:
 		return
+	if _game_mode == "clean":
+		return  # Clean mode: no play button — swaps handle scoring
 	if not NinKingGameState.is_constraint_satisfied():
 		return
 
@@ -228,13 +247,20 @@ func _on_play_pressed() -> void:
 func _on_ai_rearrange_pressed() -> void:
 	if NinKingGameState.current_state != NinKingGameState.State.PLAYING:
 		return
+	if _game_mode == "clean":
+		return
 	NinKingGameState.auto_arrange()
 	# auto_arrange() emits hand_updated — UI refresh bound via signal
 
 
 func _on_retry_pressed() -> void:
-	NinKingGameState.start_new_run("standard")
-	get_tree().change_scene_to_file("res://scenes/ninking/ninking_main.tscn")
+	var mode: String = NinKingGameState.game_mode
+	var deck: String = NinKingGameState.current_deck_name
+	NinKingGameState.start_new_run(deck, mode)
+	var scene: String = "res://scenes/ninking/ninking_main.tscn"
+	if mode == "clean":
+		scene = "res://scenes/ninking/ninking_clean_main.tscn"
+	get_tree().change_scene_to_file(scene)
 
 
 func _on_back_to_menu_pressed() -> void:

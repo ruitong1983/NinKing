@@ -1,6 +1,6 @@
 # NinKing 工作清单
 
-> **最后更新:** 2026-06-23 | **当前 Phase:** Kenney 暖纸风 UI 改造 Phase KUI  + Shader 内部优化 S1-S7 + shaderlist 优化 S8-S14 | 本次: S8 清理完成 ✅ S10 HaloFX 实施完成 ✅ S11-S14 暂缓
+> **最后更新:** 2026-06-24 | **当前 Phase:** 消除模式计分特效 | 本次: V1-V9 计分特效全部完成
 > **使用方式:** AI 每次会话开始时读取此文件。完成任务后更新状态。
 > **状态图例:** ⬜ 待做 | 🔵 进行中 | ✅ 已完成 | 🔒 暂缓 | ⛔ 已废弃
 
@@ -708,6 +708,8 @@ Phase F1 ──→ Phase F2 ──→ Phase F3 ──→ Phase H ──→ Phase
 | 2026-06-23 | 📋 **shaderlist 优化方案审阅 + 修正**: 分析 shaderlist 85+ shader 对 NinKing 的优化价值。review-plan 发现 🔴A1(架构边界/GlobalTweens控制) + A2(pixel_explosion独子系统) 必须修正。用户确认后写入 S8-S14 共 7 项。**仅 S8(清理) + S10(HaloFX) 为 P1 优先实施，其余 P3/P4暂缓。**|
 | 2026-06-23 | ⚡ **S8 清理完成** — 删除 `shaderlib/` 3 个未用 shader(含 .uid) + `sources/` 中已覆盖的 robust_shine/blink。`SOURCES.md` 同步更新。shaderlib/ 目录已清空。|
 | 2026-06-23 | 🔥 **S10 HaloFX 实施完成** — `shaders/effects/halo.gdshader` 移植(halo_01 改造版: animate 开关+uniform 外部控制+稀有度色板适配) + `scripts/shader/halo_fx.gd`新建(遵循 EdgeFadeFX 模式) + `GlobalShaders` 注册 `apply_halo/clear_halo/has_halo`。脚本编译验证通过。|
+| 2026-06-24 | 🆕 **消除模式 Phase 3 实施完成** — **CL17** HUD适配(HandTypePanel/ColXiLabel/三墩/列/牌型标签隐藏 + SwapCounter + 封印名序/破/急 + swaps_changed 信号接入) 4 文件修改 ✅ **CL18** 动效接入(burst_particles + screen_shake + hit_stop + shake_node + 分数 popup) 1 文件修改 ✅ **CL20** 抽取经济效果到 ScoreHelpers 3 文件修改 ✅ **CL21** 条件过滤器白名单安全 fallback 1 文件修改 ✅ 文档同步: clean-mode-design §11 更新 + DOCUMENT_MAP.md + 06-ui-layout + 03-technical-design(信号表+数据流) | 详见 `docs/ninking/09-mgmt/specs/clean-mode-design.md` §11 |
+| 2026-06-24 | 🔥 **CL26-CL30 消除模式三连/计分/发牌修订完成**: **CL26** detect_matches() 重写(4种匹配类型: 豹子/同花顺/同花/顺子, 最高分优先) **CL27** 计分公式 Σ(card_chip)×hand_type_mult, add_chips 在乘前加 **CL28** CleanLayoutGenerator peek+permute, 无上限重试, 不消耗牌 **CL29** DeckManager.peek() **CL30** clean-mode-design.md 全文同步(三连定义/计分公式/数值示例) 涉及 4 文件: clean_controller.gd / clean_layout_generator.gd / deck_manager.gd / clean-mode-design.md | Grill 消除模式发牌/三连/计分修订 2026-06-24 |
 | 2026-06-23 | 🆕 **消除模式通道搭建** — game_state.gd 新增 `game_mode` 字段 + `start_new_run()` 扩展 `mode` 参数；启动器新增"消除模式"按钮(CleanBtn) + `_pending_mode` 路由；1:1 复制 `ninking_main.tscn`→`ninking_clean_main.tscn`；game_manager.gd 读取存储 game_mode。玩法尚未实现，仅创建从启动器到新场景的通道。|
 
 ## 🎨 按钮统一展示动效 — 弹跳入场 + 金色粒子 + 呼吸脉冲 + hover + 点击反馈
@@ -731,8 +733,8 @@ Phase F1 ──→ Phase F2 ──→ Phase F3 ──→ Phase H ──→ Phase
 
 ## 🆕 消除模式 (Clean Mode) — Balatro 风消除
 
-> **Grill 10 轮决策, 2026-06-23**
-> **核心:** 新建 game_mode="clean" 通道，1:1 复刻主场景。实际玩法待设计。
+> **Grill 10 轮决策, 2026-06-23 | 方案: [`specs/clean-mode-design.md`](specs/clean-mode-design.md)**
+> **状态: Phase 1 (核心玩法) ✅ | Phase 2 (计分配置) ✅ | Phase 3 (UI+VFX) ✅ | CL20/CL21 清理 ✅**
 
 | # | 任务 | 说明 | 优先级 | 状态 |
 |---|------|------|--------|------|
@@ -741,18 +743,37 @@ Phase F1 ──→ Phase F2 ──→ Phase F3 ──→ Phase H ──→ Phase
 | CL3 | **main_menu.gd 路由** | `_pending_mode` + `_on_clean_pressed()` + `_on_deck_confirmed()` 路由到 `ninking_clean_main.tscn` | **P1** | ✅ |
 | CL4 | **复制 ninking_clean_main.tscn** | 1:1 复制 `ninking_main.tscn`，通过 Godot 编辑器 API 执行 | **P1** | ✅ |
 | CL5 | **game_manager.gd 读取 game_mode** | `_game_mode = NinKingGameState.game_mode`，暂不分支行为 | **P1** | ✅ |
-| CL6 | **消除模式玩法设计** | Balatro 风消除：打牌→移除→补牌→计分 | **P2** | ⬜ |
+| CL6 | **消除模式玩法设计** | Balatro 风消除：打牌→移除→补牌→计分。详见 [`specs/clean-mode-design.md`](specs/clean-mode-design.md) | **P2** | ✅ |
 | CL7 | **文档同步 (消除模式通道)** | 更新 `03-technical-design.md` / `09-launch-ui-design.md` / `DOCUMENT_MAP.md` / `06-ui-layout-reference.md` / `10-main-ui-design.md` / `11-main-overlay-design.md` (6 份) | **P1** | ✅ |
-| **CL8** | **新建 `clean_controller.gd`** — 消除模式独立控制器：拖拽相邻交换 → 行/列消除判定 → 重力下落补牌 → 连锁消除循环 → 交换次数递减。prepare/finalize 拆分模式对齐 `seal_controller.gd` | 新建 `scripts/ninking/clean_controller.gd` | **P0** | ⬜ |
-| **CL9** | **新建 `CleanLayoutGenerator`** — 替代 `auto_arranger.gd` 的 1680 枚举。随机抽 9 张 → 放入 3×3 网格 → 验证 6 组（3 行 + 3 列）全部为散牌（HIGH_CARD_3）。概率不足时支持重试上限 | 新建 `scripts/ninking/clean_layout_generator.gd` | **P0** | ⬜ |
-| **CL10** | **`game_state.gd` 模式分支** — `execute_play()`/`swap_cards()` 按 `game_mode` 分发 CleanController；`_begin_seal_phase()` clean 变体（跳过 auto_arrange → 调 CleanLayoutGenerator → 直接进入 PLAYING） | `scripts/ninking/game_state.gd` | **P0** | ⬜ |
-| **CL11** | **`game_state.gd` 加 `_cascading` 标志** — 连锁消除动画期间锁定拖拽输入，防止重力补牌中途玩家交换导致状态不一致 | `scripts/ninking/game_state.gd` | **P0** | ⬜ |
-| **CL12** | **`ConfigManager` clean 独立配置** — 新增 `clean_swaps_per_seal: 5`（独立于 `plays_per_seal: 3`），验证 `>= 1`。Q4 用户确认独立配置 | `scripts/config/config_manager.gd` | **P0** | ⬜ |
-| **CL13** | **消除计分管线** — `ScoreCalculator` 新增 `calculate_clean(grid)` 或新建 `clean_score_pipeline.gd`：仅行+列加法计分（无喜系统），每波消除单独计分后累加到 `current_score`。`SCORING` 状态复用 | `scripts/ninking/score/score_calculator.gd` + 可能新建 | **P0** | ⬜ |
+| **CL8** | **新建 `clean_controller.gd`** — 消除模式独立控制器：拖拽相邻交换 → 行/列消除判定 → 重力下落补牌 → 连锁消除循环 → 交换次数递减。prepare/finalize 拆分模式对齐 `seal_controller.gd` | 新建 `scripts/ninking/clean_controller.gd` | **P0** | ✅ |
+| **CL9** | **新建 `CleanLayoutGenerator`** — 随机抽 9 张 → 3×3 网格 → 验证 6 组无三连，重试上限 20 次 | 新建 `scripts/ninking/clean_layout_generator.gd` | **P0** | ✅ |
+| **CL10** | **`game_state.gd` 模式分支** — execute_play/swap_cards/_begin_seal_phase/_start_seal 按 mode 分发 CleanController + CleanLayoutGenerator | `scripts/ninking/game_state.gd` | **P0** | ✅ |
+| **CL11** | **`game_state.gd` `_cascading` 锁** — 连锁消除期间锁定拖拽输入 | `scripts/ninking/game_state.gd` | **P0** | ✅ |
+| **CL12** | **Config JSON + ConfigManager 修复** — `clean_swaps_per_seal` 移出 `starter_ninja_ids` | `config/game_config.json` + `scripts/config/config_manager.gd` | **P0** | ✅ |
+| **CL13** | **消除计分管线** — `ScoreCalculator` 新增 `calculate_clean()` + `_is_ninja_valid_for_clean()`；`game_manager._resolve_clean_chain()` 改用新管线（含金币/extra_swaps 处理） | `scripts/ninking/score/score_calculator.gd` + `scripts/ninking/ui/game_manager.gd` | **P0** | ✅ |
 | **CL14** | **初始布局蒙特卡洛模拟** — Python 脚本估算 9 张随机牌在 3×3 网格中 6 组全为散牌的概率。概率 < 50% 则需设计重试策略（如重抽 N 次或允许 1-2 组非散牌保底） | `tools/clean_layout_sim.py`(新) | **P1** | ⬜ |
 | **CL15** | **忍者经济审计** — 量化 clean 模式下 `on_play` 触发频率：5 swaps × 平均连锁波数（估计 2-4 波）≈ 10-20 次/seal vs bi_ji 3 次/seal。评估通胀倍数，设计降频方案（如"每 swap 仅首波消除触发"或"每密封印限触发 N 次"） | 分析任务，不改代码 | **P1** | ⬜ |
 | **CL16** | **目标分数重标定** — `barrier_config.gd` 24 个封印 target 从 bi_ji 值（含喜×堆叠+行列双维）重新校准为纯行+列加法值。基于模拟器跑分基线 + 连锁波次预期确定新目标 | `scripts/ninking/barrier_config.gd` + `tools/sim_config.py` | **P1** | ⬜ |
-| **CL17** | **UI：消除模式 HUD 适配** — ① 移除 Xi 显示区域（ColXiLabel/喜预览/HandTypeLabeler 喜预览）② 移除升序约束显示 ③ 新增 SwapCounter（交换剩余次数，替代 PlayCounter）④ PlayBtn → 不可见 ⑤ AiRearrangeBtn → 不可见 | `ninking_clean_main.tscn` + `ui_manager.gd` + `game_manager.gd` | **P1** | ⬜ |
-| **CL18** | **Tween/VFX 消除动效接入** — ① 消除粒子碎裂 `GlobalTweens.burst_particles("manga_burst")` ② 分数飘字 `TweenFX.float_up()` ③ 新牌落地弹跳 `TweenFX.entrance_bounce()` ④ 连锁波次屏幕微震 `GlobalTweens.screen_shake()` ⑤ 关键消除 hit_stop `GlobalTweens.do_hit_stop()` | `clean_controller.gd` + 调 GlobalTweens API | **P1** | ⬜ |
-| **CL19** | **文档同步（6+ 文件）** — `06-complete-redesign.md`（消除模式玩法专章）/ `03-technical-design.md`（Cascading 状态旗标 + 新场景树）/ `DOCUMENT_MAP.md` / `13-blinds-and-bosses.md`（移除 Boss 引用）/ `06-ui-layout-reference.md`（HUD 差异）/ 相关 UI 设计文档 | `docs/ninking/` 6+ 文件 | **P1** | ⬜ |
+| **CL17** | **UI：消除模式 HUD 适配** — ① 移除 Xi/BiJi 显示区域（HandTypePanel/ColXiLabel/列标签/三墩标签/牌型标签）② 新增 SwapCounter（交换剩余次数，替代 PlayCounter）③ PlayBtn/AiRearrangeBtn 隐藏 ④ 封印名改为序/破/急 ⑤ swaps_changed 信号接线修复 | `ui_manager.gd` + `game_manager.gd` + `hand_display.gd` + `dun_highlighter.gd` | **P1** | ✅ |
+| **CL18** | **Tween/VFX 消除动效接入** — ① 消除粒子 `burst_particles("manga_burst")` ② 连锁波次 `screen_shake` ③ ≥3 连锁 `hit_stop` ④ 无匹配 `shake_node(0.5, 0.1)` + UI_ERROR SFX ⑤ 分数 popup `_show_clean_score_popup()` | `game_manager.gd` _resolve_clean_chain() | **P1** | ✅ |
+| **CL19** | **文档同步（6+ 文件）** — `06-complete-redesign.md`（消除模式玩法专章 §5）/ `03-technical-design.md`（消除模式状态机+数据流）/ `DOCUMENT_MAP.md`（clean_controller/score_calculator 映射）/ `06-ui-layout-reference.md`（HUD 差异表）/ `README.md`（索引更新） | `docs/ninking/` 6+ 文件 | **P1** | ✅ |
+| **CL20** | **抽取 `apply_economy_effects()` 到 ScoreHelpers** — 新建 `ScoreHelpers.apply_economy_effects()` 共享方法，`ScoreEffectCollector._apply_economy_effects()` 委托调用，`ScoreCalculator.calculate_clean()` 改用共享方法 | `score_helpers.gd` + `score_effect_collector.gd` + `score_calculator.gd` | **P2** | ✅ |
+| **CL21** | **`_is_ninja_valid_for_clean` 条件过滤器保守 fallback** — 明确 SAFE_KEYS/INVALID_KEYS 白名单，未知 condition key → reject (false)，防止将来新增非标准条件忍者时静默误判 | `scripts/ninking/score/score_calculator.gd` | **P2** | ✅ |
 
+
+| **CL25** | **Code Review 修复（P0/P1）** — 4 个确认问题：F3 do_swap 移除冗余 hand_updated + F2 除零守卫 + F4 删除 execute_chain 死代码 + F1 条件值评估 | clean_controller.gd + score_helpers.gd + score_calculator.gd | **P0/P1** | ✅ |
+| **CL26** | **`detect_matches()` 重写** — 扩展检测 4 种匹配类型：豹子/同花顺/同花/顺子，优先返回最高分匹配，返回结构含 `hand_type`/`cards`/`score` | `scripts/ninking/clean_controller.gd` | **P0** | ✅ |
+| **CL27** | **`_score_matches()` 计分公式更新** — 改用 `Σ(card_chip) × hand_type_mult`，乘以前 +N 忍具 add_chips | `scripts/ninking/clean_controller.gd` | **P0** | ✅ |
+| **CL28** | **`CleanLayoutGenerator` peek+permute 重写** — 不消耗牌 peek，无上限重试，`_is_valid()` 复用 `detect_matches()` | `scripts/ninking/clean_layout_generator.gd` | **P0** | ✅ |
+| **CL29** | **`DeckManager` 新增 `peek(count)` 方法** — 从 draw_pile 末尾 peek 卡牌但不弹出 | `scripts/ninking/deck_manager.gd` | **P0** | ✅ |
+| **CL30** | **`clean-mode-design.md` 全文同步** — 三连定义、计分公式、数值示例全面更新 | `docs/ninking/09-mgmt/specs/clean-mode-design.md` | **P1** | ✅ |
+| **V1** | **ScoreCalculator 返回值扩展** — `calculate_clean()` 新增 `per_match_scores[]` + `ninja_contribs[]` | `scripts/ninking/score/score_calculator.gd` | **P1** | ✅ |
+| **V3** | **CleanScoringVFX** — 中央编排器：分组飘字(贝塞尔飞行+汇入)+忍者浮字+倍率标识+COMBO徽章 | `scripts/ninking/clean/clean_scoring_vfx.gd`(新) | **P1** | ✅ |
+| **V4** | **UIManager 暴露 ScorePanel** — `score_panel` 引用 + `play_clean_score_jump()` 方法(数字滚动+弹性跳+金闪+边框光晕) | `scripts/ninking/ui/ui_manager.gd` | **P1** | ✅ |
+| **V6** | **CleanChainHandler 集成** — 旧 `_show_wave_score/_show_final_score_popup/_show_combo_badge` 删除，委托 `CleanScoringVFX` | `scripts/ninking/clean_chain_handler.gd` | **P1** | ✅ |
+| **V7** | **NinKingCard.play_ninja_flash()** — 忍者触发 flash (委托 `GlobalTweens.ninja_trigger`) | `scripts/ninking/ui/ninking_card.gd` | **P1** | ✅ |
+| **V9** | **文档同步** — §10 VFX 章节大幅扩充 | `docs/ninking/09-mgmt/specs/clean-mode-design.md` | **P1** | ✅ |
+| **CL31** | **解除消除模式相邻交换约束** — 删除 `clean_controller.gd` 中 `is_adjacent()` 守卫，9 格内任意两位置自由交换。更新设计文档 §3.2/§二/§6.2 | `clean_controller.gd` + `clean-mode-design.md` | **P1** | ✅ |
+| **CL32** | **消除链视觉分步修复** — 拆分 `apply_chain_wave` 为 `remove_matches` + `gravity_and_draw` 两步，消除→0.15s→补牌。`update_card_faces` 支持 null 隐藏。`update_display()` 修复纹理重载。`move_cards` `was_playing` 捕获防止二次交换。`_cascading` 锁修复 | `clean_controller.gd` + `hand_card_container.gd` + `ninking_card.gd` + `game_manager.gd` + `game_state.gd` | **P0** | ✅ |
+| **R1** | **Code Review 修复** — 提取 `_resolve_clean_chain` + `_show_clean_score_popup` 到 `clean_chain_handler.gd`（game_manager 483→346行）。`set_cascading()` 公开 setter。`col_cards` 类型标注修复。DOCUMENT_MAP 新增 §4.8 | `clean_chain_handler.gd`(新) + `game_manager.gd` + `game_state.gd` + `clean_controller.gd` + `DOCUMENT_MAP.md` | **P2** | ✅ |
+| **CL33** | **消除链视觉分步增强 — 五阶段动画** — 2026-06-24。每波消除流程从原"消除→0.15s→补牌→0.25s"重写为：Phase A(高亮0.35s, REDRAW_TARGET红光闪烁) → B(消除, 瞬间) → C(空洞0.4s) → D1(旧牌下沉0.3s, y-offset弹跳) → D2(新牌坠落0.35s, 上方坠落+pop_in+row0橙闪) + 逐波分数弹出 + 连锁≥2 COMBO徽章。`hand_card_container.gd` 加 `get_card_at()` 公开方法 | `clean_chain_handler.gd` + `hand_card_container.gd` | **P0** | ✅ |

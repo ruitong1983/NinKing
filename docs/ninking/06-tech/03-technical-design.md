@@ -53,6 +53,7 @@
 
 ## 状态机
 
+### 比鸡模式
 ```
    (启动器 main_menu.gd 调用 start_new_run(deck_name, mode) / continue_run() 后加载本场景)
                     ┌──────────┐
@@ -87,8 +88,44 @@
               └────── 死亡后点"重新开始" → reload 场景 → SEAL_INTRO
 ```
 
+### 消除模式
+```
+   (启动器 CleanBtn 路由到 ninking_clean_main.tscn)
+                    ┌──────────┐
+                    │ SEAL_INTRO │ ← 0.5s 结界浮水印（同比鸡）
+                    └─────┬──────┘
+                          │ auto-transition (0.5s)
+                   ┌──────▼──────┐
+              ┌────│   PLAYING   │◄──────────────────────┐
+              │    └──┬──┬──┬───┘                       │
+              │       │  │  │                           │
+              │  swap │  │  (无 execute_play)           │
+              │  cards│  │  消除模式无讨伐按钮           │
+              │       │  └──────────┐                    │
+              │       │             ▼                    │
+              │       │         SCORING                  │
+              │       │     (连锁消除动画 → 判定)        │
+              │       │          │                       │
+              │       │   ┌──────┴──────┐                │
+              │       │   ▼              ▼               │
+              │       │SEAL_          GAME_              │
+              │       │COMPLETE        OVER              │
+              │       │   │                              │
+              │       │   ▼                              │
+              │       │  SHOP (同场景 Overlay) ←─ Phase C │
+              │       │   │                               │
+              │       │   ▼                               │
+              │       │ continue_from_shop() ─────────────┘
+              │       │
+              │       ▼
+              │    VICTORY
+              │
+              └────── 死亡后点"重新开始" → reload 场景 → SEAL_INTRO
+```
+
 > **Phase C 变更 (2026-06-11):** SHOP 改为同场景 Overlay，不再涉及 `change_scene_to_file`。
 > SEAL_INTRO 从 2s 缩短为 0.5s 结界浮水印。Boss 封印的揭示动画移至 PLAYING 中（战中出现）。
+> **消除模式 (2026-06-24):** 共用 PLAYING/SCORING/SEAL_COMPLETE 状态，但 SCORING 时执行连锁消除动画，而非分组计分。
 
 ### 状态枚举
 
@@ -136,7 +173,7 @@ res://
 ├── scenes/ninking/
 │   ├── ninking_launcher.tscn       ← 入口场景 (主菜单)
 │   ├── ninking_main.tscn           ← 主游戏场景（含 ShopOverlay Phase C, 比鸡模式）
-│   ├── ninking_clean_main.tscn      ← 消除模式场景 (1:1 复刻 ninking_main.tscn, 玩法待实现)
+│   ├── ninking_clean_main.tscn      ← 消除模式场景 (1:1 复刻 ninking_main.tscn, 玩法已实现 Phase 1-3 ✅)
 │   ├── debug_ninking_main.tscn          ← Debug 计分测试场景 (2026-06-12)
 │   ├── shop_panel.tscn             ← 🆕 商店面板场景片段 (替代旧 shop.tscn)
 │   ├── ninja_card.tscn               ← 🆕 统一忍者卡场景 (替代旧 display_card_base.tscn)
@@ -245,6 +282,39 @@ Shop (Control) [shop_ui.gd]       ← 改为 shop_panel.tscn (场景片段)
 
 ---
 
+### 数据流（消除模式 — swap）
+
+```
+玩家交换相邻牌 → GameManager._on_hand_swapped()
+    │
+    ▼
+NinKingGameState.swap_cards(src_idx, tgt_idx)
+    │ 检查 _cascading 锁 + 相邻约束
+    │
+    ├── CleanController.do_swap(gs, src, tgt) → 交换两张牌位置
+    │   └── emit hand_swapped + hand_updated 信号
+    │
+    ▼
+GameManager._resolve_clean_chain()
+    │
+    ├── 检测: CleanController.prepare_chain_wave(gs, level) → matches?
+    │   └── 无匹配 → 浪费一次交换 → swaps_remaining -1 → 判定
+    │
+    ├── 有匹配 → 波次循环:
+    │   ├── prepare_chain_wave → {matches, wave_score, remove_positions}
+    │   ├── apply_chain_wave → 移除匹配牌 + 重力补牌 + 抽新牌
+    │   └── 动画延迟 ~1.05s(D1 0.55s + D2 0.50s) → 继续下一波（重力/squash/spring/粒子，见 clean-mode-design.md §4.1a）
+    │
+    └── 所有波次完成后:
+        ├── ScoreCalculator.calculate_clean(hand, chains, ninjas, gold)
+        │   └── 过滤忍者 (skip hand_type/group/xi)、累加 add_chips/add_mult/x_mult、
+        │       按波次计分 → {swap_score, gold_on_swap, extra_swaps}
+        ├── 应用 gold_on_swap / extra_swaps
+        └── CleanController.finalize_swap → emit swaps_changed → 判定: 过关/失败/继续
+```
+
+---
+
 ## 信号架构
 
 ### NinKingGameState 信号
@@ -259,6 +329,7 @@ Shop (Control) [shop_ui.gd]       ← 改为 shop_panel.tscn (场景片段)
 | `arrangement_changed` | `arrangement: Arrangement` | AI 重排/原地重评估后（影/瞬/滅 分组变化） |
 | `seal_started` | `barrier: int, seal_idx: int, target: int, seal_lord_name: String` | 封印开始 |
 | `xi_triggered` | `xis: Array[String]` | 喜触发（全黑/全红等） |
+| `swaps_changed` | `remaining: int` | 消除模式交换次数变化 (2026-06-24 CL17) |
 
 ### 数据流（出牌）
 
@@ -430,7 +501,7 @@ res://
 ```
 NinKingCard (extends Card) — SVG 牌面渲染
 ├── _ensure_face_nodes() — 创建 FrontFace/BackFace/TextureRect 节点（new() 兜底）
-├── _load_card_texture() — 加载 SVG 纹理 (res://assets/images/cards/4color_deck_by_heratexx/{rank}{suit}.svg)
+├── _load_card_texture() — 加载 SVG 纹理 (res://assets/images/poker/{suit_dir}/{rank_num}.svg)  <!-- 2026-06-24: 素材从 4color_deck_by_heratexx 切至 poker -->
 │   └── expand_mode=IGNORE_SIZE + stretch_mode=KEEP_ASPECT_COVERED + size=125×175 (5:7)
 │       (IGNORE_SIZE 防止 Godot 4 每帧覆盖 size 为 SVG viewBox 240×334)
 ├── _get_card_svg_path() — suit/rank → SVG 文件路径

@@ -335,29 +335,16 @@ static func _col_matches_hand_type_cond(cond: Dictionary, col_type: CardData.Han
 
 ## Apply gold-scaling effects (金剛力, 黄金律) to a group.
 ## These are unconditional — they apply to ANY group (row or column).
+## CL20: Delegates to ScoreHelpers.apply_economy_effects() to eliminate
+## code duplication with ScoreCalculator.calculate_clean().
 static func _apply_economy_effects(effect: Dictionary, gold: int, target: Dictionary) -> bool:
+	var eco: Dictionary = ScoreHelpers.apply_economy_effects(effect, gold)
 	var applied: bool = false
-	var mult_step: int = effect.get("mult_per_gold", 0)
-	if mult_step > 0:
-		var step: int = effect.get("mult_gold_step", 5)
-		var cap: int = effect.get("mult_gold_cap", 0)
-		var earned: int = floori(float(gold) / float(step)) * mult_step
-		if cap > 0:
-			earned = mini(earned, cap)
-		if earned > 0:
-			target.mult += earned
-			applied = true
-
-	var x_step: int = effect.get("x_per_gold", 0)
-	if x_step > 1:
-		var step_g: int = effect.get("x_gold_step", 15)
-		var cap_x: int = effect.get("x_gold_cap", 0)
-		var count: int = floori(float(gold) / float(step_g))
-		if cap_x > 0:
-			count = mini(count, cap_x)
-		for _i: int in range(count):
-			target.x_stack.append(x_step)
-		if count > 0:
-			applied = true
-
+	if eco.earned_mult > 0:
+		target.mult += eco.earned_mult
+		applied = true
+	if not eco.earned_x.is_empty():
+		for xv: int in eco.earned_x:
+			target.x_stack.append(xv)
+		applied = true
 	return applied

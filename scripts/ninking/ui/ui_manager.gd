@@ -7,6 +7,9 @@ extends Control
 ## All display updates go through this class game_manager.gd only handles flow.
 ## NinjaBarNode loaded dynamically (avoids editor cache conflicts).
 
+const SB = preload("res://scripts/config/sound_bank.gd")
+const CountUp = preload("res://scripts/tween/count_up.gd")
+
 
 # ═══ Sub-views ═══
 @onready var level_intro: Control = %LevelIntro
@@ -48,6 +51,7 @@ static func _ensure_boss_cache() -> void:
 
 # ═══ Left panel ═══
 @onready var left_panel: Control = %LeftPanel
+@onready var score_panel: Panel = %ScorePanel
 @onready var panel_bg: ColorRect = %PanelBg
 @onready var col_xi_label: Label = %ColXiLabel
 
@@ -134,6 +138,7 @@ func update_xi_display(text: String) -> void:
 
 # ═══ Delegates ═══
 var hand_display: RefCounted  # HandDisplay
+var _game_mode: String = "bi_ji"
 
 var deck_viewer_ctrl: DeckViewerController
 var dun_highlighter: DunHighlighter
@@ -142,6 +147,8 @@ var ninja_bar: NinjaBarNode
 
 
 func _ready() -> void:
+	_game_mode = NinKingGameState.game_mode
+
 	# Hand display (rendering)
 	hand_display = HandDisplay.new()
 	hand_display.setup(
@@ -225,6 +232,8 @@ func show_view(view: String) -> void:
 	game_over.visible = (view == "gameover")
 	victory_overlay.visible = (view == "victory")
 	settlement_overlay.visible = (view == "settlement")
+	# Scoring overlay: show only in bi-ji scoring (clean mode uses its own VFX)
+	scoring_overlay.visible = (view == "scoring" and _game_mode != "clean")
 	# KUI2: pop_in animation for GameOver/Victory panels
 	if view == "gameover":
 		_animate_card_pop_in(game_over_panel)
@@ -234,6 +243,10 @@ func show_view(view: String) -> void:
 	# all UIManager children. Hide during overlay views so cards don't block
 	# clicks to buttons (e.g. RetryButton on GameOver screen).
 	card_grid.visible = (view in ["game", "scoring"])
+
+	# Apply clean mode specific UI visibility
+	if view in ["game", "scoring"]:
+		_apply_clean_mode_visibility()
 
 
 # ══════════════════════════════════════════
@@ -245,6 +258,65 @@ func _animate_card_pop_in(panel: Panel) -> void:
 	tw.set_parallel(true)
 	tw.tween_property(panel, "scale", Vector2(1, 1), 0.3)
 	tw.tween_property(panel, "modulate", Color(1, 1, 1, 1), 0.2)
+
+
+# Clean mode UI visibility
+# ══════════════════════════════════════════
+## Apply clean-mode-specific UI visibility rules.
+## Hides elements that don't apply to elimination mode.
+func _apply_clean_mode_visibility() -> void:
+	if _game_mode != "clean":
+		return
+
+	# Hide HandTypePanel bi-ji content (HandTypeVBox), show clean mode scroll
+	var htp: Control = left_panel.get_node("HandTypePanel")
+	if is_instance_valid(htp):
+		var htp_vbox: Control = htp.get_node_or_null("HandTypeVBox")
+		if htp_vbox:
+			htp_vbox.visible = false
+		var clean_scroll: Control = htp.get_node_or_null("CleanMatchScroll")
+		if clean_scroll:
+			clean_scroll.visible = true
+
+	# Hide ScorePanel column/xi labels
+	col_xi_label.visible = false
+	# Hide column labels
+	if is_instance_valid(col0_label): col0_label.visible = false
+	if is_instance_valid(col1_label): col1_label.visible = false
+	if is_instance_valid(col2_label): col2_label.visible = false
+	# Hide column row labels
+	if is_instance_valid(left_col_label): left_col_label.visible = false
+	if is_instance_valid(left_col_type): left_col_type.visible = false
+	if is_instance_valid(left_col_score): left_col_score.visible = false
+	if is_instance_valid(left_col_lv): left_col_lv.visible = false
+	if is_instance_valid(mid_col_label): mid_col_label.visible = false
+	if is_instance_valid(mid_col_type): mid_col_type.visible = false
+	if is_instance_valid(mid_col_score): mid_col_score.visible = false
+	if is_instance_valid(mid_col_lv): mid_col_lv.visible = false
+	if is_instance_valid(right_col_label): right_col_label.visible = false
+	if is_instance_valid(right_col_type): right_col_type.visible = false
+	if is_instance_valid(right_col_score): right_col_score.visible = false
+	if is_instance_valid(right_col_lv): right_col_lv.visible = false
+	# Hide three-dun labels
+	if is_instance_valid(head_label): head_label.visible = false
+	if is_instance_valid(middle_label): middle_label.visible = false
+	if is_instance_valid(tail_label): tail_label.visible = false
+	if is_instance_valid(head_type_label): head_type_label.visible = false
+	if is_instance_valid(middle_type_label): middle_type_label.visible = false
+	if is_instance_valid(tail_type_label): tail_type_label.visible = false
+	# Hide shadow/flash/destroy rows
+	if is_instance_valid(shadow_type_label): shadow_type_label.visible = false
+	if is_instance_valid(flash_type_label): flash_type_label.visible = false
+	if is_instance_valid(destroy_type_label): destroy_type_label.visible = false
+	if is_instance_valid(shadow_score_label): shadow_score_label.visible = false
+	if is_instance_valid(flash_score_label): flash_score_label.visible = false
+	if is_instance_valid(destroy_score_label): destroy_score_label.visible = false
+	if is_instance_valid(shadow_lv_label): shadow_lv_label.visible = false
+	if is_instance_valid(flash_lv_label): flash_lv_label.visible = false
+	if is_instance_valid(destroy_lv_label): destroy_lv_label.visible = false
+	# Hide buttons
+	if is_instance_valid(play_btn): play_btn.visible = false
+	if is_instance_valid(ai_rearrange_btn): ai_rearrange_btn.visible = false
 
 
 # Shop overlay (Phase C)
@@ -314,8 +386,9 @@ func hide_shop() -> void:
 	hand_area.visible = true
 	if game_layout.has_node("CenterColumn/DunArea"):
 		game_layout.get_node("CenterColumn/DunArea").visible = true
-	play_btn.visible = true
-	ai_rearrange_btn.visible = true
+	if _game_mode != "clean":
+		play_btn.visible = true
+		ai_rearrange_btn.visible = true
 
 
 func is_shop_open() -> bool:
@@ -371,7 +444,7 @@ func _on_shop_continue_requested() -> void:
 
 func on_seal_start(barrier: int, seal_idx: int, target: int, seal_lord_name: String) -> void:
 	clear_score_formula()
-	var seal_names: Array = ["修羅ノ封印", "明王ノ封印", "夜叉ノ封印"]
+	var seal_names: Array = ["修羅ノ封印", "明王ノ封印", "夜叉ノ封印"] if _game_mode != "clean" else ["序ノ封印", "破ノ封印", "急ノ封印"]
 	var seal_str: String = seal_names[seal_idx] if seal_idx < 3 else "?"
 	intro_level_label.text = "結界%d · %s" % [barrier, seal_str]
 	if seal_lord_name != "":
@@ -386,7 +459,10 @@ func on_seal_start(barrier: int, seal_idx: int, target: int, seal_lord_name: Str
 
 	update_score(0, target)
 	update_target(target)
-	update_match_info(3)
+	if _game_mode == "clean":
+		update_match_info(NinKingGameState.swaps_remaining)
+	else:
+		update_match_info(3)
 	update_gold(NinKingGameState.gold)
 
 
@@ -427,12 +503,61 @@ func update_score(current: int, target: int) -> void:
 	progress_bar.value = float(current)
 
 
+## Clean mode score jump animation — elastic bounce + gold flash + number roll.
+## Called by CleanScoringVFX when all floating score popups reach the panel.
+func play_clean_score_jump(old_score: int, new_score: int, _chain_level: int = 0) -> void:
+	if not is_instance_valid(score_label) or not is_instance_valid(progress_bar):
+		return
+
+	# 1) Elastic number roll via CountUp
+	CountUp.play_eased(score_label, old_score, new_score, 0.35, "", "",
+		func(_pitch: float) -> void:
+			GlobalTweens.play_sfx(SB.COUNT_TICK, 0.0)
+	)
+
+	# 2) Elastic scale jump: 0.9x → 1.25x → bounce back
+	var tw_scale: Tween = create_tween().set_parallel(false)
+	tw_scale.tween_property(score_label, "scale", Vector2(0.9, 0.9), 0.06)
+	tw_scale.tween_property(score_label, "scale", Vector2(1.25, 1.25), 0.08)\
+		.set_ease(Tween.EASE_OUT)
+	tw_scale.tween_property(score_label, "scale", Vector2.ONE, 0.12)\
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BOUNCE)
+
+	# 3) Gold flash sweep: ColorRect across score label
+	var flash := ColorRect.new()
+	flash.color = Color(1.0, 0.84, 0.0, 0.35)
+	flash.size = Vector2(0, score_label.size.y)
+	flash.position = Vector2(score_label.position.x - 20, score_label.position.y)
+	score_label.add_child(flash)
+	var tw_flash: Tween = create_tween()
+	tw_flash.tween_property(flash, "size:x", score_label.size.x + 40, 0.15)\
+		.set_ease(Tween.EASE_OUT)
+	tw_flash.tween_property(flash, "modulate:a", 0.0, 0.1)
+	await tw_flash.finished
+	if is_instance_valid(flash):
+		flash.queue_free()
+
+	# 4) Border glow on score panel
+	if is_instance_valid(score_panel):
+		var orig_modulate: Color = score_panel.modulate
+		score_panel.modulate = Color(1.08, 1.05, 0.85, 1.0)
+		var tw_glow: Tween = create_tween()
+		tw_glow.tween_property(score_panel, "modulate", orig_modulate, 0.15)\
+			.set_ease(Tween.EASE_OUT)
+
+	# 5) Progress bar sync
+	progress_bar.value = float(new_score)
+
+
 func update_gold(amount: int) -> void:
 	gold_label.text = "$%d" % amount
 
 
 func update_match_info(plays_left: int) -> void:
-	hands_label.text = "討伐 %d" % plays_left
+	if _game_mode == "clean":
+		hands_label.text = "交換 %d" % plays_left
+	else:
+		hands_label.text = "討伐 %d" % plays_left
 
 
 func update_target(target: int) -> void:
@@ -444,10 +569,14 @@ func update_target(target: int) -> void:
 # ══════════════════════════════════════════
 
 func _refresh_internal(hand: Array[CardData.PlayingCard]) -> void:
-	hand_display.refresh(hand)
-	hand_display.update_labels(hand)
-	dun_highlighter.update(NinKingGameState.current_arrangement, NinKingGameState.current_seal_lord_effects.get("constraint", "ascending"))
-	play_btn.disabled = not NinKingGameState.is_constraint_satisfied()
+	if _game_mode == "clean":
+		# Clean mode: in-place card face update, no full grid rebuild
+		hand_display.refresh_clean(hand)
+	else:
+		hand_display.refresh(hand)
+		hand_display.update_labels(hand)
+		dun_highlighter.update(NinKingGameState.current_arrangement, NinKingGameState.current_seal_lord_effects.get("constraint", "ascending"))
+		play_btn.disabled = not NinKingGameState.is_constraint_satisfied()
 
 
 func refresh_hand(hand: Array[CardData.PlayingCard]) -> void:
@@ -457,9 +586,10 @@ func refresh_hand(hand: Array[CardData.PlayingCard]) -> void:
 ## Called after two cards swap  animate in-place, no full rebuild.
 func on_cards_swapped(src: int, tgt: int) -> void:
 	card_grid.swap_two_cards(src, tgt)
-	hand_display.update_labels(NinKingGameState.hand)
-	dun_highlighter.update(NinKingGameState.current_arrangement, NinKingGameState.current_seal_lord_effects.get("constraint", "ascending"))
-	play_btn.disabled = not NinKingGameState.is_constraint_satisfied()
+	if _game_mode != "clean":
+		hand_display.update_labels(NinKingGameState.hand)
+		dun_highlighter.update(NinKingGameState.current_arrangement, NinKingGameState.current_seal_lord_effects.get("constraint", "ascending"))
+		play_btn.disabled = not NinKingGameState.is_constraint_satisfied()
 
 
 # ══════════════════════════════════════════
@@ -514,7 +644,7 @@ func restore_ui_state() -> void:
 	var gs: NinKingGameState = NinKingGameState
 	on_seal_start(gs.barrier_num, gs.seal_idx, int(gs.target_score), gs.current_seal_lord_name)
 	update_score(int(gs.current_score), int(gs.target_score))
-	update_match_info(gs.plays_remaining)
+	update_match_info(gs.swaps_remaining if gs.game_mode == "clean" else gs.plays_remaining)
 	update_gold(gs.gold)
 	refresh_hand(gs.hand)
 	refresh_ninjas(gs.owned_ninjas, gs.max_ninja_slots)

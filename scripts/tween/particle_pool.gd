@@ -164,10 +164,10 @@ static func _make_petal_texture() -> ImageTexture:
 			var dx := float(x) - cx
 			var dy := float(y) - cy
 			# 花瓣形状: 顶部尖 + 底部圆 + 左右对称
-			var dist := sqrt(dx * dx + dy * dy)
+			var _dist := sqrt(dx * dx + dy * dy)
 			var angle := atan2(dy, dx)
 			var petal_r := 6.0 + sin(angle * 2.0) * 2.0  # 花瓣曲线
-			var a := clampf(1.0 - dist / petal_r, 0.0, 1.0)
+			var a := clampf(1.0 - _dist / petal_r, 0.0, 1.0)
 			img.set_pixel(x, y, Color(1.0, 1.0, 1.0, a))
 	return ImageTexture.create_from_image(img)
 
@@ -193,7 +193,7 @@ static func _make_sparkle_texture() -> ImageTexture:
 		for x in range(16):
 			var dx := float(x) - cx
 			var dy := float(y) - cy
-			var dist := sqrt(dx * dx + dy * dy)
+			var _dist := sqrt(dx * dx + dy * dy)
 			# 四角星: |x|+|y| 菱形 + 十字扩展
 			var star_d: float = (abs(dx) + abs(dy)) / 6.0
 			var cross_d: float = (max(abs(dx), abs(dy))) / 5.0
