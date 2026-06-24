@@ -39,7 +39,6 @@ func setup(ui_ref: UIManager, mark_auto_shop_cb: Callable = func(): pass) -> voi
 
 ## Resolve elimination chains after a clean mode swap.
 func resolve_clean_chain() -> void:
-	print("[MASK_DEBUG] resolve_clean_chain: START")
 	var gs = NinKingGameState
 	if gs.current_state != NinKingGameState.State.PLAYING:
 		return
@@ -96,8 +95,6 @@ func resolve_clean_chain() -> void:
 	# B.5 — Explicitly hide card nodes (primary hide mechanism)
 	_hide_matched_cards(first_wave)
 	gs.hand_updated.emit(gs.hand)
-	# Mask debug
-	print("[MASK_DEBUG] Wave 1 Phase B done: visible=", _count_visible_cards(), " nulls=", _count_hand_nulls(gs))
 
 	# Phase C — GAP (0.4s): player sees empty slots
 	await get_tree().create_timer(0.4).timeout
@@ -151,8 +148,6 @@ func resolve_clean_chain() -> void:
 		# B.5 — Explicitly hide card nodes
 		_hide_matched_cards(wave)
 		gs.hand_updated.emit(gs.hand)
-		# Mask debug
-		print("[MASK_DEBUG] Wave ", chain_level, " Phase B done: visible=", _count_visible_cards(), " nulls=", _count_hand_nulls(gs))
 
 		# Phase C — GAP
 		await get_tree().create_timer(0.4).timeout
@@ -263,8 +258,6 @@ func _animate_replenishment(gs) -> void:
 
 	CleanController.gravity_and_draw(gs)
 	gs.hand_updated.emit(gs.hand)
-	# Mask debug
-	print("[MASK_DEBUG] _animate_replenishment: after update_card_faces visible=", _count_visible_cards(), " nulls=", _count_hand_nulls(gs))
 
 	var grid: HandCardContainer = ui.card_grid
 	var COLS: int = 3
@@ -317,14 +310,11 @@ func _animate_replenishment(gs) -> void:
 				incoming.append(idx)
 
 	# Phase D1 — Old cards fall
-	var skipped_falling: int = 0
 	for idx in falling:
 		var nk := grid.get_card_at(idx)
 		if nk == null:
-			skipped_falling += 1
 			continue
 		if not nk.visible:
-			skipped_falling += 1
 			continue
 		var target_y: float = nk.position.y
 		var col: int = idx % COLS
@@ -347,9 +337,6 @@ func _animate_replenishment(gs) -> void:
 			.set_delay(delay + 0.26)
 		glow.tween_property(nk, "modulate", Color.WHITE, 0.18)\
 			.set_ease(Tween.EASE_OUT)
-
-	if skipped_falling > 0:
-		print("[MASK_DEBUG] D1 skipped ", skipped_falling, "/", falling.size(), " falling cards (not visible)")
 
 	await get_tree().create_timer(0.55).timeout
 
@@ -421,29 +408,3 @@ func _restore_interaction() -> void:
 func _emergency_cleanup(gs) -> void:
 	gs.set_cascading(false)
 	_restore_interaction()
-
-
-# ═══ Mask debug helpers ═══
-
-## Count how many card nodes in the grid have visible=true.
-func _count_visible_cards() -> int:
-	var grid: HandCardContainer = ui.card_grid
-	if not is_instance_valid(grid):
-		return -1
-	var count: int = 0
-	for i in 9:
-		var nk := grid.get_card_at(i)
-		if nk != null and nk.visible:
-			count += 1
-	return count
-
-
-## Count how many null entries exist in gs.hand (unfilled grid slots).
-func _count_hand_nulls(gs) -> int:
-	if gs == null or gs.hand.is_empty():
-		return -1
-	var count: int = 0
-	for i in 9:
-		if gs.hand[i] == null:
-			count += 1
-	return count
