@@ -780,3 +780,20 @@ Phase F1 ──→ Phase F2 ──→ Phase F3 ──→ Phase H ──→ Phase
 | **CL32** | **消除链视觉分步修复** — 拆分 `apply_chain_wave` 为 `remove_matches` + `gravity_and_draw` 两步，消除→0.15s→补牌。`update_card_faces` 支持 null 隐藏。`update_display()` 修复纹理重载。`move_cards` `was_playing` 捕获防止二次交换。`_cascading` 锁修复 | `clean_controller.gd` + `hand_card_container.gd` + `ninking_card.gd` + `game_manager.gd` + `game_state.gd` | **P0** | ✅ |
 | **R1** | **Code Review 修复** — 提取 `_resolve_clean_chain` + `_show_clean_score_popup` 到 `clean_chain_handler.gd`（game_manager 483→346行）。`set_cascading()` 公开 setter。`col_cards` 类型标注修复。DOCUMENT_MAP 新增 §4.8 | `clean_chain_handler.gd`(新) + `game_manager.gd` + `game_state.gd` + `clean_controller.gd` + `DOCUMENT_MAP.md` | **P2** | ✅ |
 | **CL33** | **消除链视觉分步增强 — 五阶段动画** — 2026-06-24。每波消除流程从原"消除→0.15s→补牌→0.25s"重写为：Phase A(高亮0.35s, REDRAW_TARGET红光闪烁) → B(消除, 瞬间) → C(空洞0.4s) → D1(旧牌下沉0.3s, y-offset弹跳) → D2(新牌坠落0.35s, 上方坠落+pop_in+row0橙闪) + 逐波分数弹出 + 连锁≥2 COMBO徽章。`hand_card_container.gd` 加 `get_card_at()` 公开方法 | `clean_chain_handler.gd` + `hand_card_container.gd` | **P0** | ✅ |
+
+---
+
+## 🐱 忍猫自走棋 (Pet Auto-Play) — AI 猫自动消除
+
+> **Grill 多轮决策, 2026-06-24 | 方案: [`specs/pet-auto-play-design.md`](specs/pet-auto-play-design.md)**
+> **状态: 方案已定，待实施 | 性格驱动 + 一猫一文件 + 商店玩家手动**
+
+| # | 任务 | 说明 | 优先级 | 状态 |
+|---|------|------|--------|------|
+| PET0 | **商店商品重设计** — 设计适合消除模式 + 调教猫场景的售卖商品，区别于现有 bi-ji 模式商店。考虑道具/消耗品/忍者效果如何服务于"猫的决策 → 玩家购物支持"这一核心循环 | 待出方案 | **P0** | ⬜ |
+| PET1 | **Phase 1: 视觉基础** — NinKingCard VisualState 加 `PET_SUGGEST` + 创建 PetHighlight (金色边框+虚线+执行按钮) + 创建 PetSprite (右下角猫精灵) | `ninking_card.gd` + `pet_highlight.gd`(新) + `pet_sprite.gd`(新) | **P1** | ⬜ |
+| PET2 | **Phase 2: 算法核心** — 创建 `pet_algorithm_base.gd`(共享 helper) + 5 只性格猫文件 (`pet_algorithm_sente.gd` 等，一猫一文件，extends base) + PetController 性格注册表 | `scripts/ninking/pet/` 6 个新文件 + `pet_controller.gd`(新) | **P1** | ⬜ |
+| PET3 | **Phase 3: 控制器+执行流** — PetController 完整循环 + game_state 加 `pet_auto_mode` + game_manager 接线 + clean_chain_handler 回调。**商店保留玩家手动操作**，猫只接管消除阶段决策 | `pet_controller.gd`(新) + `game_state.gd` + `game_manager.gd` + `clean_chain_handler.gd` | **P1** | ⬜ |
+| PET4 | **Phase 4: 日志** — PetLogger 调 GameRunLogger.on_custom_event + barrier 汇总 | `scripts/ninking/pet/pet_logger.gd`(新) | **P2** | ⬜ |
+| PET5 | **Phase 5: 进化系统** — PetTrainPanel + PetAPIClient (HTTP→Anthropic API，仅发送当前猫的代码) + replace_algorithm() (写入单猫文件) | `pet_train_panel.gd`(新) + `pet_api_client.gd`(新) + `game_manager.gd` | **P2** | ⬜ |
+| PET6 | **Phase 6: 配置** — game_config.json + ConfigManager 加 `pet_enabled`、`pet_personality`(猫性格选择) 等配置项 | `config/game_config.json` + `config_manager.gd` | **P2** | ⬜ |
