@@ -315,6 +315,8 @@ GameManager._resolve_clean_chain()
 
 ---
 
+**竞态守卫 (v2026-06-24):** `_resolve_clean_chain()` 入口处设 `state=SCORING` + `_cascading=true` + `set_cards_interactable(false)`。全部 6 个 `await` 退出路径都先调 `_restore_interaction()` 再 `return`，防止 chain 动画期间玩家拖拽导致 `_held_cards` 与 `gs.hand` 不一致（详见 `clean_chain_handler.gd` `_restore_interaction` 方法）。同时 `hand_card_container.gd:move_cards()` 的 `was_playing=false` 分支由 `swap_two_cards()` 改为 `cards[0].move()` 归位，防止被 `_cascading` 阻挡后执行纯视觉交换。
+
 ### 数据流（消除模式 — 新封印启动 / 关卡通）
 
 同场景关卡过渡（过关 → 商店 → 继续 → 下一关）不经过 `change_scene_to_file`，`_ready()` 不会重跑。

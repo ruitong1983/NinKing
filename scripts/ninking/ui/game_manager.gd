@@ -105,6 +105,9 @@ func _on_state_changed(new_state: NinKingGameState.State) -> void:
 			# Restore hand area if dimmed during shop
 			if ui.game_layout.has_node("CenterColumn/HandArea"):
 				ui.game_layout.get_node("CenterColumn/HandArea").modulate = Color.WHITE
+			# B29: restore card interaction on level transition in clean mode
+			# resolve_clean_chain leaves cards not-interactable when chain ends in SEAL_COMPLETE
+			ui.card_grid.set_cards_interactable(true)
 			GlobalTweens.play_sfx(SB.DEAL)  # C17: deal SFX
 			# 按钮统一入场动效（弹跳 + 粒子 + 脉冲 + hover + 点击）
 			if _game_mode != "clean":
@@ -139,6 +142,15 @@ func _on_state_changed(new_state: NinKingGameState.State) -> void:
 			# GameOver 按钮统一入场动效
 			ButtonStyles.attach_entrance_animation(ui.retry_button, {"mild": true})
 			ButtonStyles.attach_entrance_animation(ui.back_to_menu_button, {"mild": true})
+			# Clean mode: 墨染残卷 — 按钮文字焦茶金，取代 apply_manga 白字
+			if _game_mode == "clean":
+				var jin := Color(0.831, 0.647, 0.455, 1)
+				ui.retry_button.add_theme_color_override("font_color", jin)
+				ui.retry_button.add_theme_color_override("font_hover_color", jin.lightened(0.15))
+				ui.retry_button.add_theme_color_override("font_pressed_color", jin.darkened(0.2))
+				ui.back_to_menu_button.add_theme_color_override("font_color", jin)
+				ui.back_to_menu_button.add_theme_color_override("font_hover_color", jin.lightened(0.15))
+				ui.back_to_menu_button.add_theme_color_override("font_pressed_color", jin.darkened(0.2))
 		NinKingGameState.State.VICTORY:
 			_auto_shop_pending = false  # Safety: clear in case finalize_play reached victory
 			ui.show_view("victory")

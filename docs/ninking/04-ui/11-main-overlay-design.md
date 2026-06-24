@@ -187,9 +187,9 @@ LevelComplete (Control 1920×1080)
 │                  全屏黑底 (80% opacity)    │
 │                                          │
 │  ┌─ ContentPanel (Kenney 暖米 520×360) ─┐│
-│  │           忍気不足                    ││  ← GameOverLabel 48px 深红 居中
+│  │           忍気不足                    ││  ← GameOverLabel 48px 焦茶金 #D4A574 居中
 │  │                                      ││
-│  │     战绩: 结界 3 · 忍気 380          ││  ← ScoreSummary 26px 深褐 居中
+│  │     战绩: 结界 3 · 忍気 380          ││  ← ScoreSummary 26px 枯叶褐 #8B7355 居中
 │  │                                      ││
 │  │         [重新开始]                    ││  ← RetryButton 24px flat
 │  │         [返回主菜单]                  ││  ← BackToMenuButton 20px flat
@@ -203,10 +203,10 @@ LevelComplete (Control 1920×1080)
 
 ```
 GameOver (Control 1920×1080)
-├── OverlayBg (ColorRect)                   ← 全屏遮罩
+├── OverlayBg (ColorRect)                   ← 全屏遮罩 墨紫黑 #0A050FD9
 ├── ContentPanel (Panel) 520×360 居中        ← Kenney 暖米卡牌面板 (KUI2)
-│   ├── GameOverLabel (Label) [%GameOverLabel]  ← "失败" 48px 深红 #C0392B, 居中
-│   ├── ScoreSummary (Label) [%ScoreSummary]     ← "战绩: 结界 X · 忍気 Y" 26px 深褐 #3D2B1A, 居中
+│   ├── GameOverLabel (Label) [%GameOverLabel]  ← "失败" 48px 焦茶金 #D4A574, 居中
+│   ├── ScoreSummary (Label) [%ScoreSummary]     ← "战绩: 结界 X · 忍気 Y" 26px 枯叶褐 #8B7355, 居中
 │   ├── RetryButton (Button) [%RetryButton]      ← "重新开始" 24px flat (manga 样式)
 │   └── BackToMenuButton (Button) [%BackToMenuButton] ← "返回主菜单" 20px flat
 │   ⚡ pop_in 入场: scale 0.75→1.0 (TRANS_BACK) + 淡入 0.2s
@@ -251,7 +251,7 @@ VictoryOverlay (Control 1920×1080)
 ├── OverlayBg (ColorRect)                   ← 全屏遮罩
 ├── ContentPanel (Panel) 520×320 居中        ← Kenney 暖米卡牌面板 (KUI2)
 │   ├── VictoryLabel (Label)                 ← "忍道制霸!" 48px 金色 #D4A843, 居中
-│   ├── StatsSummary (Label)                 ← "通关! 全N 结界制霸 · 忍気 M" 26px 深褐 #3D2B1A, 居中
+│   ├── StatsSummary (Label)                 ← "通关! 全N 结界制霸 · 忍気 M" 26px 枯叶褐 #8B7355, 居中
 │   └── MenuButton (Button)                  ← "返回主菜单" 24px flat (manga 样式)
 │   ⚡ pop_in 入场: scale 0.75→1.0 + 淡入 0.2s
 ```
@@ -296,6 +296,6 @@ layer 7: VictoryOverlay (通关覆盖层)
 | 1 | LevelIntro 漫画风入场动画（墨字浮现 → 属性色炸裂 → 集中线收束） | P1 |
 | 2 | ScoringOverlay 漫画粒子替换（shuriken/sakura → manga_ink/manga_burst, V26） | P1 |
 | 3 | LevelComplete 屏风转场增强（V15: logo 遮罩版 fade） | P3 |
-| 4 | GameOver 战绩统计面板美化（当前为简单 Label） | P2 |
+| 4 | ✅ GameOver 战绩统计面板美化（墨染残卷配色重设计 2026-06-24） | P2 ✅ |
 | 5 | 覆盖层间过渡动画（当前 visible 硬切） | P2 |
 | 6 | VictoryOverlay 通关粒子庆祝（全屏 sakura + 墨字特效） | P2 |

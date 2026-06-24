@@ -63,6 +63,8 @@ func resolve_clean_chain() -> void:
 	# Enter SCORING state + cascading lock
 	gs._transition_to(NinKingGameState.State.SCORING)
 	gs.set_cascading(true)
+	# 禁用卡片交互，防止 chain 动画期间玩家拖拽导致 _held_cards 与 gs.hand 不一致
+	ui.card_grid.set_cards_interactable(false)
 
 	var chains: Array[Dictionary] = []
 	var chain_level: int = 0
@@ -82,7 +84,8 @@ func resolve_clean_chain() -> void:
 	GlobalTweens.screen_shake(0.1, 0.06)
 	_highlight_matches(first_wave)
 	await get_tree().create_timer(0.35).timeout
-	if not is_instance_valid(gs) or not is_instance_valid(self):
+	if not is_instance_valid(self):
+		_emergency_cleanup(gs)
 		return
 
 	# Reset card visuals before removal (clean slate for recycled nodes)
@@ -98,12 +101,14 @@ func resolve_clean_chain() -> void:
 
 	# Phase C — GAP (0.4s): player sees empty slots
 	await get_tree().create_timer(0.4).timeout
-	if not is_instance_valid(gs) or not is_instance_valid(self):
+	if not is_instance_valid(self):
+		_emergency_cleanup(gs)
 		return
 
 	# Phase D1 + D2 — FALL then DROP
 	await _animate_replenishment(gs)
-	if not is_instance_valid(gs) or not is_instance_valid(self):
+	if not is_instance_valid(self):
+		_emergency_cleanup(gs)
 		return
 
 	# Per-wave scoring VFX — spawn floating popups per match group
@@ -135,7 +140,8 @@ func resolve_clean_chain() -> void:
 		# Phase A — HIGHLIGHT
 		_highlight_matches(wave)
 		await get_tree().create_timer(0.35).timeout
-		if not is_instance_valid(gs) or not is_instance_valid(self):
+		if not is_instance_valid(self):
+			_emergency_cleanup(gs)
 			return
 
 		_reset_card_visuals(wave)
@@ -150,12 +156,14 @@ func resolve_clean_chain() -> void:
 
 		# Phase C — GAP
 		await get_tree().create_timer(0.4).timeout
-		if not is_instance_valid(gs) or not is_instance_valid(self):
+		if not is_instance_valid(self):
+			_emergency_cleanup(gs)
 			return
 
 		# Phase D1 + D2
 		await _animate_replenishment(gs)
-		if not is_instance_valid(gs) or not is_instance_valid(self):
+		if not is_instance_valid(self):
+			_emergency_cleanup(gs)
 			return
 
 		# Per-wave scoring VFX
@@ -194,8 +202,15 @@ func resolve_clean_chain() -> void:
 	# Mark auto-shop before transition (Phase E settlement card)
 	_mark_auto_shop.call()
 
-	# Finalize
+	# finalize_swap 会切换状态 (PLAYING/SEAL_COMPLETE/GAME_OVER)
+	# 在其内部 state_changed handler 会控制 UI 可见性。
+	# 卡片交互在 finalize 之后根据状态恢复。
 	CleanController.finalize_swap(gs, chains, swap_score)
+
+	# 如果 finalize 切回 PLAYING，恢复卡片交互；
+	# 如果切到 SEAL_COMPLETE/GAME_OVER，覆盖层会接管 UI，无需交互。
+	if gs.current_state == NinKingGameState.State.PLAYING:
+		_restore_interaction()
 
 
 # ═══ Phase A — Highlight matched cards ═══
@@ -240,7 +255,7 @@ func _hide_matched_cards(wave_data: Dictionary) -> void:
 ## Animate card replenishment after elimination:
 ##   1) Snapshot hand state before gravity_and_draw
 ##   2) Execute gravity + draw (data layer)
-##   3) Detect falling old cards vs new incoming cards
+##   3) Detecting falling old cards vs new incoming cards
 ##   4) Phase D1: old cards fall with gravity acceleration + squash spring
 ##   5) Phase D2: new cards drop in from above (scale entry + landing flash)
 func _animate_replenishment(gs) -> void:
@@ -253,6 +268,23 @@ func _animate_replenishment(gs) -> void:
 
 	var grid: HandCardContainer = ui.card_grid
 	var COLS: int = 3
+
+	# ── Kill any lingering hover/drag tweens before fall animation ──
+	# set_cards_interactable(false) in resolve_clean_chain prevents NEW hovers,
+	# but cards already in HOVERING state still have active hover tweens that
+	# fight with the fall animation tweens on position:y/scale.
+	# Kill tweens directly (avoid change_state(IDLE) which would trigger
+	# _stop_hover_animation creating a wasteful restore tween then immediately killed).
+	for j in 9:
+		var nk := grid.get_card_at(j)
+		if nk == null or not is_instance_valid(nk):
+			continue
+		if nk.hover_tween != null and nk.hover_tween.is_valid():
+			nk.hover_tween.kill()
+			nk.hover_tween = null
+		if nk.move_tween != null and nk.move_tween.is_valid():
+			nk.move_tween.kill()
+			nk.move_tween = null
 
 	# ── Detect card movement types ──
 	var falling: Array[int] = []
@@ -374,6 +406,21 @@ func _animate_replenishment(gs) -> void:
 			var nk := grid.get_card_at(idx)
 			if is_instance_valid(nk):
 				nk.set_visual_state(NinKingCard.VisualState.NORMAL)
+
+
+# ═══ Interaction guard helpers ═══
+
+## 恢复卡片交互性。
+func _restore_interaction() -> void:
+	if is_instance_valid(ui) and is_instance_valid(ui.card_grid):
+		ui.card_grid.set_cards_interactable(true)
+
+
+## 紧急清理：清 cascading 锁 + 恢复交互。
+## 在 self 即将失效但 gs 仍有效时调用（场景转换、重试等中途退出）。
+func _emergency_cleanup(gs) -> void:
+	gs.set_cascading(false)
+	_restore_interaction()
 
 
 # ═══ Mask debug helpers ═══

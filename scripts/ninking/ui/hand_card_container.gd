@@ -141,14 +141,21 @@ func move_cards(cards: Array, index: int = -1, with_history: bool = true) -> boo
 			var target := global_position + _card_local_pos(index)
 			cards[0].move(target, 0.0)
 			return true
-		# Capture state BEFORE swap_cards (which may trigger signals that
-		# change state, e.g. clean mode PLAYING to SCORING during chain resolution).
+		# 捕获初始状态: was_playing → swap_cards 会成功发射 hand_swapped。
+		# 信号处理器已做视觉交换；was_playing=false → swap_cards 被阻挡。
+		# 阻挡原因分两种:
+		#   1) clean mode _cascading=true (chain进行中) → 不做视觉交换，卡片归位
+		#   2) state!=PLAYING (Debug/MAIN_MENU) → B17: 保留视觉交换以支持 debug 拖拽
 		var was_playing: bool = NinKingGameState.current_state == NinKingGameState.State.PLAYING
 		NinKingGameState.swap_cards(src_idx, index)
-		# If not in PLAYING state before swap, the hand_swapped signal won't
-		# fire -> swap_two_cards won't be called. Call it directly for visual swap.
 		if not was_playing:
-			swap_two_cards(src_idx, index)
+			if NinKingGameState.game_mode == "clean" and NinKingGameState.is_cascading():
+				# chain 进行中被阻挡 → 归位，避免 _held_cards 与 gs.hand 不一致
+				var target := global_position + _card_local_pos(src_idx)
+				cards[0].move(target, 0.0)
+			else:
+				# Debug/MAIN_MENU 被阻挡 → 保留视觉交换（B17 回退）
+				swap_two_cards(src_idx, index)
 		return true
 	return super.move_cards(cards, index, with_history)
 

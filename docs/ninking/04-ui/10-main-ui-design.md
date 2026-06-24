@@ -113,10 +113,10 @@ NinKingMain (Control) [game_manager.gd]
     │
     ├── LevelComplete (Control)         ← 过关覆盖层
     ├── GameOver (Control) [%GameOver]           ← 失败覆盖层
-    │   ├── OverlayBg (ColorRect)               ← #000 80%, 全屏
+    │   ├── OverlayBg (ColorRect)               ← 墨紫黑 #0A050FD9, 全屏
     │   ├── ContentPanel (Panel) 520x360 居中    → Kenney 暖米卡牌面板 (KUI2)
-    │   │   ├── GameOverLabel [%GameOverLabel]  → "失败" 48px 深红 #C0392B, 居中
-    │   │   ├── ScoreSummary [%ScoreSummary]    → "战绩: 结界 X · 忍気 Y" 26px 深褐 #3D2B1A, 居中
+    │   │   ├── GameOverLabel [%GameOverLabel]  → "失败" 48px 焦茶金 #D4A574, 居中
+    │   │   ├── ScoreSummary [%ScoreSummary]    → "战绩: 结界 X · 忍気 Y" 26px 枯叶褐 #8B7355, 居中
     │   │   ├── RetryButton [%RetryButton]      → "重新开始" 24px (manga 样式)
     │   │   └── BackToMenuButton [%BackToMenuButton] → "返回主菜单" 20px flat
     │   │   ⚡ pop_in 入场: scale 0.75→1.0 + 淡入 0.2s
@@ -125,7 +125,7 @@ NinKingMain (Control) [game_manager.gd]
     │   │   ├── OverlayBg (ColorRect)           ← #000 70%, 全屏
     │   │   ├── ContentPanel (Panel) 520x320 居中 → Kenney 暖米卡牌面板 (KUI2)
     │   │   │   ├── VictoryLabel                → "忍道制霸!" 48px 金色 #D4A843, 居中
-    │   │   │   ├── StatsSummary                → "通关! 全结界制霸 · 忍気 N" 26px 深褐 #3D2B1A
+    │   │   │   ├── StatsSummary                → "通关! 全结界制霸 · 忍気 N" 26px 枯叶褐 #8B7355
     │   │   │   └── MenuButton                 → "返回主菜单" 24px flat (manga 样式)
     │   │   │   ⚡ pop_in 入场: scale 0.75→1.0 + 淡入 0.2s
     │   │

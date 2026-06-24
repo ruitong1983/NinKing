@@ -1089,7 +1089,7 @@ offset_bottom = 1080.0
 layout_mode = 0
 offset_right = 1920.0
 offset_bottom = 1080.0
-color = Color(0, 0, 0, 0.8)
+color = Color(0.039, 0.02, 0.059, 0.85)
 
 [node name="ContentPanel" type="Panel" parent="UIManager/GameOver" unique_id=219543539]
 layout_mode = 0
@@ -1105,7 +1105,7 @@ offset_left = 60.0
 offset_top = 25.0
 offset_right = 460.0
 offset_bottom = 75.0
-theme_override_colors/font_color = Color(0.753, 0.224, 0.169, 1)
+theme_override_colors/font_color = Color(0.831, 0.647, 0.455, 1)
 theme_override_font_sizes/font_size = 48
 text = "失败"
 horizontal_alignment = 1
@@ -1117,7 +1117,7 @@ offset_left = 60.0
 offset_top = 95.0
 offset_right = 460.0
 offset_bottom = 135.0
-theme_override_colors/font_color = Color(0.239, 0.169, 0.102, 1)
+theme_override_colors/font_color = Color(0.545, 0.451, 0.333, 1)
 theme_override_font_sizes/font_size = 26
 text = "战绩: 结界 0 · 忍気 0"
 horizontal_alignment = 1
@@ -1182,7 +1182,7 @@ size_flags_horizontal = 3
 [node name="CloseBtn" type="Button" parent="UIManager/DeckViewer/CardPanel/TitleBar" unique_id=333994660]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.239, 0.169, 0.102, 1)
+theme_override_colors/font_color = Color(0.545, 0.451, 0.333, 1)
 theme_override_font_sizes/font_size = 24
 text = "✕"
 flat = true
@@ -1198,7 +1198,7 @@ theme_override_constants/separation = 30
 [node name="DrawCountLabel" type="Label" parent="UIManager/DeckViewer/CardPanel/CountRow" unique_id=1382385425]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.239, 0.169, 0.102, 1)
+theme_override_colors/font_color = Color(0.545, 0.451, 0.333, 1)
 theme_override_font_sizes/font_size = 24
 text = "牌堆: 0 张"
 
@@ -1254,7 +1254,7 @@ offset_left = 60.0
 offset_top = 100.0
 offset_right = 460.0
 offset_bottom = 140.0
-theme_override_colors/font_color = Color(0.239, 0.169, 0.102, 1)
+theme_override_colors/font_color = Color(0.545, 0.451, 0.333, 1)
 theme_override_font_sizes/font_size = 26
 text = "通关! 全N结界制霸 · 忍気 N"
 horizontal_alignment = 1

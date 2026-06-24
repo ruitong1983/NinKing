@@ -1,6 +1,6 @@
 # 疑难问题解决手册
 
-> **建立日期:** 2026-06-14 | **最后更新:** 2026-06-24 (§20)
+> **建立日期:** 2026-06-14 | **最后更新:** 2026-06-24 (§21)
 > **用途:** 记录开发中遇到的非显而易见的坑及其解决方案，避免重复踩坑。
 
 ## §1 素材替换后"缺少依赖项"
@@ -730,5 +730,64 @@ if game_mode == "clean":
 **次生问题（已一并修复）：** 结算面板金币显示虚高 — `game_manager.gd:_show_settlement_card()` 引用 `animation_handler.current_play_data`（仅比鸡模式有值），消除模式取到空字典导致 `gold_gain = 现有金币 + 1`。修复：新增 `_gold_before_seal_complete` 追踪变量，消除模式走独立计算通道。
 
 **受影响文件：** `game_state.gd`（+1行）、`game_manager.gd`（+4行 +2行修改）
+
+**2026-06-24**
+
+---
+
+## §21 消除模式下落补牌动画被悬停 tween 干扰 — 卡片卡在半空
+
+**现象：** 消除模式交换后，触发 chain 消除 → 卡片下落补牌动画期间，若鼠标悬停在正在下落的卡片上，该卡片无法到达既定位置（卡在半空），或缩放变形。
+
+**根因（双层防线失效）：**
+
+1. `resolve_clean_chain()` 第67行设了 `set_cards_interactable(false)` — 这阻止了**新**的 hover 进入。但已在 HOVERING 状态的卡片（在 Phase A 高亮或 Phase C 空隙期间鼠标进入的）的 hover tween **依然在运行**。
+
+2. `_animate_replenishment()` 的 Phase D1 设置 `nk.position.y = target_y - 100.0`（下落起点），但 hover tween 在同一帧将其覆盖回悬停上移后的位置。
+
+3. Phase D2 捕获 `target_y = nk.position.y`（已被悬停扰乱），动画目标值本身就是错误的。
+
+**本质：** `can_be_interacted_with = false` 只阻止状态机**进入** HOVERING，但不**退出**已存在的 HOVERING，也不杀掉运行中的 `hover_tween`。
+
+**进程竞争：**
+```
+D1 开始 → 设 position.y = target - 100
+  → hover tween（仍在运行）覆盖 position.y ← 冲突
+  → 下落 tween 开始动画 position:y → target
+    → hover tween 继续争夺 position.y ← 持续冲突
+→ 0.55s 后 D2 开始
+  → target_y = nk.position.y （当前受悬停影响的值）← 错误
+  → 恢复时位置不正确
+```
+
+**修复（`clean_chain_handler.gd:266-286`）：** 在 `_animate_replenishment()` 下落动画创建之前，遍历 9 张卡片：
+1. 强制非 IDLE 状态的卡片回到 IDLE → `_exit_state(HOVERING)` → 触发 `_stop_hover_animation()` → 创建 restore tween
+2. 杀掉 restore tween（`nk.hover_tween.kill()`）→ 防止 restore 与下落 tween 打架
+3. 杀掉残留的 `move_tween`（来自 `swap_two_cards` 动画）
+
+```gdscript
+# 在 Phase D1 开始前
+for j in 9:
+    var nk := grid.get_card_at(j)
+    if nk == null or not is_instance_valid(nk):
+        continue
+    if nk.current_state != DraggableObject.DraggableState.IDLE:
+        nk.change_state(DraggableObject.DraggableState.IDLE)
+    if nk.hover_tween != null and nk.hover_tween.is_valid():
+        nk.hover_tween.kill()
+        nk.hover_tween = null
+    if nk.move_tween != null and nk.move_tween.is_valid():
+        nk.move_tween.kill()
+        nk.move_tween = null
+```
+
+**验证方法：** 在消除模式中做一次交换，触发 chain 下落动画期间，快速将鼠标移入牌桌区域并悬停在正在下落的卡片上。观察：
+- 卡片应顺利下落到既定位置，不卡半空
+- 卡片缩放正常，不变形
+- 下落动画结束后，鼠标悬停能正常触发 hover 效果
+
+**设计原则：** `set_cards_interactable(false)` 只防新进入，不杀旧状态。需要同时做两件事——① 禁止新 hover（`can_be_interacted_with = false`）② 杀掉旧 hover tween（强制 IDLE + `hover_tween.kill()`）。
+
+**受影响文件：** `scripts/ninking/clean_chain_handler.gd`（+21行）
 
 **2026-06-24**

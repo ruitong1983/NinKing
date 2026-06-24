@@ -69,9 +69,12 @@ var game_mode: String = "bi_ji"  # "bi_ji"=比鸡模式, "clean"=消除模式
 # Clean mode
 var _cascading: bool = false  # Chain wave in progress — lock input
 
-## Public setter for chain resolution lock (accessed from CleanChainHandler).
+## Public setter/getter for chain resolution lock (accessed from CleanChainHandler / HandCardContainer).
 func set_cascading(value: bool) -> void:
 	_cascading = value
+
+func is_cascading() -> bool:
+	return _cascading
 
 # Player inventory
 var owned_ninjas: Array[Dictionary] = []

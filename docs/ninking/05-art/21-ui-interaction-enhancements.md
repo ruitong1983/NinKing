@@ -1,6 +1,6 @@
 # NinKing UI 交互增强素材指南
 
-> **建立日期:** 2026-06-22 | **最后更新:** 2026-06-23 (+§3.7 GameOver/Victory 卡片化 KUI2)
+> **建立日期:** 2026-06-22 | **最后更新:** 2026-06-24 (+§3.8 GameOver 墨染残卷配色重设计 + 消除模式按钮文字焦茶金)
 > **用途:** 汇总所有为提升界面交互体验而集成的 UI 素材，说明架构、使用方法、替换流程和扩展指引。
 > **原则:** 每项增强必须在此文档中有记录，否则视为未正式接入。
 > **关联:**
@@ -258,9 +258,10 @@ Kenney 纹理边角圆边区域约 5px，留 3px 缓冲，**patch_margin = 8px**
 
 | 场景 | 元素 | 颜色 | 色值 |
 |------|------|------|------|
-| 失败 | 标题 | 深红 (醒目不刺眼) | `#C0392B` |
+| 失败 | 标题 | 焦茶金 (卷轴烧焦质感) | `#D4A574` |
 | 胜利 | 标题 | 金色 (庆祝感) | `#D4A843` |
-| 两者 | 战报正文 | 深褐 (最高可读性) | `#3D2B1A` |
-| 两者 | 按钮 | 由 `ButtonStyles.apply_manga()` 动态设 (accent 色) | — |
+| 两者 | 战报正文 | 枯叶褐 (温润可读) | `#8B7355` |
+| 失败 | 按钮 | 消除模式: 焦茶金 `#D4A574` (覆盖 apply_manga 白字) | `game_manager.gd` GAME_OVER 分支 |
+| 胜利 | 按钮 | 由 `ButtonStyles.apply_manga()` 动态设 (accent 色) | — |
 
 **实现方式：** 场景中新增 ContentPanel (Panel) 节点，运行时通过 `PanelStyles.beige_light_panel()` 应用 Kenney 纹理。`ui_manager.gd` 中新增 `_animate_card_pop_in()` 动画方法，在 `show_view("gameover"/"victory")` 时触发。按钮样式由已有的 `game_manager.gd:_on_seal_started()` 中 `ButtonStyles.apply_manga()` 统一管理。

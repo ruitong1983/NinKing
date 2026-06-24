@@ -1,6 +1,6 @@
 # NinKing 工作清单
 
-> **最后更新:** 2026-06-24 | **当前 Phase:** 消除模式计分特效 | 本次: V1-V9 计分特效全部完成
+> **最后更新:** 2026-06-24 | **当前 Phase:** 消除模式竞态修复 | 本次: B29 消除模式第二关手牌区卡住 — seal_complete 后交互未恢复
 > **使用方式:** AI 每次会话开始时读取此文件。完成任务后更新状态。
 > **状态图例:** ⬜ 待做 | 🔵 进行中 | ✅ 已完成 | 🔒 暂缓 | ⛔ 已废弃
 
@@ -46,6 +46,9 @@
 | B23 | **满员购买 → Toast + 忍栏脉冲 + UI_ERROR 音效** — `on_purchase_requested()` 满员分支改为 `ToastManager.show("忍者栏已满，请先出售", 2.0)` + `_ui.pulse_ninja_bar()` + `GlobalTweens.play_sfx(SB.UI_ERROR)` | `shop_handler.gd` | **P0** | ✅ |
 | B24 | **新增 `pulse_cards()` 集体脉冲动画** — 忍者栏卡片集体 pulse: scale 1.0→1.08→1.0, 0.15s×2轮, 用 `GlobalTweens.scale_pop()` 链式调用。ui_manager 委托到 ninja_bar_node | `ui_manager.gd` + `ninja_bar_node.gd` | **P0** | ✅ |
 | B26 | **牌库面板已出牌无灰色 + 尺寸异常** — `fake3d.gdshader` fragment 直接 `COLOR = texture(...)` 覆盖了 Godot 内置的 `MODULATE`，导致 `pc.modulate = Color(0.35, 0.35, 0.35, 0.65)` 无效。修复：三个 fake3d shader 末尾加 `COLOR *= MODULATE;`；`ninking_card.gd` `_apply_fake3d_material()` 中 `can_be_interacted_with == false` 时跳过（deck viewer 卡牌不需要 3D 倾斜+消除 vertex 膨胀导致的尺寸问题） | `shaders/fake3d/fake3d.gdshader` + `fake3d_flash.gdshader` + `fake3d_shadow.gdshader` + `scripts/ninking/ui/ninking_card.gd` | **P0** | ✅ |
+| B27 | **消除模式下落补牌动画期间悬停干扰 — hover tween 与下落 tween 冲突** — `set_cards_interactable(false)` 只阻止新悬停，已存在的 HOVERING 状态的 hover tween 仍与 Phase D1/D2 的 `position:y`/`scale` 下落 tween 争夺同属性控制权，导致卡片卡在半空或缩放变形。修复：`_animate_replenishment()` 下落动画前，遍历 9 卡强制 IDLE + 杀掉 hover_tween + move_tween | `scripts/ninking/clean_chain_handler.gd` | **P0** | ✅ |
+| B28 | **消除模式快速交换导致卡住 — chain 全程缺失交互守卫** — `resolve_clean_chain()` 设 `_cascading=true` 后未调 `set_cards_interactable(false)`，卡片在 0.35s 高亮→0.4s 间隙→0.55s 落位全阶段均可交互。第二组拖拽落位时 `swap_cards` 被 `_cascading` 阻挡，`move_cards()` 落入 `was_playing=false` 分支执行纯视觉 `swap_two_cards()`，导致 `_held_cards` 与 `gs.hand` 不一致，`update_card_faces()` 按索引覆盖后数据永久错乱 → 表现为卡住。修复：① `resolve_clean_chain` 入口加 `set_cards_interactable(false)`，所有退出路径加 `_restore_interaction()`；② `move_cards()` `was_playing=false` 分支改为 `cards[0].move(src)` 归位而非视觉交换 | `scripts/ninking/clean_chain_handler.gd` + `scripts/ninking/ui/hand_card_container.gd` | **P0** | ✅ |
+| B29 | **消除模式第二关手牌区卡住无法拖拽** — `resolve_clean_chain()` 结束时若转入 SEAL_COMPLETE（通关），`_restore_interaction()` 被跳过（第212行 PLAYING 守卫），`can_be_interacted_with` 保持 `false` 进入下一关。修复：`_on_state_changed(PLAYING)` 入口显式 `ui.card_grid.set_cards_interactable(true)` | `scripts/ninking/ui/game_manager.gd` | **P0** | ✅ |
 
 ---
 

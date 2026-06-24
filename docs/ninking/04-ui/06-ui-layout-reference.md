@@ -144,10 +144,10 @@ NinKingMain (Control) 1920×1080                      [game_manager.gd]
     │   ⛔  ShopPanel 详细子树 → 见 shop_panel.tscn / 07-shop-ui-design.md
     │
     ├── GameOver (Control) [%GameOver] 520x360                  — 失败弹窗 (view: "gameover")
-    │   ├── OverlayBg (ColorRect)                      #000 80%, 全屏
+    │   ├── OverlayBg (ColorRect)                      墨紫黑 #0A050FD9, 全屏
     │   ├── ContentPanel (Panel) 520x360 居中            — Kenney 暖米卡牌面板 (KUI2)
-    │   │   ├── GameOverLabel (Label) [%GameOverLabel]  "失败" 48px 深红 #C0392B, 居中
-    │   │   ├── ScoreSummary (Label) [%ScoreSummary]     "战绩: 结界 X · 忍気 Y" 26px 深褐 #3D2B1A, 居中
+    │   │   ├── GameOverLabel (Label) [%GameOverLabel]  "失败" 48px 焦茶金 #D4A574, 居中
+    │   │   ├── ScoreSummary (Label) [%ScoreSummary]     "战绩: 结界 X · 忍気 Y" 26px 枯叶褐 #8B7355, 居中
     │   │   ├── RetryButton (Button) [%RetryButton]      "重新开始" 24px flat (manga 样式)
     │   │   └── BackToMenuButton (Button) [%BackToMenuButton] "返回主菜单" 20px flat
     │   │   ⚡ pop_in 入场: scale 0.75→1.0 (TRANS_BACK) + 淡入 0.2s
@@ -156,7 +156,7 @@ NinKingMain (Control) 1920×1080                      [game_manager.gd]
     │   │   ├── OverlayBg (ColorRect)                   #000 70%, 全屏
     │   │   ├── ContentPanel (Panel) 520x320 居中        — Kenney 暖米卡牌面板 (KUI2)
     │   │   │   ├── VictoryLabel (Label)                 "忍道制霸!" 48px 金色 #D4A843, 居中
-    │   │   │   ├── StatsSummary (Label)                 "通关! 全N结界制霸 · 忍気 N" 26px 深褐 #3D2B1A, 居中
+    │   │   │   ├── StatsSummary (Label)                 "通关! 全N结界制霸 · 忍気 N" 26px 枯叶褐 #8B7355, 居中
     │   │   │   └── MenuButton (Button)                  "返回主菜单" 24px flat (manga 样式)
     │   │   │   ⚡ pop_in 入场: scale 0.75→1.0 + 淡入 0.2s
     │   │
